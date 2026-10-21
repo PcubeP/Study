@@ -28,6 +28,12 @@ Open the live site, or `index.html` locally. The landing page has a search filte
 
 Every guide is available as **HTML** (interactive, collapsible sections) and **PDF** (A4, print-optimised).
 
+- **Dark mode** — toggle in the top bar of any page. Follows your OS preference until you choose explicitly; the choice is remembered.
+- **Progress tracking** — tick a guide off from its card on the index, or with *Mark complete* inside the guide. The index shows overall and per-category progress, and completed guides are highlighted inside the learning tracks. Progress lives in `localStorage` under `studypack.progress`, so it is per-browser and never leaves your machine.
+- **Reading position** — each guide shows a scroll-progress bar under the top bar.
+
+Printing always uses the light theme regardless of what is on screen.
+
 ## Repository layout
 
 ```
@@ -37,10 +43,11 @@ guides/<slug>.pdf            print-ready PDFs
 _content/<slug>.body.html    source content fragment for each guide
 _content/<slug>.meta.json    subtitle + tags
 assets/topics.json           master manifest (slug, title, category, focus)
-assets/study.css             design system shared by every page
+assets/study.css             design system shared by every page (light + dark)
 assets/build.js              _content -> guides/*.html
 assets/gen-index.js          topics.json + guides -> index.html
 assets/make-pdfs.js          guides/*.html -> guides/*.pdf (headless Edge/Chrome)
+.github/workflows/pages.yml  rebuilds and deploys to GitHub Pages on every push to main
 ```
 
 ## Rebuilding
@@ -57,7 +64,13 @@ To add a topic: add an entry to `assets/topics.json`, write `_content/<slug>.bod
 
 ## Publishing
 
-The site is plain static HTML served straight from the repository root — no build step runs on GitHub. `.nojekyll` is present so GitHub Pages serves the files as-is (without it, Jekyll would skip the `_content/` directory). To publish: **Settings → Pages → Source: Deploy from a branch → `main` / `/ (root)`**.
+Deployment is automated by [`.github/workflows/pages.yml`](.github/workflows/pages.yml). Every push to `main` reinstalls the build dependencies, regenerates `guides/*.html` from `_content/`, rebuilds `index.html`, fills in any missing PDFs, verifies that every slug in `topics.json` produced a page, and publishes the result to GitHub Pages.
+
+That means you only have to commit `_content/` changes — the generated HTML is rebuilt server-side. Building locally is still worth it so you can preview before pushing.
+
+**One-time setup:** Settings → Pages → Source → **GitHub Actions**.
+
+`.nojekyll` is present so the files are served as-is — without it Jekyll would skip the `_content/` directory. To regenerate every PDF on the runner (slow), run the workflow manually from the Actions tab with *Rebuild every PDF* ticked.
 
 ## Disclaimer
 

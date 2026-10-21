@@ -1,26 +1,52 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
+<script>(function(){try{var t=localStorage.getItem('studypack.theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Machine Learning Core Concepts — Study Guide</title>
 <meta name="description" content="A Complete Reference for Supervised/Unsupervised/RL, Training Dynamics, Evaluation, Algorithms, and the End-to-End Project Lifecycle">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Machine Learning Core Concepts — Study Guide">
 <meta property="og:description" content="A Complete Reference for Supervised/Unsupervised/RL, Training Dynamics, Evaluation, Algorithms, and the End-to-End Project Lifecycle">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-family='Segoe UI,Arial,sans-serif' font-size='38' font-weight='700' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
 <style>/* ============================================================
    Study Guide Design System
-   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   Print-optimized (A4) + interactive HTML. Light + dark themes.
+   Theme is set by an inline head script: <html data-theme="light|dark">
    ============================================================ */
 :root{
   --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
-  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
-  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef; --surface:#ffffff;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff; --on-brand:#ffffff;
   --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
   --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
   --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --note-line:#c7d7fe; --tip-line:#ddd6fe; --warn-line:#fde68a;
+  --danger-line:#fecaca; --ok-line:#a7f3d0;
+  --badge-g-ink:#065f46; --badge-o-ink:#92400e;
+  --th-bg:#1e3a8a; --th-ink:#ffffff; --th-alt-bg:#1a2233;
   --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --code-inline-bg:#eef1f6; --code-inline-ink:#b91c1c;
+  --cover-a:#1e3a8a; --cover-b:#2563eb; --cover-c:#0891b2;
+  --shadow:0 1px 3px rgba(16,24,40,.04);
   --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
   --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+[data-theme="dark"]{
+  --ink:#e4eaf3; --ink-soft:#bcc7d8; --muted:#8c99ad;
+  --bg:#0f141c; --bg-soft:#171f2b; --line:#2a3443; --surface:#141b25;
+  --brand:#60a5fa; --brand-ink:#bfdbfe; --brand-soft:#16233a; --on-brand:#0b1118;
+  --accent:#22d3ee; --ok:#34d399; --ok-soft:#102a22;
+  --warn:#fbbf24; --warn-soft:#2b2214; --danger:#f87171; --danger-soft:#2e181a;
+  --tip:#a78bfa; --tip-soft:#221b36;
+  --note-line:#2b4068; --tip-line:#3b3160; --warn-line:#5a4318;
+  --danger-line:#5c2a2c; --ok-line:#1d5244;
+  --badge-g-ink:#6ee7b7; --badge-o-ink:#fcd34d;
+  --th-bg:#1d2a40; --th-ink:#dbe6f7; --th-alt-bg:#252f3f;
+  --code-bg:#0a0f16; --code-ink:#e2e8f0;
+  --code-inline-bg:#1c2533; --code-inline-ink:#fca5a5;
+  --cover-a:#13224d; --cover-b:#1d4ed8; --cover-c:#0e7490;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -28,7 +54,7 @@ body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;backgroun
 .wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
 
 /* ---------- Cover / header ---------- */
-.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+.cover{background:linear-gradient(135deg,var(--cover-a) 0%,var(--cover-b) 55%,var(--cover-c) 100%);color:#fff;
   padding:56px 48px;border-radius:0;margin-bottom:8px}
 .cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
 .cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
@@ -61,19 +87,19 @@ hr{border:none;border-top:1px solid var(--line);margin:32px 0}
 .callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
   border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
 .callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
-.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
-.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
-.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
-.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
-.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout.note{background:var(--brand-soft);border-color:var(--note-line)}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:var(--tip-line)}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:var(--warn-line)}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:var(--danger-line)}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:var(--ok-line)}.callout.ok::before{content:"✓";color:var(--ok)}
 .callout .t{font-weight:800;display:block;margin-bottom:2px}
 
 /* ---------- Cards / grids ---------- */
 .grid{display:grid;gap:16px;margin:18px 0}
 .grid.c2{grid-template-columns:1fr 1fr}
 .grid.c3{grid-template-columns:1fr 1fr 1fr}
-.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
-  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:var(--shadow);page-break-inside:avoid}
 .card h4{margin-top:0;color:var(--brand-ink)}
 .card.soft{background:var(--bg-soft)}
 
@@ -87,7 +113,7 @@ hr{border:none;border-top:1px solid var(--line);margin:32px 0}
 pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
   overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
 pre code{font-family:var(--mono);white-space:pre}
-:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:var(--code-inline-bg);color:var(--code-inline-ink);padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
 .code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
   padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
 .code-label + pre{border-top-left-radius:0}
@@ -104,19 +130,19 @@ pre code{font-family:var(--mono);white-space:pre}
 /* ---------- Tables ---------- */
 table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
 th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
-th{background:var(--brand-ink);color:#fff;font-weight:700}
+th{background:var(--th-bg);color:var(--th-ink);font-weight:700}
 tr:nth-child(even) td{background:var(--bg-soft)}
-table.compare th:first-child{background:var(--ink)}
+table.compare th:first-child{background:var(--th-alt-bg)}
 
 /* ---------- Misc ---------- */
-.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid var(--note-line);
   padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
-.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
-.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
-.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
-  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.badge.g{background:var(--ok-soft);color:var(--badge-g-ink);border-color:var(--ok-line)}
+.badge.o{background:var(--warn-soft);color:var(--badge-o-ink);border-color:var(--warn-line)}
+.kbd{background:var(--surface);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;color:var(--ink)}
 .pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
-.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+.pipeline .step{background:var(--brand-soft);border:1px solid var(--note-line);color:var(--brand-ink);
   padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
 .pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
 
@@ -136,11 +162,11 @@ details .body{padding:0 18px 14px}
 .topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
   border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
 .topbar .sp{flex:1}
-.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:var(--surface);border:1px solid var(--line);
   border-radius:8px;padding:5px 12px;cursor:pointer}
-.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.topbar button:hover{background:var(--brand-soft);border-color:var(--note-line)}
 .totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
-  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  color:var(--on-brand);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
   box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
 .totop:hover{opacity:1}
 
@@ -155,7 +181,7 @@ details .body{padding:0 18px 14px}
 .steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
 .steps>li:last-child{border-left-color:transparent;padding-bottom:0}
 .steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
-  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+  background:var(--brand);color:var(--on-brand);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
 .steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
 
 /* ---------- Key-value fact strip ---------- */
@@ -163,6 +189,46 @@ details .body{padding:0 18px 14px}
 .facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
 .facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
 .facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Reading progress (guides, HTML only) ---------- */
+.readbar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:40;transition:width .1s linear}
+
+/* ---------- Mark-complete control (guides, HTML only) ---------- */
+.topbar .done-btn[aria-pressed="true"]{background:var(--ok-soft);border-color:var(--ok-line);color:var(--ok)}
+.topbar .done-btn[aria-pressed="true"]::before{content:"\2713 ";font-weight:900}
+
+/* ---------- Progress tracking (index, HTML only) ---------- */
+.progress{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin:18px 0}
+.progress .row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.progress .row b{font-size:20px;color:var(--brand-ink)}
+.progress .row .sub{color:var(--muted);font-size:13px;flex:1}
+.progress .bar{height:9px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:10px}
+.progress .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--accent));
+  border-radius:999px;transition:width .35s ease}
+.progress button{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:none;
+  border:1px solid var(--line);border-radius:8px;padding:4px 10px;cursor:pointer}
+.progress button:hover{color:var(--danger);border-color:var(--danger-line)}
+
+.home .card{position:relative;padding-right:46px}
+.home .card .mark{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:6px;
+  border:2px solid var(--line);background:var(--surface);cursor:pointer;padding:0;line-height:1}
+.home .card .mark:hover{border-color:var(--brand)}
+.home .card .mark[aria-pressed="true"]{background:var(--ok);border-color:var(--ok)}
+.home .card .mark[aria-pressed="true"]::after{content:"\2713";color:#fff;font-size:14px;font-weight:900;
+  display:block;margin-top:-2px}
+.home .card.is-done{border-color:var(--ok-line)}
+.home .card.is-done h4{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.home h2 .catprog{float:right;font-size:12px;font-weight:700;color:var(--muted);
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:3px 11px;margin-top:6px}
+.tstep.is-done{background:var(--ok-soft);border-color:var(--ok-line)}
+.tstep.is-done .n{background:var(--ok);color:#fff}
+
+/* ---------- Theme toggle ---------- */
+.themer{font:inherit;font-weight:700;font-size:13px;color:var(--brand-ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:8px;padding:5px 12px;cursor:pointer}
+.themer:hover{background:var(--brand-soft);border-color:var(--note-line)}
+[data-theme="dark"] .themer .lt,.themer .dk{display:none}
+[data-theme="dark"] .themer .dk{display:inline}
 
 /* ---------- Responsive ---------- */
 @media (max-width:760px){
@@ -179,6 +245,23 @@ details .body{padding:0 18px 14px}
 /* ---------- Print ---------- */
 @page{size:A4;margin:16mm 0}
 @media print{
+  /* always print the light palette regardless of the on-screen theme */
+  :root,[data-theme="dark"]{
+    --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+    --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef; --surface:#ffffff;
+    --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff; --on-brand:#ffffff;
+    --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+    --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+    --tip:#7c3aed; --tip-soft:#f5f3ff;
+    --note-line:#c7d7fe; --tip-line:#ddd6fe; --warn-line:#fde68a;
+    --danger-line:#fecaca; --ok-line:#a7f3d0;
+    --badge-g-ink:#065f46; --badge-o-ink:#92400e;
+    --th-bg:#1e3a8a; --th-ink:#ffffff; --th-alt-bg:#1a2233;
+    --code-bg:#0f172a; --code-ink:#e2e8f0;
+    --code-inline-bg:#eef1f6; --code-inline-ink:#b91c1c;
+    --cover-a:#1e3a8a; --cover-b:#2563eb; --cover-c:#0891b2;
+    color-scheme:light;
+  }
   .wrap{max-width:none;padding:0 16mm}
   .cover{margin:0 0 8px;border-radius:0}
   h2{page-break-after:avoid}
@@ -189,9 +272,13 @@ details .body{padding:0 18px 14px}
   a{color:var(--ink)}
   .no-print{display:none}
 }
-</style></head><body>
+</style></head><body data-slug="ml-core-concepts">
+<div class="readbar no-print" id="readbar"></div>
 <nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
-<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<span class="sp"></span>
+<button class="done-btn" id="doneBtn" aria-pressed="false">Mark complete</button>
+<button class="themer" id="themeBtn" aria-label="Toggle colour theme"><span class="lt">Dark</span><span class="dk">Light</span></button>
+<button onclick="window.print()">Print / Save PDF</button></nav>
 <header class="cover">
   <div class="kicker">AI/ML Deep Dive</div>
   <h1>Machine Learning Core Concepts</h1>
@@ -1252,4 +1339,39 @@ final_auc = roc_auc_score(y_test, search.predict_proba(X_test)[:, <span class="h
 <hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
 </main>
 <a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+<script>
+(function(){
+  var KEY='studypack.', root=document.documentElement;
+  var tb=document.getElementById('themeBtn');
+  if(tb)tb.addEventListener('click',function(){
+    var t=root.getAttribute('data-theme')==='dark'?'light':'dark';
+    root.setAttribute('data-theme',t);
+    try{localStorage.setItem(KEY+'theme',t);}catch(e){}
+  });
+
+  var slug=document.body.getAttribute('data-slug'), db=document.getElementById('doneBtn');
+  function read(){try{return JSON.parse(localStorage.getItem(KEY+'progress')||'{}');}catch(e){return {};}}
+  function paint(d){db.setAttribute('aria-pressed',d?'true':'false');db.textContent=d?'Completed':'Mark complete';}
+  if(db&&slug){
+    paint(!!read()[slug]);
+    db.addEventListener('click',function(){
+      var p=read();
+      if(p[slug])delete p[slug];else p[slug]=Date.now();
+      try{localStorage.setItem(KEY+'progress',JSON.stringify(p));}catch(e){}
+      paint(!!p[slug]);
+    });
+  }
+
+  var rb=document.getElementById('readbar');
+  if(rb){
+    var tick=function(){
+      var max=root.scrollHeight-root.clientHeight;
+      rb.style.width=(max>0?(root.scrollTop/max*100):0)+'%';
+    };
+    addEventListener('scroll',tick,{passive:true});
+    addEventListener('resize',tick);
+    tick();
+  }
+})();
+</script>
 </body></html>

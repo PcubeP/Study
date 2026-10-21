@@ -55,17 +55,22 @@ function shell(m, subtitle, tags, body) {
   const mins = Math.max(1, Math.round(words / 220));
   const desc = attr(subtitle) || `${attr(m.title)} — a comprehensive study guide and interview-prep reference.`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<script>(function(){try{var t=localStorage.getItem('studypack.theme');if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${m.title} — Study Guide</title>
 <meta name="description" content="${desc}">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <meta property="og:type" content="article">
 <meta property="og:title" content="${attr(m.title)} — Study Guide">
 <meta property="og:description" content="${desc}">
 <link rel="icon" href="${FAVICON}">
-<style>${CSS}</style></head><body>
+<style>${CSS}</style></head><body data-slug="${m.slug}">
+<div class="readbar no-print" id="readbar"></div>
 <nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
-<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<span class="sp"></span>
+<button class="done-btn" id="doneBtn" aria-pressed="false">Mark complete</button>
+<button class="themer" id="themeBtn" aria-label="Toggle colour theme"><span class="lt">Dark</span><span class="dk">Light</span></button>
+<button onclick="window.print()">Print / Save PDF</button></nav>
 <header class="cover">
   <div class="kicker">${m.category}</div>
   <h1>${m.title}</h1>
@@ -79,6 +84,41 @@ ${r.html}
 <hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
 </main>
 <a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+<script>
+(function(){
+  var KEY='studypack.', root=document.documentElement;
+  var tb=document.getElementById('themeBtn');
+  if(tb)tb.addEventListener('click',function(){
+    var t=root.getAttribute('data-theme')==='dark'?'light':'dark';
+    root.setAttribute('data-theme',t);
+    try{localStorage.setItem(KEY+'theme',t);}catch(e){}
+  });
+
+  var slug=document.body.getAttribute('data-slug'), db=document.getElementById('doneBtn');
+  function read(){try{return JSON.parse(localStorage.getItem(KEY+'progress')||'{}');}catch(e){return {};}}
+  function paint(d){db.setAttribute('aria-pressed',d?'true':'false');db.textContent=d?'Completed':'Mark complete';}
+  if(db&&slug){
+    paint(!!read()[slug]);
+    db.addEventListener('click',function(){
+      var p=read();
+      if(p[slug])delete p[slug];else p[slug]=Date.now();
+      try{localStorage.setItem(KEY+'progress',JSON.stringify(p));}catch(e){}
+      paint(!!p[slug]);
+    });
+  }
+
+  var rb=document.getElementById('readbar');
+  if(rb){
+    var tick=function(){
+      var max=root.scrollHeight-root.clientHeight;
+      rb.style.width=(max>0?(root.scrollTop/max*100):0)+'%';
+    };
+    addEventListener('scroll',tick,{passive:true});
+    addEventListener('resize',tick);
+    tick();
+  }
+})();
+</script>
 </body></html>`;
 }
 

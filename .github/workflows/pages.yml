@@ -1,0 +1,79 @@
+name: Build & deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      regenerate_pdfs:
+        description: Rebuild every PDF from scratch (slow)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let an in-flight deploy finish; queue at most one more.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: assets/package-lock.json
+
+      - name: Install build dependencies
+        working-directory: assets
+        run: npm ci
+
+      - name: Build guides and index
+        run: |
+          node assets/build.js
+          node assets/gen-index.js
+
+      # PDFs are committed, so this only fills in guides that are missing one.
+      - name: Generate missing PDFs
+        continue-on-error: true
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+        run: |
+          node assets/make-pdfs.js ${{ inputs.regenerate_pdfs && '--force' || '' }}
+
+      - name: Check every guide in the manifest was built
+        run: |
+          node -e "
+            const fs=require('fs');
+            const t=JSON.parse(fs.readFileSync('assets/topics.json','utf8')).topics;
+            const missing=t.filter(x=>!fs.existsSync('guides/'+x.slug+'.html')).map(x=>x.slug);
+            if(missing.length){console.error('Missing built guides: '+missing.join(', '));process.exit(1);}
+            console.log(t.length+' guides present.');
+          "
+
+      # upload-pages-artifact already excludes .git and .github
+      - name: Strip build dependencies from the published site
+        run: rm -rf assets/node_modules
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
