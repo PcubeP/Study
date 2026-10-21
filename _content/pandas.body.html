@@ -1,0 +1,582 @@
+<p class="lead">Pandas is the workhorse of tabular data in Python: a fast, expressive layer over NumPy that gives you labeled, heterogeneous tables you can slice, group, join, reshape, and analyze in a handful of lines. If NumPy gives you arrays, pandas gives you a spreadsheet with a programmable brain.</p>
+
+<h2 id="what-it-is">What It Is and Why It Matters</h2>
+
+<p>Pandas provides two core data structures. A <span class="badge">Series</span> is a one-dimensional labeled array (a single column). A <span class="badge">DataFrame</span> is a two-dimensional labeled table — effectively a dictionary of Series that share a common row index. Everything you do in pandas revolves around these two objects and the <em>index</em> that labels them.</p>
+
+<div class="callout note"><span class="t">Mental model</span> Think of a DataFrame as columns of NumPy arrays glued together, each sharing one row index. Column operations are vectorized and fast; per-row Python loops are slow. The whole art of good pandas is pushing work into vectorized column operations.</div>
+
+<div class="diagram"><svg viewBox="0 0 640 300" width="640" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="20" y="28" font-size="14" fill="#1a2233" font-weight="bold">DataFrame = aligned Series sharing one Index</text>
+  <!-- index column -->
+  <rect x="20" y="50" width="90" height="30" fill="#1e3a8a"/>
+  <text x="30" y="70" font-size="13" fill="#ffffff">Index</text>
+  <rect x="20" y="80" width="90" height="40" fill="#eff4ff" stroke="#94a3b8"/>
+  <rect x="20" y="120" width="90" height="40" fill="#eff4ff" stroke="#94a3b8"/>
+  <rect x="20" y="160" width="90" height="40" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="55" y="105" font-size="13" fill="#1a2233">0</text>
+  <text x="55" y="145" font-size="13" fill="#1a2233">1</text>
+  <text x="55" y="185" font-size="13" fill="#1a2233">2</text>
+  <!-- columns -->
+  <g>
+    <rect x="130" y="50" width="130" height="30" fill="#2563eb"/>
+    <text x="150" y="70" font-size="13" fill="#ffffff">"name" (object)</text>
+    <rect x="130" y="80" width="130" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="130" y="120" width="130" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="130" y="160" width="130" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="140" y="105" font-size="12" fill="#1a2233">Ada</text>
+    <text x="140" y="145" font-size="12" fill="#1a2233">Linus</text>
+    <text x="140" y="185" font-size="12" fill="#1a2233">Grace</text>
+  </g>
+  <g>
+    <rect x="280" y="50" width="120" height="30" fill="#059669"/>
+    <text x="298" y="70" font-size="13" fill="#ffffff">"age" (int64)</text>
+    <rect x="280" y="80" width="120" height="40" fill="#ecfdf5" stroke="#94a3b8"/>
+    <rect x="280" y="120" width="120" height="40" fill="#ecfdf5" stroke="#94a3b8"/>
+    <rect x="280" y="160" width="120" height="40" fill="#ecfdf5" stroke="#94a3b8"/>
+    <text x="330" y="105" font-size="12" fill="#1a2233">36</text>
+    <text x="330" y="145" font-size="12" fill="#1a2233">54</text>
+    <text x="330" y="185" font-size="12" fill="#1a2233">45</text>
+  </g>
+  <g>
+    <rect x="420" y="50" width="140" height="30" fill="#0891b2"/>
+    <text x="438" y="70" font-size="13" fill="#ffffff">"active" (bool)</text>
+    <rect x="420" y="80" width="140" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="420" y="120" width="140" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="420" y="160" width="140" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="470" y="105" font-size="12" fill="#1a2233">True</text>
+    <text x="470" y="145" font-size="12" fill="#1a2233">False</text>
+    <text x="470" y="185" font-size="12" fill="#1a2233">True</text>
+  </g>
+  <text x="130" y="235" font-size="12" fill="#b45309">each column is a Series; one Series = Index + one column</text>
+  <path d="M60 200 L60 235 L120 235" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>
+  <text x="130" y="268" font-size="12" fill="#1a2233">Columns need not share a dtype — that heterogeneity is what a DataFrame adds over a 2D NumPy array.</text>
+</svg><div class="cap">Fig 1 — Anatomy of a DataFrame: a shared index plus typed columns.</div></div>
+
+<div class="grid c3">
+  <div class="card"><h4>Labeled</h4>Rows and columns carry labels, so alignment is automatic and bugs from positional mismatch disappear.</div>
+  <div class="card"><h4>Vectorized</h4>Operations run in C over whole columns — orders of magnitude faster than Python loops.</div>
+  <div class="card"><h4>Interoperable</h4>Reads CSV, Excel, Parquet, JSON, SQL; integrates with NumPy, matplotlib, scikit-learn, Arrow.</div>
+</div>
+
+<h2 id="setup">Setup / Getting Started</h2>
+
+<pre><code class="language-bash"># Install (pandas 2.x is current; 2.0+ brings Arrow-backed dtypes)
+pip install pandas
+
+# Recommended extras for I/O you will actually use
+pip install pyarrow openpyxl sqlalchemy   # parquet, excel, SQL
+
+# Verify
+python -c "import pandas as pd; print(pd.__version__)"</code></pre>
+
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+
+# Build a DataFrame from a dict of columns (most common constructor)
+df = pd.DataFrame({
+    "name":   ["Ada", "Linus", "Grace", "Alan"],
+    "age":    [36, 54, 45, 41],
+    "team":   ["A", "B", "A", "B"],
+    "salary": [95000, 88000, 120000, np.nan],
+})
+
+print(df.shape)      # (4, 4)  -> rows, cols
+print(df.dtypes)     # per-column types
+df.head(2)           # first 2 rows
+df.info()            # dtypes + non-null counts + memory
+df.describe()        # summary stats for numeric columns</code></pre>
+
+<div class="callout tip"><span class="t">Display sanity</span> In notebooks, set <code>pd.set_option("display.max_columns", None)</code> and <code>pd.set_option("display.width", 160)</code> so wide tables stop wrapping awkwardly.</div>
+
+<h2 id="series-dataframe">Series &amp; DataFrame Essentials</h2>
+
+<p>A Series pairs <code>values</code> (a NumPy or Arrow-backed array) with an <code>index</code>. A DataFrame adds a <code>columns</code> index on top.</p>
+
+<pre><code class="language-python">s = pd.Series([10, 20, 30], index=["a", "b", "c"], name="score")
+s["b"]            # 20  -> label access
+s.values          # array([10, 20, 30])
+s.index           # Index(['a','b','c'], dtype='object')
+
+# Alignment: arithmetic matches on the index, NOT position
+left  = pd.Series([1, 2, 3], index=["a", "b", "c"])
+right = pd.Series([10, 20],   index=["b", "c"])
+left + right      # a=NaN, b=12, c=23  (a has no match -> NaN)
+
+# DataFrame column access
+df["age"]         # a Series
+df[["name", "age"]]   # a DataFrame (list -> multiple columns)
+df.age            # attribute access (only for valid identifier names)</code></pre>
+
+<div class="callout warn"><span class="t">Columns vs rows</span> <code>df["age"]</code> selects a <em>column</em>. To select <em>rows</em> you need <code>.loc</code> / <code>.iloc</code> (next section). <code>df[0]</code> raises a KeyError unless a column is literally named <code>0</code>.</div>
+
+<h3>Dtypes you should recognize</h3>
+<table>
+  <tr><th>Dtype</th><th>Means</th><th>Note</th></tr>
+  <tr><td><code>int64</code> / <code>float64</code></td><td>NumPy numeric</td><td>float64 holds NaN; int64 cannot</td></tr>
+  <tr><td><code>object</code></td><td>Python objects, usually strings</td><td>Slow; prefer <code>string</code> dtype</td></tr>
+  <tr><td><code>string</code></td><td>Dedicated string dtype</td><td><code>df["c"].astype("string")</code></td></tr>
+  <tr><td><code>category</code></td><td>Finite set of labels</td><td>Big memory + speed win for low-cardinality text</td></tr>
+  <tr><td><code>datetime64[ns]</code></td><td>Timestamps</td><td>Unlocks <code>.dt</code> accessor</td></tr>
+  <tr><td><code>Int64</code> (capital I)</td><td>Nullable integer</td><td>Holds <code>pd.NA</code>, unlike int64</td></tr>
+  <tr><td><code>bool</code> / <code>boolean</code></td><td>Boolean / nullable boolean</td><td>Used for masks</td></tr>
+</table>
+
+<h2 id="indexing">Indexing: loc, iloc, and Selection</h2>
+
+<p>This is the single most important thing to get right. There are two selectors:</p>
+
+<div class="grid c2">
+  <div class="card"><h4><code>.loc[rows, cols]</code></h4>Label-based. Endpoints are <strong>inclusive</strong>. Use for named rows/columns and boolean masks.</div>
+  <div class="card"><h4><code>.iloc[rows, cols]</code></h4>Integer-position based. Endpoints are <strong>exclusive</strong> (like Python slices). Use for positional access.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 640 250" width="640" height="250">
+  <text x="20" y="26" font-size="14" fill="#1a2233" font-weight="bold">loc (labels, inclusive) vs iloc (positions, exclusive)</text>
+  <!-- grid -->
+  <g font-size="12" fill="#1a2233">
+    <text x="30" y="60">pos</text><text x="30" y="90">0</text><text x="30" y="120">1</text><text x="30" y="150">2</text><text x="30" y="180">3</text>
+    <text x="80" y="60">label</text><text x="85" y="90">"w"</text><text x="85" y="120">"x"</text><text x="85" y="150">"y"</text><text x="85" y="180">"z"</text>
+  </g>
+  <g>
+    <rect x="140" y="75" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+    <rect x="140" y="105" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+    <rect x="140" y="135" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+    <rect x="140" y="165" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+  </g>
+  <!-- loc bracket -->
+  <rect x="300" y="75" width="150" height="90" fill="none" stroke="#059669" stroke-width="2"/>
+  <text x="305" y="68" font-size="12" fill="#059669">df.loc["w":"y"]  -&gt; w, x, y (3 rows)</text>
+  <!-- iloc bracket -->
+  <rect x="470" y="75" width="150" height="60" fill="none" stroke="#b45309" stroke-width="2"/>
+  <text x="475" y="68" font-size="12" fill="#b45309">df.iloc[0:2] -&gt; pos 0,1 (2 rows)</text>
+  <text x="140" y="225" font-size="12" fill="#1a2233">Same object, two coordinate systems. Mixing them is the #1 source of off-by-one bugs.</text>
+</svg><div class="cap">Fig 2 — Label slicing includes the endpoint; positional slicing does not.</div></div>
+
+<pre><code class="language-python">df = df.set_index("name")   # make 'name' the row label
+
+# --- label-based (.loc) ---
+df.loc["Ada"]                     # one row as a Series
+df.loc["Ada", "age"]              # scalar
+df.loc[["Ada", "Grace"], ["age", "team"]]   # subframe
+df.loc["Ada":"Grace"]             # label slice, INCLUSIVE of Grace
+
+# --- position-based (.iloc) ---
+df.iloc[0]                        # first row
+df.iloc[0:2]                      # first two rows, EXCLUSIVE of index 2
+df.iloc[-1]                       # last row
+df.iloc[0, 1]                     # row 0, column 1 by position
+
+# --- boolean filtering (goes through .loc) ---
+df.loc[df["age"] &gt; 42]            # rows where age &gt; 42
+df.loc[(df["age"] &gt; 42) &amp; (df["team"] == "A")]   # & / | , parens required
+df.loc[df["team"].isin(["A"])]
+df.loc[df["age"].between(40, 50)]
+
+# --- assignment through loc (no chained-indexing trap) ---
+df.loc[df["age"] &gt; 50, "team"] = "senior"</code></pre>
+
+<div class="callout danger"><span class="t">Chained indexing</span> Never assign via <code>df[df.age &gt; 50]["team"] = ...</code>. That is <em>chained indexing</em>: it may write to a temporary copy and silently do nothing (the classic <code>SettingWithCopyWarning</code>). Always use a single <code>df.loc[mask, "col"] = value</code>.</div>
+
+<h2 id="filtering">Filtering &amp; Transforming Columns</h2>
+
+<pre><code class="language-python"># query(): string expressions, often cleaner for complex filters
+df.query("age &gt; 42 and team == 'A'")
+threshold = 42
+df.query("age &gt; @threshold")          # @ references Python variables
+
+# Create / overwrite columns
+df["bonus"] = df["salary"] * 0.1
+df["senior"] = df["age"] &gt;= 45
+
+# assign(): returns a new frame, chainable, no mutation
+out = (df
+       .assign(tax=lambda d: d["salary"] * 0.3,
+               net=lambda d: d["salary"] - d["salary"] * 0.3))
+
+# Drop / rename
+df.drop(columns=["bonus"])
+df.rename(columns={"salary": "pay"})
+df.drop(index=["Alan"])               # drop a row by label</code></pre>
+
+<div class="callout tip"><span class="t">Method chaining</span> Chaining with <code>.assign</code>, <code>.query</code>, <code>.pipe</code> keeps transformations readable and avoids intermediate variables. Wrap the chain in parentheses so you can put each step on its own line.</div>
+
+<h2 id="missing-data">Missing Data</h2>
+
+<p>Missing values appear as <code>NaN</code> (float), <code>NaT</code> (datetime), or <code>pd.NA</code> (nullable dtypes). Detect, drop, or fill them.</p>
+
+<pre><code class="language-python">df.isna()                 # boolean DataFrame
+df.isna().sum()           # count of missing per column  <- do this first
+df["salary"].notna()
+
+# Drop
+df.dropna()                       # drop rows with ANY NaN
+df.dropna(subset=["salary"])      # only consider these columns
+df.dropna(axis=1, thresh=3)       # drop cols with < 3 non-null values
+
+# Fill
+df["salary"].fillna(df["salary"].median())
+df.fillna({"salary": 0, "team": "unknown"})   # per-column fills
+df["salary"].ffill()              # forward-fill (carry last valid)
+df["salary"].bfill()              # back-fill
+
+# Interpolate (time series / ordered numeric)
+df["salary"].interpolate(method="linear")</code></pre>
+
+<div class="callout warn"><span class="t">int64 cannot hold NaN</span> A column of integers with a missing value becomes <code>float64</code> automatically. If you need true nullable integers, use the <code>Int64</code> dtype: <code>df["n"].astype("Int64")</code>.</div>
+
+<h2 id="groupby">GroupBy: Split-Apply-Combine</h2>
+
+<p>GroupBy is pandas' most powerful idiom. You <strong>split</strong> rows into groups by key, <strong>apply</strong> a function to each group, and <strong>combine</strong> the results back into a Series or DataFrame.</p>
+
+<div class="diagram"><svg viewBox="0 0 640 280" width="640" height="280">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="20" y="24" font-size="14" fill="#1a2233" font-weight="bold">Split - Apply - Combine</text>
+  <!-- source -->
+  <rect x="20" y="50" width="120" height="150" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="40" y="45" font-size="12" fill="#1a2233">rows</text>
+  <text x="35" y="80" font-size="12" fill="#1a2233">A  95k</text>
+  <text x="35" y="105" font-size="12" fill="#1a2233">B  88k</text>
+  <text x="35" y="130" font-size="12" fill="#1a2233">A  120k</text>
+  <text x="35" y="155" font-size="12" fill="#1a2233">B  70k</text>
+  <path d="M145 125 L200 90" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <path d="M145 125 L200 190" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <!-- groups -->
+  <rect x="205" y="60" width="150" height="60" fill="#ecfdf5" stroke="#059669"/>
+  <text x="215" y="80" font-size="12" fill="#1a2233">group A: 95k, 120k</text>
+  <text x="215" y="105" font-size="12" fill="#059669">split by "team"</text>
+  <rect x="205" y="160" width="150" height="60" fill="#ecfdf5" stroke="#059669"/>
+  <text x="215" y="180" font-size="12" fill="#1a2233">group B: 88k, 70k</text>
+  <path d="M360 90 L420 125" stroke="#b45309" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <path d="M360 190 L420 135" stroke="#b45309" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <text x="360" y="55" font-size="12" fill="#b45309">apply mean()</text>
+  <!-- result -->
+  <rect x="425" y="100" width="180" height="70" fill="#ffffff" stroke="#1e3a8a"/>
+  <text x="440" y="125" font-size="12" fill="#1a2233">team  salary</text>
+  <text x="440" y="145" font-size="12" fill="#1a2233">A     107500</text>
+  <text x="440" y="162" font-size="12" fill="#1a2233">B      79000</text>
+  <text x="440" y="195" font-size="12" fill="#1e3a8a">combine -&gt; one row per group</text>
+</svg><div class="cap">Fig 3 — GroupBy partitions rows by key, reduces each partition, and stitches results together.</div></div>
+
+<pre><code class="language-python"># Single aggregation
+df.groupby("team")["salary"].mean()
+
+# Multiple columns, multiple functions via agg()
+df.groupby("team").agg(
+    avg_pay=("salary", "mean"),
+    max_age=("age", "max"),
+    n=("salary", "size"),
+)   # named aggregation -> clean, flat column names
+
+# Group by several keys -> MultiIndex result
+df.groupby(["team", "senior"])["salary"].sum()
+
+# transform(): broadcast group result back to original shape (same length)
+df["pay_vs_team_avg"] = df["salary"] - df.groupby("team")["salary"].transform("mean")
+
+# filter(): keep only groups meeting a condition
+df.groupby("team").filter(lambda g: g["salary"].mean() &gt; 80000)
+
+# apply(): most flexible, slowest — use when agg/transform cannot express it
+df.groupby("team").apply(lambda g: g.nlargest(2, "salary"))</code></pre>
+
+<div class="callout tip"><span class="t">agg vs transform</span> Use <code>agg</code> when you want one row per group (a summary). Use <code>transform</code> when you want a result aligned to the original rows (e.g. group mean on every row). Reach for <code>apply</code> only when neither fits — it is the slow fallback.</div>
+
+<h2 id="merge-join">Merge, Join &amp; Concatenate</h2>
+
+<p>Combine datasets by key (<code>merge</code>), by index (<code>join</code>), or by stacking (<code>concat</code>).</p>
+
+<pre><code class="language-python">employees = pd.DataFrame({"emp_id": [1, 2, 3], "name": ["Ada", "Linus", "Grace"], "dept_id": [10, 20, 10]})
+depts     = pd.DataFrame({"dept_id": [10, 20, 30], "dept": ["Eng", "Sales", "Ops"]})
+
+# INNER (default): only matching keys
+pd.merge(employees, depts, on="dept_id", how="inner")
+
+# LEFT: keep all left rows, NaN where no match
+pd.merge(employees, depts, on="dept_id", how="left")
+
+# Different key names on each side
+pd.merge(a, b, left_on="country_code", right_on="iso", how="left")
+
+# Stacking
+pd.concat([df1, df2], axis=0)             # stack rows (union)
+pd.concat([df1, df2], axis=1)             # stack columns (align on index)
+
+# validate guards against accidental fan-out / dup keys
+pd.merge(employees, depts, on="dept_id", how="left", validate="many_to_one")</code></pre>
+
+<table>
+  <tr><th>how</th><th>Keeps</th><th>SQL analog</th></tr>
+  <tr><td><code>inner</code></td><td>Only keys in both</td><td>INNER JOIN</td></tr>
+  <tr><td><code>left</code></td><td>All left + matches</td><td>LEFT JOIN</td></tr>
+  <tr><td><code>right</code></td><td>All right + matches</td><td>RIGHT JOIN</td></tr>
+  <tr><td><code>outer</code></td><td>Union of keys</td><td>FULL OUTER JOIN</td></tr>
+  <tr><td><code>cross</code></td><td>Cartesian product</td><td>CROSS JOIN</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Silent row explosion</span> If the right side has duplicate keys, a left merge multiplies rows (a many-to-many fan-out). Pass <code>validate="many_to_one"</code> or <code>"one_to_one"</code> to make pandas raise instead of silently inflating your data.</div>
+
+<h2 id="reshape-pivot">Reshaping: pivot, melt, stack</h2>
+
+<p>Data arrives either <em>wide</em> (one column per variable) or <em>long</em> (one row per observation). Reshape between them.</p>
+
+<pre><code class="language-python"># Long -> wide: pivot_table (aggregates duplicates safely)
+sales = pd.DataFrame({
+    "date": ["2026-01", "2026-01", "2026-02", "2026-02"],
+    "region": ["N", "S", "N", "S"],
+    "revenue": [100, 80, 120, 95],
+})
+wide = sales.pivot_table(index="date", columns="region",
+                         values="revenue", aggfunc="sum", fill_value=0)
+
+# Wide -> long: melt
+long = wide.reset_index().melt(id_vars="date",
+                               var_name="region", value_name="revenue")
+
+# stack / unstack move an index level between rows and columns
+multi = df.groupby(["team", "senior"])["salary"].sum()
+multi.unstack()          # 'senior' level -> columns
+multi.unstack().stack()  # back to long
+
+# crosstab: frequency table
+pd.crosstab(df["team"], df["senior"])</code></pre>
+
+<div class="callout note"><span class="t">pivot vs pivot_table</span> <code>pivot</code> fails if there are duplicate index/column pairs. <code>pivot_table</code> aggregates them via <code>aggfunc</code> — use it as your default and reserve <code>pivot</code> for guaranteed-unique data.</div>
+
+<h2 id="apply-map">apply, map &amp; Vectorization</h2>
+
+<pre><code class="language-python"># map(): element-wise on a Series (dict lookup or function)
+df["team_full"] = df["team"].map({"A": "Alpha", "B": "Bravo"})
+
+# apply() on a Series: element-wise function
+df["name_len"] = df.index.to_series().apply(len)
+
+# apply() on a DataFrame: axis=1 runs per row (SLOW — avoid in hot paths)
+df["flag"] = df.apply(lambda r: "hi" if r["salary"] &gt; 100000 else "lo", axis=1)
+
+# Prefer vectorized / np.where for the common case
+df["flag"] = np.where(df["salary"] &gt; 100000, "hi", "lo")
+df["bucket"] = np.select(
+    [df["age"] &lt; 40, df["age"] &lt; 50],
+    ["junior", "mid"],
+    default="senior",
+)
+
+# String operations are vectorized via .str
+df["name"].str.upper()
+df["name"].str.contains("a", case=False)
+df["name"].str.replace("Ada", "ADA", regex=False)</code></pre>
+
+<div class="callout danger"><span class="t">apply(axis=1) is a loop in disguise</span> It calls your Python function once per row. On a million rows it can be 100x slower than the vectorized equivalent. Reach for <code>np.where</code>, <code>np.select</code>, <code>.str</code>, <code>.dt</code>, or boolean masks first.</div>
+
+<h2 id="datetime">Datetime &amp; Time Series</h2>
+
+<pre><code class="language-python"># Parse strings to datetime64
+df["ts"] = pd.to_datetime(df["ts"], format="%Y-%m-%d", errors="coerce")
+
+# The .dt accessor exposes calendar fields
+df["ts"].dt.year
+df["ts"].dt.month_name()
+df["ts"].dt.dayofweek          # Monday=0
+df["ts"].dt.quarter
+
+# Set a DatetimeIndex to unlock resampling & partial-string slicing
+ts = df.set_index("ts").sort_index()
+ts.loc["2026-01"]              # all rows in January 2026
+ts.loc["2026-01-01":"2026-03-31"]
+
+# Resample: groupby over time buckets
+ts["revenue"].resample("ME").sum()     # month-end totals
+ts["revenue"].resample("W").mean()      # weekly average
+
+# Rolling windows
+ts["revenue"].rolling(window=7).mean()  # 7-period moving average
+ts["revenue"].shift(1)                  # lag by one period
+ts["revenue"].pct_change()              # period-over-period % change
+
+# Timezones
+ts.tz_localize("UTC").tz_convert("Asia/Kolkata")</code></pre>
+
+<div class="callout tip"><span class="t">Always sort a time index</span> Partial-string slicing and <code>rolling</code> assume monotonic order. Call <code>.sort_index()</code> right after you set a DatetimeIndex.</div>
+
+<h2 id="io">Reading &amp; Writing: CSV, Excel, SQL, Parquet</h2>
+
+<pre><code class="language-python"># CSV — the daily driver
+df = pd.read_csv("data.csv",
+                 parse_dates=["date"],       # parse while reading
+                 dtype={"zip": "string"},     # keep leading zeros
+                 usecols=["date", "zip", "amount"],  # read only what you need
+                 na_values=["", "NA", "null"])
+df.to_csv("out.csv", index=False)
+
+# Excel (needs openpyxl)
+pd.read_excel("book.xlsx", sheet_name="Q1")
+df.to_excel("out.xlsx", sheet_name="results", index=False)
+
+# SQL (needs SQLAlchemy engine)
+from sqlalchemy import create_engine
+engine = create_engine("postgresql+psycopg2://user:pw@host/db")
+pd.read_sql("SELECT * FROM sales WHERE year = 2026", engine)
+df.to_sql("results", engine, if_exists="replace", index=False)
+
+# Parquet — columnar, typed, compressed; best for analytics pipelines
+df.to_parquet("data.parquet")            # needs pyarrow
+pd.read_parquet("data.parquet", columns=["date", "amount"])
+
+# JSON
+pd.read_json("data.json")
+pd.json_normalize(nested_records)        # flatten nested JSON into columns</code></pre>
+
+<div class="callout note"><span class="t">Prefer Parquet for pipelines</span> CSV loses dtypes, has no compression, and reparses on every read. Parquet stores dtypes, compresses well, and lets you read only the columns you need — often 5-20x faster and smaller.</div>
+
+<h2 id="worked-example">Mini Worked Example: Monthly Revenue Report</h2>
+
+<p>A realistic end-to-end chain: read raw orders, clean, enrich, aggregate, and export.</p>
+
+<pre><code class="language-python">import pandas as pd
+
+orders = pd.read_csv("orders.csv", parse_dates=["order_date"])
+customers = pd.read_csv("customers.csv")   # customer_id, region, tier
+
+report = (
+    orders
+      .dropna(subset=["amount"])                       # drop incomplete rows
+      .assign(month=lambda d: d["order_date"].dt.to_period("M"))
+      .merge(customers, on="customer_id", how="left",  # enrich with region
+             validate="many_to_one")
+      .groupby(["month", "region"], as_index=False)    # split by month+region
+      .agg(revenue=("amount", "sum"),
+           orders=("amount", "size"),
+           avg_order=("amount", "mean"))
+      .sort_values(["month", "revenue"], ascending=[True, False])
+)
+
+report["revenue_share"] = (
+    report["revenue"] / report.groupby("month")["revenue"].transform("sum")
+)
+report.to_parquet("monthly_revenue.parquet", index=False)
+print(report.head())</code></pre>
+
+<details><summary>Show the transformation step by step</summary><div class="body">
+<div class="pipeline">
+  <span class="step">read_csv</span><span class="arrow">-&gt;</span>
+  <span class="step">dropna</span><span class="arrow">-&gt;</span>
+  <span class="step">assign month</span><span class="arrow">-&gt;</span>
+  <span class="step">merge region</span><span class="arrow">-&gt;</span>
+  <span class="step">groupby+agg</span><span class="arrow">-&gt;</span>
+  <span class="step">transform share</span><span class="arrow">-&gt;</span>
+  <span class="step">to_parquet</span>
+</div>
+<p>Each step returns a new DataFrame, so the chain never mutates the raw <code>orders</code> frame — safe to re-run and easy to debug by truncating the chain.</p>
+</div></details>
+
+<h2 id="cheatsheet">Cheat-Sheet Reference</h2>
+
+<table>
+  <tr><th>Task</th><th>Code</th></tr>
+  <tr><td>Shape / columns</td><td><code>df.shape</code>, <code>df.columns</code></td></tr>
+  <tr><td>First / last n</td><td><code>df.head(n)</code>, <code>df.tail(n)</code></td></tr>
+  <tr><td>Random sample</td><td><code>df.sample(5)</code></td></tr>
+  <tr><td>Select column</td><td><code>df["c"]</code></td></tr>
+  <tr><td>Select rows by label</td><td><code>df.loc[mask]</code></td></tr>
+  <tr><td>Select rows by position</td><td><code>df.iloc[0:5]</code></td></tr>
+  <tr><td>Filter</td><td><code>df.query("a &gt; 1")</code></td></tr>
+  <tr><td>New column</td><td><code>df.assign(c=...)</code></td></tr>
+  <tr><td>Sort</td><td><code>df.sort_values("c", ascending=False)</code></td></tr>
+  <tr><td>Unique / counts</td><td><code>df["c"].unique()</code>, <code>df["c"].value_counts()</code></td></tr>
+  <tr><td>Aggregate by group</td><td><code>df.groupby("k").agg(...)</code></td></tr>
+  <tr><td>Join</td><td><code>pd.merge(a, b, on="k", how="left")</code></td></tr>
+  <tr><td>Pivot</td><td><code>df.pivot_table(index=, columns=, values=)</code></td></tr>
+  <tr><td>Missing count</td><td><code>df.isna().sum()</code></td></tr>
+  <tr><td>Rename</td><td><code>df.rename(columns={"a": "b"})</code></td></tr>
+  <tr><td>Reset / set index</td><td><code>df.reset_index()</code>, <code>df.set_index("c")</code></td></tr>
+  <tr><td>Apply vectorized bins</td><td><code>pd.cut(df["c"], bins=[0,10,20])</code></td></tr>
+  <tr><td>Memory usage</td><td><code>df.memory_usage(deep=True)</code></td></tr>
+</table>
+
+<h3>Pandas vs SQL vs Excel</h3>
+<table>
+  <tr><th>Concept</th><th>Pandas</th><th>SQL</th></tr>
+  <tr><td>Filter rows</td><td><code>df.query("x &gt; 1")</code></td><td><code>WHERE x &gt; 1</code></td></tr>
+  <tr><td>Pick columns</td><td><code>df[["a","b"]]</code></td><td><code>SELECT a, b</code></td></tr>
+  <tr><td>Aggregate</td><td><code>groupby().agg()</code></td><td><code>GROUP BY</code></td></tr>
+  <tr><td>Join</td><td><code>merge(how="left")</code></td><td><code>LEFT JOIN</code></td></tr>
+  <tr><td>Sort</td><td><code>sort_values()</code></td><td><code>ORDER BY</code></td></tr>
+  <tr><td>Distinct</td><td><code>drop_duplicates()</code></td><td><code>DISTINCT</code></td></tr>
+  <tr><td>Top-N per group</td><td><code>groupby().head(n)</code></td><td><code>ROW_NUMBER() &lt;= n</code></td></tr>
+</table>
+
+<h2 id="performance">Performance Tips</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Vectorize everything</h4>Replace <code>apply(axis=1)</code> and Python loops with column arithmetic, <code>np.where</code>, <code>np.select</code>, and <code>.str</code>/<code>.dt</code> accessors.</div>
+  <div class="card"><h4>Shrink dtypes</h4>Convert low-cardinality strings to <code>category</code> and downcast numerics (<code>pd.to_numeric(s, downcast="integer")</code>). Big memory wins.</div>
+  <div class="card"><h4>Read less</h4>Use <code>usecols</code>, <code>dtype</code>, and <code>nrows</code> on read. Prefer Parquet so you only load needed columns.</div>
+  <div class="card"><h4>Avoid growing frames</h4>Never <code>concat</code> inside a loop. Collect pieces in a list and <code>pd.concat</code> once at the end.</div>
+  <div class="card"><h4>Chunk big files</h4><code>pd.read_csv(path, chunksize=100_000)</code> yields chunks you can process and reduce without loading everything.</div>
+  <div class="card"><h4>Know when to leave</h4>At tens of GB, consider Polars, DuckDB, or Dask. Pandas is single-machine and largely single-threaded.</div>
+</div>
+
+<pre><code class="language-python"># Measure before optimizing
+%timeit df.apply(lambda r: r.a + r.b, axis=1)   # slow (row loop)
+%timeit df["a"] + df["b"]                         # fast (vectorized)
+
+# Category dtype can cut memory of text columns by 10x+
+before = df.memory_usage(deep=True).sum()
+df["team"] = df["team"].astype("category")
+after = df.memory_usage(deep=True).sum()
+
+# Build once, not in a loop
+pieces = [process(chunk) for chunk in pd.read_csv("big.csv", chunksize=100_000)]
+result = pd.concat(pieces, ignore_index=True)</code></pre>
+
+<div class="callout ok"><span class="t">Rule of thumb</span> If you wrote a Python <code>for</code> loop over rows, there is almost always a vectorized pandas/NumPy expression that is both shorter and dramatically faster. Look for it first.</div>
+
+<h2 id="best-practices">Best Practices &amp; Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Use <code>.loc[mask, col] = value</code> for conditional assignment; chain with <code>.assign</code>/<code>.query</code>/<code>.pipe</code>; set explicit dtypes on read; profile with <code>df.info()</code> and <code>%timeit</code>; keep a tidy (long) layout for analysis.</div>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>inplace=True</code> rarely saves memory and often hurts readability — prefer reassignment. Comparing floats with <code>==</code> is unreliable; use <code>np.isclose</code>. <code>df.append</code> was removed in pandas 2.0 — use <code>pd.concat</code>.</div>
+
+<div class="callout danger"><span class="t">Classic bugs</span> (1) Chained-indexing assignment silently fails. (2) Merging on a non-unique key explodes row counts. (3) Forgetting that integer columns coerce to float on missing data. (4) Using Python <code>and</code>/<code>or</code> instead of <code>&amp;</code>/<code>|</code> in masks (and forgetting parentheses).</div>
+
+<h2 id="interview">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between <code>.loc</code> and <code>.iloc</code>?</div><div class="a"><code>.loc</code> is label-based and its slice endpoints are inclusive; <code>.iloc</code> is integer-position based and its endpoints are exclusive, like Python slicing. Use <code>.loc</code> with named labels and boolean masks, <code>.iloc</code> for positional access. Mixing them is a common off-by-one source.</div></div>
+
+<div class="qa"><div class="q">Explain split-apply-combine and when you'd use transform vs agg.</div><div class="a">GroupBy splits rows into groups by key, applies a function to each group, and combines results. <code>agg</code> reduces each group to one row (a summary). <code>transform</code> returns a result the same length as the input, broadcasting the group result back to every row — ideal for things like subtracting a per-group mean. <code>apply</code> is the flexible but slow fallback.</div></div>
+
+<div class="qa"><div class="q">What is the <code>SettingWithCopyWarning</code> and how do you avoid it?</div><div class="a">It warns that you may be assigning to a temporary copy produced by chained indexing (<code>df[mask]["col"] = x</code>), so the write might not land on the original frame. Fix it by doing a single indexed assignment: <code>df.loc[mask, "col"] = x</code>.</div></div>
+
+<div class="qa"><div class="q">Why does an integer column become float after you introduce a missing value?</div><div class="a">NumPy's <code>int64</code> has no representation for NaN, so pandas upcasts the column to <code>float64</code> to store the missing value. To keep integers, use the nullable <code>Int64</code> dtype, which supports <code>pd.NA</code>.</div></div>
+
+<div class="qa"><div class="q">How do merge types differ, and what causes a row explosion in a join?</div><div class="a"><code>inner</code> keeps only matching keys, <code>left</code>/<code>right</code> keep all rows from one side, <code>outer</code> keeps the union. A row explosion happens when the key is non-unique on the other side, creating a many-to-many fan-out. Guard with the <code>validate</code> parameter (e.g. <code>"many_to_one"</code>).</div></div>
+
+<div class="qa"><div class="q">When should you avoid <code>apply(axis=1)</code>?</div><div class="a">Almost always in performance-sensitive code: it calls a Python function per row, defeating vectorization and running 10-100x slower. Prefer vectorized arithmetic, <code>np.where</code>, <code>np.select</code>, boolean masks, or the <code>.str</code>/<code>.dt</code> accessors.</div></div>
+
+<div class="qa"><div class="q">How do you reshape between wide and long formats?</div><div class="a"><code>pivot_table</code> (or <code>pivot</code>) goes long-to-wide, aggregating duplicates via <code>aggfunc</code>; <code>melt</code> goes wide-to-long. <code>stack</code>/<code>unstack</code> move levels between the row and column indexes. Prefer <code>pivot_table</code> because <code>pivot</code> errors on duplicate index/column pairs.</div></div>
+
+<div class="qa"><div class="q">What does <code>groupby().transform("mean")</code> return versus <code>groupby().mean()</code>?</div><div class="a"><code>mean()</code> returns one value per group (shape = number of groups). <code>transform("mean")</code> returns a Series the same length as the original, with each row filled by its group's mean — useful for creating per-row derived features like deviation from the group average.</div></div>
+
+<div class="qa"><div class="q">How would you reduce the memory footprint of a large DataFrame?</div><div class="a">Convert low-cardinality text columns to <code>category</code>, downcast numerics with <code>pd.to_numeric(..., downcast=...)</code>, read only needed columns with <code>usecols</code>, set explicit dtypes on read, and store intermediate data as Parquet. Measure with <code>df.memory_usage(deep=True)</code>.</div></div>
+
+<div class="qa"><div class="q">What is index alignment and how does it affect arithmetic?</div><div class="a">Pandas aligns operands on their index labels (not position) before arithmetic. Labels present in one operand but not the other produce <code>NaN</code>. This prevents silent position-based mismatches but surprises people who expect positional behavior — use <code>.values</code> or <code>.reset_index(drop=True)</code> to force positional math.</div></div>
+
+<div class="qa"><div class="q">How do you handle a CSV with dates and leading-zero zip codes?</div><div class="a">Pass <code>parse_dates=["date"]</code> so dates become <code>datetime64</code>, and <code>dtype={"zip": "string"}</code> so the zip stays text and keeps leading zeros (reading it as a number would strip them). Also set <code>na_values</code> to catch the file's missing-value sentinels.</div></div>
+
+<div class="qa"><div class="q">When would you choose Polars or DuckDB over pandas?</div><div class="a">When data exceeds comfortable single-machine memory, when you need multi-core/parallel execution, or when you want lazy query optimization. Pandas is single-machine and mostly single-threaded; Polars (Rust, multi-threaded, lazy) and DuckDB (in-process SQL on larger-than-memory data) scale better while interoperating with pandas via Arrow.</div></div>
+
+<h2 id="further">Further Learning</h2>
+<ul>
+  <li><strong>Official docs</strong> — the "10 minutes to pandas" and "Essential basic functionality" guides; the API reference is excellent for discovering parameters.</li>
+  <li><strong>Tidy data</strong> — Hadley Wickham's paper; the long-format discipline makes groupby/pivot natural.</li>
+  <li><strong>NumPy fundamentals</strong> — broadcasting and dtypes underpin pandas performance.</li>
+  <li><strong>Arrow &amp; Parquet</strong> — the modern columnar backbone; learn <code>pyarrow</code> dtypes in pandas 2.x.</li>
+  <li><strong>Polars &amp; DuckDB</strong> — the next step when pandas hits scale limits; both read/write Arrow and Parquet.</li>
+  <li><strong>Practice</strong> — rebuild a SQL analytics report entirely in pandas, then profile and vectorize the slow parts.</li>
+</ul>

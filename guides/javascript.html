@@ -1,0 +1,663 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JavaScript — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Programming Languages</div>
+  <h1>JavaScript</h1>
+  <div class="subtitle">Modern ES2020+ JavaScript from types and closures to the event loop, async/await, modules, and the DOM — the language behind React and Node.</div>
+  <div class="tags"><span>javascript</span><span>es2020</span><span>async-await</span><span>closures</span><span>event-loop</span><span>prototypes</span><span>dom</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~15 min read &middot; 3,334 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-javascript-is-amp-why-it-matters">What JavaScript Is &amp; Why It Matters</a></li><li><a href="#setup-amp-getting-started">Setup &amp; Getting Started</a></li><li><a href="#types-values-amp-coercion">Types, Values &amp; Coercion</a></li><li><a href="#functions-scope-amp-closures">Functions, Scope &amp; Closures</a></li><li><a href="#objects-prototypes-amp-classes">Objects, Prototypes &amp; Classes</a></li><li><a href="#the-this-keyword-amp-binding">The this Keyword &amp; Binding</a></li><li><a href="#the-event-loop-promises-amp-async-await">The Event Loop, Promises &amp; async/await</a></li><li><a href="#modules">Modules</a></li><li><a href="#arrays-iteration-amp-functional-methods">Arrays, Iteration &amp; Functional Methods</a></li><li><a href="#dom-amp-fetch-browser-basics">DOM &amp; Fetch — Browser Basics</a></li><li><a href="#cheat-sheet-reference">Cheat-Sheet Reference</a></li><li><a href="#best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-javascript-is-amp-why-it-matters">What JavaScript Is &amp; Why It Matters</h2>
+<p class="lead">JavaScript is the single-threaded, dynamically typed, prototype-based language that runs the web browser, the Node.js server, build tools, and the runtime beneath React, Vue, and Angular. Learn it deeply once and you can write front end, back end, CLIs, and mobile apps.</p>
+
+<p>JavaScript (standardised as <strong>ECMAScript</strong>) ships a new edition every June. ES2015 (ES6) was the watershed release — <code>let</code>/<code>const</code>, arrow functions, classes, modules, promises. Everything from ES2020 onward (optional chaining, nullish coalescing, <code>BigInt</code>, top-level <code>await</code>, logical assignment) is the modern baseline this guide targets.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Ubiquitous</h4>Runs in every browser, on servers (Node/Deno/Bun), in edge functions, and embedded devices. The only language native to the browser.</div>
+  <div class="card"><h4>Single-threaded + async</h4>One call stack, but an <em>event loop</em> plus non-blocking I/O lets it handle thousands of concurrent operations.</div>
+  <div class="card"><h4>Multi-paradigm</h4>First-class functions enable functional style; prototypes and classes enable OOP. You pick per problem.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 230" width="720" height="230">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="200" height="80" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="120" y="48" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Your JS source</text>
+  <text x="120" y="72" text-anchor="middle" font-size="12" fill="#1a2233">.js / .mjs / .ts</text>
+
+  <rect x="270" y="20" width="200" height="80" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="370" y="48" text-anchor="middle" font-size="14" fill="#059669" font-weight="bold">JS Engine</text>
+  <text x="370" y="70" text-anchor="middle" font-size="12" fill="#1a2233">V8 / SpiderMonkey</text>
+  <text x="370" y="88" text-anchor="middle" font-size="11" fill="#1a2233">parse → bytecode → JIT</text>
+
+  <rect x="520" y="20" width="180" height="80" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="610" y="48" text-anchor="middle" font-size="14" fill="#0891b2" font-weight="bold">Host runtime</text>
+  <text x="610" y="70" text-anchor="middle" font-size="11" fill="#1a2233">Browser DOM / Node</text>
+  <text x="610" y="88" text-anchor="middle" font-size="11" fill="#1a2233">timers, fetch, fs</text>
+
+  <line x1="222" y1="60" x2="266" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="472" y1="60" x2="516" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+
+  <rect x="140" y="140" width="440" height="70" rx="8" fill="#fff" stroke="#94a3b8" stroke-dasharray="4 3"/>
+  <text x="360" y="168" text-anchor="middle" font-size="13" fill="#1a2233" font-weight="bold">Call stack + heap + event loop + task queues</text>
+  <text x="360" y="190" text-anchor="middle" font-size="11" fill="#1a2233">The engine runs your code; the host supplies the async APIs</text>
+</svg><div class="cap">Fig 1 — JS source is executed by an engine (V8 etc.) embedded in a host runtime that provides I/O APIs.</div></div>
+
+<h2 id="setup-amp-getting-started">Setup &amp; Getting Started</h2>
+<p>You need almost nothing to start: open a browser console (<span class="kbd">F12</span>). For real projects install Node.js (bundles <code>npm</code>).</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Install Node via the official installer or a version manager (nvm recommended)</span>
+node --version        <span class="hljs-comment"># v22.x LTS as of 2026</span>
+npm --version
+
+<span class="hljs-comment"># Run a file</span>
+node app.js
+
+<span class="hljs-comment"># Start a REPL to experiment</span>
+node
+
+<span class="hljs-comment"># Initialise a project (creates package.json)</span>
+npm init -y
+
+<span class="hljs-comment"># Add a dependency and run a script</span>
+npm install lodash
+npm run build</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Use <code>"type": "module"</code> in <code>package.json</code> so <code>.js</code> files use ES module <code>import</code>/<code>export</code> syntax rather than legacy CommonJS <code>require</code>.</div>
+
+<h2 id="types-values-amp-coercion">Types, Values &amp; Coercion</h2>
+<p>JavaScript has <strong>7 primitive types</strong> plus objects. Primitives are immutable and compared by value; objects are compared by reference.</p>
+
+<table>
+  <tr><th>Type</th><th>Example</th><th><code>typeof</code> result</th><th>Notes</th></tr>
+  <tr><td>number</td><td><code>42</code>, <code>3.14</code>, <code>NaN</code></td><td><code>"number"</code></td><td>IEEE-754 double; one type for int &amp; float</td></tr>
+  <tr><td>bigint</td><td><code>9007199254740993n</code></td><td><code>"bigint"</code></td><td>Arbitrary-precision integers</td></tr>
+  <tr><td>string</td><td><code>"hi"</code>, <code>`t${x}`</code></td><td><code>"string"</code></td><td>UTF-16; immutable</td></tr>
+  <tr><td>boolean</td><td><code>true</code></td><td><code>"boolean"</code></td><td></td></tr>
+  <tr><td>undefined</td><td><code>undefined</code></td><td><code>"undefined"</code></td><td>Absence of value (default)</td></tr>
+  <tr><td>null</td><td><code>null</code></td><td><code>"object"</code></td><td>Historic bug; intentional empty</td></tr>
+  <tr><td>symbol</td><td><code>Symbol("id")</code></td><td><code>"symbol"</code></td><td>Unique keys</td></tr>
+  <tr><td>object</td><td><code>{}</code>, <code>[]</code>, <code>fn</code></td><td><code>"object"</code>/<code>"function"</code></td><td>Everything non-primitive</td></tr>
+</table>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// Prefer const; use let when reassigning; never use var (function-scoped, hoisted)</span>
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">PI</span> = <span class="hljs-number">3.14159</span>;
+<span class="hljs-keyword">let</span> count = <span class="hljs-number">0</span>;
+count += <span class="hljs-number">1</span>;
+
+<span class="hljs-comment">// Strict equality (===) does NOT coerce. Loose equality (==) does — avoid it.</span>
+<span class="hljs-number">0</span> == <span class="hljs-string">&quot;0&quot;</span>;        <span class="hljs-comment">// true  (coerced)  ⚠</span>
+<span class="hljs-number">0</span> === <span class="hljs-string">&quot;0&quot;</span>;       <span class="hljs-comment">// false (no coercion) ✓</span>
+<span class="hljs-literal">null</span> == <span class="hljs-literal">undefined</span>;   <span class="hljs-comment">// true  (the one useful == case)</span>
+<span class="hljs-title class_">NaN</span> === <span class="hljs-title class_">NaN</span>;         <span class="hljs-comment">// false — use Number.isNaN()</span>
+
+<span class="hljs-comment">// Falsy values (everything else is truthy): false, 0, -0, 0n, &quot;&quot;, null, undefined, NaN</span>
+<span class="hljs-keyword">if</span> (!<span class="hljs-string">&quot;&quot;</span>) <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;empty string is falsy&quot;</span>);
+
+<span class="hljs-comment">// Nullish coalescing (??) only falls through on null/undefined, not on 0 or &quot;&quot;</span>
+<span class="hljs-keyword">const</span> port = userPort ?? <span class="hljs-number">8080</span>;     <span class="hljs-comment">// 0 would be kept; || would wrongly replace it</span>
+<span class="hljs-keyword">const</span> name = input?.<span class="hljs-property">user</span>?.<span class="hljs-property">name</span> ?? <span class="hljs-string">&quot;anon&quot;</span>;  <span class="hljs-comment">// optional chaining + nullish default</span></code></pre>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>typeof null === "object"</code> and <code>typeof NaN === "number"</code>. To test arrays use <code>Array.isArray(x)</code>, not <code>typeof</code>.</div>
+
+<h2 id="functions-scope-amp-closures">Functions, Scope &amp; Closures</h2>
+<p>Functions are first-class values: assign them, pass them, return them. Scope is <em>lexical</em> — determined by where code is written, not where it is called.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// Three ways to make a function</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">declared</span>(<span class="hljs-params">a, b</span>) { <span class="hljs-keyword">return</span> a + b; }          <span class="hljs-comment">// hoisted fully</span>
+<span class="hljs-keyword">const</span> expr = <span class="hljs-keyword">function</span> (<span class="hljs-params">a, b</span>) { <span class="hljs-keyword">return</span> a + b; };    <span class="hljs-comment">// not hoisted</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title function_">arrow</span> = (<span class="hljs-params">a, b</span>) =&gt; a + b;                      <span class="hljs-comment">// concise; no own `this`</span>
+
+<span class="hljs-comment">// Default, rest, and spread</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params">name = <span class="hljs-string">&quot;world&quot;</span>, ...others</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`hi <span class="hljs-subst">${name}</span>`</span> + (others.<span class="hljs-property">length</span> ? <span class="hljs-string">` and <span class="hljs-subst">${others.join(<span class="hljs-string">&quot;, &quot;</span>)}</span>`</span> : <span class="hljs-string">&quot;&quot;</span>);
+}
+<span class="hljs-keyword">const</span> nums = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>];
+<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(...nums);                 <span class="hljs-comment">// spread into args → 3</span>
+<span class="hljs-keyword">const</span> copy = [...nums, <span class="hljs-number">4</span>];         <span class="hljs-comment">// spread into a new array</span></code></pre>
+
+<h3>Closures</h3>
+<p>A <strong>closure</strong> is a function bundled with references to the variables of the scope where it was created. It keeps those variables alive after the outer function returns — the foundation of private state, memoisation, and callbacks.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-keyword">function</span> <span class="hljs-title function_">makeCounter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">let</span> count = <span class="hljs-number">0</span>;                   <span class="hljs-comment">// private — not reachable from outside</span>
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-title function_">inc</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> ++count; },     <span class="hljs-comment">// closes over `count`</span>
+    <span class="hljs-title function_">get</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> count; },
+  };
+}
+<span class="hljs-keyword">const</span> c = <span class="hljs-title function_">makeCounter</span>();
+c.<span class="hljs-title function_">inc</span>();  <span class="hljs-comment">// 1</span>
+c.<span class="hljs-title function_">inc</span>();  <span class="hljs-comment">// 2</span>
+c.<span class="hljs-title function_">get</span>();  <span class="hljs-comment">// 2 — `count` persisted because the returned functions reference it</span></code></pre>
+
+<div class="diagram"><svg viewBox="0 0 640 230" width="640" height="230">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs>
+  <rect x="20" y="30" width="240" height="170" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="140" y="56" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">makeCounter() scope</text>
+  <rect x="55" y="80" width="170" height="40" rx="6" fill="#fff" stroke="#2563eb"/>
+  <text x="140" y="105" text-anchor="middle" font-size="13" fill="#1a2233">count = 2</text>
+  <rect x="55" y="135" width="170" height="45" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="140" y="162" text-anchor="middle" font-size="12" fill="#059669">inc(), get()</text>
+
+  <rect x="380" y="60" width="230" height="110" rx="8" fill="#fff" stroke="#94a3b8" stroke-dasharray="4 3"/>
+  <text x="495" y="86" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a2233">After return</text>
+  <text x="495" y="112" text-anchor="middle" font-size="12" fill="#1a2233">const c = makeCounter()</text>
+  <text x="495" y="134" text-anchor="middle" font-size="12" fill="#1a2233">c.inc() still reaches count</text>
+  <text x="495" y="156" text-anchor="middle" font-size="11" fill="#b45309">count survives GC via closure</text>
+
+  <line x1="225" y1="155" x2="376" y2="130" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+</svg><div class="cap">Fig 2 — The returned methods close over <code>count</code>, keeping that variable alive on the heap after the function returns.</div></div>
+
+<h2 id="objects-prototypes-amp-classes">Objects, Prototypes &amp; Classes</h2>
+<p>JavaScript inheritance is <strong>prototypal</strong>: every object has a hidden link (<code>[[Prototype]]</code>, read via <code>Object.getPrototypeOf</code>) to another object. Property lookups walk this chain until found or <code>null</code>.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-keyword">const</span> animal = {
+  <span class="hljs-title function_">describe</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-variable language_">this</span>.name}</span> says <span class="hljs-subst">${<span class="hljs-variable language_">this</span>.sound}</span>`</span>; },
+};
+<span class="hljs-keyword">const</span> dog = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">create</span>(animal);   <span class="hljs-comment">// dog&#x27;s prototype is `animal`</span>
+dog.<span class="hljs-property">name</span> = <span class="hljs-string">&quot;Rex&quot;</span>;
+dog.<span class="hljs-property">sound</span> = <span class="hljs-string">&quot;woof&quot;</span>;
+dog.<span class="hljs-title function_">describe</span>();                      <span class="hljs-comment">// &quot;Rex says woof&quot; — method found on prototype</span>
+
+<span class="hljs-comment">// `class` is syntax sugar over prototypes</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Shape</span> {
+  #sides;                            <span class="hljs-comment">// true private field (ES2022)</span>
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">sides</span>) { <span class="hljs-variable language_">this</span>.#sides = sides; }
+  <span class="hljs-keyword">get</span> <span class="hljs-title function_">sides</span>() { <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.#sides; }
+  <span class="hljs-title function_">area</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>; }
+  <span class="hljs-keyword">static</span> <span class="hljs-title function_">unit</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Shape</span>(<span class="hljs-number">1</span>); }   <span class="hljs-comment">// static = on the class, not instances</span>
+}
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Square</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Shape</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">side</span>) { <span class="hljs-variable language_">super</span>(<span class="hljs-number">4</span>); <span class="hljs-variable language_">this</span>.<span class="hljs-property">side</span> = side; }
+  <span class="hljs-title function_">area</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">side</span> ** <span class="hljs-number">2</span>; }         <span class="hljs-comment">// override</span>
+}
+<span class="hljs-keyword">new</span> <span class="hljs-title class_">Square</span>(<span class="hljs-number">3</span>).<span class="hljs-title function_">area</span>();   <span class="hljs-comment">// 9</span></code></pre>
+
+<div class="diagram"><svg viewBox="0 0 560 210" width="560" height="210">
+  <defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <rect x="40" y="150" width="150" height="46" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="115" y="178" text-anchor="middle" font-size="13" fill="#059669">sq (instance)</text>
+  <rect x="40" y="86" width="150" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="115" y="114" text-anchor="middle" font-size="13" fill="#2563eb">Square.prototype</text>
+  <rect x="40" y="22" width="150" height="46" rx="6" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="115" y="50" text-anchor="middle" font-size="13" fill="#1e3a8a">Shape.prototype</text>
+  <rect x="300" y="22" width="170" height="46" rx="6" fill="#fff" stroke="#94a3b8"/>
+  <text x="385" y="50" text-anchor="middle" font-size="13" fill="#1a2233">Object.prototype → null</text>
+
+  <line x1="115" y1="150" x2="115" y2="134" stroke="#0891b2" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="115" y1="86" x2="115" y2="70" stroke="#0891b2" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="190" y1="45" x2="296" y2="45" stroke="#0891b2" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="245" y="178" font-size="11" fill="#1a2233">Lookup walks UP the chain until found or null</text>
+</svg><div class="cap">Fig 3 — The prototype chain. A missing property on <code>sq</code> is searched on each prototype in turn.</div></div>
+
+<h3>Destructuring &amp; useful object APIs</h3>
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-keyword">const</span> user = { <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-attr">role</span>: <span class="hljs-string">&quot;admin&quot;</span> };
+<span class="hljs-keyword">const</span> { name, <span class="hljs-attr">role</span>: title } = user;        <span class="hljs-comment">// rename on extract → title === &quot;admin&quot;</span>
+<span class="hljs-keyword">const</span> [first, , third] = [<span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">30</span>];     <span class="hljs-comment">// skip holes → first=10, third=30</span>
+
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(user);     <span class="hljs-comment">// [&quot;id&quot;,&quot;name&quot;,&quot;role&quot;]</span>
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(user);  <span class="hljs-comment">// [[&quot;id&quot;,1],[&quot;name&quot;,&quot;Ada&quot;],[&quot;role&quot;,&quot;admin&quot;]]</span>
+<span class="hljs-keyword">const</span> clone = { ...user, <span class="hljs-attr">role</span>: <span class="hljs-string">&quot;user&quot;</span> };   <span class="hljs-comment">// shallow copy + override</span>
+<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">freeze</span>(clone);  <span class="hljs-comment">// shallow immutability</span></code></pre>
+
+<h2 id="the-this-keyword-amp-binding">The <code>this</code> Keyword &amp; Binding</h2>
+<p><code>this</code> is decided by <em>how a function is called</em>, not where it is defined — except arrow functions, which capture <code>this</code> lexically.</p>
+
+<table>
+  <tr><th>Call form</th><th>What <code>this</code> is</th></tr>
+  <tr><td><code>fn()</code> (plain)</td><td><code>undefined</code> in strict mode (else global)</td></tr>
+  <tr><td><code>obj.fn()</code></td><td><code>obj</code> (the receiver)</td></tr>
+  <tr><td><code>new Fn()</code></td><td>the freshly created instance</td></tr>
+  <tr><td><code>fn.call(x)</code> / <code>fn.apply(x)</code></td><td><code>x</code> (explicit)</td></tr>
+  <tr><td><code>fn.bind(x)</code></td><td>permanently bound to <code>x</code></td></tr>
+  <tr><td>arrow <code>() =&gt; ...</code></td><td>inherited from the enclosing scope</td></tr>
+</table>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-keyword">const</span> timer = {
+  <span class="hljs-attr">seconds</span>: <span class="hljs-number">0</span>,
+  <span class="hljs-title function_">startBroken</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-built_in">setInterval</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) { <span class="hljs-variable language_">this</span>.<span class="hljs-property">seconds</span>++; }, <span class="hljs-number">1000</span>); <span class="hljs-comment">// ⚠ `this` is NOT timer</span>
+  },
+  <span class="hljs-title function_">startFixed</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> { <span class="hljs-variable language_">this</span>.<span class="hljs-property">seconds</span>++; }, <span class="hljs-number">1000</span>);       <span class="hljs-comment">// ✓ arrow keeps `this`</span>
+  },
+};</code></pre>
+
+<div class="callout warn"><span class="t">Classic pitfall</span> Passing a method as a callback (<code>element.addEventListener("click", obj.handle)</code>) loses <code>this</code>. Fix with <code>obj.handle.bind(obj)</code> or an arrow wrapper.</div>
+
+<h2 id="the-event-loop-promises-amp-async-await">The Event Loop, Promises &amp; async/await</h2>
+<p class="lead">JavaScript runs on one thread, so it never blocks on I/O. Instead, async work is handed to the host, and callbacks are queued to run once the call stack is empty — orchestrated by the <strong>event loop</strong>.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <defs><marker id="ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect x="30" y="30" width="170" height="120" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="115" y="54" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">Call stack</text>
+  <text x="115" y="80" text-anchor="middle" font-size="11" fill="#1a2233">runs sync code</text>
+  <text x="115" y="100" text-anchor="middle" font-size="11" fill="#1a2233">one frame at a time</text>
+
+  <circle cx="360" cy="90" r="55" fill="#ecfdf5" stroke="#059669"/>
+  <text x="360" y="86" text-anchor="middle" font-size="13" font-weight="bold" fill="#059669">Event</text>
+  <text x="360" y="104" text-anchor="middle" font-size="13" font-weight="bold" fill="#059669">loop</text>
+
+  <rect x="520" y="20" width="180" height="55" rx="8" fill="#fff" stroke="#0891b2"/>
+  <text x="610" y="42" text-anchor="middle" font-size="12" font-weight="bold" fill="#0891b2">Microtask queue</text>
+  <text x="610" y="62" text-anchor="middle" font-size="11" fill="#1a2233">promises — drained FIRST</text>
+
+  <rect x="520" y="105" width="180" height="55" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="610" y="127" text-anchor="middle" font-size="12" font-weight="bold" fill="#b45309">Macrotask queue</text>
+  <text x="610" y="147" text-anchor="middle" font-size="11" fill="#1a2233">setTimeout, I/O, events</text>
+
+  <line x1="200" y1="90" x2="300" y2="90" stroke="#2563eb" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="420" y1="70" x2="516" y2="48" stroke="#2563eb" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="420" y1="110" x2="516" y2="132" stroke="#2563eb" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="360" y="210" text-anchor="middle" font-size="12" fill="#1a2233">Each tick: run all microtasks, then ONE macrotask, repeat</text>
+  <text x="360" y="232" text-anchor="middle" font-size="11" fill="#b45309">This is why a resolved promise fires before a setTimeout(0)</text>
+</svg><div class="cap">Fig 4 — The event loop empties the stack, drains all microtasks, then processes one macrotask per tick.</div></div>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;1 sync&quot;</span>);
+<span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;4 macrotask&quot;</span>), <span class="hljs-number">0</span>);
+<span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;3 microtask&quot;</span>));
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;2 sync&quot;</span>);
+<span class="hljs-comment">// Output order: 1, 2, 3, 4  — microtasks beat macrotasks</span>
+
+<span class="hljs-comment">// A Promise is a value that will exist later. States: pending → fulfilled | rejected.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/users/<span class="hljs-subst">${id}</span>`</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">res</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!res.<span class="hljs-property">ok</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`HTTP <span class="hljs-subst">${res.status}</span>`</span>);
+    <span class="hljs-keyword">return</span> res.<span class="hljs-title function_">json</span>();
+  });
+}
+
+<span class="hljs-comment">// async/await is syntactic sugar over promises — read it top to bottom</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loadProfile</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> user = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchUser</span>(id);               <span class="hljs-comment">// pauses until resolved</span>
+    <span class="hljs-keyword">const</span> [posts, friends] = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([    <span class="hljs-comment">// run concurrently, await both</span>
+      <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/users/<span class="hljs-subst">${id}</span>/posts`</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-title function_">json</span>()),
+      <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/users/<span class="hljs-subst">${id}</span>/friends`</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> r.<span class="hljs-title function_">json</span>()),
+    ]);
+    <span class="hljs-keyword">return</span> { user, posts, friends };
+  } <span class="hljs-keyword">catch</span> (err) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&quot;load failed:&quot;</span>, err.<span class="hljs-property">message</span>);
+    <span class="hljs-keyword">throw</span> err;                                        <span class="hljs-comment">// rethrow or return a fallback</span>
+  }
+}</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Use <code>Promise.all</code> for "all must succeed", <code>Promise.allSettled</code> when you want every result regardless of failures, and <code>Promise.race</code> / <code>Promise.any</code> for the first to settle / first to succeed.</div>
+
+<h2 id="modules">Modules</h2>
+<p>Modern code uses <strong>ES modules</strong> (ESM). Each file is its own scope; you explicitly export and import bindings. Node also supports legacy CommonJS (<code>require</code>/<code>module.exports</code>).</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// math.js — named exports + one default export</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-title function_">add</span> = (<span class="hljs-params">a, b</span>) =&gt; a + b;
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">mul</span>(<span class="hljs-params">a, b</span>) { <span class="hljs-keyword">return</span> a * b; }
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Calculator</span> { <span class="hljs-comment">/* ... */</span> }
+
+<span class="hljs-comment">// app.js</span>
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">Calculator</span>, { add, mul <span class="hljs-keyword">as</span> multiply } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./math.js&quot;</span>;
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> math <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./math.js&quot;</span>;       <span class="hljs-comment">// namespace import</span>
+<span class="hljs-keyword">const</span> mod = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&quot;./math.js&quot;</span>);   <span class="hljs-comment">// dynamic import → lazy / code-splitting</span></code></pre>
+
+<table>
+  <tr><th></th><th>ES Modules</th><th>CommonJS</th></tr>
+  <tr><td>Syntax</td><td><code>import</code> / <code>export</code></td><td><code>require</code> / <code>module.exports</code></td></tr>
+  <tr><td>Loading</td><td>Static, async, tree-shakeable</td><td>Synchronous, dynamic</td></tr>
+  <tr><td>Where</td><td>Browsers &amp; Node (default)</td><td>Legacy Node</td></tr>
+  <tr><td>Bindings</td><td>Live (read-only views)</td><td>Copied values</td></tr>
+</table>
+
+<h2 id="arrays-iteration-amp-functional-methods">Arrays, Iteration &amp; Functional Methods</h2>
+<p>Array methods are the workhorse of day-to-day JS. The functional trio <code>map</code>/<code>filter</code>/<code>reduce</code> replaces most hand-written loops.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-keyword">const</span> orders = [
+  { <span class="hljs-attr">id</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">total</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">paid</span>: <span class="hljs-literal">true</span> },
+  { <span class="hljs-attr">id</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">total</span>: <span class="hljs-number">70</span>, <span class="hljs-attr">paid</span>: <span class="hljs-literal">false</span> },
+  { <span class="hljs-attr">id</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">total</span>: <span class="hljs-number">50</span>, <span class="hljs-attr">paid</span>: <span class="hljs-literal">true</span> },
+];
+
+orders.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">total</span>);                 <span class="hljs-comment">// [30, 70, 50] — transform</span>
+orders.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">paid</span>);               <span class="hljs-comment">// keep paid orders</span>
+orders.<span class="hljs-title function_">find</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">id</span> === <span class="hljs-number">2</span>);             <span class="hljs-comment">// first match or undefined</span>
+orders.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> !o.<span class="hljs-property">paid</span>);                <span class="hljs-comment">// true — any unpaid?</span>
+orders.<span class="hljs-title function_">every</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">total</span> &gt; <span class="hljs-number">0</span>);           <span class="hljs-comment">// true — all positive?</span>
+
+<span class="hljs-comment">// reduce folds a list into one accumulated value</span>
+<span class="hljs-keyword">const</span> paidRevenue = orders
+  .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">o</span>) =&gt;</span> o.<span class="hljs-property">paid</span>)
+  .<span class="hljs-title function_">reduce</span>(<span class="hljs-function">(<span class="hljs-params">sum, o</span>) =&gt;</span> sum + o.<span class="hljs-property">total</span>, <span class="hljs-number">0</span>);    <span class="hljs-comment">// 80</span>
+
+<span class="hljs-comment">// Iterate with for...of (values) — prefer over for...in for arrays</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> o <span class="hljs-keyword">of</span> orders) <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(o.<span class="hljs-property">id</span>);
+
+<span class="hljs-comment">// Immutable-friendly helpers (ES2023): toSorted/toReversed/with don&#x27;t mutate</span>
+<span class="hljs-keyword">const</span> sorted = [<span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>].<span class="hljs-title function_">toSorted</span>();        <span class="hljs-comment">// [1,2,3]; original untouched</span></code></pre>
+
+<table>
+  <tr><th>Method</th><th>Returns</th><th>Mutates?</th><th>Use for</th></tr>
+  <tr><td><code>map</code></td><td>new array</td><td>no</td><td>1:1 transform</td></tr>
+  <tr><td><code>filter</code></td><td>new array</td><td>no</td><td>keep a subset</td></tr>
+  <tr><td><code>reduce</code></td><td>any value</td><td>no</td><td>aggregate/fold</td></tr>
+  <tr><td><code>forEach</code></td><td><code>undefined</code></td><td>no</td><td>side effects only</td></tr>
+  <tr><td><code>flatMap</code></td><td>new array</td><td>no</td><td>map + flatten one level</td></tr>
+  <tr><td><code>sort</code></td><td>same array</td><td><strong>yes</strong></td><td>in-place ordering</td></tr>
+  <tr><td><code>push/splice</code></td><td>varies</td><td><strong>yes</strong></td><td>in-place edits</td></tr>
+</table>
+
+<h2 id="dom-amp-fetch-browser-basics">DOM &amp; Fetch — Browser Basics</h2>
+<p>In the browser, <code>document</code> exposes the DOM tree. You query nodes, mutate them, and listen for events.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// Query</span>
+<span class="hljs-keyword">const</span> btn = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;#load&quot;</span>);
+<span class="hljs-keyword">const</span> items = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelectorAll</span>(<span class="hljs-string">&quot;.item&quot;</span>);   <span class="hljs-comment">// static NodeList</span>
+
+<span class="hljs-comment">// Create &amp; insert</span>
+<span class="hljs-keyword">const</span> li = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&quot;li&quot;</span>);
+li.<span class="hljs-property">textContent</span> = <span class="hljs-string">&quot;New item&quot;</span>;
+li.<span class="hljs-property">classList</span>.<span class="hljs-title function_">add</span>(<span class="hljs-string">&quot;item&quot;</span>);
+<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;ul&quot;</span>).<span class="hljs-title function_">append</span>(li);
+
+<span class="hljs-comment">// Events — the handler receives an Event object</span>
+btn.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;click&quot;</span>, <span class="hljs-title function_">async</span> (event) =&gt; {
+  event.<span class="hljs-title function_">preventDefault</span>();
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&quot;/api/data&quot;</span>, {
+    <span class="hljs-attr">method</span>: <span class="hljs-string">&quot;POST&quot;</span>,
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;Content-Type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span> },
+    <span class="hljs-attr">body</span>: <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({ <span class="hljs-attr">q</span>: <span class="hljs-string">&quot;hello&quot;</span> }),
+  });
+  <span class="hljs-keyword">if</span> (!res.<span class="hljs-property">ok</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(res.<span class="hljs-property">statusText</span>);
+  <span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> res.<span class="hljs-title function_">json</span>();
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(data);
+});</code></pre>
+
+<div class="callout note"><span class="t">Note</span> <code>fetch</code> only rejects on network failure — an HTTP 404 or 500 still <em>resolves</em>. Always check <code>res.ok</code> yourself.</div>
+
+<h3>Mini worked example: a debounced search box</h3>
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// Debounce: wait until the user stops typing before firing — a real-world closure use</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">debounce</span>(<span class="hljs-params">fn, delay = <span class="hljs-number">300</span></span>) {
+  <span class="hljs-keyword">let</span> timer;                                   <span class="hljs-comment">// persisted via closure</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">...args</span>) =&gt;</span> {
+    <span class="hljs-built_in">clearTimeout</span>(timer);
+    timer = <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">fn</span>(...args), delay);
+  };
+}
+
+<span class="hljs-keyword">const</span> input = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">querySelector</span>(<span class="hljs-string">&quot;#search&quot;</span>);
+<span class="hljs-keyword">const</span> search = <span class="hljs-title function_">debounce</span>(<span class="hljs-title function_">async</span> (query) =&gt; {
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/search?q=<span class="hljs-subst">${<span class="hljs-built_in">encodeURIComponent</span>(query)}</span>`</span>);
+  <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> res.<span class="hljs-title function_">json</span>();
+  <span class="hljs-title function_">render</span>(results);
+}, <span class="hljs-number">400</span>);
+
+input.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;input&quot;</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> <span class="hljs-title function_">search</span>(e.<span class="hljs-property">target</span>.<span class="hljs-property">value</span>));</code></pre>
+
+<h2 id="cheat-sheet-reference">Cheat-Sheet Reference</h2>
+<table>
+  <tr><th>Task</th><th>Modern idiom</th></tr>
+  <tr><td>Default if null/undefined</td><td><code>x ?? fallback</code></td></tr>
+  <tr><td>Safe deep access</td><td><code>a?.b?.c</code></td></tr>
+  <tr><td>Clone array</td><td><code>[...arr]</code> or <code>arr.slice()</code></td></tr>
+  <tr><td>Shallow clone object</td><td><code>{ ...obj }</code> or <code>structuredClone(obj)</code> (deep)</td></tr>
+  <tr><td>Merge objects</td><td><code>{ ...a, ...b }</code></td></tr>
+  <tr><td>Unique values</td><td><code>[...new Set(arr)]</code></td></tr>
+  <tr><td>Object → array</td><td><code>Object.entries(obj)</code></td></tr>
+  <tr><td>Array → object</td><td><code>Object.fromEntries(pairs)</code></td></tr>
+  <tr><td>Conditional assign</td><td><code>obj.x ??= computeDefault()</code></td></tr>
+  <tr><td>Format number</td><td><code>n.toLocaleString()</code></td></tr>
+  <tr><td>Parse/stringify JSON</td><td><code>JSON.parse(s)</code> / <code>JSON.stringify(o, null, 2)</code></td></tr>
+  <tr><td>Async delay</td><td><code>await new Promise(r =&gt; setTimeout(r, ms))</code></td></tr>
+</table>
+
+<div class="pipeline"><span class="step">parse</span><span class="arrow">-&gt;</span><span class="step">compile (JIT)</span><span class="arrow">-&gt;</span><span class="step">execute</span><span class="arrow">-&gt;</span><span class="step">event loop</span><span class="arrow">-&gt;</span><span class="step">GC</span></div>
+
+<h2 id="best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</h2>
+<div class="grid c2">
+  <div class="card"><h4>Do</h4>
+    <div class="callout ok"><span class="t">Good</span> Default to <code>const</code>; use <code>===</code>; prefer pure functions and immutable updates; name async functions by what they return; always <code>await</code> or <code>return</code> a promise.</div>
+  </div>
+  <div class="card"><h4>Avoid</h4>
+    <div class="callout danger"><span class="t">Avoid</span> <code>var</code>, loose <code>==</code>, mutating shared arrays, <code>for...in</code> on arrays, floating promises (unhandled rejections), and blocking the main thread with heavy sync loops.</div>
+  </div>
+</div>
+
+<div class="callout warn"><span class="t">Float math</span> <code>0.1 + 0.2 === 0.3</code> is <strong>false</strong> (IEEE-754). Compare with an epsilon or work in integer cents. For money, consider <code>BigInt</code> or a decimal library.</div>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// Pitfall: shared reference in a loop closure (var)</span>
+<span class="hljs-keyword">const</span> fns = [];
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">3</span>; i++) fns.<span class="hljs-title function_">push</span>(<span class="hljs-function">() =&gt;</span> i);
+fns.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">f</span>) =&gt;</span> <span class="hljs-title function_">f</span>());   <span class="hljs-comment">// [3, 3, 3] ⚠ — all share one `i`</span>
+<span class="hljs-comment">// Fix: use let (new binding each iteration)</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> j = <span class="hljs-number">0</span>; j &lt; <span class="hljs-number">3</span>; j++) fns.<span class="hljs-title function_">push</span>(<span class="hljs-function">() =&gt;</span> j);   <span class="hljs-comment">// [0, 1, 2] ✓</span>
+
+<span class="hljs-comment">// Pitfall: forgetting await → floating promise, errors vanish</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">bad</span>(<span class="hljs-params"></span>) { <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>); }   <span class="hljs-comment">// ⚠ result + errors lost</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">good</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchUser</span>(<span class="hljs-number">1</span>); }</code></pre>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What is the difference between <code>==</code> and <code>===</code>?</div><div class="a"><code>===</code> compares type and value with no coercion. <code>==</code> coerces operands to a common type first, producing surprising results (<code>"" == 0</code> is true). Always use <code>===</code>; the one accepted <code>==</code> use is <code>x == null</code> to catch both <code>null</code> and <code>undefined</code>.</div></div>
+
+<div class="qa"><div class="q">Explain closures and give a real use.</div><div class="a">A closure is a function together with the lexical environment it was created in, so it retains access to outer variables after the outer function returns. Uses: private state (module pattern), memoisation caches, debounce/throttle, and event handlers that remember configuration.</div></div>
+
+<div class="qa"><div class="q">How does the event loop order <code>setTimeout(0)</code> vs a resolved promise?</div><div class="a">The promise callback runs first. After each synchronous run completes, the loop drains the entire <em>microtask</em> queue (promise callbacks, <code>queueMicrotask</code>) before taking a single <em>macrotask</em> (timers, I/O). So microtasks always beat timers of the same tick.</div></div>
+
+<div class="qa"><div class="q">What is <code>this</code> and how is it determined?</div><div class="a">It is the call-time receiver, set by how the function is invoked: the object before the dot for method calls, the new instance for <code>new</code>, the explicit argument for <code>call</code>/<code>apply</code>/<code>bind</code>, and <code>undefined</code> (strict mode) for plain calls. Arrow functions ignore all of that and capture <code>this</code> lexically.</div></div>
+
+<div class="qa"><div class="q">Explain prototypal inheritance.</div><div class="a">Each object has an internal <code>[[Prototype]]</code> link to another object. Property reads that miss the object walk up this chain until found or <code>null</code>. <code>class</code> is sugar: methods live on <code>Class.prototype</code>, and <code>extends</code> links one prototype to another.</div></div>
+
+<div class="qa"><div class="q">What is the difference between <code>null</code> and <code>undefined</code>?</div><div class="a"><code>undefined</code> means a variable has not been assigned (the engine's default); <code>null</code> is an explicit "no value" you assign deliberately. <code>typeof undefined</code> is <code>"undefined"</code>; <code>typeof null</code> is <code>"object"</code> (a historic bug).</div></div>
+
+<div class="qa"><div class="q">What does <code>const</code> actually guarantee?</div><div class="a">That the binding cannot be reassigned — not that the value is immutable. A <code>const</code> object or array can still have its contents mutated. Use <code>Object.freeze</code> for shallow immutability.</div></div>
+
+<div class="qa"><div class="q">How do you run async operations concurrently vs sequentially?</div><div class="a">Sequentially: <code>await</code> each in turn. Concurrently: start them all (they return promises immediately) then <code>await Promise.all([...])</code>. Awaiting inside a loop serialises; mapping to promises then awaiting all parallelises.</div></div>
+
+<div class="qa"><div class="q">What is hoisting?</div><div class="a">Declarations are processed before execution. <code>function</code> declarations and <code>var</code> are hoisted (var initialised to <code>undefined</code>); <code>let</code>/<code>const</code> are hoisted but live in the "temporal dead zone" until their declaration line, so accessing them early throws.</div></div>
+
+<div class="qa"><div class="q">Why is <code>0.1 + 0.2 !== 0.3</code>?</div><div class="a">Numbers are 64-bit IEEE-754 doubles; 0.1 and 0.2 have no exact binary representation, so the sum is 0.30000000000000004. Compare with a tolerance (<code>Math.abs(a-b) &lt; Number.EPSILON</code>) or use integer units.</div></div>
+
+<div class="qa"><div class="q">Difference between <code>map</code> and <code>forEach</code>?</div><div class="a"><code>map</code> returns a new transformed array and is for producing values; <code>forEach</code> returns <code>undefined</code> and is for side effects only. Chaining and functional pipelines use <code>map</code>; you cannot <code>break</code> out of either (use <code>for...of</code> or <code>some</code>).</div></div>
+
+<div class="qa"><div class="q">What is event delegation?</div><div class="a">Attaching one listener to a common ancestor and using <code>event.target</code> to handle events from many children, relying on bubbling. It is efficient for large/ dynamic lists and avoids per-element listeners.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li><strong>MDN Web Docs</strong> — the authoritative reference for every API and language feature.</li>
+  <li><strong>"You Don't Know JS Yet"</strong> (Kyle Simpson) — deep dives on scope, closures, <code>this</code>, and types.</li>
+  <li><strong>TC39 proposals</strong> — track upcoming ECMAScript features (temporal, records &amp; tuples, decorators).</li>
+  <li><strong>Node.js docs</strong> — streams, the <code>fs</code>/<code>http</code> APIs, and the Node event loop phases.</li>
+  <li><strong>TypeScript</strong> — the natural next step: static types over the same language.</li>
+  <li><strong>Build projects</strong> — a debounced search UI, a small REST server, and a React app to apply closures, async, and modules in anger.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

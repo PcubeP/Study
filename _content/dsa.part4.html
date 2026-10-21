@@ -1,0 +1,196 @@
+<h2>Core Patterns</h2>
+<p class="lead">Interview problems are variations on a small number of reusable patterns. Recognizing the pattern is 80% of the solve. Here are the six that cover the majority of questions.</p>
+
+<h3>Two Pointers</h3>
+<p><strong>When to use:</strong> a sorted array/string, or any time you compare elements from two positions &mdash; converging ends, or a slow/fast pair. Turns many O(n&sup2;) scans into O(n).</p>
+<details><summary>Show solution &mdash; pair summing to target in sorted array</summary><div class="body">
+<pre><code class="language-python">def two_sum_sorted(a, target):
+    i, j = 0, len(a) - 1
+    while i &lt; j:
+        s = a[i] + a[j]
+        if s == target:
+            return [i, j]
+        if s &lt; target:
+            i += 1          # need larger sum
+        else:
+            j -= 1          # need smaller sum
+    return []</code></pre>
+</div></details>
+
+<h3>Sliding Window</h3>
+<p><strong>When to use:</strong> contiguous subarray/substring problems &mdash; longest/shortest/max-sum window satisfying a constraint. Expand the right edge, shrink the left when the window violates the constraint.</p>
+<details><summary>Show solution &mdash; longest substring without repeating characters</summary><div class="body">
+<pre><code class="language-python">def length_of_longest(s):
+    seen = {}            # char -> last index
+    left = best = 0
+    for right, c in enumerate(s):
+        if c in seen and seen[c] &gt;= left:
+            left = seen[c] + 1      # jump past the repeat
+        seen[c] = right
+        best = max(best, right - left + 1)
+    return best</code></pre>
+</div></details>
+
+<h3>Binary Search</h3>
+<p><strong>When to use:</strong> a sorted search space, or any monotonic predicate ("smallest x that works"). Halves the space each step for O(log n). Also applies to "binary search on the answer".</p>
+<details><summary>Show solution &mdash; classic index search</summary><div class="body">
+<pre><code class="language-python">def binary_search(a, target):
+    lo, hi = 0, len(a) - 1
+    while lo &lt;= hi:
+        mid = (lo + hi) // 2        # no overflow in Python
+        if a[mid] == target:
+            return mid
+        if a[mid] &lt; target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1</code></pre>
+</div></details>
+
+<div class="callout warn"><span class="t">Watch out</span> The two classic binary-search bugs: an infinite loop (your bounds don't shrink) and off-by-one in the <code>lo/hi</code> update. Decide up front whether your interval is inclusive <code>[lo, hi]</code> or half-open, and be consistent.</div>
+
+<h3>Recursion &amp; Backtracking</h3>
+<p><strong>When to use:</strong> enumerate combinations/permutations/subsets, or explore a decision tree (N-queens, Sudoku, word search). Choose &rarr; recurse &rarr; <em>un</em>choose. Prune branches that can't lead to a solution.</p>
+<pre><code class="language-python">def subsets(nums):
+    res, path = [], []
+    def backtrack(start):
+        res.append(path[:])          # record current subset
+        for i in range(start, len(nums)):
+            path.append(nums[i])     # choose
+            backtrack(i + 1)         # explore
+            path.pop()               # un-choose
+    backtrack(0)
+    return res</code></pre>
+
+<h3>Dynamic Programming</h3>
+<p><strong>When to use:</strong> optimal substructure + overlapping subproblems. "Count the ways", "min/max cost", "can we reach". Cache subresults (memoization, top-down) or build a table (tabulation, bottom-up).</p>
+<pre><code class="language-python"># Fibonacci: naive O(2^n) -> memoized O(n)
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n):
+    if n &lt; 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+# Bottom-up, O(1) space
+def fib_iter(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a</code></pre>
+<div class="callout tip"><span class="t">Tip</span> Define the <em>state</em> and the <em>transition</em> in words before coding. "dp[i] = max profit using the first i items" is often the whole battle.</div>
+
+<h3>Greedy</h3>
+<p><strong>When to use:</strong> a locally optimal choice provably leads to a global optimum (interval scheduling, Huffman coding, some coin systems). Faster than DP when it applies &mdash; but you must justify why greedy is safe.</p>
+<pre><code class="language-python"># Activity selection: max non-overlapping intervals
+def max_meetings(intervals):
+    intervals.sort(key=lambda iv: iv[1])   # by end time
+    count, end = 0, float('-inf')
+    for s, e in intervals:
+        if s &gt;= end:
+            count += 1
+            end = e
+    return count</code></pre>
+
+<h2>Sorting &amp; Searching</h2>
+<p>You rarely implement a sort in an interview, but you must know their trade-offs and when stability or in-place behavior matters. Python's built-in <code>sorted()</code>/<code>list.sort()</code> use Timsort: stable, O(n log n), fast on partially sorted data.</p>
+
+<table>
+  <tr><th>Algorithm</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable?</th></tr>
+  <tr><td>Quick sort</td><td>O(n log n)</td><td>O(n&sup2;)</td><td>O(log n)</td><td>No</td></tr>
+  <tr><td>Merge sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Yes</td></tr>
+  <tr><td>Heap sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td>No</td></tr>
+  <tr><td>Timsort (Python)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Yes</td></tr>
+  <tr><td>Insertion sort</td><td>O(n&sup2;)</td><td>O(n&sup2;)</td><td>O(1)</td><td>Yes</td></tr>
+  <tr><td>Counting sort</td><td>O(n + k)</td><td>O(n + k)</td><td>O(k)</td><td>Yes</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Note</span> Comparison-based sorts cannot beat O(n log n) in the worst case. Non-comparison sorts (counting, radix, bucket) can hit O(n) but only for integer-like keys in a bounded range.</div>
+
+<h2>Pattern &rarr; Signals &rarr; Example Problems</h2>
+<p>Scan the "signals" column when you read a prompt; the words there are your cue to the pattern.</p>
+<table>
+  <tr><th>Pattern</th><th>Signals in the prompt</th><th>Example problems</th></tr>
+  <tr><td>Two pointers</td><td>sorted array, pair, palindrome, in-place</td><td>Two Sum II, Valid Palindrome, Container With Most Water</td></tr>
+  <tr><td>Sliding window</td><td>contiguous subarray/substring, longest/shortest, "at most k"</td><td>Longest Substring Without Repeating, Min Window Substring</td></tr>
+  <tr><td>Binary search</td><td>sorted, "find smallest/largest that", monotonic</td><td>Search in Rotated Array, Koko Eating Bananas</td></tr>
+  <tr><td>Hash map/set</td><td>count, dedupe, "seen before", frequency</td><td>Two Sum, Group Anagrams, Subarray Sum Equals K</td></tr>
+  <tr><td>BFS / DFS</td><td>grid, graph, levels, connected, shortest unweighted</td><td>Number of Islands, Word Ladder, Course Schedule</td></tr>
+  <tr><td>Heap</td><td>top k, k-th largest, merge k, running median</td><td>Kth Largest, Merge k Sorted Lists, Find Median Stream</td></tr>
+  <tr><td>Backtracking</td><td>all combinations/permutations/subsets, "generate all"</td><td>Permutations, Combination Sum, N-Queens</td></tr>
+  <tr><td>Dynamic programming</td><td>count ways, min/max cost, "can reach", optimal</td><td>Coin Change, Longest Common Subsequence, House Robber</td></tr>
+</table>
+
+<h2>Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">Why is a hash map lookup O(1) on average but O(n) in the worst case?</div><div class="a">Averaged over a good hash function and load factor, keys spread across buckets so each lookup touches a short chain. In the pathological case where every key hashes to the same bucket, the structure degrades to a single linked list and lookup becomes linear.</div></div>
+
+<div class="qa"><div class="q">When would you choose a linked list over a dynamic array?</div><div class="a">When you need frequent insertions/deletions at known positions (especially the head) and don't need random access. Also when you can't tolerate the occasional O(n) resize of a dynamic array, or when implementing structures like LRU caches that splice nodes.</div></div>
+
+<div class="qa"><div class="q">BFS vs DFS &mdash; how do you choose?</div><div class="a">BFS for shortest path in an unweighted graph and for level-order processing; it uses a queue and O(width) memory. DFS for exhaustive exploration, cycle detection, and topological sorting; it uses recursion/stack and O(depth) memory. On very deep graphs DFS risks stack overflow; on very wide graphs BFS uses more memory.</div></div>
+
+<div class="qa"><div class="q">What makes a problem suitable for dynamic programming?</div><div class="a">Two properties: optimal substructure (the optimal answer is built from optimal answers to subproblems) and overlapping subproblems (the same subproblems recur). If subproblems don't overlap, plain divide-and-conquer suffices; if a greedy choice is provably safe, greedy is simpler and faster.</div></div>
+
+<div class="qa"><div class="q">How do you detect a cycle in a linked list in O(1) space?</div><div class="a">Floyd's tortoise and hare: advance one pointer by one node and another by two. If they ever meet, there is a cycle; if the fast pointer reaches null, there isn't. It uses constant extra space versus a hash set's O(n).</div></div>
+
+<div class="qa"><div class="q">Why is binary search O(log n), and what must be true to use it?</div><div class="a">Each comparison discards half the remaining candidates, so the number of steps is log&#8322;(n). It requires a sorted structure or, more generally, a monotonic predicate &mdash; a point before which the answer is "no" and after which it is "yes".</div></div>
+
+<div class="qa"><div class="q">What is the difference between stable and unstable sorting?</div><div class="a">A stable sort preserves the relative order of records with equal keys. This matters when sorting by multiple criteria in passes (e.g., sort by name, then by date keeping name order within a date). Merge sort and Timsort are stable; quicksort and heapsort are not.</div></div>
+
+<div class="qa"><div class="q">How would you find the top k elements in a large stream?</div><div class="a">Maintain a min-heap of size k. For each incoming element, push it and, if the heap exceeds k, pop the smallest. This keeps the k largest seen so far in O(n log k) time and O(k) space &mdash; far better than sorting everything.</div></div>
+
+<div class="qa"><div class="q">What is amortized analysis, with an example?</div><div class="a">It averages the cost of an operation over a sequence rather than looking at the worst single call. A dynamic array's append is O(1) amortized: most appends are O(1), and the occasional O(n) resize is paid for by the many cheap appends before it because capacity doubles.</div></div>
+
+<div class="qa"><div class="q">When is a trie better than a hash set for strings?</div><div class="a">When you need prefix queries (autocomplete, "words starting with&hellip;") or want to exploit shared prefixes to save memory. A hash set answers exact-membership in O(L) but cannot enumerate by prefix efficiently.</div></div>
+
+<div class="qa"><div class="q">How do you reason about the space complexity of a recursive function?</div><div class="a">Count the maximum depth of the call stack (each frame holds locals and the return address) plus any heap allocations that persist. A recursion n levels deep is at least O(n) space even if it allocates nothing else.</div></div>
+
+<div class="qa"><div class="q">Your solution is correct but too slow. How do you improve it?</div><div class="a">Identify the bottleneck via complexity analysis, then look for a pattern: replace a nested lookup with a hash map, exploit sortedness with two pointers or binary search, cache repeated subproblems with DP, or prune the search space with better bounds. Always confirm the new complexity before claiming the improvement.</div></div>
+
+<h2>Study Plan &amp; Further Learning</h2>
+<p>Depth beats breadth. Master the patterns above on a modest set of problems rather than grinding hundreds mechanically.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Weeks 1&ndash;2 &mdash; Foundations</h4>
+    <ul>
+      <li>Big-O analysis until it is automatic</li>
+      <li>Arrays, strings, hash maps, two pointers</li>
+      <li>Stacks &amp; queues; sliding window</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Weeks 3&ndash;4 &mdash; Structures</h4>
+    <ul>
+      <li>Linked lists (reversal, cycle, merge)</li>
+      <li>Trees &amp; BSTs; all four traversals</li>
+      <li>Heaps and top-k problems</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Weeks 5&ndash;6 &mdash; Algorithms</h4>
+    <ul>
+      <li>Graphs: BFS, DFS, topological sort, Dijkstra</li>
+      <li>Binary search variants ("on the answer")</li>
+      <li>Backtracking templates</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Weeks 7&ndash;8 &mdash; Mastery</h4>
+    <ul>
+      <li>Dynamic programming (1D then 2D)</li>
+      <li>Greedy and when it is provably safe</li>
+      <li>Timed mock interviews, out loud</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Prioritized checklist</h3>
+<ul>
+  <li><span class="badge g">Must</span> Explain the complexity of every solution you write.</li>
+  <li><span class="badge g">Must</span> Solve ~5 problems per pattern until recognition is instant.</li>
+  <li><span class="badge g">Must</span> Practice talking through your approach before coding.</li>
+  <li><span class="badge">Should</span> Redo problems you failed after one week.</li>
+  <li><span class="badge">Should</span> Do at least 3 full timed mock interviews.</li>
+  <li><span class="badge o">Nice</span> Study system-design basics if interviewing for senior roles.</li>
+  <li><span class="badge o">Nice</span> Keep a personal "bug log" of mistakes you repeat.</li>
+</ul>
+
+<div class="callout ok"><span class="t">Final word</span> Interviewers hire for clear thinking under pressure, not memorized solutions. A calm, well-communicated process on a familiar pattern beats a silent scramble every time.</div>

@@ -1,0 +1,800 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>React — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Web & App Development</div>
+  <h1>React</h1>
+  <div class="subtitle">Build declarative UIs with components, JSX, and hooks — from props/state and useEffect to lists, forms, data fetching, routing, and performance.</div>
+  <div class="tags"><span>react</span><span>jsx</span><span>hooks</span><span>useState</span><span>useEffect</span><span>components</span><span>performance</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~19 min read &middot; 4,098 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-react-is-amp-why-it-matters">What React Is &amp; Why It Matters</a></li><li><a href="#setup-amp-getting-started">Setup &amp; Getting Started</a></li><li><a href="#components-amp-jsx">Components &amp; JSX</a></li><li><a href="#props-amp-state">Props &amp; State</a></li><li><a href="#hooks-the-essential-set">Hooks — The Essential Set</a></li><li><a href="#lists-keys-amp-conditional-rendering">Lists, Keys &amp; Conditional Rendering</a></li><li><a href="#forms-amp-controlled-components">Forms &amp; Controlled Components</a></li><li><a href="#lifting-state-up-amp-data-flow">Lifting State Up &amp; Data Flow</a></li><li><a href="#data-fetching">Data Fetching</a></li><li><a href="#routing-overview">Routing Overview</a></li><li><a href="#performance-optimisation">Performance Optimisation</a></li><li><a href="#cheat-sheet-amp-hook-reference">Cheat-Sheet &amp; Hook Reference</a></li><li><a href="#best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-react-is-amp-why-it-matters">What React Is &amp; Why It Matters</h2>
+<p class="lead">React is a declarative, component-based JavaScript library for building user interfaces. You describe <em>what</em> the UI should look like for a given state, and React efficiently updates the DOM to match whenever that state changes.</p>
+
+<p>Created at Facebook and open-sourced in 2013, React is the most widely used UI library on the web. Its core idea is simple but powerful: your UI is a pure function of state, <code>UI = f(state)</code>. You never manually touch the DOM to insert or remove nodes — you change a value, and React figures out the minimal set of DOM mutations needed.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Declarative</h4>Describe the target UI for each state; React handles the imperative DOM updates. Fewer bugs than hand-written <code>document.createElement</code> code.</div>
+  <div class="card"><h4>Component-based</h4>Build encapsulated, reusable pieces that manage their own state, then compose them into complex UIs like LEGO bricks.</div>
+  <div class="card"><h4>Learn once, write anywhere</h4>The same mental model powers the web (<code>react-dom</code>), native mobile (React Native), and server rendering.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">The render cycle</text>
+
+  <rect x="30" y="50" width="160" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="110" y="78" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">State / props</text>
+  <text x="110" y="96" text-anchor="middle" font-size="11" fill="#1a2233">change triggers render</text>
+
+  <rect x="250" y="50" width="160" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="330" y="78" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Components run</text>
+  <text x="330" y="96" text-anchor="middle" font-size="11" fill="#1a2233">return new element tree</text>
+
+  <rect x="470" y="50" width="160" height="60" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="550" y="78" text-anchor="middle" font-size="13" fill="#0891b2" font-weight="bold">Virtual DOM</text>
+  <text x="550" y="96" text-anchor="middle" font-size="11" fill="#1a2233">lightweight JS tree</text>
+
+  <rect x="250" y="190" width="160" height="60" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="330" y="214" text-anchor="middle" font-size="13" fill="#b45309" font-weight="bold">Diff (reconcile)</text>
+  <text x="330" y="232" text-anchor="middle" font-size="11" fill="#1a2233">old tree vs new tree</text>
+
+  <rect x="470" y="190" width="160" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="550" y="214" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Commit to DOM</text>
+  <text x="550" y="232" text-anchor="middle" font-size="11" fill="#1a2233">minimal real mutations</text>
+
+  <line x1="192" y1="80" x2="246" y2="80" stroke="#2563eb" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="412" y1="80" x2="466" y2="80" stroke="#2563eb" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="550" y1="112" x2="550" y2="160" stroke="#2563eb" stroke-width="2"/>
+  <line x1="550" y1="160" x2="412" y2="160" stroke="#2563eb" stroke-width="2"/>
+  <line x1="330" y1="160" x2="330" y2="186" stroke="#2563eb" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="412" y1="220" x2="466" y2="220" stroke="#2563eb" stroke-width="2" marker-end="url(#ar)"/>
+</svg><div class="cap">Fig 1 — A state change re-runs components to produce a new virtual DOM, which React diffs against the previous one and commits only the minimal real-DOM changes.</div></div>
+
+<div class="callout note"><span class="t">Virtual DOM</span> The virtual DOM is just an in-memory tree of plain JS objects describing your UI. Comparing two JS trees is far cheaper than reading/writing the real DOM, so React batches and minimises actual DOM work.</div>
+
+<h2 id="setup-amp-getting-started">Setup &amp; Getting Started</h2>
+<p>The old <code>create-react-app</code> tool is deprecated. In 2026 the recommended paths are <strong>Vite</strong> for a client-side single-page app, or a framework like <strong>Next.js</strong> for server rendering and routing out of the box.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># --- Vite (fast, minimal SPA) ---</span>
+npm create vite@latest my-app -- --template react
+<span class="hljs-built_in">cd</span> my-app
+npm install
+npm run dev          <span class="hljs-comment"># local dev server with hot module replacement</span>
+npm run build        <span class="hljs-comment"># production bundle into dist/</span>
+
+<span class="hljs-comment"># --- Next.js (full framework: routing, SSR, server components) ---</span>
+npx create-next-app@latest my-next-app
+
+<span class="hljs-comment"># React itself is just two packages:</span>
+npm install react react-dom</code></pre>
+
+<p>The entry point mounts your root component into a DOM node using the React 18+ <code>createRoot</code> API:</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-comment">// main.jsx — the application entry point</span>
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">StrictMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+<span class="hljs-keyword">import</span> { createRoot } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react-dom/client&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-title class_">App</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./App.jsx&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">&quot;./index.css&quot;</span>;
+
+<span class="hljs-comment">// StrictMode double-invokes renders in dev to surface impure logic.</span>
+<span class="hljs-title function_">createRoot</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>)).<span class="hljs-title function_">render</span>(
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">StrictMode</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">StrictMode</span>&gt;</span></span>
+);</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> StrictMode intentionally runs effects and renders twice in development only. If something breaks under it, your code has a hidden side effect — fix the code rather than removing StrictMode.</div>
+
+<h2 id="components-amp-jsx">Components &amp; JSX</h2>
+<p>A component is a JavaScript function that returns markup. Component names <strong>must start with a capital letter</strong> — React treats lowercase tags as built-in HTML elements.</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-comment">// A function component returns JSX describing the UI.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Greeting</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Hello, world!<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span></span>;
+}
+
+<span class="hljs-comment">// Components compose: use one inside another like a custom tag.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">main</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Greeting</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Greeting</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">main</span>&gt;</span></span>
+  );
+}</code></pre>
+
+<p><strong>JSX</strong> is syntax sugar that compiles to <code>React.createElement</code> calls. It looks like HTML but it is JavaScript, so a few rules differ:</p>
+
+<div class="grid c2">
+  <div class="card"><h4>One root element</h4>A component must return a single parent. Wrap siblings in a <code>&lt;div&gt;</code> or an empty <strong>Fragment</strong> <code>&lt;&gt;...&lt;/&gt;</code> to avoid extra DOM nodes.</div>
+  <div class="card"><h4>camelCase attributes</h4><code>className</code> not <code>class</code>, <code>htmlFor</code> not <code>for</code>, <code>onClick</code> not <code>onclick</code>. Styles are objects: <code>style={{color:'red'}}</code>.</div>
+  <div class="card"><h4>Curly braces embed JS</h4>Any JS expression goes inside <code>{ }</code> — variables, function calls, ternaries. Statements like <code>if</code> or <code>for</code> are not allowed inside JSX.</div>
+  <div class="card"><h4>Close every tag</h4>JSX is XML-strict: self-closing tags need a slash, e.g. <code>&lt;img /&gt;</code>, <code>&lt;br /&gt;</code>.</div>
+</div>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">function</span> <span class="hljs-title function_">Profile</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> user = { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-attr">avatar</span>: <span class="hljs-string">&quot;/ada.png&quot;</span> };
+  <span class="hljs-keyword">const</span> isOnline = <span class="hljs-literal">true</span>;
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;&gt;</span>
+      {/* curly braces embed JS expressions */}
+      <span class="hljs-tag">&lt;<span class="hljs-name">img</span> <span class="hljs-attr">src</span>=<span class="hljs-string">{user.avatar}</span> <span class="hljs-attr">alt</span>=<span class="hljs-string">{user.name}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;avatar&quot;</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>{user.name}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span>&gt;</span>{isOnline ? &quot;🟢 Online&quot; : &quot;⚪ Offline&quot;}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;/&gt;</span></span>
+  );
+}</code></pre>
+
+<h2 id="props-amp-state">Props &amp; State</h2>
+<p>Data flows one way in React: <strong>down</strong>, from parent to child, via <strong>props</strong>. Props are read-only inputs — a component must never mutate its own props. <strong>State</strong> is private, mutable-over-time data owned by a component.</p>
+
+<h3>Props</h3>
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-comment">// Props arrive as a single object; destructure for readability.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">UserCard</span>(<span class="hljs-params">{ name, role, verified = <span class="hljs-literal">false</span> }</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;card&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>{name} {verified &amp;&amp; &quot;✔&quot;}<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>{role}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-comment">// Parent passes props as attributes. `children` is a special prop</span>
+<span class="hljs-comment">// holding whatever you nest between the tags.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">UserCard</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;Linus&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;Maintainer&quot;</span> <span class="hljs-attr">verified</span> /&gt;</span></span>;
+}</code></pre>
+
+<div class="callout note"><span class="t">children</span> Content placed between a component's tags is passed as the <code>children</code> prop, enabling flexible wrapper components like <code>&lt;Panel&gt;...&lt;/Panel&gt;</code>.</div>
+
+<h3>State with useState</h3>
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Counter</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// useState returns [currentValue, setterFunction].</span>
+  <span class="hljs-keyword">const</span> [count, setCount] = <span class="hljs-title function_">useState</span>(<span class="hljs-number">0</span>);
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setCount(count + 1)}&gt;
+      Clicked {count} times
+    <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></span>
+  );
+}</code></pre>
+
+<div class="callout warn"><span class="t">State is a snapshot</span> Calling <code>setCount</code> does not change <code>count</code> immediately — it schedules a re-render. The <code>count</code> variable keeps its value for the rest of the current render. To update based on the previous value, pass an <strong>updater function</strong>.</div>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-comment">// WRONG: all three see the same stale snapshot — count only goes up by 1.</span>
+<span class="hljs-title function_">setCount</span>(count + <span class="hljs-number">1</span>);
+<span class="hljs-title function_">setCount</span>(count + <span class="hljs-number">1</span>);
+<span class="hljs-title function_">setCount</span>(count + <span class="hljs-number">1</span>);
+
+<span class="hljs-comment">// RIGHT: updater form receives the latest pending value — goes up by 3.</span>
+<span class="hljs-title function_">setCount</span>(<span class="hljs-function"><span class="hljs-params">c</span> =&gt;</span> c + <span class="hljs-number">1</span>);
+<span class="hljs-title function_">setCount</span>(<span class="hljs-function"><span class="hljs-params">c</span> =&gt;</span> c + <span class="hljs-number">1</span>);
+<span class="hljs-title function_">setCount</span>(<span class="hljs-function"><span class="hljs-params">c</span> =&gt;</span> c + <span class="hljs-number">1</span>);</code></pre>
+
+<p>Never mutate state objects or arrays directly. Create a new reference so React detects the change:</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">const</span> [todos, setTodos] = <span class="hljs-title function_">useState</span>([]);
+
+<span class="hljs-comment">// WRONG — mutates existing array, same reference, no re-render guaranteed</span>
+todos.<span class="hljs-title function_">push</span>(newTodo);
+<span class="hljs-title function_">setTodos</span>(todos);
+
+<span class="hljs-comment">// RIGHT — new array via spread</span>
+<span class="hljs-title function_">setTodos</span>([...todos, newTodo]);
+
+<span class="hljs-comment">// Updating one item immutably</span>
+<span class="hljs-title function_">setTodos</span>(todos.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.<span class="hljs-property">id</span> === id ? { ...t, <span class="hljs-attr">done</span>: <span class="hljs-literal">true</span> } : t));
+
+<span class="hljs-comment">// Removing an item</span>
+<span class="hljs-title function_">setTodos</span>(todos.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">t</span> =&gt;</span> t.<span class="hljs-property">id</span> !== id));</code></pre>
+
+<h2 id="hooks-the-essential-set">Hooks — The Essential Set</h2>
+<p>Hooks are functions starting with <code>use</code> that let function components "hook into" React features. Two rules govern all hooks:</p>
+
+<div class="callout danger"><span class="t">Rules of Hooks</span> (1) Only call hooks at the <strong>top level</strong> of a component or custom hook — never inside loops, conditions, or nested functions. (2) Only call them from React function components or other hooks. React relies on a stable call order to associate each hook with its state.</div>
+
+<h3>useEffect — synchronising with the outside world</h3>
+<p>Effects run <em>after</em> render to synchronise with external systems: network, subscriptions, timers, direct DOM APIs. The dependency array controls when the effect re-runs.</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Clock</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [now, setNow] = <span class="hljs-title function_">useState</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>());
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> id = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">setNow</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>()), <span class="hljs-number">1000</span>);
+    <span class="hljs-comment">// The returned cleanup runs before the next effect and on unmount.</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">clearInterval</span>(id);
+  }, []); <span class="hljs-comment">// empty deps = run once after mount</span>
+
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">time</span>&gt;</span>{now.toLocaleTimeString()}<span class="hljs-tag">&lt;/<span class="hljs-name">time</span>&gt;</span></span>;
+}</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 740 230" width="740" height="230">
+  <defs>
+    <marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <line x1="40" y1="120" x2="700" y2="120" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar2)"/>
+  <text x="700" y="145" text-anchor="end" font-size="11" fill="#1a2233">time</text>
+
+  <circle cx="110" cy="120" r="7" fill="#2563eb"/>
+  <text x="110" y="95" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="bold">Mount</text>
+  <text x="110" y="150" text-anchor="middle" font-size="11" fill="#1a2233">render</text>
+  <text x="110" y="166" text-anchor="middle" font-size="11" fill="#059669">effect runs</text>
+
+  <circle cx="320" cy="120" r="7" fill="#2563eb"/>
+  <text x="320" y="95" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="bold">Dep changed</text>
+  <text x="320" y="150" text-anchor="middle" font-size="11" fill="#b45309">cleanup prev</text>
+  <text x="320" y="166" text-anchor="middle" font-size="11" fill="#059669">effect re-runs</text>
+
+  <circle cx="540" cy="120" r="7" fill="#2563eb"/>
+  <text x="540" y="95" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="bold">Re-render</text>
+  <text x="540" y="150" text-anchor="middle" font-size="11" fill="#1a2233">deps same</text>
+  <text x="540" y="166" text-anchor="middle" font-size="11" fill="#94a3b8">effect skipped</text>
+
+  <circle cx="660" cy="120" r="7" fill="#b45309"/>
+  <text x="660" y="95" text-anchor="middle" font-size="12" fill="#b45309" font-weight="bold">Unmount</text>
+  <text x="660" y="150" text-anchor="middle" font-size="11" fill="#b45309">cleanup runs</text>
+</svg><div class="cap">Fig 2 — useEffect lifecycle: the effect runs after mount, re-runs (cleanup → effect) when a dependency changes, is skipped when deps are unchanged, and cleans up on unmount.</div></div>
+
+<div class="callout warn"><span class="t">Dependency array</span> Omitting the array runs the effect after <em>every</em> render. An empty <code>[]</code> runs it once. List every reactive value the effect reads — the lint rule <code>react-hooks/exhaustive-deps</code> enforces this. Lying about deps causes stale closures and bugs.</div>
+
+<h3>useRef — mutable boxes &amp; DOM access</h3>
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { useRef, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">SearchBox</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> inputRef = <span class="hljs-title function_">useRef</span>(<span class="hljs-literal">null</span>); <span class="hljs-comment">// { current: null }</span>
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    inputRef.<span class="hljs-property">current</span>.<span class="hljs-title function_">focus</span>(); <span class="hljs-comment">// imperative DOM access after mount</span>
+  }, []);
+
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">{inputRef}</span> <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;Search...&quot;</span> /&gt;</span></span>;
+}</code></pre>
+<p>A ref holds a mutable value in <code>.current</code> that persists across renders <strong>without triggering a re-render</strong> when changed. Use it for DOM nodes, timer IDs, or any "instance variable".</p>
+
+<h3>useContext — avoiding prop drilling</h3>
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { createContext, useContext } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ThemeContext</span> = <span class="hljs-title function_">createContext</span>(<span class="hljs-string">&quot;light&quot;</span>);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThemeContext.Provider</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;dark&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Toolbar</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ThemeContext.Provider</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Toolbar</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-comment">// Reads the nearest Provider&#x27;s value — no props threaded through.</span>
+  <span class="hljs-keyword">const</span> theme = <span class="hljs-title function_">useContext</span>(<span class="hljs-title class_">ThemeContext</span>);
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{theme}</span>&gt;</span>Current theme: {theme}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>;
+}</code></pre>
+
+<h3>useMemo &amp; useCallback — caching between renders</h3>
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { useMemo, useCallback } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">ProductList</span>(<span class="hljs-params">{ products, query }</span>) {
+  <span class="hljs-comment">// Recompute the filtered list only when products or query change.</span>
+  <span class="hljs-keyword">const</span> visible = <span class="hljs-title function_">useMemo</span>(
+    <span class="hljs-function">() =&gt;</span> products.<span class="hljs-title function_">filter</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.<span class="hljs-property">name</span>.<span class="hljs-title function_">includes</span>(query)),
+    [products, query]
+  );
+
+  <span class="hljs-comment">// Stable function identity so memoised children don&#x27;t re-render.</span>
+  <span class="hljs-keyword">const</span> handleBuy = <span class="hljs-title function_">useCallback</span>(<span class="hljs-function">(<span class="hljs-params">id</span>) =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;buy&quot;</span>, id);
+  }, []);
+
+  <span class="hljs-keyword">return</span> visible.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span>
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Item</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{p.id}</span> <span class="hljs-attr">product</span>=<span class="hljs-string">{p}</span> <span class="hljs-attr">onBuy</span>=<span class="hljs-string">{handleBuy}</span> /&gt;</span></span>
+  );
+}</code></pre>
+
+<div class="callout note"><span class="t">Mental model</span> <code>useMemo</code> caches a <em>computed value</em>; <code>useCallback</code> caches a <em>function</em>. <code>useCallback(fn, deps)</code> is just <code>useMemo(() =&gt; fn, deps)</code>. Reach for them only to fix a measured performance problem, not by default.</div>
+
+<h3>Custom hooks — extracting reusable logic</h3>
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-comment">// Any function that calls hooks and starts with &quot;use&quot; is a custom hook.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">useLocalStorage</span>(<span class="hljs-params">key, initial</span>) {
+  <span class="hljs-keyword">const</span> [value, setValue] = <span class="hljs-title function_">useState</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> stored = <span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">getItem</span>(key);
+    <span class="hljs-keyword">return</span> stored ? <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(stored) : initial;
+  });
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">localStorage</span>.<span class="hljs-title function_">setItem</span>(key, <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(value));
+  }, [key, value]);
+
+  <span class="hljs-keyword">return</span> [value, setValue];
+}
+
+<span class="hljs-comment">// Usage reads just like useState but persists across reloads.</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Settings</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [name, setName] = <span class="hljs-title function_">useLocalStorage</span>(<span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-string">&quot;&quot;</span>);
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">value</span>=<span class="hljs-string">{name}</span> <span class="hljs-attr">onChange</span>=<span class="hljs-string">{e</span> =&gt;</span> setName(e.target.value)} /&gt;</span>;
+}</code></pre>
+
+<h2 id="lists-keys-amp-conditional-rendering">Lists, Keys &amp; Conditional Rendering</h2>
+<p>Render collections by mapping an array to JSX. Each sibling needs a stable, unique <code>key</code> so React can track items across renders.</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">function</span> <span class="hljs-title function_">TodoList</span>(<span class="hljs-params">{ todos }</span>) {
+  <span class="hljs-keyword">if</span> (todos.<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Nothing to do 🎉<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;   <span class="hljs-comment">// early-return conditional</span>
+  }
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+      {todos.map(todo =&gt; (
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{todo.id}</span>&gt;</span>
+          {todo.done ? <span class="hljs-tag">&lt;<span class="hljs-name">s</span>&gt;</span>{todo.text}<span class="hljs-tag">&lt;/<span class="hljs-name">s</span>&gt;</span> : todo.text}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      ))}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span></span>
+  );
+}</code></pre>
+
+<div class="callout danger"><span class="t">Never use the array index as key</span> when the list can reorder, insert, or delete — React will associate state with the wrong item, causing subtle bugs (wrong input values, lost focus). Use a stable domain ID.</div>
+
+<p>Common conditional patterns:</p>
+<table>
+  <tr><th>Pattern</th><th>Code</th><th>Use when</th></tr>
+  <tr><td>Ternary</td><td><code>{ok ? &lt;A/&gt; : &lt;B/&gt;}</code></td><td>Choose between two outputs</td></tr>
+  <tr><td>Logical AND</td><td><code>{ok &amp;&amp; &lt;A/&gt;}</code></td><td>Render or render nothing</td></tr>
+  <tr><td>Early return</td><td><code>if (!data) return &lt;Spinner/&gt;;</code></td><td>Guard clauses at top of component</td></tr>
+  <tr><td>Return null</td><td><code>return null;</code></td><td>Render nothing from a component</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The <code>0</code> gotcha</span> <code>{count &amp;&amp; &lt;Badge/&gt;}</code> renders the literal <code>0</code> when count is zero, because <code>0</code> is falsy but still a renderable value. Use <code>{count &gt; 0 &amp;&amp; &lt;Badge/&gt;}</code> instead.</div>
+
+<h2 id="forms-amp-controlled-components">Forms &amp; Controlled Components</h2>
+<p>In a <strong>controlled component</strong>, React state is the single source of truth: the input's <code>value</code> comes from state, and <code>onChange</code> writes back to state.</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">SignupForm</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [form, setForm] = <span class="hljs-title function_">useState</span>({ <span class="hljs-attr">email</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">agree</span>: <span class="hljs-literal">false</span> });
+
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleChange</span>(<span class="hljs-params">e</span>) {
+    <span class="hljs-keyword">const</span> { name, value, type, checked } = e.<span class="hljs-property">target</span>;
+    <span class="hljs-title function_">setForm</span>(<span class="hljs-function"><span class="hljs-params">prev</span> =&gt;</span> ({
+      ...prev,
+      [name]: type === <span class="hljs-string">&quot;checkbox&quot;</span> ? checked : value,
+    }));
+  }
+
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleSubmit</span>(<span class="hljs-params">e</span>) {
+    e.<span class="hljs-title function_">preventDefault</span>();              <span class="hljs-comment">// stop full-page reload</span>
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;submit&quot;</span>, form);
+  }
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleSubmit}</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+        <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;email&quot;</span>
+        <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;email&quot;</span>
+        <span class="hljs-attr">value</span>=<span class="hljs-string">{form.email}</span>
+        <span class="hljs-attr">onChange</span>=<span class="hljs-string">{handleChange}</span>
+      /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+          <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;agree&quot;</span>
+          <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span>
+          <span class="hljs-attr">checked</span>=<span class="hljs-string">{form.agree}</span>
+          <span class="hljs-attr">onChange</span>=<span class="hljs-string">{handleChange}</span>
+        /&gt;</span>
+        I agree
+      <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">disabled</span>=<span class="hljs-string">{!form.agree}</span>&gt;</span>Sign up<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+  );
+}</code></pre>
+
+<div class="callout tip"><span class="t">Controlled vs uncontrolled</span> Controlled inputs give you instant validation and derived UI. For simple forms, <strong>uncontrolled</strong> inputs read via a <code>ref</code> or the native form API are lighter. Libraries like React Hook Form combine both for performance.</div>
+
+<h2 id="lifting-state-up-amp-data-flow">Lifting State Up &amp; Data Flow</h2>
+<p>When two components need to share state, move it to their closest common ancestor and pass it down as props. The ancestor owns the state; children receive values and callbacks. This keeps a single source of truth.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 290" width="720" height="290">
+  <defs>
+    <marker id="ar3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+    <marker id="ar4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+  </defs>
+  <rect x="280" y="30" width="160" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="54" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Parent</text>
+  <text x="360" y="74" text-anchor="middle" font-size="11" fill="#1a2233">owns state</text>
+
+  <rect x="90" y="180" width="180" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="180" y="206" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Child A (input)</text>
+  <text x="180" y="226" text-anchor="middle" font-size="11" fill="#1a2233">calls onChange(value)</text>
+
+  <rect x="450" y="180" width="180" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="540" y="206" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Child B (display)</text>
+  <text x="540" y="226" text-anchor="middle" font-size="11" fill="#1a2233">reads value prop</text>
+
+  <line x1="330" y1="92" x2="200" y2="176" stroke="#b45309" stroke-width="2" marker-end="url(#ar4)"/>
+  <text x="210" y="135" font-size="11" fill="#b45309">callback down</text>
+  <line x1="390" y1="92" x2="520" y2="176" stroke="#2563eb" stroke-width="2" marker-end="url(#ar3)"/>
+  <text x="470" y="135" font-size="11" fill="#2563eb">value down</text>
+
+  <path d="M180 178 C 180 120, 360 120, 360 92" fill="none" stroke="#059669" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#ar3)"/>
+  <text x="250" y="110" font-size="11" fill="#059669">event up ↑</text>
+</svg><div class="cap">Fig 3 — Unidirectional data flow: state lives in the common parent, flows down as props, and child events flow up through callbacks to update it.</div></div>
+
+<div class="callout note"><span class="t">When context/stores aren't enough</span> For deeply shared or server state, reach for <code>useReducer</code> + context, or dedicated libraries: Redux Toolkit / Zustand for client state, TanStack Query for server cache.</div>
+
+<h2 id="data-fetching">Data Fetching</h2>
+<p>In a classic SPA you fetch in an effect, tracking loading and error states. Always guard against race conditions when the component unmounts or the request key changes.</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">useUser</span>(<span class="hljs-params">id</span>) {
+  <span class="hljs-keyword">const</span> [state, setState] = <span class="hljs-title function_">useState</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;loading&quot;</span>, <span class="hljs-attr">data</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span> });
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">let</span> ignore = <span class="hljs-literal">false</span>;             <span class="hljs-comment">// guard against stale responses</span>
+    <span class="hljs-keyword">const</span> controller = <span class="hljs-keyword">new</span> <span class="hljs-title class_">AbortController</span>();
+
+    <span class="hljs-title function_">setState</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;loading&quot;</span>, <span class="hljs-attr">data</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span> });
+    <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/users/<span class="hljs-subst">${id}</span>`</span>, { <span class="hljs-attr">signal</span>: controller.<span class="hljs-property">signal</span> })
+      .<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> {
+        <span class="hljs-keyword">if</span> (!r.<span class="hljs-property">ok</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`HTTP <span class="hljs-subst">${r.status}</span>`</span>);
+        <span class="hljs-keyword">return</span> r.<span class="hljs-title function_">json</span>();
+      })
+      .<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">data</span> =&gt;</span> { <span class="hljs-keyword">if</span> (!ignore) <span class="hljs-title function_">setState</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;ok&quot;</span>, data, <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span> }); })
+      .<span class="hljs-title function_">catch</span>(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> {
+        <span class="hljs-keyword">if</span> (err.<span class="hljs-property">name</span> !== <span class="hljs-string">&quot;AbortError&quot;</span> &amp;&amp; !ignore)
+          <span class="hljs-title function_">setState</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-attr">data</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">error</span>: err });
+      });
+
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> { ignore = <span class="hljs-literal">true</span>; controller.<span class="hljs-title function_">abort</span>(); };
+  }, [id]);
+
+  <span class="hljs-keyword">return</span> state;
+}</code></pre>
+
+<div class="callout tip"><span class="t">Prefer a data library</span> Hand-rolled fetching gets repetitive and error-prone. <strong>TanStack Query</strong> (React Query) handles caching, deduping, retries, background refetch, and stale-while-revalidate in a few lines. In frameworks like Next.js, fetch in Server Components instead.</div>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-comment">// The same thing with TanStack Query — caching &amp; states for free.</span>
+<span class="hljs-keyword">import</span> { useQuery } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tanstack/react-query&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">Profile</span>(<span class="hljs-params">{ id }</span>) {
+  <span class="hljs-keyword">const</span> { data, isPending, error } = <span class="hljs-title function_">useQuery</span>({
+    <span class="hljs-attr">queryKey</span>: [<span class="hljs-string">&quot;user&quot;</span>, id],
+    <span class="hljs-attr">queryFn</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/users/<span class="hljs-subst">${id}</span>`</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> r.<span class="hljs-title function_">json</span>()),
+  });
+
+  <span class="hljs-keyword">if</span> (isPending) <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Spinner</span> /&gt;</span></span>;
+  <span class="hljs-keyword">if</span> (error) <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Failed: {error.message}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>{data.name}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span></span>;
+}</code></pre>
+
+<h2 id="routing-overview">Routing Overview</h2>
+<p>React has no built-in router. The two dominant choices in 2026 are <strong>React Router</strong> (for Vite SPAs) and the <strong>Next.js App Router</strong> (file-system based).</p>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-comment">// React Router v6/v7 — declarative routes</span>
+<span class="hljs-keyword">import</span> { createBrowserRouter, <span class="hljs-title class_">RouterProvider</span>, <span class="hljs-title class_">Link</span>, useParams } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react-router-dom&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">User</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> { id } = <span class="hljs-title function_">useParams</span>();        <span class="hljs-comment">// read URL params</span>
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>User {id}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span></span>;
+}
+
+<span class="hljs-keyword">const</span> router = <span class="hljs-title function_">createBrowserRouter</span>([
+  { <span class="hljs-attr">path</span>: <span class="hljs-string">&quot;/&quot;</span>, <span class="hljs-attr">element</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Home</span> /&gt;</span></span> },
+  { <span class="hljs-attr">path</span>: <span class="hljs-string">&quot;/users/:id&quot;</span>, <span class="hljs-attr">element</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">User</span> /&gt;</span></span> },
+  { <span class="hljs-attr">path</span>: <span class="hljs-string">&quot;*&quot;</span>, <span class="hljs-attr">element</span>: <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">NotFound</span> /&gt;</span></span> },
+]);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">RouterProvider</span> <span class="hljs-attr">router</span>=<span class="hljs-string">{router}</span> /&gt;</span></span>;
+}
+
+<span class="hljs-comment">// Navigation uses &lt;Link&gt; (not &lt;a&gt;) to avoid full page reloads.</span>
+&lt;<span class="hljs-title class_">Link</span> to=<span class="hljs-string">&quot;/users/42&quot;</span>&gt;<span class="hljs-title class_">View</span> user&lt;/<span class="hljs-title class_">Link</span>&gt;</code></pre>
+
+<table>
+  <tr><th>Concern</th><th>React Router</th><th>Next.js App Router</th></tr>
+  <tr><td>Route definition</td><td>Config array / JSX</td><td>Folder &amp; file names</td></tr>
+  <tr><td>Rendering</td><td>Client-side (SPA)</td><td>Server Components + SSR default</td></tr>
+  <tr><td>Data loading</td><td>Loaders / fetch in effect</td><td><code>async</code> server components</td></tr>
+  <tr><td>Best for</td><td>Dashboards, internal apps</td><td>SEO sites, full-stack apps</td></tr>
+</table>
+
+<h2 id="performance-optimisation">Performance Optimisation</h2>
+<p>React is fast by default; most "performance problems" are unnecessary re-renders. Optimise only after profiling with the React DevTools Profiler.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>React.memo</h4>Wraps a component to skip re-render when its props are shallow-equal to the previous render. Pair with <code>useCallback</code>/<code>useMemo</code> for stable prop identities.</div>
+  <div class="card"><h4>Keys &amp; structure</h4>Stable keys prevent remounting. Moving state down or lifting content up (<code>children</code>) avoids re-rendering whole subtrees.</div>
+  <div class="card"><h4>Code splitting</h4><code>lazy()</code> + <code>&lt;Suspense&gt;</code> defer loading of routes/components until needed, shrinking the initial bundle.</div>
+  <div class="card"><h4>List virtualisation</h4>Render only visible rows of huge lists with TanStack Virtual or react-window.</div>
+</div>
+
+<div class="code-label">JSX</div><pre><code class="hljs"><span class="hljs-keyword">import</span> { memo, lazy, <span class="hljs-title class_">Suspense</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+
+<span class="hljs-comment">// Only re-renders when `row` actually changes.</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Row</span> = <span class="hljs-title function_">memo</span>(<span class="hljs-keyword">function</span> <span class="hljs-title function_">Row</span>(<span class="hljs-params">{ row }</span>) {
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>{row.label}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span></span>;
+});
+
+<span class="hljs-comment">// Lazy-load a heavy route; show a fallback while the chunk downloads.</span>
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">Dashboard</span> = <span class="hljs-title function_">lazy</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&quot;./Dashboard.jsx&quot;</span>));
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span> <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>&lt;<span class="hljs-attr">Spinner</span> /&gt;</span>}&gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">Dashboard</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span></span>
+  );
+}</code></pre>
+
+<div class="callout ok"><span class="t">React Compiler</span> As of 2026 the React Compiler can auto-memoise components and hooks at build time, often removing the need for manual <code>useMemo</code>/<code>useCallback</code>/<code>memo</code>. Adopt it and lean on it before hand-tuning.</div>
+
+<h2 id="cheat-sheet-amp-hook-reference">Cheat-Sheet &amp; Hook Reference</h2>
+<table>
+  <tr><th>Hook</th><th>Signature</th><th>Purpose</th></tr>
+  <tr><td><code>useState</code></td><td><code>[v, setV] = useState(init)</code></td><td>Local reactive state</td></tr>
+  <tr><td><code>useEffect</code></td><td><code>useEffect(fn, deps)</code></td><td>Side effects / external sync</td></tr>
+  <tr><td><code>useContext</code></td><td><code>v = useContext(Ctx)</code></td><td>Read context value</td></tr>
+  <tr><td><code>useRef</code></td><td><code>ref = useRef(init)</code></td><td>Mutable box / DOM node</td></tr>
+  <tr><td><code>useMemo</code></td><td><code>v = useMemo(fn, deps)</code></td><td>Cache computed value</td></tr>
+  <tr><td><code>useCallback</code></td><td><code>fn = useCallback(fn, deps)</code></td><td>Cache function identity</td></tr>
+  <tr><td><code>useReducer</code></td><td><code>[s, dispatch] = useReducer(r, init)</code></td><td>Complex state transitions</td></tr>
+  <tr><td><code>useId</code></td><td><code>id = useId()</code></td><td>Stable unique IDs for a11y</td></tr>
+  <tr><td><code>useTransition</code></td><td><code>[pending, start] = useTransition()</code></td><td>Mark updates non-urgent</td></tr>
+</table>
+
+<h3>Props vs State at a glance</h3>
+<table>
+  <tr><th>Aspect</th><th>Props</th><th>State</th></tr>
+  <tr><td>Owner</td><td>Parent</td><td>The component itself</td></tr>
+  <tr><td>Mutable?</td><td>No (read-only)</td><td>Yes, via setter</td></tr>
+  <tr><td>Triggers re-render</td><td>When parent passes new values</td><td>When setter is called</td></tr>
+  <tr><td>Direction</td><td>Flows down</td><td>Local, raised via callbacks</td></tr>
+</table>
+
+<h2 id="best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Keep components small and single-purpose. Derive values during render instead of storing redundant state. Co-locate state as low as possible. Name event handlers <code>handleX</code> and props <code>onX</code>.</div>
+<div class="callout tip"><span class="t">Do</span> Treat state as immutable, always producing new objects/arrays. Enable the ESLint React Hooks plugin and fix every exhaustive-deps warning.</div>
+<div class="callout warn"><span class="t">Avoid</span> Storing derived data in state (e.g. a <code>fullName</code> computed from first/last) — it drifts out of sync. Compute it inline instead.</div>
+<div class="callout danger"><span class="t">Avoid</span> Calling hooks conditionally, mutating state/props directly, using array indexes as keys for dynamic lists, and putting <code>setState</code> in render (infinite loop). Don't use effects for logic that belongs in event handlers.</div>
+
+<details><summary>Show: the three most common beginner bugs</summary><div class="body">
+<p><strong>1. Stale state in loops</strong> — use the updater form <code>setX(x =&gt; ...)</code>. <strong>2. Infinite effect loop</strong> — an effect that sets state it also depends on; narrow the deps or move logic to an event handler. <strong>3. Missing cleanup</strong> — subscriptions/timers not cleared on unmount cause memory leaks and "setState on unmounted component" warnings.</p>
+</div></details>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What problem does the virtual DOM solve?</div><div class="a">Direct DOM manipulation is slow and error-prone. React keeps a lightweight in-memory tree, computes the difference between the previous and next trees (reconciliation), and applies only the minimal set of real-DOM mutations. You write declarative code; React optimises the imperative updates.</div></div>
+
+<div class="qa"><div class="q">What is the difference between props and state?</div><div class="a">Props are read-only inputs passed from a parent and cannot be changed by the receiving component. State is private data owned and managed by the component itself, updated via its setter, which schedules a re-render. Props flow down; state is local.</div></div>
+
+<div class="qa"><div class="q">Why does React need keys in lists?</div><div class="a">Keys give each element a stable identity so React can match items between renders and preserve their state/DOM when the list reorders or changes. Without stable keys (e.g. using array index), React may reuse the wrong DOM node, producing bugs like wrong input values. Keys should be stable, unique domain IDs.</div></div>
+
+<div class="qa"><div class="q">Explain the useEffect dependency array.</div><div class="a">It lists the reactive values the effect reads. React re-runs the effect whenever any dependency changes (by <code>Object.is</code> comparison). An empty array runs it once after mount; omitting the array runs it after every render. Dependencies must be complete — otherwise the effect captures stale values (stale closure bug).</div></div>
+
+<div class="qa"><div class="q">Why must you not mutate state directly?</div><div class="a">React detects changes by comparing references. Mutating an object/array keeps the same reference, so React (and memoised children) may skip re-rendering. Always create a new object/array (spread, map, filter) so the reference changes and the UI stays consistent.</div></div>
+
+<div class="qa"><div class="q">What are the Rules of Hooks and why do they exist?</div><div class="a">Call hooks only at the top level (not in loops/conditions/nested functions) and only from React functions. React associates each hook with its state by call order; conditional calls would misalign that order between renders and corrupt state.</div></div>
+
+<div class="qa"><div class="q">useMemo vs useCallback — when do you use each?</div><div class="a"><code>useMemo</code> caches the result of an expensive computation; <code>useCallback</code> caches a function's identity so it stays stable across renders (useful for props to memoised children or effect deps). <code>useCallback(fn, d)</code> equals <code>useMemo(() =&gt; fn, d)</code>. Use them to fix measured re-render problems, not pre-emptively.</div></div>
+
+<div class="qa"><div class="q">What is "lifting state up"?</div><div class="a">Moving shared state to the closest common ancestor of the components that need it, then passing the value down as props and raising changes via callback props. It keeps a single source of truth and enables sibling components to stay in sync.</div></div>
+
+<div class="qa"><div class="q">Controlled vs uncontrolled components?</div><div class="a">In a controlled component, form input value is driven by React state (<code>value</code> + <code>onChange</code>), making React the source of truth. An uncontrolled component lets the DOM hold the value, read on demand via a ref. Controlled gives instant validation/derived UI; uncontrolled is lighter for simple forms.</div></div>
+
+<div class="qa"><div class="q">How do you prevent unnecessary re-renders?</div><div class="a">Wrap pure components in <code>React.memo</code>, keep prop identities stable with <code>useCallback</code>/<code>useMemo</code>, use stable keys, move state down so changes affect smaller subtrees, and pass JSX via <code>children</code>. In 2026, the React Compiler can automate most of this. Always profile first.</div></div>
+
+<div class="qa"><div class="q">What is reconciliation?</div><div class="a">The algorithm React uses to diff the new element tree against the previous one. It assumes elements of different types produce different trees, and uses keys to match children of the same type. The result is a minimal list of DOM operations committed in a single batch.</div></div>
+
+<div class="qa"><div class="q">Why can calling setState multiple times only update once, and how to fix it?</div><div class="a">Within one render, state is a fixed snapshot, so <code>setCount(count + 1)</code> three times all read the same <code>count</code>. React also batches updates. Use the functional updater <code>setCount(c =&gt; c + 1)</code>, which receives the latest pending value, to apply sequential updates correctly.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li><strong>Official docs</strong> — react.dev, especially the "Learn React" and "Thinking in React" tutorials and the "Escape Hatches" chapter on effects and refs.</li>
+  <li><strong>useReducer + Context</strong> — scale state management before reaching for external libraries.</li>
+  <li><strong>TanStack Query</strong> — the standard for server-state caching and data fetching.</li>
+  <li><strong>Next.js / Remix</strong> — Server Components, streaming SSR, and full-stack React.</li>
+  <li><strong>Testing</strong> — React Testing Library + Vitest/Jest for user-centric component tests.</li>
+  <li><strong>TypeScript with React</strong> — typed props, hooks, and events for safer large codebases.</li>
+  <li><strong>React Compiler</strong> — adopt it to auto-optimise and simplify your components.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

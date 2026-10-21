@@ -1,0 +1,865 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data Structures & Algorithms (Interview Prep) — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Interview Prep</div>
+  <h1>Data Structures & Algorithms (Interview Prep)</h1>
+  <div class="subtitle">A visual, pattern-first guide to the data structures, algorithms, and problem-solving frameworks that win coding interviews.</div>
+  <div class="tags"><span>dsa</span><span>algorithms</span><span>data-structures</span><span>interview-prep</span><span>big-o</span><span>patterns</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~18 min read &middot; 3,938 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#how-to-approach-a-coding-interview">How to Approach a Coding Interview</a></li><li><a href="#big-o-amp-complexity-analysis">Big-O &amp; Complexity Analysis</a></li><li><a href="#arrays-amp-strings">Arrays &amp; Strings</a></li><li><a href="#hash-maps-amp-sets">Hash Maps &amp; Sets</a></li><li><a href="#stacks-amp-queues">Stacks &amp; Queues</a></li><li><a href="#linked-lists">Linked Lists</a></li><li><a href="#trees-amp-bsts">Trees &amp; BSTs</a></li><li><a href="#heaps-priority-queues">Heaps / Priority Queues</a></li><li><a href="#graphs-bfs-amp-dfs">Graphs: BFS &amp; DFS</a></li><li><a href="#tries">Tries</a></li><li><a href="#core-patterns">Core Patterns</a></li><li><a href="#sorting-amp-searching">Sorting &amp; Searching</a></li><li><a href="#pattern-rarr-signals-rarr-example-problems">Pattern &rarr; Signals &rarr; Example Problems</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#study-plan-amp-further-learning">Study Plan &amp; Further Learning</a></li></ol></nav>
+<p class="lead">A fast, interview-focused tour of the data structures, algorithms, and problem-solving patterns that show up again and again in technical interviews. Start here with the mindset and the math.</p>
+
+<h2 id="how-to-approach-a-coding-interview">How to Approach a Coding Interview</h2>
+<p>Most candidates lose points not because they lack knowledge, but because they jump straight to code. Interviewers are grading your <strong>process</strong>: how you clarify, how you reason about trade-offs, and how you verify. A repeatable framework keeps you calm and makes your thinking visible.</p>
+
+<h3>The UMPIRE framework</h3>
+<p>UMPIRE is a durable checklist you can run on any problem. It maps cleanly onto the shorter <em>clarify &rarr; plan &rarr; code &rarr; test</em> loop that experienced engineers use instinctively.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>U &mdash; Understand</h4>Restate the problem in your own words. Ask about input size, types, duplicates, empty/negative cases, and expected output format.</div>
+  <div class="card"><h4>M &mdash; Match</h4>Which known category is this? Sorting, graph search, DP, two pointers? Pattern-matching narrows the solution space fast.</div>
+  <div class="card"><h4>P &mdash; Plan</h4>Sketch the approach in plain language or pseudocode <em>before</em> typing. Agree on it with the interviewer.</div>
+  <div class="card"><h4>I &mdash; Implement</h4>Write clean, idiomatic code. Narrate as you go so your reasoning is auditable.</div>
+  <div class="card"><h4>R &mdash; Review</h4>Re-read your code line by line. Hunt for off-by-one errors, null handling, and mutation bugs.</div>
+  <div class="card"><h4>E &mdash; Evaluate</h4>State time and space complexity. Walk through examples and edge cases out loud.</div>
+</div>
+
+<div class="pipeline">
+  <span class="step">Clarify</span><span class="arrow">-&gt;</span>
+  <span class="step">Examples</span><span class="arrow">-&gt;</span>
+  <span class="step">Plan</span><span class="arrow">-&gt;</span>
+  <span class="step">Code</span><span class="arrow">-&gt;</span>
+  <span class="step">Test</span><span class="arrow">-&gt;</span>
+  <span class="step">Optimize</span>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 640 220" width="640" height="220">
+  <defs>
+    <marker id="ah1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect x="20" y="80" width="110" height="54" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="75" y="104" text-anchor="middle" font-size="13" fill="#1e3a8a">Clarify</text>
+  <text x="75" y="122" text-anchor="middle" font-size="11" fill="#1a2233">inputs, edges</text>
+  <rect x="170" y="80" width="110" height="54" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="225" y="104" text-anchor="middle" font-size="13" fill="#1e3a8a">Plan</text>
+  <text x="225" y="122" text-anchor="middle" font-size="11" fill="#1a2233">pseudocode</text>
+  <rect x="320" y="80" width="110" height="54" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="375" y="104" text-anchor="middle" font-size="13" fill="#1e3a8a">Code</text>
+  <text x="375" y="122" text-anchor="middle" font-size="11" fill="#1a2233">implement</text>
+  <rect x="470" y="80" width="110" height="54" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="525" y="104" text-anchor="middle" font-size="13" fill="#059669">Test</text>
+  <text x="525" y="122" text-anchor="middle" font-size="11" fill="#1a2233">verify + edges</text>
+  <line x1="130" y1="107" x2="166" y2="107" stroke="#2563eb" stroke-width="2" marker-end="url(#ah1)"/>
+  <line x1="280" y1="107" x2="316" y2="107" stroke="#2563eb" stroke-width="2" marker-end="url(#ah1)"/>
+  <line x1="430" y1="107" x2="466" y2="107" stroke="#2563eb" stroke-width="2" marker-end="url(#ah1)"/>
+  <path d="M525,134 C525,185 75,185 75,136" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ah1)"/>
+  <text x="300" y="178" text-anchor="middle" font-size="11" fill="#b45309">optimize &amp; iterate if needed</text>
+</svg>
+<div class="cap">Fig 1. The core interview loop &mdash; clarify before you code, test before you declare done.</div>
+</div>
+
+<div class="callout tip"><span class="t">Tip</span> Spend the first 2&ndash;3 minutes only on understanding and examples. A concrete worked example (including an edge case) catches most misunderstandings before they cost you.</div>
+
+<div class="callout warn"><span class="t">Watch out</span> Don't optimize prematurely. Get a correct brute-force solution verbalized first, then improve. A working O(n&sup2;) beats a broken O(n).</div>
+
+<h3>Communication checklist</h3>
+<ul>
+  <li><strong>Think out loud.</strong> Silence reads as being stuck.</li>
+  <li><strong>Name your complexity</strong> as soon as you have an approach.</li>
+  <li><strong>Ask before assuming</strong> &mdash; can inputs be empty? sorted? contain duplicates or negatives?</li>
+  <li><strong>Dry-run</strong> your final code on one normal case and one edge case.</li>
+</ul>
+
+<h2 id="big-o-amp-complexity-analysis">Big-O &amp; Complexity Analysis</h2>
+<p>Big-O describes how an algorithm's running time or memory grows as the input size <span class="kbd">n</span> grows. We drop constants and lower-order terms and keep the <em>dominant</em> growth term, because that is what matters at scale.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 640 320" width="640" height="320">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#1a2233"/>
+    </marker>
+  </defs>
+  <line x1="60" y1="280" x2="610" y2="280" stroke="#1a2233" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="60" y1="280" x2="60" y2="20" stroke="#1a2233" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <text x="600" y="300" font-size="12" fill="#1a2233">n (input size)</text>
+  <text x="18" y="30" font-size="12" fill="#1a2233">ops</text>
+  <path d="M60,276 L600,268" fill="none" stroke="#059669" stroke-width="2.5"/>
+  <text x="520" y="258" font-size="12" fill="#059669">O(1), O(log n)</text>
+  <path d="M60,276 L600,120" fill="none" stroke="#0891b2" stroke-width="2.5"/>
+  <text x="500" y="112" font-size="12" fill="#0891b2">O(n)</text>
+  <path d="M60,276 C260,250 420,150 600,60" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="470" y="70" font-size="12" fill="#2563eb">O(n log n)</text>
+  <path d="M60,276 C180,276 300,120 360,30" fill="none" stroke="#b45309" stroke-width="2.5"/>
+  <text x="300" y="48" font-size="12" fill="#b45309">O(n&sup2;)</text>
+  <path d="M60,276 C120,276 150,120 170,30" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="150" y="26" font-size="12" fill="#dc2626">O(2&#8319;)</text>
+</svg>
+<div class="cap">Fig 2. Growth curves. Flatter is better &mdash; small differences in order explode at large n.</div>
+</div>
+
+<h3>Complexity cheat-sheet</h3>
+<table>
+  <tr><th>Notation</th><th>Name</th><th>Example operation</th><th>Verdict</th></tr>
+  <tr><td>O(1)</td><td>Constant</td><td>Array index, hash lookup, stack push</td><td><span class="badge g">Excellent</span></td></tr>
+  <tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search, balanced-BST lookup</td><td><span class="badge g">Excellent</span></td></tr>
+  <tr><td>O(n)</td><td>Linear</td><td>Single scan, linked-list traversal</td><td><span class="badge g">Good</span></td></tr>
+  <tr><td>O(n log n)</td><td>Linearithmic</td><td>Merge sort, heap sort, efficient sorts</td><td><span class="badge">Good</span></td></tr>
+  <tr><td>O(n&sup2;)</td><td>Quadratic</td><td>Nested loops, naive pair comparison</td><td><span class="badge o">Caution</span></td></tr>
+  <tr><td>O(2&#8319;)</td><td>Exponential</td><td>Naive recursion over subsets</td><td><span class="badge o">Bad</span></td></tr>
+  <tr><td>O(n!)</td><td>Factorial</td><td>Brute-force permutations (travelling salesman)</td><td><span class="badge o">Bad</span></td></tr>
+</table>
+
+<div class="callout note"><span class="t">Note</span> <strong>Amortized</strong> complexity averages cost over a sequence of operations. A dynamic array's <code>append</code> is O(1) amortized even though occasional resizes cost O(n), because resizes are rare and double capacity.</div>
+
+<h3>Analyzing your own code</h3>
+<ul>
+  <li><strong>Sequential</strong> statements add: O(a) + O(b) = O(a + b).</li>
+  <li><strong>Nested</strong> loops multiply: a loop inside a loop over n is O(n&sup2;).</li>
+  <li><strong>Halving</strong> the input each step gives a log n factor.</li>
+  <li><strong>Space</strong> counts auxiliary memory: the recursion call stack, extra arrays, and hash maps all add up.</li>
+</ul>
+
+<div class="callout ok"><span class="t">Rule of thumb</span> For n up to ~10&#8309; an O(n log n) solution runs comfortably within a one-second limit. If n is tiny (&le; 20), an exponential solution may be acceptable &mdash; and sometimes expected.</div>
+
+<h2 id="arrays-amp-strings">Arrays &amp; Strings</h2>
+<p class="lead">Contiguous, index-addressable sequences &mdash; the most common input type in interviews. Strings behave like immutable arrays of characters in most languages, including Python.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Strengths</h4>O(1) random access by index. Cache-friendly contiguous memory. Simple to reason about.</div>
+  <div class="card"><h4>Weaknesses</h4>Insertion/deletion in the middle is O(n) (shifting). Fixed-size in low-level languages; Python lists auto-grow (amortized O(1) append).</div>
+</div>
+
+<table>
+  <tr><th>Operation</th><th>Time</th><th>Note</th></tr>
+  <tr><td>Index access <code>a[i]</code></td><td>O(1)</td><td>Direct address</td></tr>
+  <tr><td>Append (end)</td><td>O(1) amortized</td><td>Occasional resize</td></tr>
+  <tr><td>Insert/delete middle</td><td>O(n)</td><td>Shift elements</td></tr>
+  <tr><td>Search (unsorted)</td><td>O(n)</td><td>Linear scan</td></tr>
+  <tr><td>Search (sorted)</td><td>O(log n)</td><td>Binary search</td></tr>
+</table>
+
+<p>In-place reversal is a canonical warm-up. It uses O(1) extra space with two indices converging from the ends.</p>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">reverse_in_place</span>(<span class="hljs-params">a</span>):
+    i, j = <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(a) - <span class="hljs-number">1</span>
+    <span class="hljs-keyword">while</span> i &lt; j:
+        a[i], a[j] = a[j], a[i]
+        i += <span class="hljs-number">1</span>
+        j -= <span class="hljs-number">1</span>
+    <span class="hljs-keyword">return</span> a
+
+<span class="hljs-comment"># Strings are immutable in Python, so build a new one:</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">reverse_string</span>(<span class="hljs-params">s</span>):
+    <span class="hljs-keyword">return</span> s[::-<span class="hljs-number">1</span>]</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> When a problem says "sorted array", think binary search or two pointers. When it says "subarray" or "substring", think sliding window or prefix sums.</div>
+
+<h3>Prefix sums</h3>
+<p>Precomputing cumulative sums turns repeated range-sum queries from O(n) each into O(1) each.</p>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">build_prefix</span>(<span class="hljs-params">nums</span>):
+    prefix = [<span class="hljs-number">0</span>] * (<span class="hljs-built_in">len</span>(nums) + <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">for</span> i, x <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(nums):
+        prefix[i + <span class="hljs-number">1</span>] = prefix[i] + x
+    <span class="hljs-keyword">return</span> prefix
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">range_sum</span>(<span class="hljs-params">prefix, lo, hi</span>):   <span class="hljs-comment"># inclusive [lo, hi]</span>
+    <span class="hljs-keyword">return</span> prefix[hi + <span class="hljs-number">1</span>] - prefix[lo]</code></pre>
+
+<h2 id="hash-maps-amp-sets">Hash Maps &amp; Sets</h2>
+<p>A hash map (dict) stores key&rarr;value pairs with average O(1) lookup, insert, and delete. It hashes the key to a bucket index; collisions are resolved by chaining or open addressing. A set is the same structure storing only keys.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 640 280" width="640" height="280">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect x="20" y="30" width="140" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="55" text-anchor="middle" font-size="13" fill="#1e3a8a">key "cat"</text>
+  <rect x="200" y="30" width="120" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="260" y="49" text-anchor="middle" font-size="12" fill="#059669">hash(key)</text>
+  <text x="260" y="64" text-anchor="middle" font-size="11" fill="#1a2233">% capacity</text>
+  <line x1="160" y1="50" x2="196" y2="50" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="320" y1="50" x2="378" y2="90" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="400" y="25" font-size="12" fill="#1a2233">buckets</text>
+  <g font-size="12">
+    <rect x="380" y="40" width="40" height="30" fill="#fff" stroke="#94a3b8"/><text x="400" y="60" text-anchor="middle">0</text>
+    <rect x="380" y="80" width="40" height="30" fill="#eff4ff" stroke="#94a3b8"/><text x="400" y="100" text-anchor="middle">1</text>
+    <rect x="380" y="120" width="40" height="30" fill="#fff" stroke="#94a3b8"/><text x="400" y="140" text-anchor="middle">2</text>
+    <rect x="380" y="160" width="40" height="30" fill="#eff4ff" stroke="#94a3b8"/><text x="400" y="180" text-anchor="middle">3</text>
+    <rect x="380" y="200" width="40" height="30" fill="#fff" stroke="#94a3b8"/><text x="400" y="220" text-anchor="middle">4</text>
+  </g>
+  <g font-size="11">
+    <rect x="450" y="80" width="80" height="30" rx="4" fill="#eff4ff" stroke="#2563eb"/><text x="490" y="100" text-anchor="middle" fill="#1e3a8a">cat:3</text>
+    <rect x="450" y="160" width="80" height="30" rx="4" fill="#eff4ff" stroke="#2563eb"/><text x="490" y="180" text-anchor="middle" fill="#1e3a8a">dog:7</text>
+    <rect x="548" y="160" width="80" height="30" rx="4" fill="#fff7ed" stroke="#b45309"/><text x="588" y="180" text-anchor="middle" fill="#b45309">owl:2</text>
+  </g>
+  <line x1="420" y1="95" x2="448" y2="95" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="420" y1="175" x2="448" y2="175" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="530" y1="175" x2="546" y2="175" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="588" y="212" text-anchor="middle" font-size="11" fill="#b45309">collision &rarr; chain</text>
+</svg>
+<div class="cap">Fig 3. A hash table: keys hash to bucket indices; collisions chain within a bucket.</div>
+</div>
+
+<table>
+  <tr><th>Operation</th><th>Average</th><th>Worst</th></tr>
+  <tr><td>Insert / lookup / delete</td><td>O(1)</td><td>O(n) (all keys collide)</td></tr>
+  <tr><td>Iterate all entries</td><td>O(n)</td><td>O(n)</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Classic: two-sum in one pass with a hash map</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">two_sum</span>(<span class="hljs-params">nums, target</span>):
+    seen = {}                      <span class="hljs-comment"># value -&gt; index</span>
+    <span class="hljs-keyword">for</span> i, x <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(nums):
+        need = target - x
+        <span class="hljs-keyword">if</span> need <span class="hljs-keyword">in</span> seen:
+            <span class="hljs-keyword">return</span> [seen[need], i]
+        seen[x] = i
+    <span class="hljs-keyword">return</span> []
+
+<span class="hljs-comment"># Set for O(1) membership / de-duplication</span>
+unique = <span class="hljs-built_in">set</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>])         <span class="hljs-comment"># {1, 2, 3}</span></code></pre>
+
+<div class="callout warn"><span class="t">Watch out</span> Keys must be hashable (immutable). Lists and dicts can't be keys; use tuples or frozensets instead.</div>
+
+<h2 id="stacks-amp-queues">Stacks &amp; Queues</h2>
+<p>A <strong>stack</strong> is LIFO (last-in, first-out) &mdash; think a stack of plates. A <strong>queue</strong> is FIFO (first-in, first-out) &mdash; think a line at a counter. Both support O(1) push and pop at their respective ends.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Stack uses</h4>Undo history, matching brackets, DFS, expression evaluation, backtracking, call stacks.</div>
+  <div class="card"><h4>Queue uses</h4>BFS, task scheduling, buffering, producer/consumer pipelines, rate limiting.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> deque
+
+stack = []
+stack.append(<span class="hljs-number">1</span>)       <span class="hljs-comment"># push</span>
+stack.append(<span class="hljs-number">2</span>)
+top = stack.pop()     <span class="hljs-comment"># 2  (LIFO)</span>
+
+queue = deque()
+queue.append(<span class="hljs-number">1</span>)       <span class="hljs-comment"># enqueue</span>
+queue.append(<span class="hljs-number">2</span>)
+front = queue.popleft()  <span class="hljs-comment"># 1  (FIFO)</span>
+
+<span class="hljs-comment"># Valid parentheses with a stack</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">is_valid</span>(<span class="hljs-params">s</span>):
+    pairs = {<span class="hljs-string">&#x27;)&#x27;</span>: <span class="hljs-string">&#x27;(&#x27;</span>, <span class="hljs-string">&#x27;]&#x27;</span>: <span class="hljs-string">&#x27;[&#x27;</span>, <span class="hljs-string">&#x27;}&#x27;</span>: <span class="hljs-string">&#x27;{&#x27;</span>}
+    stack = []
+    <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> s:
+        <span class="hljs-keyword">if</span> c <span class="hljs-keyword">in</span> pairs:
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> stack <span class="hljs-keyword">or</span> stack.pop() != pairs[c]:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        <span class="hljs-keyword">else</span>:
+            stack.append(c)
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">not</span> stack</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Use <code>collections.deque</code> for queues, not a plain list &mdash; <code>list.pop(0)</code> is O(n), while <code>deque.popleft()</code> is O(1).</div>
+
+<h2 id="linked-lists">Linked Lists</h2>
+<p>A sequence of nodes where each node holds a value and a pointer to the next node. Unlike arrays, there is no random access, but insertion/deletion at a known node is O(1) because no shifting is required.</p>
+
+<table>
+  <tr><th>Operation</th><th>Array</th><th>Linked list</th></tr>
+  <tr><td>Access by index</td><td>O(1)</td><td>O(n)</td></tr>
+  <tr><td>Insert/delete at head</td><td>O(n)</td><td>O(1)</td></tr>
+  <tr><td>Insert/delete at known node</td><td>O(n)</td><td>O(1)</td></tr>
+  <tr><td>Search</td><td>O(n)</td><td>O(n)</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">ListNode</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, val=<span class="hljs-number">0</span>, nxt=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-variable language_">self</span>.val = val
+        <span class="hljs-variable language_">self</span>.<span class="hljs-built_in">next</span> = nxt
+
+<span class="hljs-comment"># Iterative reversal: the single most-asked linked-list question</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">reverse_list</span>(<span class="hljs-params">head</span>):
+    prev = <span class="hljs-literal">None</span>
+    cur = head
+    <span class="hljs-keyword">while</span> cur:
+        nxt = cur.<span class="hljs-built_in">next</span>     <span class="hljs-comment"># save next</span>
+        cur.<span class="hljs-built_in">next</span> = prev    <span class="hljs-comment"># flip pointer</span>
+        prev = cur         <span class="hljs-comment"># advance prev</span>
+        cur = nxt          <span class="hljs-comment"># advance cur</span>
+    <span class="hljs-keyword">return</span> prev            <span class="hljs-comment"># new head</span></code></pre>
+
+<div class="callout note"><span class="t">Two-pointer tricks</span> Use <strong>slow/fast</strong> pointers to find the middle (fast moves 2x) or to detect a cycle (Floyd's tortoise and hare &mdash; they meet iff a cycle exists). Use a <strong>dummy head</strong> node to simplify edge cases when the head itself might change.</div>
+
+<h2 id="trees-amp-bsts">Trees &amp; BSTs</h2>
+<p class="lead">A tree is a hierarchy of nodes with one root and no cycles. A <strong>binary tree</strong> gives each node at most two children. A <strong>binary search tree (BST)</strong> adds an ordering invariant that makes search, insert, and delete O(log n) when balanced.</p>
+
+<div class="callout note"><span class="t">BST invariant</span> For every node, all values in its <em>left</em> subtree are smaller, and all values in its <em>right</em> subtree are larger. An in-order traversal therefore visits values in sorted order.</div>
+
+<div class="diagram">
+<svg viewBox="0 0 560 260" width="560" height="260">
+  <line x1="280" y1="55" x2="170" y2="120" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="280" y1="55" x2="390" y2="120" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="170" y1="120" x2="110" y2="190" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="170" y1="120" x2="230" y2="190" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="390" y1="120" x2="450" y2="190" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="280" cy="45" r="24" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="280" y="51" text-anchor="middle" font-size="14" fill="#1e3a8a">8</text>
+  <circle cx="170" cy="120" r="24" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="170" y="126" text-anchor="middle" font-size="14" fill="#1e3a8a">3</text>
+  <circle cx="390" cy="120" r="24" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="390" y="126" text-anchor="middle" font-size="14" fill="#1e3a8a">12</text>
+  <circle cx="110" cy="190" r="24" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="110" y="196" text-anchor="middle" font-size="14" fill="#059669">1</text>
+  <circle cx="230" cy="190" r="24" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="230" y="196" text-anchor="middle" font-size="14" fill="#059669">6</text>
+  <circle cx="450" cy="190" r="24" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="450" y="196" text-anchor="middle" font-size="14" fill="#059669">14</text>
+  <text x="280" y="18" text-anchor="middle" font-size="12" fill="#1a2233">root</text>
+  <text x="110" y="238" text-anchor="middle" font-size="11" fill="#b45309">in-order: 1 3 6 8 12 14</text>
+</svg>
+<div class="cap">Fig 4. A binary search tree. Left &lt; node &lt; right at every level.</div>
+</div>
+
+<h3>Traversals</h3>
+<table>
+  <tr><th>Traversal</th><th>Order</th><th>Typical use</th></tr>
+  <tr><td>In-order</td><td>left, node, right</td><td>Sorted output of a BST</td></tr>
+  <tr><td>Pre-order</td><td>node, left, right</td><td>Copy/serialize a tree</td></tr>
+  <tr><td>Post-order</td><td>left, right, node</td><td>Delete tree, evaluate expressions</td></tr>
+  <tr><td>Level-order</td><td>breadth-first by depth</td><td>Shortest path, level grouping</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">TreeNode</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, val=<span class="hljs-number">0</span>, left=<span class="hljs-literal">None</span>, right=<span class="hljs-literal">None</span></span>):
+        <span class="hljs-variable language_">self</span>.val, <span class="hljs-variable language_">self</span>.left, <span class="hljs-variable language_">self</span>.right = val, left, right
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">inorder</span>(<span class="hljs-params">root</span>):
+    out = []
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">dfs</span>(<span class="hljs-params">node</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> node:
+            <span class="hljs-keyword">return</span>
+        dfs(node.left)
+        out.append(node.val)
+        dfs(node.right)
+    dfs(root)
+    <span class="hljs-keyword">return</span> out
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">bst_search</span>(<span class="hljs-params">root, target</span>):
+    <span class="hljs-keyword">while</span> root:
+        <span class="hljs-keyword">if</span> target == root.val:
+            <span class="hljs-keyword">return</span> root
+        root = root.left <span class="hljs-keyword">if</span> target &lt; root.val <span class="hljs-keyword">else</span> root.right
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span></code></pre>
+
+<div class="callout warn"><span class="t">Watch out</span> A plain BST degrades to O(n) if inserts arrive in sorted order (it becomes a linked list). Self-balancing trees &mdash; AVL, red-black &mdash; keep height O(log n). Python's <code>dict</code>/<code>set</code> use hashing, but <code>sortedcontainers.SortedList</code> gives balanced-tree behavior.</div>
+
+<h2 id="heaps-priority-queues">Heaps / Priority Queues</h2>
+<p>A binary heap is a complete binary tree stored compactly in an array, maintaining the <strong>heap property</strong>: in a min-heap every parent is &le; its children, so the minimum is always at the root. It gives O(log n) push and pop, and O(1) peek.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>When to reach for a heap</h4>"Top k", "k largest/smallest", "merge k sorted lists", running median, Dijkstra's shortest path, scheduling by priority.</div>
+  <div class="card"><h4>Array layout</h4>For node at index <code>i</code>: left child <code>2i+1</code>, right child <code>2i+2</code>, parent <code>(i-1)//2</code>. No pointers needed.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> heapq
+
+<span class="hljs-comment"># Python&#x27;s heapq is a MIN-heap</span>
+h = []
+heapq.heappush(h, <span class="hljs-number">5</span>)
+heapq.heappush(h, <span class="hljs-number">1</span>)
+heapq.heappush(h, <span class="hljs-number">3</span>)
+smallest = heapq.heappop(h)   <span class="hljs-comment"># 1</span>
+
+<span class="hljs-comment"># k largest: keep a min-heap of size k</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">k_largest</span>(<span class="hljs-params">nums, k</span>):
+    h = []
+    <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> nums:
+        heapq.heappush(h, x)
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(h) &gt; k:
+            heapq.heappop(h)   <span class="hljs-comment"># drop smallest</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">sorted</span>(h, reverse=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># Max-heap trick: push negated values</span>
+maxh = []
+heapq.heappush(maxh, -<span class="hljs-number">5</span>)
+top = -heapq.heappop(maxh)    <span class="hljs-comment"># 5</span></code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Building a heap from an existing list with <code>heapq.heapify(lst)</code> is O(n), cheaper than n individual pushes (O(n log n)).</div>
+
+<h2 id="graphs-bfs-amp-dfs">Graphs: BFS &amp; DFS</h2>
+<p>A graph is a set of <strong>vertices</strong> connected by <strong>edges</strong>. Edges may be directed or undirected, weighted or unweighted. The two foundational traversals are breadth-first search (BFS) and depth-first search (DFS).</p>
+
+<div class="diagram">
+<svg viewBox="0 0 600 260" width="600" height="260">
+  <line x1="90" y1="70" x2="230" y2="60" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="90" y1="70" x2="140" y2="180" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="230" y1="60" x2="140" y2="180" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="230" y1="60" x2="370" y2="150" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="140" y1="180" x2="370" y2="150" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="90" cy="70" r="22" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="90" y="76" text-anchor="middle" font-size="13" fill="#1e3a8a">A</text>
+  <circle cx="230" cy="60" r="22" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="230" y="66" text-anchor="middle" font-size="13" fill="#1e3a8a">B</text>
+  <circle cx="140" cy="180" r="22" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="140" y="186" text-anchor="middle" font-size="13" fill="#1e3a8a">C</text>
+  <circle cx="370" cy="150" r="22" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="370" y="156" text-anchor="middle" font-size="13" fill="#1e3a8a">D</text>
+  <rect x="440" y="40" width="150" height="76" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="515" y="64" text-anchor="middle" font-size="12" fill="#059669">BFS from A:</text>
+  <text x="515" y="84" text-anchor="middle" font-size="12" fill="#1a2233">A, B, C, D</text>
+  <text x="515" y="104" text-anchor="middle" font-size="11" fill="#1a2233">(layer by layer)</text>
+  <rect x="440" y="140" width="150" height="76" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="515" y="164" text-anchor="middle" font-size="12" fill="#b45309">DFS from A:</text>
+  <text x="515" y="184" text-anchor="middle" font-size="12" fill="#1a2233">A, B, C, D</text>
+  <text x="515" y="204" text-anchor="middle" font-size="11" fill="#1a2233">(deep first)</text>
+</svg>
+<div class="cap">Fig 5. Graph traversal. BFS explores by distance (queue); DFS plunges deep (stack/recursion).</div>
+</div>
+
+<table>
+  <tr><th></th><th>BFS</th><th>DFS</th></tr>
+  <tr><td>Data structure</td><td>Queue</td><td>Stack / recursion</td></tr>
+  <tr><td>Finds</td><td>Shortest path (unweighted)</td><td>Any path; cycle detection</td></tr>
+  <tr><td>Memory</td><td>O(width)</td><td>O(depth)</td></tr>
+  <tr><td>Time</td><td colspan="2">O(V + E) with an adjacency list</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> deque
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">bfs</span>(<span class="hljs-params">graph, start</span>):
+    visited = {start}
+    q = deque([start])
+    order = []
+    <span class="hljs-keyword">while</span> q:
+        node = q.popleft()
+        order.append(node)
+        <span class="hljs-keyword">for</span> nb <span class="hljs-keyword">in</span> graph[node]:
+            <span class="hljs-keyword">if</span> nb <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> visited:
+                visited.add(nb)
+                q.append(nb)
+    <span class="hljs-keyword">return</span> order
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">dfs</span>(<span class="hljs-params">graph, start, visited=<span class="hljs-literal">None</span></span>):
+    <span class="hljs-keyword">if</span> visited <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+        visited = <span class="hljs-built_in">set</span>()
+    visited.add(start)
+    <span class="hljs-keyword">for</span> nb <span class="hljs-keyword">in</span> graph[start]:
+        <span class="hljs-keyword">if</span> nb <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> visited:
+            dfs(graph, nb, visited)
+    <span class="hljs-keyword">return</span> visited</code></pre>
+
+<div class="callout note"><span class="t">Beyond the basics</span> For weighted shortest paths use <strong>Dijkstra</strong> (heap + non-negative weights) or <strong>Bellman-Ford</strong> (handles negatives). For ordering dependencies use <strong>topological sort</strong>. Mark nodes visited <em>when enqueued</em> in BFS to avoid duplicates.</div>
+
+<h2 id="tries">Tries</h2>
+<p>A trie (prefix tree) stores strings by their characters along paths from the root. It gives O(L) insert and lookup where L is the word length &mdash; independent of how many words are stored &mdash; and makes <strong>prefix</strong> queries natural (autocomplete, spell-check, IP routing).</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Trie</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.root = {}
+        <span class="hljs-variable language_">self</span>.END = <span class="hljs-string">&#x27;#&#x27;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">insert</span>(<span class="hljs-params">self, word</span>):
+        node = <span class="hljs-variable language_">self</span>.root
+        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> word:
+            node = node.setdefault(c, {})
+        node[<span class="hljs-variable language_">self</span>.END] = <span class="hljs-literal">True</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">search</span>(<span class="hljs-params">self, word, prefix=<span class="hljs-literal">False</span></span>):
+        node = <span class="hljs-variable language_">self</span>.root
+        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> word:
+            <span class="hljs-keyword">if</span> c <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> node:
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+            node = node[c]
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span> <span class="hljs-keyword">if</span> prefix <span class="hljs-keyword">else</span> <span class="hljs-variable language_">self</span>.END <span class="hljs-keyword">in</span> node</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Reach for a trie when a problem involves many strings sharing prefixes, or asks "does any word start with&hellip;". A hash set answers full-word membership but can't do prefix queries efficiently.</div>
+
+<h2 id="core-patterns">Core Patterns</h2>
+<p class="lead">Interview problems are variations on a small number of reusable patterns. Recognizing the pattern is 80% of the solve. Here are the six that cover the majority of questions.</p>
+
+<h3>Two Pointers</h3>
+<p><strong>When to use:</strong> a sorted array/string, or any time you compare elements from two positions &mdash; converging ends, or a slow/fast pair. Turns many O(n&sup2;) scans into O(n).</p>
+<details><summary>Show solution &mdash; pair summing to target in sorted array</summary><div class="body">
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">two_sum_sorted</span>(<span class="hljs-params">a, target</span>):
+    i, j = <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(a) - <span class="hljs-number">1</span>
+    <span class="hljs-keyword">while</span> i &lt; j:
+        s = a[i] + a[j]
+        <span class="hljs-keyword">if</span> s == target:
+            <span class="hljs-keyword">return</span> [i, j]
+        <span class="hljs-keyword">if</span> s &lt; target:
+            i += <span class="hljs-number">1</span>          <span class="hljs-comment"># need larger sum</span>
+        <span class="hljs-keyword">else</span>:
+            j -= <span class="hljs-number">1</span>          <span class="hljs-comment"># need smaller sum</span>
+    <span class="hljs-keyword">return</span> []</code></pre>
+</div></details>
+
+<h3>Sliding Window</h3>
+<p><strong>When to use:</strong> contiguous subarray/substring problems &mdash; longest/shortest/max-sum window satisfying a constraint. Expand the right edge, shrink the left when the window violates the constraint.</p>
+<details><summary>Show solution &mdash; longest substring without repeating characters</summary><div class="body">
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">length_of_longest</span>(<span class="hljs-params">s</span>):
+    seen = {}            <span class="hljs-comment"># char -&gt; last index</span>
+    left = best = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">for</span> right, c <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(s):
+        <span class="hljs-keyword">if</span> c <span class="hljs-keyword">in</span> seen <span class="hljs-keyword">and</span> seen[c] &gt;= left:
+            left = seen[c] + <span class="hljs-number">1</span>      <span class="hljs-comment"># jump past the repeat</span>
+        seen[c] = right
+        best = <span class="hljs-built_in">max</span>(best, right - left + <span class="hljs-number">1</span>)
+    <span class="hljs-keyword">return</span> best</code></pre>
+</div></details>
+
+<h3>Binary Search</h3>
+<p><strong>When to use:</strong> a sorted search space, or any monotonic predicate ("smallest x that works"). Halves the space each step for O(log n). Also applies to "binary search on the answer".</p>
+<details><summary>Show solution &mdash; classic index search</summary><div class="body">
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">binary_search</span>(<span class="hljs-params">a, target</span>):
+    lo, hi = <span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(a) - <span class="hljs-number">1</span>
+    <span class="hljs-keyword">while</span> lo &lt;= hi:
+        mid = (lo + hi) // <span class="hljs-number">2</span>        <span class="hljs-comment"># no overflow in Python</span>
+        <span class="hljs-keyword">if</span> a[mid] == target:
+            <span class="hljs-keyword">return</span> mid
+        <span class="hljs-keyword">if</span> a[mid] &lt; target:
+            lo = mid + <span class="hljs-number">1</span>
+        <span class="hljs-keyword">else</span>:
+            hi = mid - <span class="hljs-number">1</span>
+    <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span></code></pre>
+</div></details>
+
+<div class="callout warn"><span class="t">Watch out</span> The two classic binary-search bugs: an infinite loop (your bounds don't shrink) and off-by-one in the <code>lo/hi</code> update. Decide up front whether your interval is inclusive <code>[lo, hi]</code> or half-open, and be consistent.</div>
+
+<h3>Recursion &amp; Backtracking</h3>
+<p><strong>When to use:</strong> enumerate combinations/permutations/subsets, or explore a decision tree (N-queens, Sudoku, word search). Choose &rarr; recurse &rarr; <em>un</em>choose. Prune branches that can't lead to a solution.</p>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">subsets</span>(<span class="hljs-params">nums</span>):
+    res, path = [], []
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">backtrack</span>(<span class="hljs-params">start</span>):
+        res.append(path[:])          <span class="hljs-comment"># record current subset</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(start, <span class="hljs-built_in">len</span>(nums)):
+            path.append(nums[i])     <span class="hljs-comment"># choose</span>
+            backtrack(i + <span class="hljs-number">1</span>)         <span class="hljs-comment"># explore</span>
+            path.pop()               <span class="hljs-comment"># un-choose</span>
+    backtrack(<span class="hljs-number">0</span>)
+    <span class="hljs-keyword">return</span> res</code></pre>
+
+<h3>Dynamic Programming</h3>
+<p><strong>When to use:</strong> optimal substructure + overlapping subproblems. "Count the ways", "min/max cost", "can we reach". Cache subresults (memoization, top-down) or build a table (tabulation, bottom-up).</p>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Fibonacci: naive O(2^n) -&gt; memoized O(n)</span>
+<span class="hljs-keyword">from</span> functools <span class="hljs-keyword">import</span> lru_cache
+
+<span class="hljs-meta">@lru_cache(<span class="hljs-params">maxsize=<span class="hljs-literal">None</span></span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fib</span>(<span class="hljs-params">n</span>):
+    <span class="hljs-keyword">if</span> n &lt; <span class="hljs-number">2</span>:
+        <span class="hljs-keyword">return</span> n
+    <span class="hljs-keyword">return</span> fib(n - <span class="hljs-number">1</span>) + fib(n - <span class="hljs-number">2</span>)
+
+<span class="hljs-comment"># Bottom-up, O(1) space</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fib_iter</span>(<span class="hljs-params">n</span>):
+    a, b = <span class="hljs-number">0</span>, <span class="hljs-number">1</span>
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n):
+        a, b = b, a + b
+    <span class="hljs-keyword">return</span> a</code></pre>
+<div class="callout tip"><span class="t">Tip</span> Define the <em>state</em> and the <em>transition</em> in words before coding. "dp[i] = max profit using the first i items" is often the whole battle.</div>
+
+<h3>Greedy</h3>
+<p><strong>When to use:</strong> a locally optimal choice provably leads to a global optimum (interval scheduling, Huffman coding, some coin systems). Faster than DP when it applies &mdash; but you must justify why greedy is safe.</p>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Activity selection: max non-overlapping intervals</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">max_meetings</span>(<span class="hljs-params">intervals</span>):
+    intervals.sort(key=<span class="hljs-keyword">lambda</span> iv: iv[<span class="hljs-number">1</span>])   <span class="hljs-comment"># by end time</span>
+    count, end = <span class="hljs-number">0</span>, <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;-inf&#x27;</span>)
+    <span class="hljs-keyword">for</span> s, e <span class="hljs-keyword">in</span> intervals:
+        <span class="hljs-keyword">if</span> s &gt;= end:
+            count += <span class="hljs-number">1</span>
+            end = e
+    <span class="hljs-keyword">return</span> count</code></pre>
+
+<h2 id="sorting-amp-searching">Sorting &amp; Searching</h2>
+<p>You rarely implement a sort in an interview, but you must know their trade-offs and when stability or in-place behavior matters. Python's built-in <code>sorted()</code>/<code>list.sort()</code> use Timsort: stable, O(n log n), fast on partially sorted data.</p>
+
+<table>
+  <tr><th>Algorithm</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable?</th></tr>
+  <tr><td>Quick sort</td><td>O(n log n)</td><td>O(n&sup2;)</td><td>O(log n)</td><td>No</td></tr>
+  <tr><td>Merge sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Yes</td></tr>
+  <tr><td>Heap sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td>No</td></tr>
+  <tr><td>Timsort (Python)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Yes</td></tr>
+  <tr><td>Insertion sort</td><td>O(n&sup2;)</td><td>O(n&sup2;)</td><td>O(1)</td><td>Yes</td></tr>
+  <tr><td>Counting sort</td><td>O(n + k)</td><td>O(n + k)</td><td>O(k)</td><td>Yes</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Note</span> Comparison-based sorts cannot beat O(n log n) in the worst case. Non-comparison sorts (counting, radix, bucket) can hit O(n) but only for integer-like keys in a bounded range.</div>
+
+<h2 id="pattern-rarr-signals-rarr-example-problems">Pattern &rarr; Signals &rarr; Example Problems</h2>
+<p>Scan the "signals" column when you read a prompt; the words there are your cue to the pattern.</p>
+<table>
+  <tr><th>Pattern</th><th>Signals in the prompt</th><th>Example problems</th></tr>
+  <tr><td>Two pointers</td><td>sorted array, pair, palindrome, in-place</td><td>Two Sum II, Valid Palindrome, Container With Most Water</td></tr>
+  <tr><td>Sliding window</td><td>contiguous subarray/substring, longest/shortest, "at most k"</td><td>Longest Substring Without Repeating, Min Window Substring</td></tr>
+  <tr><td>Binary search</td><td>sorted, "find smallest/largest that", monotonic</td><td>Search in Rotated Array, Koko Eating Bananas</td></tr>
+  <tr><td>Hash map/set</td><td>count, dedupe, "seen before", frequency</td><td>Two Sum, Group Anagrams, Subarray Sum Equals K</td></tr>
+  <tr><td>BFS / DFS</td><td>grid, graph, levels, connected, shortest unweighted</td><td>Number of Islands, Word Ladder, Course Schedule</td></tr>
+  <tr><td>Heap</td><td>top k, k-th largest, merge k, running median</td><td>Kth Largest, Merge k Sorted Lists, Find Median Stream</td></tr>
+  <tr><td>Backtracking</td><td>all combinations/permutations/subsets, "generate all"</td><td>Permutations, Combination Sum, N-Queens</td></tr>
+  <tr><td>Dynamic programming</td><td>count ways, min/max cost, "can reach", optimal</td><td>Coin Change, Longest Common Subsequence, House Robber</td></tr>
+</table>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">Why is a hash map lookup O(1) on average but O(n) in the worst case?</div><div class="a">Averaged over a good hash function and load factor, keys spread across buckets so each lookup touches a short chain. In the pathological case where every key hashes to the same bucket, the structure degrades to a single linked list and lookup becomes linear.</div></div>
+
+<div class="qa"><div class="q">When would you choose a linked list over a dynamic array?</div><div class="a">When you need frequent insertions/deletions at known positions (especially the head) and don't need random access. Also when you can't tolerate the occasional O(n) resize of a dynamic array, or when implementing structures like LRU caches that splice nodes.</div></div>
+
+<div class="qa"><div class="q">BFS vs DFS &mdash; how do you choose?</div><div class="a">BFS for shortest path in an unweighted graph and for level-order processing; it uses a queue and O(width) memory. DFS for exhaustive exploration, cycle detection, and topological sorting; it uses recursion/stack and O(depth) memory. On very deep graphs DFS risks stack overflow; on very wide graphs BFS uses more memory.</div></div>
+
+<div class="qa"><div class="q">What makes a problem suitable for dynamic programming?</div><div class="a">Two properties: optimal substructure (the optimal answer is built from optimal answers to subproblems) and overlapping subproblems (the same subproblems recur). If subproblems don't overlap, plain divide-and-conquer suffices; if a greedy choice is provably safe, greedy is simpler and faster.</div></div>
+
+<div class="qa"><div class="q">How do you detect a cycle in a linked list in O(1) space?</div><div class="a">Floyd's tortoise and hare: advance one pointer by one node and another by two. If they ever meet, there is a cycle; if the fast pointer reaches null, there isn't. It uses constant extra space versus a hash set's O(n).</div></div>
+
+<div class="qa"><div class="q">Why is binary search O(log n), and what must be true to use it?</div><div class="a">Each comparison discards half the remaining candidates, so the number of steps is log&#8322;(n). It requires a sorted structure or, more generally, a monotonic predicate &mdash; a point before which the answer is "no" and after which it is "yes".</div></div>
+
+<div class="qa"><div class="q">What is the difference between stable and unstable sorting?</div><div class="a">A stable sort preserves the relative order of records with equal keys. This matters when sorting by multiple criteria in passes (e.g., sort by name, then by date keeping name order within a date). Merge sort and Timsort are stable; quicksort and heapsort are not.</div></div>
+
+<div class="qa"><div class="q">How would you find the top k elements in a large stream?</div><div class="a">Maintain a min-heap of size k. For each incoming element, push it and, if the heap exceeds k, pop the smallest. This keeps the k largest seen so far in O(n log k) time and O(k) space &mdash; far better than sorting everything.</div></div>
+
+<div class="qa"><div class="q">What is amortized analysis, with an example?</div><div class="a">It averages the cost of an operation over a sequence rather than looking at the worst single call. A dynamic array's append is O(1) amortized: most appends are O(1), and the occasional O(n) resize is paid for by the many cheap appends before it because capacity doubles.</div></div>
+
+<div class="qa"><div class="q">When is a trie better than a hash set for strings?</div><div class="a">When you need prefix queries (autocomplete, "words starting with&hellip;") or want to exploit shared prefixes to save memory. A hash set answers exact-membership in O(L) but cannot enumerate by prefix efficiently.</div></div>
+
+<div class="qa"><div class="q">How do you reason about the space complexity of a recursive function?</div><div class="a">Count the maximum depth of the call stack (each frame holds locals and the return address) plus any heap allocations that persist. A recursion n levels deep is at least O(n) space even if it allocates nothing else.</div></div>
+
+<div class="qa"><div class="q">Your solution is correct but too slow. How do you improve it?</div><div class="a">Identify the bottleneck via complexity analysis, then look for a pattern: replace a nested lookup with a hash map, exploit sortedness with two pointers or binary search, cache repeated subproblems with DP, or prune the search space with better bounds. Always confirm the new complexity before claiming the improvement.</div></div>
+
+<h2 id="study-plan-amp-further-learning">Study Plan &amp; Further Learning</h2>
+<p>Depth beats breadth. Master the patterns above on a modest set of problems rather than grinding hundreds mechanically.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Weeks 1&ndash;2 &mdash; Foundations</h4>
+    <ul>
+      <li>Big-O analysis until it is automatic</li>
+      <li>Arrays, strings, hash maps, two pointers</li>
+      <li>Stacks &amp; queues; sliding window</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Weeks 3&ndash;4 &mdash; Structures</h4>
+    <ul>
+      <li>Linked lists (reversal, cycle, merge)</li>
+      <li>Trees &amp; BSTs; all four traversals</li>
+      <li>Heaps and top-k problems</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Weeks 5&ndash;6 &mdash; Algorithms</h4>
+    <ul>
+      <li>Graphs: BFS, DFS, topological sort, Dijkstra</li>
+      <li>Binary search variants ("on the answer")</li>
+      <li>Backtracking templates</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Weeks 7&ndash;8 &mdash; Mastery</h4>
+    <ul>
+      <li>Dynamic programming (1D then 2D)</li>
+      <li>Greedy and when it is provably safe</li>
+      <li>Timed mock interviews, out loud</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Prioritized checklist</h3>
+<ul>
+  <li><span class="badge g">Must</span> Explain the complexity of every solution you write.</li>
+  <li><span class="badge g">Must</span> Solve ~5 problems per pattern until recognition is instant.</li>
+  <li><span class="badge g">Must</span> Practice talking through your approach before coding.</li>
+  <li><span class="badge">Should</span> Redo problems you failed after one week.</li>
+  <li><span class="badge">Should</span> Do at least 3 full timed mock interviews.</li>
+  <li><span class="badge o">Nice</span> Study system-design basics if interviewing for senior roles.</li>
+  <li><span class="badge o">Nice</span> Keep a personal "bug log" of mistakes you repeat.</li>
+</ul>
+
+<div class="callout ok"><span class="t">Final word</span> Interviewers hire for clear thinking under pressure, not memorized solutions. A calm, well-communicated process on a familiar pattern beats a silent scramble every time.</div>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

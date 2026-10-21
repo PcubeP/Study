@@ -1,0 +1,1 @@
+{"subtitle": "From Dockerfile to a locked-down customer cluster — images, Compose, Kubernetes objects, Helm, and the runbooks for when a pod will not start.", "tags": ["docker", "kubernetes", "containers", "dockerfile", "compose", "helm", "kubectl", "k8s", "devops", "deployment", "networking", "security", "troubleshooting", "fde"]}

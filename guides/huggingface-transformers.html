@@ -1,0 +1,795 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hugging Face Transformers — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">AI/ML Frameworks</div>
+  <h1>Hugging Face Transformers</h1>
+  <div class="subtitle">From one-line pipeline() inference to LoRA fine-tuning — the complete working guide to the Hugging Face Transformers ecosystem.</div>
+  <div class="tags"><span>transformers</span><span>huggingface</span><span>NLP</span><span>LLM</span><span>fine-tuning</span><span>LoRA</span><span>tokenization</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~16 min read &middot; 3,474 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#1-what-it-is-and-why-it-matters">1. What It Is and Why It Matters</a></li><li><a href="#2-setup-and-getting-started">2. Setup and Getting Started</a></li><li><a href="#3-the-pipeline-zero-to-inference">3. The pipeline() — Zero-to-Inference</a></li><li><a href="#4-autotokenizer-and-automodel-the-manual-api">4. AutoTokenizer and AutoModel — The Manual API</a></li><li><a href="#5-tokenization-in-depth">5. Tokenization in Depth</a></li><li><a href="#6-text-generation">6. Text Generation</a></li><li><a href="#7-embeddings-and-feature-extraction">7. Embeddings and Feature Extraction</a></li><li><a href="#8-the-datasets-library">8. The datasets Library</a></li><li><a href="#9-fine-tuning-with-trainer">9. Fine-Tuning with Trainer</a></li><li><a href="#10-peft-and-lora">10. PEFT and LoRA</a></li><li><a href="#11-saving-loading-and-sharing">11. Saving, Loading, and Sharing</a></li><li><a href="#12-cheat-sheet-reference">12. Cheat-Sheet Reference</a></li><li><a href="#13-best-practices-and-common-pitfalls">13. Best Practices and Common Pitfalls</a></li><li><a href="#14-interview-questions-amp-answers">14. Interview Questions &amp; Answers</a></li><li><a href="#15-further-learning">15. Further Learning</a></li></ol></nav>
+<p class="lead">Hugging Face <strong>Transformers</strong> is the de-facto standard library for working with pretrained deep-learning models — from a one-line <code>pipeline()</code> that classifies text, to full fine-tuning of a 7B-parameter LLM with LoRA. It gives you a unified Python API over tens of thousands of models on the Hub, backed interchangeably by PyTorch, and ships the tokenizers, training loop, and inference utilities you need to go from prototype to production.</p>
+
+<h2 id="1-what-it-is-and-why-it-matters">1. What It Is and Why It Matters</h2>
+
+<p>Before Transformers, using a state-of-the-art NLP model meant cloning a research repo, reconciling framework versions, and reimplementing preprocessing. The library collapses that into three composable abstractions you will use everywhere: a <span class="badge">tokenizer</span> that turns text into model-ready integer tensors, a <span class="badge g">model</span> that maps those tensors to hidden states or predictions, and a <span class="badge o">pipeline</span> that wires both together for a task.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>The Hub</h4>A git-backed registry of 1M+ models, datasets, and demos. Any checkpoint is one string away: <code>"bert-base-uncased"</code>, <code>"meta-llama/Llama-3.1-8B"</code>.</div>
+  <div class="card"><h4>Auto classes</h4><code>AutoModel</code>/<code>AutoTokenizer</code> read a model's config and instantiate the correct architecture — your code stays identical across BERT, GPT, T5, or Llama.</div>
+  <div class="card"><h4>One ecosystem</h4><code>transformers</code>, <code>datasets</code>, <code>tokenizers</code>, <code>accelerate</code>, <code>peft</code>, and <code>evaluate</code> interoperate so training and inference share one data path.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 760 250" width="760" height="250">
+  <defs>
+    <marker id="hf-ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="95" width="130" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="85" y="122" text-anchor="middle" font-size="13" fill="#1a2233">Raw text</text>
+  <text x="85" y="140" text-anchor="middle" font-size="11" fill="#64748b">"I love this!"</text>
+
+  <rect x="200" y="95" width="150" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="275" y="118" text-anchor="middle" font-size="13" fill="#1a2233">Tokenizer</text>
+  <text x="275" y="136" text-anchor="middle" font-size="11" fill="#64748b">input_ids, mask</text>
+
+  <rect x="400" y="95" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="475" y="118" text-anchor="middle" font-size="13" fill="#1a2233">Model</text>
+  <text x="475" y="136" text-anchor="middle" font-size="11" fill="#64748b">forward pass</text>
+
+  <rect x="600" y="95" width="140" height="60" rx="8" fill="#1e3a8a" stroke="#1e3a8a"/>
+  <text x="670" y="118" text-anchor="middle" font-size="13" fill="#fff">Logits /</text>
+  <text x="670" y="136" text-anchor="middle" font-size="13" fill="#fff">hidden states</text>
+
+  <line x1="150" y1="125" x2="200" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah)"/>
+  <line x1="350" y1="125" x2="400" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah)"/>
+  <line x1="550" y1="125" x2="600" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah)"/>
+
+  <rect x="200" y="30" width="350" height="34" rx="6" fill="none" stroke="#b45309" stroke-dasharray="5 4"/>
+  <text x="375" y="52" text-anchor="middle" font-size="12" fill="#b45309">pipeline() wraps both and post-processes</text>
+  <line x1="275" y1="64" x2="275" y2="93" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <line x1="475" y1="64" x2="475" y2="93" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+  <text x="375" y="210" text-anchor="middle" font-size="12" fill="#64748b">Post-process (argmax + label map) → {"label": "POSITIVE", "score": 0.99}</text>
+</svg>
+<div class="cap">Fig 1 — The core data path. <code>pipeline()</code> is a convenience wrapper over the same tokenizer + model you can also drive manually.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of Transformers as "drivers for neural networks". The model file is the hardware; the <code>config.json</code> tells the Auto classes which driver to load; the tokenizer is the cable that converts your text into the exact signal the model was trained on.</div>
+
+<h2 id="2-setup-and-getting-started">2. Setup and Getting Started</h2>
+
+<p>Install the library with a backend. PyTorch is the default and most widely supported. Add the sibling libraries you'll need for data and efficient fine-tuning.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Isolated environment</span>
+python -m venv .venv &amp;&amp; <span class="hljs-built_in">source</span> .venv/bin/activate   <span class="hljs-comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="hljs-comment"># Core + PyTorch backend</span>
+pip install <span class="hljs-string">&quot;transformers[torch]&quot;</span>
+
+<span class="hljs-comment"># Common companions</span>
+pip install datasets           <span class="hljs-comment"># streaming/efficient dataset loading</span>
+pip install accelerate         <span class="hljs-comment"># device placement + distributed training</span>
+pip install evaluate           <span class="hljs-comment"># metrics (accuracy, f1, bleu, ...)</span>
+pip install peft               <span class="hljs-comment"># LoRA / parameter-efficient fine-tuning</span>
+pip install sentencepiece      <span class="hljs-comment"># tokenizers for T5, Llama, etc.</span>
+
+<span class="hljs-comment"># Verify</span>
+python -c <span class="hljs-string">&quot;import transformers; print(transformers.__version__)&quot;</span></code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Authenticate to download gated models (e.g. Llama) and push your own</span>
+huggingface-cli login          <span class="hljs-comment"># paste a token from huggingface.co/settings/tokens</span>
+
+<span class="hljs-comment"># Caching: downloaded weights live here (override with HF_HOME)</span>
+<span class="hljs-built_in">export</span> HF_HOME=<span class="hljs-string">&quot;<span class="hljs-variable">$HOME</span>/.cache/huggingface&quot;</span></code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Set <code>HF_HUB_ENABLE_HF_TRANSFER=1</code> and <code>pip install hf_transfer</code> for much faster multi-gigabyte downloads. In notebooks, use <code>from huggingface_hub import notebook_login</code>.</div>
+
+<h2 id="3-the-pipeline-zero-to-inference">3. The pipeline() — Zero-to-Inference</h2>
+
+<p><code>pipeline()</code> is the fastest path to a working result. You name a task; it picks a sensible default model, downloads it, and handles pre/post-processing. Pass an explicit <code>model=</code> for reproducibility in real code.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> pipeline
+
+<span class="hljs-comment"># Sentiment analysis (default model chosen for the task)</span>
+clf = pipeline(<span class="hljs-string">&quot;sentiment-analysis&quot;</span>)
+<span class="hljs-built_in">print</span>(clf(<span class="hljs-string">&quot;Hugging Face makes NLP wonderfully simple.&quot;</span>))
+<span class="hljs-comment"># [{&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998}]</span>
+
+<span class="hljs-comment"># Pin a model explicitly + run on GPU (device=0) or Apple Silicon (&quot;mps&quot;)</span>
+clf = pipeline(
+    task=<span class="hljs-string">&quot;sentiment-analysis&quot;</span>,
+    model=<span class="hljs-string">&quot;distilbert-base-uncased-finetuned-sst-2-english&quot;</span>,
+    device=<span class="hljs-number">0</span>,                      <span class="hljs-comment"># -1 = CPU</span>
+)
+
+<span class="hljs-comment"># Batch many inputs at once — far faster than a Python loop</span>
+results = clf([<span class="hljs-string">&quot;Great value.&quot;</span>, <span class="hljs-string">&quot;Terrible support.&quot;</span>, <span class="hljs-string">&quot;It&#x27;s fine.&quot;</span>])</code></pre>
+
+<p>The task string selects the output shape and post-processing. A representative set:</p>
+
+<table>
+<tr><th>Task string</th><th>What it does</th><th>Typical default head</th></tr>
+<tr><td><code>sentiment-analysis</code> / <code>text-classification</code></td><td>Label a whole sequence</td><td>SequenceClassification</td></tr>
+<tr><td><code>ner</code> / <code>token-classification</code></td><td>Tag each token (entities)</td><td>TokenClassification</td></tr>
+<tr><td><code>question-answering</code></td><td>Extract an answer span from a context</td><td>QuestionAnswering</td></tr>
+<tr><td><code>fill-mask</code></td><td>Predict masked tokens</td><td>MaskedLM</td></tr>
+<tr><td><code>summarization</code> / <code>translation</code></td><td>Seq2seq text generation</td><td>Seq2SeqLM</td></tr>
+<tr><td><code>text-generation</code></td><td>Autoregressive completion / chat</td><td>CausalLM</td></tr>
+<tr><td><code>feature-extraction</code></td><td>Return raw hidden states (embeddings)</td><td>base Model</td></tr>
+<tr><td><code>zero-shot-classification</code></td><td>Classify into arbitrary labels via NLI</td><td>SequenceClassification</td></tr>
+<tr><td><code>automatic-speech-recognition</code></td><td>Transcribe audio (Whisper)</td><td>SpeechSeq2Seq</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Reuse the pipeline</span> Constructing a pipeline reloads weights from disk every time. Create it <em>once</em> at startup and reuse it; never build one inside a request handler or a loop.</div>
+
+<h2 id="4-autotokenizer-and-automodel-the-manual-api">4. AutoTokenizer and AutoModel — The Manual API</h2>
+
+<p>When you need control — custom pre/post-processing, access to hidden states, or integration into a training loop — drop below the pipeline. The <code>Auto*</code> classes inspect <code>config.json</code> and return the right concrete class.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, AutoModelForSequenceClassification
+<span class="hljs-keyword">import</span> torch
+
+ckpt = <span class="hljs-string">&quot;distilbert-base-uncased-finetuned-sst-2-english&quot;</span>
+tok = AutoTokenizer.from_pretrained(ckpt)
+model = AutoModelForSequenceClassification.from_pretrained(ckpt)
+
+<span class="hljs-comment"># Tokenize → PyTorch tensors, padded + truncated to the model&#x27;s limit</span>
+inputs = tok(
+    [<span class="hljs-string">&quot;I love this&quot;</span>, <span class="hljs-string">&quot;I hate waiting&quot;</span>],
+    padding=<span class="hljs-literal">True</span>, truncation=<span class="hljs-literal">True</span>, return_tensors=<span class="hljs-string">&quot;pt&quot;</span>,
+)
+<span class="hljs-comment"># inputs = {&#x27;input_ids&#x27;: tensor([...]), &#x27;attention_mask&#x27;: tensor([...])}</span>
+
+<span class="hljs-keyword">with</span> torch.no_grad():                 <span class="hljs-comment"># inference: no gradients needed</span>
+    logits = model(**inputs).logits   <span class="hljs-comment"># shape [batch, num_labels]</span>
+
+probs = torch.softmax(logits, dim=-<span class="hljs-number">1</span>)
+preds = probs.argmax(dim=-<span class="hljs-number">1</span>)
+<span class="hljs-comment"># Map ids to names via the model&#x27;s config</span>
+labels = [model.config.id2label[i.item()] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> preds]
+<span class="hljs-built_in">print</span>(labels)                         <span class="hljs-comment"># [&#x27;POSITIVE&#x27;, &#x27;NEGATIVE&#x27;]</span></code></pre>
+
+<h3>The AutoModel family</h3>
+<p>Pick the class that matches your task — the suffix determines which <em>head</em> is attached on top of the base encoder/decoder.</p>
+
+<table>
+<tr><th>Class</th><th>Use for</th><th>Output</th></tr>
+<tr><td><code>AutoModel</code></td><td>Raw embeddings / custom heads</td><td><code>last_hidden_state</code></td></tr>
+<tr><td><code>AutoModelForSequenceClassification</code></td><td>Sentiment, topic, NLI</td><td>logits [batch, labels]</td></tr>
+<tr><td><code>AutoModelForTokenClassification</code></td><td>NER, POS tagging</td><td>logits [batch, seq, labels]</td></tr>
+<tr><td><code>AutoModelForQuestionAnswering</code></td><td>Extractive QA</td><td>start/end logits</td></tr>
+<tr><td><code>AutoModelForCausalLM</code></td><td>GPT-style generation, chat LLMs</td><td>next-token logits</td></tr>
+<tr><td><code>AutoModelForSeq2SeqLM</code></td><td>Translation, summarization (T5, BART)</td><td>decoder logits</td></tr>
+<tr><td><code>AutoModelForMaskedLM</code></td><td>Masked-token prediction (BERT)</td><td>vocab logits</td></tr>
+</table>
+
+<h2 id="5-tokenization-in-depth">5. Tokenization in Depth</h2>
+
+<p>Tokenization is where most subtle bugs hide. Modern tokenizers use <strong>subword</strong> algorithms (WordPiece, Byte-Pair Encoding, SentencePiece/Unigram) so any string — including unseen words and emoji — maps to a finite vocabulary. The tokenizer also adds special tokens the model expects and produces an <code>attention_mask</code> marking real vs. padded positions.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 220" width="720" height="220">
+  <defs>
+    <marker id="hf-ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker>
+  </defs>
+  <text x="20" y="40" font-size="13" fill="#1a2233">"tokenizing"</text>
+  <line x1="130" y1="35" x2="190" y2="35" stroke="#0891b2" stroke-width="2" marker-end="url(#hf-ah2)"/>
+  <text x="200" y="40" font-size="12" fill="#64748b">BPE split</text>
+
+  <rect x="300" y="18" width="70" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="335" y="38" text-anchor="middle" font-size="12" fill="#1a2233">token</text>
+  <rect x="380" y="18" width="70" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="415" y="38" text-anchor="middle" font-size="12" fill="#1a2233">##izing</text>
+
+  <text x="20" y="110" font-size="13" fill="#1a2233">Add specials</text>
+  <rect x="150" y="92" width="60" height="30" rx="5" fill="#ecfdf5" stroke="#059669"/>
+  <text x="180" y="112" text-anchor="middle" font-size="11" fill="#1a2233">[CLS]</text>
+  <rect x="215" y="92" width="60" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="245" y="112" text-anchor="middle" font-size="11" fill="#1a2233">token</text>
+  <rect x="280" y="92" width="60" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="310" y="112" text-anchor="middle" font-size="11" fill="#1a2233">##izing</text>
+  <rect x="345" y="92" width="60" height="30" rx="5" fill="#ecfdf5" stroke="#059669"/>
+  <text x="375" y="112" text-anchor="middle" font-size="11" fill="#1a2233">[SEP]</text>
+
+  <text x="20" y="175" font-size="13" fill="#1a2233">To ids</text>
+  <rect x="150" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="180" y="177" text-anchor="middle" font-size="11" fill="#1a2233">101</text>
+  <rect x="215" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="245" y="177" text-anchor="middle" font-size="11" fill="#1a2233">19204</text>
+  <rect x="280" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="310" y="177" text-anchor="middle" font-size="11" fill="#1a2233">6894</text>
+  <rect x="345" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="375" y="177" text-anchor="middle" font-size="11" fill="#1a2233">102</text>
+</svg>
+<div class="cap">Fig 2 — Tokenization stages: subword split → add special tokens → map to vocabulary ids. The exact split and specials are baked into each checkpoint.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained(<span class="hljs-string">&quot;bert-base-uncased&quot;</span>)
+
+enc = tok(<span class="hljs-string">&quot;Tokenizing isn&#x27;t hard.&quot;</span>)
+<span class="hljs-built_in">print</span>(enc[<span class="hljs-string">&quot;input_ids&quot;</span>])            <span class="hljs-comment"># [101, 19204, 6026, 2003, 2025, 2524, 1012, 102]</span>
+<span class="hljs-built_in">print</span>(tok.convert_ids_to_tokens(enc[<span class="hljs-string">&quot;input_ids&quot;</span>]))
+<span class="hljs-comment"># [&#x27;[CLS]&#x27;, &#x27;token&#x27;, &#x27;##izing&#x27;, &#x27;is&#x27;, &quot;n&#x27;t&quot;, &#x27;hard&#x27;, &#x27;.&#x27;, &#x27;[SEP]&#x27;]</span>
+
+<span class="hljs-comment"># Round-trip back to text</span>
+<span class="hljs-built_in">print</span>(tok.decode(enc[<span class="hljs-string">&quot;input_ids&quot;</span>], skip_special_tokens=<span class="hljs-literal">True</span>))  <span class="hljs-comment"># &quot;tokenizing isn&#x27;t hard.&quot;</span>
+
+<span class="hljs-comment"># Key arguments you will use constantly</span>
+batch = tok(
+    [<span class="hljs-string">&quot;short&quot;</span>, <span class="hljs-string">&quot;a much longer sequence that may exceed the limit&quot;</span>],
+    padding=<span class="hljs-string">&quot;longest&quot;</span>,       <span class="hljs-comment"># or &quot;max_length&quot;</span>
+    truncation=<span class="hljs-literal">True</span>,
+    max_length=<span class="hljs-number">128</span>,
+    return_tensors=<span class="hljs-string">&quot;pt&quot;</span>,     <span class="hljs-comment"># &quot;pt&quot; torch, &quot;np&quot; numpy, None lists</span>
+)</code></pre>
+
+<h3>Chat templates</h3>
+<p>Instruction-tuned LLMs expect a specific role-formatted prompt. Never hand-format it — use the tokenizer's built-in template so special tokens match training exactly.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">messages = [
+    {<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;You are a concise assistant.&quot;</span>},
+    {<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Explain attention in one sentence.&quot;</span>},
+]
+prompt = tok.apply_chat_template(
+    messages,
+    tokenize=<span class="hljs-literal">False</span>,
+    add_generation_prompt=<span class="hljs-literal">True</span>,   <span class="hljs-comment"># append the assistant turn marker</span>
+)</code></pre>
+
+<div class="callout danger"><span class="t">Golden rule</span> Always load the tokenizer from the <em>same checkpoint</em> as the model. A model's weights are meaningless if the token ids, special tokens, or vocabulary don't match what it was trained on.</div>
+
+<h2 id="6-text-generation">6. Text Generation</h2>
+
+<p>Causal LMs generate autoregressively: predict the next token, append it, repeat. The <code>generate()</code> method exposes decoding strategy, length, and sampling controls. Understanding these knobs is essential interview material.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, AutoModelForCausalLM
+<span class="hljs-keyword">import</span> torch
+
+ckpt = <span class="hljs-string">&quot;Qwen/Qwen2.5-0.5B-Instruct&quot;</span>
+tok = AutoTokenizer.from_pretrained(ckpt)
+model = AutoModelForCausalLM.from_pretrained(ckpt, torch_dtype=<span class="hljs-string">&quot;auto&quot;</span>, device_map=<span class="hljs-string">&quot;auto&quot;</span>)
+
+messages = [{<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Give me a haiku about tensors.&quot;</span>}]
+inputs = tok.apply_chat_template(
+    messages, add_generation_prompt=<span class="hljs-literal">True</span>, return_tensors=<span class="hljs-string">&quot;pt&quot;</span>
+).to(model.device)
+
+out = model.generate(
+    inputs,
+    max_new_tokens=<span class="hljs-number">64</span>,       <span class="hljs-comment"># cap generated length (NOT total length)</span>
+    do_sample=<span class="hljs-literal">True</span>,          <span class="hljs-comment"># False = greedy/deterministic</span>
+    temperature=<span class="hljs-number">0.7</span>,         <span class="hljs-comment"># &lt;1 sharper, &gt;1 more random</span>
+    top_p=<span class="hljs-number">0.9</span>,               <span class="hljs-comment"># nucleus sampling</span>
+    top_k=<span class="hljs-number">50</span>,
+    repetition_penalty=<span class="hljs-number">1.1</span>,
+)
+<span class="hljs-comment"># Slice off the prompt tokens before decoding</span>
+text = tok.decode(out[<span class="hljs-number">0</span>][inputs.shape[-<span class="hljs-number">1</span>]:], skip_special_tokens=<span class="hljs-literal">True</span>)
+<span class="hljs-built_in">print</span>(text)</code></pre>
+
+<table>
+<tr><th>Strategy</th><th>Settings</th><th>When to use</th></tr>
+<tr><td>Greedy</td><td><code>do_sample=False</code></td><td>Deterministic, factual, short answers</td></tr>
+<tr><td>Beam search</td><td><code>num_beams=4</code></td><td>Translation/summarization quality</td></tr>
+<tr><td>Sampling</td><td><code>do_sample=True, temperature, top_p</code></td><td>Creative, diverse open-ended text</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Streaming + speed</span> Pass a <code>TextIteratorStreamer</code> to <code>generate()</code> to yield tokens as they arrive. Set <code>model.generation_config.pad_token_id = tok.eos_token_id</code> to silence padding warnings, and prefer <code>torch_dtype=torch.bfloat16</code> on modern GPUs to halve memory.</div>
+
+<h2 id="7-embeddings-and-feature-extraction">7. Embeddings and Feature Extraction</h2>
+
+<p>For semantic search, clustering, or RAG retrieval you need a fixed-size vector per text. Transformers gives raw hidden states; you pool them into a sentence embedding. <strong>Mean pooling</strong> over the attention mask is the standard recipe for most sentence encoders.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer, AutoModel
+<span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn.functional <span class="hljs-keyword">as</span> F
+
+ckpt = <span class="hljs-string">&quot;sentence-transformers/all-MiniLM-L6-v2&quot;</span>
+tok = AutoTokenizer.from_pretrained(ckpt)
+model = AutoModel.from_pretrained(ckpt)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">mean_pool</span>(<span class="hljs-params">last_hidden, mask</span>):
+    mask = mask.unsqueeze(-<span class="hljs-number">1</span>).<span class="hljs-built_in">float</span>()            <span class="hljs-comment"># [batch, seq, 1]</span>
+    summed = (last_hidden * mask).<span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span>)
+    counts = mask.<span class="hljs-built_in">sum</span>(<span class="hljs-number">1</span>).clamp(<span class="hljs-built_in">min</span>=<span class="hljs-number">1e-9</span>)
+    <span class="hljs-keyword">return</span> summed / counts                       <span class="hljs-comment"># [batch, hidden]</span>
+
+sentences = [<span class="hljs-string">&quot;A dog runs in the park.&quot;</span>, <span class="hljs-string">&quot;A canine sprints across a field.&quot;</span>]
+enc = tok(sentences, padding=<span class="hljs-literal">True</span>, truncation=<span class="hljs-literal">True</span>, return_tensors=<span class="hljs-string">&quot;pt&quot;</span>)
+<span class="hljs-keyword">with</span> torch.no_grad():
+    out = model(**enc)
+
+emb = mean_pool(out.last_hidden_state, enc[<span class="hljs-string">&quot;attention_mask&quot;</span>])
+emb = F.normalize(emb, p=<span class="hljs-number">2</span>, dim=<span class="hljs-number">1</span>)               <span class="hljs-comment"># unit vectors for cosine sim</span>
+
+similarity = (emb[<span class="hljs-number">0</span>] @ emb[<span class="hljs-number">1</span>]).item()            <span class="hljs-comment"># dot of normalized == cosine</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;cosine similarity: <span class="hljs-subst">{similarity:<span class="hljs-number">.3</span>f}</span>&quot;</span>)    <span class="hljs-comment"># ~0.7 (semantically close)</span></code></pre>
+
+<div class="callout note"><span class="t">Shortcut</span> The <code>sentence-transformers</code> library wraps this pooling for you: <code>SentenceTransformer(ckpt).encode(sentences)</code>. Use raw Transformers when you need custom pooling or want zero extra dependencies.</div>
+
+<h2 id="8-the-datasets-library">8. The datasets Library</h2>
+
+<p>The <code>datasets</code> library loads data lazily via Apache Arrow (memory-mapped, so it won't blow up your RAM), and offers fast <code>.map()</code> transforms that integrate directly with the <code>Trainer</code>.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> datasets <span class="hljs-keyword">import</span> load_dataset
+
+<span class="hljs-comment"># Load from the Hub (train/validation/test splits come as a DatasetDict)</span>
+ds = load_dataset(<span class="hljs-string">&quot;imdb&quot;</span>)
+<span class="hljs-built_in">print</span>(ds)
+<span class="hljs-comment"># DatasetDict({ train: Dataset(25000), test: Dataset(25000) })</span>
+
+<span class="hljs-comment"># Load your own files</span>
+local = load_dataset(<span class="hljs-string">&quot;csv&quot;</span>, data_files={<span class="hljs-string">&quot;train&quot;</span>: <span class="hljs-string">&quot;train.csv&quot;</span>, <span class="hljs-string">&quot;test&quot;</span>: <span class="hljs-string">&quot;test.csv&quot;</span>})
+
+<span class="hljs-comment"># Tokenize the whole dataset in batches (cached to disk automatically)</span>
+<span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoTokenizer
+tok = AutoTokenizer.from_pretrained(<span class="hljs-string">&quot;distilbert-base-uncased&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">preprocess</span>(<span class="hljs-params">batch</span>):
+    <span class="hljs-keyword">return</span> tok(batch[<span class="hljs-string">&quot;text&quot;</span>], truncation=<span class="hljs-literal">True</span>, max_length=<span class="hljs-number">256</span>)
+
+ds = ds.<span class="hljs-built_in">map</span>(preprocess, batched=<span class="hljs-literal">True</span>)
+ds = ds.remove_columns([<span class="hljs-string">&quot;text&quot;</span>]).rename_column(<span class="hljs-string">&quot;label&quot;</span>, <span class="hljs-string">&quot;labels&quot;</span>)
+ds.set_format(<span class="hljs-string">&quot;torch&quot;</span>)
+
+<span class="hljs-comment"># Stream a huge dataset without downloading it all</span>
+big = load_dataset(<span class="hljs-string">&quot;c4&quot;</span>, <span class="hljs-string">&quot;en&quot;</span>, split=<span class="hljs-string">&quot;train&quot;</span>, streaming=<span class="hljs-literal">True</span>)
+<span class="hljs-keyword">for</span> example <span class="hljs-keyword">in</span> big.take(<span class="hljs-number">2</span>):
+    <span class="hljs-built_in">print</span>(example[<span class="hljs-string">&quot;text&quot;</span>][:<span class="hljs-number">80</span>])</code></pre>
+
+<h2 id="9-fine-tuning-with-trainer">9. Fine-Tuning with Trainer</h2>
+
+<p>The <code>Trainer</code> class implements a robust training loop — mixed precision, gradient accumulation, checkpointing, logging, distributed training — so you supply only the model, data, and <code>TrainingArguments</code>. Here is a complete, runnable classification fine-tune.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> evaluate
+<span class="hljs-keyword">from</span> datasets <span class="hljs-keyword">import</span> load_dataset
+<span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> (
+    AutoTokenizer, AutoModelForSequenceClassification,
+    TrainingArguments, Trainer, DataCollatorWithPadding,
+)
+
+ckpt = <span class="hljs-string">&quot;distilbert-base-uncased&quot;</span>
+tok = AutoTokenizer.from_pretrained(ckpt)
+
+ds = load_dataset(<span class="hljs-string">&quot;imdb&quot;</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">prep</span>(<span class="hljs-params">b</span>): <span class="hljs-keyword">return</span> tok(b[<span class="hljs-string">&quot;text&quot;</span>], truncation=<span class="hljs-literal">True</span>, max_length=<span class="hljs-number">256</span>)
+ds = ds.<span class="hljs-built_in">map</span>(prep, batched=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># Dynamic padding per-batch is faster than padding everything to max_length</span>
+collator = DataCollatorWithPadding(tokenizer=tok)
+
+model = AutoModelForSequenceClassification.from_pretrained(
+    ckpt, num_labels=<span class="hljs-number">2</span>,
+    id2label={<span class="hljs-number">0</span>: <span class="hljs-string">&quot;NEG&quot;</span>, <span class="hljs-number">1</span>: <span class="hljs-string">&quot;POS&quot;</span>}, label2id={<span class="hljs-string">&quot;NEG&quot;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&quot;POS&quot;</span>: <span class="hljs-number">1</span>},
+)
+
+accuracy = evaluate.load(<span class="hljs-string">&quot;accuracy&quot;</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_metrics</span>(<span class="hljs-params">eval_pred</span>):
+    logits, labels = eval_pred
+    preds = np.argmax(logits, axis=-<span class="hljs-number">1</span>)
+    <span class="hljs-keyword">return</span> accuracy.compute(predictions=preds, references=labels)
+
+args = TrainingArguments(
+    output_dir=<span class="hljs-string">&quot;imdb-distilbert&quot;</span>,
+    learning_rate=<span class="hljs-number">2e-5</span>,
+    per_device_train_batch_size=<span class="hljs-number">16</span>,
+    per_device_eval_batch_size=<span class="hljs-number">32</span>,
+    num_train_epochs=<span class="hljs-number">2</span>,
+    weight_decay=<span class="hljs-number">0.01</span>,
+    eval_strategy=<span class="hljs-string">&quot;epoch&quot;</span>,       <span class="hljs-comment"># evaluate each epoch</span>
+    save_strategy=<span class="hljs-string">&quot;epoch&quot;</span>,
+    load_best_model_at_end=<span class="hljs-literal">True</span>,
+    fp16=<span class="hljs-literal">True</span>,                   <span class="hljs-comment"># mixed precision on GPU</span>
+    push_to_hub=<span class="hljs-literal">False</span>,
+)
+
+trainer = Trainer(
+    model=model,
+    args=args,
+    train_dataset=ds[<span class="hljs-string">&quot;train&quot;</span>].shuffle(seed=<span class="hljs-number">42</span>).select(<span class="hljs-built_in">range</span>(<span class="hljs-number">5000</span>)),
+    eval_dataset=ds[<span class="hljs-string">&quot;test&quot;</span>].select(<span class="hljs-built_in">range</span>(<span class="hljs-number">1000</span>)),
+    processing_class=tok,        <span class="hljs-comment"># (was tokenizer=) handles saving the tokenizer</span>
+    data_collator=collator,
+    compute_metrics=compute_metrics,
+)
+
+trainer.train()
+trainer.save_model(<span class="hljs-string">&quot;imdb-distilbert/best&quot;</span>)   <span class="hljs-comment"># saves weights + tokenizer + config</span></code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 720 150" width="720" height="150">
+  <defs>
+    <marker id="hf-ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <rect x="10" y="55" width="110" height="44" rx="7" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="65" y="82" text-anchor="middle" font-size="12" fill="#1a2233">Dataset</text>
+  <rect x="150" y="55" width="110" height="44" rx="7" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="205" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Collator</text>
+  <text x="205" y="90" text-anchor="middle" font-size="10" fill="#64748b">(pad batch)</text>
+  <rect x="290" y="55" width="120" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="350" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Forward +</text>
+  <text x="350" y="90" text-anchor="middle" font-size="11" fill="#1a2233">loss</text>
+  <rect x="440" y="55" width="120" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="500" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Backward +</text>
+  <text x="500" y="90" text-anchor="middle" font-size="11" fill="#1a2233">optimizer step</text>
+  <rect x="590" y="55" width="120" height="44" rx="7" fill="#fff7ed" stroke="#b45309"/>
+  <text x="650" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Eval +</text>
+  <text x="650" y="90" text-anchor="middle" font-size="11" fill="#1a2233">checkpoint</text>
+
+  <line x1="120" y1="77" x2="150" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <line x1="260" y1="77" x2="290" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <line x1="410" y1="77" x2="440" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <line x1="560" y1="77" x2="590" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <path d="M650 99 C650 135, 65 135, 65 101" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#hf-ah3)"/>
+  <text x="360" y="130" text-anchor="middle" font-size="11" fill="#64748b">repeat for each batch / epoch</text>
+</svg>
+<div class="cap">Fig 3 — What Trainer orchestrates per step: batch → pad → forward/loss → backward/step, with periodic eval and checkpointing.</div>
+</div>
+
+<h2 id="10-peft-and-lora">10. PEFT and LoRA</h2>
+
+<p>Full fine-tuning of a billion-parameter model updates every weight — enormous memory and storage. <strong>Parameter-Efficient Fine-Tuning (PEFT)</strong> freezes the base model and trains a tiny number of extra parameters. The dominant method, <strong>LoRA (Low-Rank Adaptation)</strong>, injects two small matrices <em>A</em> (d×r) and <em>B</em> (r×d) whose product approximates the weight update, where rank <em>r</em> is typically 8-64. You train &lt;1% of the parameters and ship a few-MB adapter instead of a multi-GB checkpoint.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 680 220" width="680" height="220">
+  <defs>
+    <marker id="hf-ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="60" y="80" width="130" height="60" rx="8" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="125" y="106" text-anchor="middle" font-size="13" fill="#1a2233">W (frozen)</text>
+  <text x="125" y="124" text-anchor="middle" font-size="11" fill="#64748b">d × d</text>
+
+  <rect x="300" y="40" width="90" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="345" y="60" text-anchor="middle" font-size="12" fill="#1a2233">A (d×r)</text>
+  <text x="345" y="76" text-anchor="middle" font-size="10" fill="#059669">trainable</text>
+  <rect x="300" y="104" width="90" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="345" y="124" text-anchor="middle" font-size="12" fill="#1a2233">B (r×d)</text>
+  <text x="345" y="140" text-anchor="middle" font-size="10" fill="#059669">trainable</text>
+
+  <circle cx="500" cy="110" r="22" fill="#1e3a8a"/>
+  <text x="500" y="116" text-anchor="middle" font-size="18" fill="#fff">+</text>
+
+  <rect x="560" y="80" width="100" height="60" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="610" y="114" text-anchor="middle" font-size="12" fill="#1a2233">output</text>
+
+  <line x1="190" y1="110" x2="478" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <line x1="390" y1="62" x2="482" y2="98" stroke="#059669" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <line x1="390" y1="126" x2="482" y2="122" stroke="#059669" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <line x1="522" y1="110" x2="560" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <text x="345" y="175" text-anchor="middle" font-size="12" fill="#64748b">ΔW ≈ B·A  (rank r ≪ d, so few parameters)</text>
+  <text x="125" y="60" text-anchor="middle" font-size="11" fill="#64748b">original weights unchanged</text>
+</svg>
+<div class="cap">Fig 4 — LoRA. The frozen weight W is kept; only the low-rank adapters A and B are trained, and their product is added to W's output.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> peft <span class="hljs-keyword">import</span> LoraConfig, get_peft_model, TaskType
+<span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModelForCausalLM
+
+base = AutoModelForCausalLM.from_pretrained(
+    <span class="hljs-string">&quot;Qwen/Qwen2.5-0.5B&quot;</span>, torch_dtype=<span class="hljs-string">&quot;auto&quot;</span>, device_map=<span class="hljs-string">&quot;auto&quot;</span>,
+)
+
+lora = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,
+    r=<span class="hljs-number">16</span>,                     <span class="hljs-comment"># rank</span>
+    lora_alpha=<span class="hljs-number">32</span>,            <span class="hljs-comment"># scaling (effective LR multiplier ~ alpha/r)</span>
+    lora_dropout=<span class="hljs-number">0.05</span>,
+    target_modules=[<span class="hljs-string">&quot;q_proj&quot;</span>, <span class="hljs-string">&quot;v_proj&quot;</span>],   <span class="hljs-comment"># which linear layers get adapters</span>
+)
+
+model = get_peft_model(base, lora)
+model.print_trainable_parameters()
+<span class="hljs-comment"># trainable params: 1.08M || all params: 495M || trainable%: 0.22</span>
+
+<span class="hljs-comment"># Train with the SAME Trainer as before, then save just the adapter (a few MB)</span>
+model.save_pretrained(<span class="hljs-string">&quot;qwen-lora-adapter&quot;</span>)
+
+<span class="hljs-comment"># Later: reload base + adapter for inference</span>
+<span class="hljs-keyword">from</span> peft <span class="hljs-keyword">import</span> PeftModel
+base = AutoModelForCausalLM.from_pretrained(<span class="hljs-string">&quot;Qwen/Qwen2.5-0.5B&quot;</span>)
+model = PeftModel.from_pretrained(base, <span class="hljs-string">&quot;qwen-lora-adapter&quot;</span>)</code></pre>
+
+<div class="callout tip"><span class="t">QLoRA</span> Combine LoRA with a 4-bit quantized base (<code>bitsandbytes</code>, <code>load_in_4bit=True</code>) to fine-tune a 7B model on a single consumer GPU. The base is frozen anyway, so quantizing it costs little accuracy.</div>
+
+<h2 id="11-saving-loading-and-sharing">11. Saving, Loading, and Sharing</h2>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Save locally — produces config.json, model weights (safetensors), tokenizer files</span>
+model.save_pretrained(<span class="hljs-string">&quot;my-model&quot;</span>)
+tok.save_pretrained(<span class="hljs-string">&quot;my-model&quot;</span>)
+
+<span class="hljs-comment"># Reload later</span>
+model = AutoModelForSequenceClassification.from_pretrained(<span class="hljs-string">&quot;my-model&quot;</span>)
+
+<span class="hljs-comment"># Push to the Hub (requires huggingface-cli login)</span>
+model.push_to_hub(<span class="hljs-string">&quot;your-username/my-model&quot;</span>)
+tok.push_to_hub(<span class="hljs-string">&quot;your-username/my-model&quot;</span>)</code></pre>
+
+<div class="callout note"><span class="t">safetensors</span> The default weight format is <code>.safetensors</code> — a safe, fast, zero-copy format that cannot execute arbitrary code on load (unlike pickle-based <code>.bin</code>). Prefer it, especially for third-party checkpoints.</div>
+
+<h2 id="12-cheat-sheet-reference">12. Cheat-Sheet Reference</h2>
+
+<table>
+<tr><th>Goal</th><th>Call</th></tr>
+<tr><td>Quick inference</td><td><code>pipeline(task, model=...)</code></td></tr>
+<tr><td>Load tokenizer</td><td><code>AutoTokenizer.from_pretrained(ckpt)</code></td></tr>
+<tr><td>Load model + head</td><td><code>AutoModelForXxx.from_pretrained(ckpt)</code></td></tr>
+<tr><td>Encode text</td><td><code>tok(text, padding=True, truncation=True, return_tensors="pt")</code></td></tr>
+<tr><td>Decode ids</td><td><code>tok.decode(ids, skip_special_tokens=True)</code></td></tr>
+<tr><td>Chat prompt</td><td><code>tok.apply_chat_template(msgs, add_generation_prompt=True)</code></td></tr>
+<tr><td>Generate text</td><td><code>model.generate(ids, max_new_tokens=...)</code></td></tr>
+<tr><td>Load data</td><td><code>load_dataset(name_or_format, ...)</code></td></tr>
+<tr><td>Map transform</td><td><code>ds.map(fn, batched=True)</code></td></tr>
+<tr><td>Train</td><td><code>Trainer(model, args, ...).train()</code></td></tr>
+<tr><td>Add LoRA</td><td><code>get_peft_model(model, LoraConfig(...))</code></td></tr>
+<tr><td>Save / share</td><td><code>model.save_pretrained(dir)</code> / <code>.push_to_hub(repo)</code></td></tr>
+</table>
+
+<h3>Model families at a glance</h3>
+<table>
+<tr><th>Family</th><th>Type</th><th>Best for</th></tr>
+<tr><td>BERT / RoBERTa / DeBERTa</td><td>Encoder-only</td><td>Classification, NER, embeddings</td></tr>
+<tr><td>GPT / Llama / Qwen / Mistral</td><td>Decoder-only</td><td>Generation, chat, few-shot</td></tr>
+<tr><td>T5 / BART / mBART</td><td>Encoder-decoder</td><td>Summarization, translation</td></tr>
+<tr><td>Whisper</td><td>Speech seq2seq</td><td>Transcription / ASR</td></tr>
+<tr><td>CLIP / ViT</td><td>Vision / multimodal</td><td>Image classification, retrieval</td></tr>
+</table>
+
+<h2 id="13-best-practices-and-common-pitfalls">13. Best Practices and Common Pitfalls</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Do</h4>
+    <ul>
+      <li>Pin exact checkpoint strings and a <code>revision=</code> commit hash for reproducibility.</li>
+      <li>Use <code>torch.no_grad()</code> or <code>@torch.inference_mode()</code> for inference.</li>
+      <li>Batch inputs; use <code>DataCollatorWithPadding</code> for dynamic padding.</li>
+      <li>Prefer <code>bfloat16</code>/<code>fp16</code> on GPU to cut memory and speed up.</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Avoid</h4>
+    <ul>
+      <li>Building a pipeline inside a request handler or loop.</li>
+      <li>Mismatched tokenizer and model checkpoints.</li>
+      <li>Forgetting to slice the prompt off generated output before decoding.</li>
+      <li>Padding everything to <code>max_length</code> when dynamic padding is faster.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout ok"><span class="t">Best practice</span> Keep model loading separate from inference. Load once (ideally at process start), move to the right device, set <code>model.eval()</code>, and reuse the handle. This dominates latency in real services.</div>
+
+<div class="callout warn"><span class="t">Pitfall: OOM during training</span> If you hit CUDA out-of-memory, reduce <code>per_device_train_batch_size</code> and compensate with <code>gradient_accumulation_steps</code>, enable <code>gradient_checkpointing=True</code>, and switch to <code>fp16</code>/<code>bf16</code>. These trade compute/time for memory.</div>
+
+<div class="callout danger"><span class="t">Pitfall: trusting remote code</span> Some models require <code>trust_remote_code=True</code>, which executes code from the repo on your machine. Only enable it for sources you trust, and pin a specific <code>revision</code>.</div>
+
+<h2 id="14-interview-questions-amp-answers">14. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What do the Auto classes actually do?</div><div class="a">They read the model's <code>config.json</code> (specifically <code>architectures</code>/<code>model_type</code>) and dynamically instantiate the matching concrete class — e.g. <code>AutoModelForCausalLM</code> on a Llama config returns <code>LlamaForCausalLM</code>. This lets one code path work across architectures and keeps your code decoupled from a specific model.</div></div>
+
+<div class="qa"><div class="q">Why must the tokenizer match the model?</div><div class="a">The model learned a mapping from specific token ids and special tokens to meaning. A different tokenizer produces different ids, vocabulary, and special-token placement, so the inputs no longer mean what the model expects — outputs become garbage. Always load both from the same checkpoint.</div></div>
+
+<div class="qa"><div class="q">What is the attention_mask for?</div><div class="a">When batching sequences of different lengths you pad shorter ones to a common length. The attention mask is 1 for real tokens and 0 for padding, telling the attention mechanism to ignore padded positions so they don't affect the output.</div></div>
+
+<div class="qa"><div class="q">Explain temperature, top_k, and top_p in generation.</div><div class="a">They shape the next-token distribution during sampling. Temperature scales logits before softmax (&lt;1 sharpens toward the top token, &gt;1 flattens for more randomness). top_k keeps only the k highest-probability tokens. top_p (nucleus) keeps the smallest set of tokens whose cumulative probability reaches p. Greedy decoding (<code>do_sample=False</code>) always takes the argmax.</div></div>
+
+<div class="qa"><div class="q">How does LoRA reduce fine-tuning cost?</div><div class="a">It freezes the pretrained weights and learns a low-rank update ΔW = B·A, where A is d×r and B is r×d with rank r≪d. Only A and B are trained — often &lt;1% of parameters — so optimizer state and gradients are tiny, and the resulting adapter is a few MB. The base model is shared across many task adapters.</div></div>
+
+<div class="qa"><div class="q">What problem does the datasets library's Arrow backend solve?</div><div class="a">It memory-maps data from disk instead of loading it all into RAM, so you can work with datasets larger than memory. It also enables fast columnar access, zero-copy slicing, on-disk caching of <code>.map()</code> results, and streaming mode for datasets too large to download.</div></div>
+
+<div class="qa"><div class="q">When would you choose full fine-tuning over LoRA?</div><div class="a">When you have ample compute, the target task differs substantially from pretraining, and you need maximum accuracy with no inference-time adapter overhead. For most practical adaptation — limited GPU, many tasks, fast iteration — LoRA/QLoRA gives comparable quality at a fraction of the cost.</div></div>
+
+<div class="qa"><div class="q">How do you get a sentence embedding from a BERT-style model?</div><div class="a">Run the base model to get <code>last_hidden_state</code> (one vector per token), then pool. Mean pooling over non-padding tokens (weighted by the attention mask) is the standard; some models use the <code>[CLS]</code> token. Normalize to unit length so dot product equals cosine similarity.</div></div>
+
+<div class="qa"><div class="q">Encoder-only vs decoder-only vs encoder-decoder — when to use each?</div><div class="a">Encoder-only (BERT) sees the whole sequence bidirectionally — best for understanding tasks like classification and NER. Decoder-only (GPT, Llama) is causal/autoregressive — best for generation and chat. Encoder-decoder (T5, BART) encodes an input then generates a transformed output — best for translation and summarization.</div></div>
+
+<div class="qa"><div class="q">What does gradient accumulation do and why use it?</div><div class="a">It runs several forward/backward passes, summing gradients, before a single optimizer step. This simulates a larger effective batch size (small batch × accumulation steps) without the memory of a big batch — essential for training large models on limited VRAM.</div></div>
+
+<div class="qa"><div class="q">Why prefer safetensors over pickle checkpoints?</div><div class="a">Pickle (<code>.bin</code>) can execute arbitrary code when loaded, a security risk for untrusted models. safetensors stores only tensor data, loads faster via zero-copy/mmap, and cannot run code — making it the safe default.</div></div>
+
+<div class="qa"><div class="q">How would you serve a fine-tuned model efficiently in production?</div><div class="a">Load the model once at startup in eval mode on the GPU with bf16; batch incoming requests; use <code>torch.inference_mode()</code>; cache the tokenizer. For high-throughput LLM generation, use a dedicated serving engine (e.g. TGI or vLLM) that adds KV-cache management, continuous batching, and paged attention rather than calling <code>generate()</code> per request.</div></div>
+
+<h2 id="15-further-learning">15. Further Learning</h2>
+
+<ul>
+  <li><strong>Official course</strong> — the free Hugging Face LLM/NLP course walks through tokenizers, fine-tuning, and the Trainer end to end.</li>
+  <li><strong>Docs deep-dives</strong> — read the <code>generate()</code> and <code>GenerationConfig</code> reference, and the PEFT guide for LoRA/QLoRA/prefix tuning.</li>
+  <li><strong>accelerate</strong> — learn multi-GPU and mixed-precision training to scale beyond one device.</li>
+  <li><strong>sentence-transformers</strong> — for production embedding and semantic search.</li>
+  <li><strong>Serving</strong> — explore Text Generation Inference (TGI) and vLLM for low-latency, high-throughput LLM serving.</li>
+  <li><strong>Build something</strong> — fine-tune a small model on your own labelled data with LoRA, push the adapter to the Hub, and wire it into a RAG or chat demo.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

@@ -1,0 +1,618 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jupyter Notebooks & Anaconda — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Data Science</div>
+  <h1>Jupyter Notebooks & Anaconda</h1>
+  <div class="subtitle">Master the notebook workflow, kernels, and IPython magics alongside conda environments and reproducible, shareable Python setups.</div>
+  <div class="tags"><span>jupyter</span><span>anaconda</span><span>conda</span><span>jupyterlab</span><span>environments</span><span>reproducibility</span><span>data-science</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~16 min read &middot; 3,411 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#1-what-they-are-and-why-they-matter">1. What They Are and Why They Matter</a></li><li><a href="#2-setup-and-getting-started">2. Setup and Getting Started</a></li><li><a href="#3-the-notebook-document-and-cell-workflow">3. The Notebook Document and Cell Workflow</a></li><li><a href="#4-ipython-magics-and-shell-access">4. IPython Magics and Shell Access</a></li><li><a href="#5-kernels-and-jupyterlab">5. Kernels and JupyterLab</a></li><li><a href="#6-conda-environments-and-package-management">6. Conda: Environments and Package Management</a></li><li><a href="#7-conda-vs-pip-vs-venv">7. conda vs pip vs venv</a></li><li><a href="#8-cheat-sheet-reference">8. Cheat-Sheet Reference</a></li><li><a href="#9-best-practices-and-common-pitfalls">9. Best Practices and Common Pitfalls</a></li><li><a href="#10-interview-questions-amp-answers">10. Interview Questions &amp; Answers</a></li><li><a href="#11-further-learning">11. Further Learning</a></li></ol></nav>
+<p class="lead">Jupyter and Anaconda are the two tools most data scientists launch first. <strong>Jupyter</strong> gives you a literate, cell-by-cell programming surface where code, output, math, and prose live in one document — the natural habitat for exploration, teaching, and reproducible analysis. <strong>Anaconda</strong> (and its lean cousin Miniconda) gives you a cross-platform package and environment manager that installs not just Python libraries but the compiled C/C++/Fortran stacks (MKL, CUDA, GEOS) they depend on, so your project runs the same on your laptop, a colleague's Mac, and a CI server. Learn the notebook workflow and conda environments well and you eliminate the two biggest sources of friction in data work: slow iteration and "it works on my machine".</p>
+
+<h2 id="1-what-they-are-and-why-they-matter">1. What They Are and Why They Matter</h2>
+
+<p>These are complementary layers, not competitors. Anaconda sits <em>underneath</em> and provisions the Python interpreter plus every binary dependency; Jupyter runs <em>on top</em> and gives you an interactive editing experience backed by a language <strong>kernel</strong>. A healthy mental model separates three moving parts: the <strong>front-end</strong> you type into (the browser UI), the <strong>kernel</strong> that actually executes code and holds state, and the <strong>environment</strong> (a conda env) that supplies the packages the kernel imports.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Anaconda / conda</h4>A package <em>and</em> environment manager. Resolves and installs binary dependencies (not just Python), creates isolated environments, and reproduces them across OSes from a single file.</div>
+  <div class="card"><h4>Jupyter Notebook / Lab</h4>A client that renders a <code>.ipynb</code> document and talks to a kernel over a messaging protocol. JupyterLab is the modern IDE-style interface; classic Notebook is the simpler one.</div>
+  <div class="card"><h4>Kernel</h4>The process that runs your code and keeps variables alive between cells. IPython is the default Python kernel; kernels exist for R, Julia, Scala, and dozens more.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 780 300" width="780" height="300">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+    <marker id="arg" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <rect x="20" y="110" width="150" height="80" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="145" text-anchor="middle" font-size="14" fill="#1a2233">Browser UI</text>
+  <text x="95" y="165" text-anchor="middle" font-size="11" fill="#6b7688">JupyterLab / Notebook</text>
+
+  <rect x="250" y="110" width="150" height="80" rx="10" fill="#ecfdf5" stroke="#059669"/>
+  <text x="325" y="140" text-anchor="middle" font-size="14" fill="#1a2233">Jupyter Server</text>
+  <text x="325" y="160" text-anchor="middle" font-size="11" fill="#6b7688">HTTP + WebSocket</text>
+  <text x="325" y="176" text-anchor="middle" font-size="11" fill="#6b7688">routes messages</text>
+
+  <rect x="480" y="60" width="150" height="80" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="555" y="92" text-anchor="middle" font-size="14" fill="#1a2233">Kernel</text>
+  <text x="555" y="112" text-anchor="middle" font-size="11" fill="#6b7688">IPython process</text>
+  <text x="555" y="128" text-anchor="middle" font-size="11" fill="#6b7688">holds state</text>
+
+  <rect x="480" y="170" width="150" height="80" rx="10" fill="#fffbeb" stroke="#b45309"/>
+  <text x="555" y="202" text-anchor="middle" font-size="14" fill="#1a2233">conda env</text>
+  <text x="555" y="222" text-anchor="middle" font-size="11" fill="#6b7688">numpy, pandas,</text>
+  <text x="555" y="238" text-anchor="middle" font-size="11" fill="#6b7688">python 3.12 ...</text>
+
+  <rect x="660" y="60" width="100" height="190" rx="10" fill="none" stroke="#94a3b8" stroke-dasharray="5 4"/>
+  <text x="710" y="150" text-anchor="middle" font-size="11" fill="#6b7688" transform="rotate(90 710 150)">Anaconda provisions</text>
+
+  <line x1="170" y1="150" x2="250" y2="150" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="210" y="142" text-anchor="middle" font-size="10" fill="#6b7688">ws</text>
+  <line x1="400" y1="140" x2="480" y2="100" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="440" y="108" text-anchor="middle" font-size="10" fill="#6b7688">ZMQ</text>
+  <line x1="555" y1="140" x2="555" y2="170" stroke="#94a3b8" stroke-width="2" marker-end="url(#arg)"/>
+  <text x="585" y="160" text-anchor="middle" font-size="10" fill="#6b7688">imports</text>
+</svg>
+<div class="cap">Fig 1. The four moving parts: UI talks to the Jupyter Server over WebSocket; the server relays execution requests to a kernel over ZeroMQ; the kernel imports packages from the conda environment it was launched in.</div>
+</div>
+
+<div class="callout note"><span class="t">The single most useful insight</span> A notebook's output depends on <em>which kernel</em> ran it, and that kernel belongs to <em>one</em> environment. 90% of "ModuleNotFoundError even though I pip-installed it" problems are a mismatch: you installed into env A but the notebook is running env B's kernel.</div>
+
+<h2 id="2-setup-and-getting-started">2. Setup and Getting Started</h2>
+
+<p>Prefer <strong>Miniconda</strong> (just conda + Python) over the full Anaconda Distribution unless you want the ~3 GB bundle of pre-installed scientific packages. Even better for speed is <strong>Miniforge</strong>, which defaults to the community <code>conda-forge</code> channel and ships the fast <code>mamba</code> solver.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># --- Install Miniconda (Linux/macOS example) ---</span>
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+<span class="hljs-comment"># restart your shell, then verify</span>
+conda --version          <span class="hljs-comment"># conda 24.x or newer</span>
+conda init bash          <span class="hljs-comment"># wire conda into your shell startup</span>
+
+<span class="hljs-comment"># --- Create a project environment (never work in base!) ---</span>
+conda create -n ds python=3.12 numpy pandas jupyterlab -y
+conda activate ds
+
+<span class="hljs-comment"># --- Launch ---</span>
+jupyter lab              <span class="hljs-comment"># opens http://localhost:8888 in your browser</span>
+<span class="hljs-comment"># or the classic interface:</span>
+jupyter notebook</code></pre>
+
+<div class="callout tip"><span class="t">Modern conda is fast</span> Since conda 23.10 the lightning-fast <code>libmamba</code> solver is the default. If you are on an older install, enable it once: <code>conda config --set solver libmamba</code>. Dependency resolution that took minutes now takes seconds.</div>
+
+<p>To make a specific environment selectable as a kernel inside Jupyter, register it with <code>ipykernel</code>:</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs">conda activate ds
+conda install ipykernel -y
+<span class="hljs-comment"># register this env so it appears in the Jupyter kernel picker</span>
+python -m ipykernel install --user --name ds --display-name <span class="hljs-string">&quot;Python (ds)&quot;</span></code></pre>
+
+<h2 id="3-the-notebook-document-and-cell-workflow">3. The Notebook Document and Cell Workflow</h2>
+
+<p>A notebook is a JSON file (<code>.ipynb</code>) containing an ordered list of <strong>cells</strong>. Each cell is one of three types: <span class="badge">code</span>, <span class="badge g">markdown</span>, or <span class="badge o">raw</span>. Code cells send their source to the kernel and capture whatever the kernel returns — text, tables, images, HTML, interactive widgets.</p>
+
+<h3>The execution model (and its #1 trap)</h3>
+
+<p>Cells share a <strong>single, persistent namespace</strong> in the kernel. The number in <code>[ ]</code> to a cell's left is its <em>execution count</em> — the order in which it was actually run, which need not match top-to-bottom order on screen. This is the source of the notorious "hidden state" bug.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 740 260" width="740" height="260">
+  <defs><marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker></defs>
+  <rect x="30" y="30" width="300" height="200" rx="10" fill="#f6f8fb" stroke="#e3e8ef"/>
+  <text x="180" y="22" text-anchor="middle" font-size="12" fill="#6b7688">On-screen order</text>
+  <rect x="50" y="50" width="260" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="75" font-size="12" fill="#1a2233">[1] x = 10</text>
+  <rect x="50" y="100" width="260" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="125" font-size="12" fill="#1a2233">[3] print(x)  # 42 ?!</text>
+  <rect x="50" y="150" width="260" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="175" font-size="12" fill="#1a2233">[2] x = 42</text>
+
+  <rect x="420" y="80" width="280" height="100" rx="10" fill="#fef2f2" stroke="#dc2626"/>
+  <text x="560" y="115" text-anchor="middle" font-size="13" fill="#1a2233">Kernel ran 1 → 2 → 3</text>
+  <text x="560" y="140" text-anchor="middle" font-size="12" fill="#6b7688">so x is 42 when cell 3 runs,</text>
+  <text x="560" y="158" text-anchor="middle" font-size="12" fill="#6b7688">even though it sits above cell 2</text>
+
+  <line x1="330" y1="130" x2="420" y2="130" stroke="#dc2626" stroke-width="2" marker-end="url(#ar2)"/>
+</svg>
+<div class="cap">Fig 2. Execution count vs. visual order. The kernel remembers state across runs, so out-of-order execution yields results you cannot reproduce by reading top to bottom.</div>
+</div>
+
+<div class="callout danger"><span class="t">Always validate with "Restart &amp; Run All"</span> Before you trust, share, or commit a notebook, run <strong>Kernel → Restart Kernel and Run All Cells</strong>. If it fails or gives different numbers, your notebook had hidden state and is not reproducible.</div>
+
+<h3>Essential keyboard shortcuts</h3>
+
+<p>Jupyter has two modes: <strong>command mode</strong> (blue bar, acts on cells — press <span class="kbd">Esc</span>) and <strong>edit mode</strong> (green bar, type into a cell — press <span class="kbd">Enter</span>).</p>
+
+<table>
+<tr><th>Shortcut</th><th>Mode</th><th>Action</th></tr>
+<tr><td><span class="kbd">Shift</span>+<span class="kbd">Enter</span></td><td>any</td><td>Run cell, select cell below</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">Enter</span></td><td>any</td><td>Run cell, stay put</td></tr>
+<tr><td><span class="kbd">Alt</span>+<span class="kbd">Enter</span></td><td>any</td><td>Run cell, insert new cell below</td></tr>
+<tr><td><span class="kbd">A</span> / <span class="kbd">B</span></td><td>command</td><td>Insert cell above / below</td></tr>
+<tr><td><span class="kbd">D</span> <span class="kbd">D</span></td><td>command</td><td>Delete cell</td></tr>
+<tr><td><span class="kbd">M</span> / <span class="kbd">Y</span></td><td>command</td><td>Convert to markdown / code</td></tr>
+<tr><td><span class="kbd">Z</span></td><td>command</td><td>Undo cell deletion</td></tr>
+<tr><td><span class="kbd">0</span> <span class="kbd">0</span></td><td>command</td><td>Restart the kernel</td></tr>
+<tr><td><span class="kbd">Shift</span>+<span class="kbd">M</span></td><td>command</td><td>Merge selected cells</td></tr>
+</table>
+
+<h2 id="4-ipython-magics-and-shell-access">4. IPython Magics and Shell Access</h2>
+
+<p>The IPython kernel adds <strong>magic commands</strong>: special directives prefixed with <code>%</code> (line magic, affects one line) or <code>%%</code> (cell magic, affects the whole cell). They are not Python — they are kernel features for timing, profiling, loading code, and switching languages.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Line magics (single %)</span>
+%timeit <span class="hljs-built_in">sum</span>(<span class="hljs-built_in">range</span>(<span class="hljs-number">1000</span>))        <span class="hljs-comment"># statistically robust micro-benchmark</span>
+%who                            <span class="hljs-comment"># list variables defined in the namespace</span>
+%matplotlib inline              <span class="hljs-comment"># render matplotlib figures in the output</span>
+%load_ext autoreload            <span class="hljs-comment"># auto-reimport edited modules</span>
+%autoreload <span class="hljs-number">2</span>
+%pwd                            <span class="hljs-comment"># print working directory</span>
+
+<span class="hljs-comment"># Cell magics (double %%)</span>
+%%timeit                        <span class="hljs-comment"># time the WHOLE cell</span>
+total = <span class="hljs-number">0</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10000</span>):
+    total += i
+
+%%bash                          <span class="hljs-comment"># run the cell as a shell script</span>
+ls -la
+echo <span class="hljs-string">&quot;hello from the shell&quot;</span>
+
+%%writefile helper.py           <span class="hljs-comment"># dump cell contents to a file</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">greet</span>(<span class="hljs-params">name</span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;Hi, <span class="hljs-subst">{name}</span>&quot;</span></code></pre>
+
+<p>You can also run shell commands inline with <code>!</code>, and capture their output into a Python variable:</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">!pip install rich               <span class="hljs-comment"># one-off shell command</span>
+files = !ls *.csv               <span class="hljs-comment"># capture stdout into a Python list</span>
+<span class="hljs-built_in">print</span>(files)
+
+<span class="hljs-comment"># Interpolate Python variables into shell with {}</span>
+name = <span class="hljs-string">&quot;data.csv&quot;</span>
+!head -n <span class="hljs-number">3</span> {name}</code></pre>
+
+<div class="callout warn"><span class="t">Use %pip and %conda, not !pip</span> Inside a notebook, prefer the magics <code>%pip install &lt;pkg&gt;</code> and <code>%conda install &lt;pkg&gt;</code>. They install into the <em>exact environment the running kernel uses</em>. Plain <code>!pip</code> may resolve to a different Python on your <code>PATH</code>, which is how packages "disappear".</div>
+
+<table>
+<tr><th>Magic</th><th>Purpose</th></tr>
+<tr><td><code>%timeit</code> / <code>%%timeit</code></td><td>Benchmark a line / cell with multiple runs</td></tr>
+<tr><td><code>%time</code> / <code>%%time</code></td><td>Time a single execution (wall + CPU)</td></tr>
+<tr><td><code>%prun</code>, <code>%lprun</code></td><td>Function-level and line-level profiling</td></tr>
+<tr><td><code>%debug</code>, <code>%pdb on</code></td><td>Post-mortem / automatic debugger on exceptions</td></tr>
+<tr><td><code>%run script.py</code></td><td>Execute an external script in the namespace</td></tr>
+<tr><td><code>%env</code></td><td>Get / set environment variables</td></tr>
+<tr><td><code>%store</code></td><td>Persist a variable across kernel restarts</td></tr>
+<tr><td><code>%lsmagic</code></td><td>List every available magic</td></tr>
+</table>
+
+<h2 id="5-kernels-and-jupyterlab">5. Kernels and JupyterLab</h2>
+
+<p>The kernel is a separate OS process. The front-end never runs your code directly — it sends <em>execute_request</em> messages and renders the <em>display_data</em> and <em>stream</em> messages that come back. This decoupling is why you can interrupt a runaway loop (<span class="kbd">I</span> <span class="kbd">I</span>), restart a hung kernel, or even connect a remote kernel to a local UI.</p>
+
+<h3>JupyterLab vs. classic Notebook vs. the ecosystem</h3>
+
+<table class="compare">
+<tr><th>Tool</th><th>What it is</th><th>Reach for it when</th></tr>
+<tr><td>JupyterLab</td><td>Full IDE: tabs, file browser, terminals, extensions, side-by-side notebooks</td><td>Default modern choice for serious work</td></tr>
+<tr><td>Jupyter Notebook 7</td><td>The classic single-document UI, now rebuilt on JupyterLab components</td><td>You want a lightweight, focused view</td></tr>
+<tr><td>VS Code / Cursor</td><td>Editor with native <code>.ipynb</code> support + debugger + Git</td><td>You live in an editor and want notebooks beside normal code</td></tr>
+<tr><td>Google Colab</td><td>Hosted notebooks with free GPUs</td><td>No local setup; quick GPU experiments</td></tr>
+<tr><td>JupyterHub</td><td>Multi-user server for teams/classes</td><td>Centralised, shared compute</td></tr>
+</table>
+
+<h3>A worked mini-example: exploratory data analysis</h3>
+
+<p>Here is the archetypal notebook flow — load, inspect, visualise — the kind of cell sequence you would type live in an interview or a real analysis.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Cell 1 — setup</span>
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+%matplotlib inline
+
+<span class="hljs-comment"># Cell 2 — load and peek</span>
+df = pd.read_csv(<span class="hljs-string">&quot;sales.csv&quot;</span>, parse_dates=[<span class="hljs-string">&quot;date&quot;</span>])
+df.head()                       <span class="hljs-comment"># rich HTML table in the output</span>
+
+<span class="hljs-comment"># Cell 3 — quick profile</span>
+df.describe()
+df.isna().<span class="hljs-built_in">sum</span>()                 <span class="hljs-comment"># missing-value audit</span>
+
+<span class="hljs-comment"># Cell 4 — a visual, rendered inline</span>
+monthly = df.set_index(<span class="hljs-string">&quot;date&quot;</span>)[<span class="hljs-string">&quot;revenue&quot;</span>].resample(<span class="hljs-string">&quot;ME&quot;</span>).<span class="hljs-built_in">sum</span>()
+monthly.plot(figsize=(<span class="hljs-number">9</span>, <span class="hljs-number">4</span>), title=<span class="hljs-string">&quot;Monthly revenue&quot;</span>)
+plt.ylabel(<span class="hljs-string">&quot;USD&quot;</span>)
+plt.tight_layout()</code></pre>
+
+<div class="pipeline">
+  <span class="step">conda create env</span><span class="arrow">-></span>
+  <span class="step">register kernel</span><span class="arrow">-></span>
+  <span class="step">jupyter lab</span><span class="arrow">-></span>
+  <span class="step">explore in cells</span><span class="arrow">-></span>
+  <span class="step">Restart &amp; Run All</span><span class="arrow">-></span>
+  <span class="step">export env.yml</span>
+</div>
+
+<h2 id="6-conda-environments-and-package-management">6. Conda: Environments and Package Management</h2>
+
+<p>An environment is a self-contained directory holding a specific Python interpreter and a specific set of packages. Isolation means Project A can use pandas 1.5 while Project B uses pandas 2.2, with zero conflict. Never install into <code>base</code> — keep it minimal and create one env per project.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 740 240" width="740" height="240">
+  <rect x="30" y="30" width="200" height="180" rx="10" fill="#f6f8fb" stroke="#94a3b8"/>
+  <text x="130" y="55" text-anchor="middle" font-size="13" fill="#1a2233" font-weight="bold">base (keep minimal)</text>
+  <text x="130" y="80" text-anchor="middle" font-size="11" fill="#6b7688">conda, python</text>
+
+  <rect x="270" y="30" width="200" height="180" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="370" y="55" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">env: ds</text>
+  <text x="370" y="80" text-anchor="middle" font-size="11" fill="#1a2233">python 3.12</text>
+  <text x="370" y="100" text-anchor="middle" font-size="11" fill="#1a2233">pandas 2.2</text>
+  <text x="370" y="120" text-anchor="middle" font-size="11" fill="#1a2233">numpy 2.1</text>
+  <text x="370" y="140" text-anchor="middle" font-size="11" fill="#1a2233">jupyterlab</text>
+
+  <rect x="510" y="30" width="200" height="180" rx="10" fill="#ecfdf5" stroke="#059669"/>
+  <text x="610" y="55" text-anchor="middle" font-size="13" fill="#065f46" font-weight="bold">env: legacy</text>
+  <text x="610" y="80" text-anchor="middle" font-size="11" fill="#1a2233">python 3.9</text>
+  <text x="610" y="100" text-anchor="middle" font-size="11" fill="#1a2233">pandas 1.5</text>
+  <text x="610" y="120" text-anchor="middle" font-size="11" fill="#1a2233">tensorflow 2.11</text>
+</svg>
+<div class="cap">Fig 3. Isolated environments. Each project gets its own interpreter + pinned packages; incompatible versions coexist peacefully side by side.</div>
+</div>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Lifecycle of a conda environment</span>
+conda create -n ds python=3.12          <span class="hljs-comment"># create</span>
+conda activate ds                       <span class="hljs-comment"># enter</span>
+conda install pandas scikit-learn       <span class="hljs-comment"># install from default/conda-forge</span>
+conda install -c conda-forge polars     <span class="hljs-comment"># install from a specific channel</span>
+conda list                              <span class="hljs-comment"># what&#x27;s installed</span>
+conda <span class="hljs-built_in">env</span> list                          <span class="hljs-comment"># all environments on the machine</span>
+conda update pandas                     <span class="hljs-comment"># upgrade one package</span>
+conda remove numpy                      <span class="hljs-comment"># uninstall</span>
+conda deactivate                        <span class="hljs-comment"># leave</span>
+conda <span class="hljs-built_in">env</span> remove -n ds                  <span class="hljs-comment"># delete entirely</span>
+
+<span class="hljs-comment"># Faster: use mamba as a drop-in replacement</span>
+mamba install pytorch -c pytorch</code></pre>
+
+<h3>Reproducibility: environment files</h3>
+
+<p>The payoff of conda is sharing an exact environment. There are two export styles — a human-authored spec and a fully pinned lock.</p>
+
+<div class="code-label">YAML</div><pre><code class="hljs"><span class="hljs-comment"># environment.yml — the spec you hand-edit and commit to Git</span>
+<span class="hljs-attr">name:</span> <span class="hljs-string">ds</span>
+<span class="hljs-attr">channels:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">conda-forge</span>
+<span class="hljs-attr">dependencies:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">python=3.12</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">pandas&gt;=2.2</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">scikit-learn</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">jupyterlab</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-string">pip</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">pip:</span>                      <span class="hljs-comment"># pip-only deps live in a nested block</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">some-pypi-only-package==1.4.0</span></code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Recreate the environment anywhere from the spec</span>
+conda <span class="hljs-built_in">env</span> create -f environment.yml
+conda activate ds
+
+<span class="hljs-comment"># Update an existing env after editing the file</span>
+conda <span class="hljs-built_in">env</span> update -f environment.yml --prune   <span class="hljs-comment"># --prune removes dropped deps</span>
+
+<span class="hljs-comment"># Fully pinned, exact export (good for a snapshot; OS-specific!)</span>
+conda <span class="hljs-built_in">env</span> <span class="hljs-built_in">export</span> &gt; environment.lock.yml
+
+<span class="hljs-comment"># Cross-platform explicit spec (reproducible, no builds)</span>
+conda <span class="hljs-built_in">env</span> <span class="hljs-built_in">export</span> --from-history &gt; environment.yml</code></pre>
+
+<div class="callout tip"><span class="t">--from-history is the portable export</span> A plain <code>conda env export</code> pins exact build strings tied to your OS and will often fail to recreate on a different platform. <code>--from-history</code> records only the packages <em>you</em> explicitly asked for, producing a clean, cross-platform file.</div>
+
+<h2 id="7-conda-vs-pip-vs-venv">7. conda vs pip vs venv</h2>
+
+<p>These overlap but solve different problems. <strong>venv</strong> isolates Python packages only. <strong>pip</strong> installs from PyPI into whatever environment is active. <strong>conda</strong> is both an environment manager <em>and</em> a package manager that also handles non-Python binaries. They can be combined — but with rules.</p>
+
+<table class="compare">
+<tr><th>Dimension</th><th>conda</th><th>pip + venv</th></tr>
+<tr><td>Manages environments</td><td>Yes (<code>conda create</code>)</td><td>venv does; pip does not</td></tr>
+<tr><td>Package source</td><td>conda channels (conda-forge, defaults)</td><td>PyPI</td></tr>
+<tr><td>Non-Python deps</td><td>Yes — CUDA, MKL, GDAL, compilers</td><td>No (relies on prebuilt wheels)</td></tr>
+<tr><td>Language scope</td><td>Any language</td><td>Python only</td></tr>
+<tr><td>Dependency solver</td><td>Full SAT solver (libmamba)</td><td>Resolver, less strict about binary ABI</td></tr>
+<tr><td>Breadth of packages</td><td>Large but &lt; PyPI</td><td>Everything on PyPI</td></tr>
+<tr><td>Best for</td><td>Data science, GPU, geospatial, mixed stacks</td><td>Pure-Python apps, web, lightweight tools</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The golden rule for mixing conda and pip</span> Install as much as possible with conda <em>first</em>, then use <code>pip</code> only for what conda lacks — and do it <em>last</em>. Installing with conda after pip can silently clobber pip-managed files. Record pip deps in the <code>pip:</code> block of <code>environment.yml</code> so the environment stays reproducible.</div>
+
+<p>The modern pure-pip world has also matured. Tools like <strong>uv</strong> (an extremely fast Rust-based resolver/installer) and <strong>Poetry</strong> or <strong>PDM</strong> manage pip-based projects with real lock files. For a pure-Python service, uv + venv is often faster and leaner than conda; for a GPU/compiled scientific stack, conda still wins.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># The venv + pip workflow (no conda)</span>
+python -m venv .venv              <span class="hljs-comment"># create an env in ./.venv</span>
+<span class="hljs-built_in">source</span> .venv/bin/activate         <span class="hljs-comment"># (Windows: .venv\Scripts\activate)</span>
+pip install -r requirements.txt   <span class="hljs-comment"># install pinned deps</span>
+pip freeze &gt; requirements.txt     <span class="hljs-comment"># snapshot exact versions</span>
+
+<span class="hljs-comment"># The modern fast alternative: uv</span>
+uv venv                           <span class="hljs-comment"># create .venv instantly</span>
+uv pip install pandas jupyterlab  <span class="hljs-comment"># resolve + install in a flash</span>
+uv pip compile requirements.in -o requirements.txt  <span class="hljs-comment"># lock</span></code></pre>
+
+<h2 id="8-cheat-sheet-reference">8. Cheat-Sheet Reference</h2>
+
+<h3>conda command reference</h3>
+<table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>conda create -n NAME python=3.12</code></td><td>Create a new environment</td></tr>
+<tr><td><code>conda activate NAME</code> / <code>deactivate</code></td><td>Enter / leave an environment</td></tr>
+<tr><td><code>conda install -c conda-forge PKG</code></td><td>Install from a channel</td></tr>
+<tr><td><code>conda list</code></td><td>List installed packages</td></tr>
+<tr><td><code>conda env list</code></td><td>List all environments</td></tr>
+<tr><td><code>conda env export --from-history &gt; environment.yml</code></td><td>Portable export</td></tr>
+<tr><td><code>conda env create -f environment.yml</code></td><td>Recreate from file</td></tr>
+<tr><td><code>conda clean --all</code></td><td>Free disk by removing caches/tarballs</td></tr>
+<tr><td><code>conda config --show channels</code></td><td>Inspect channel configuration</td></tr>
+</table>
+
+<h3>Jupyter CLI reference</h3>
+<table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>jupyter lab</code></td><td>Launch JupyterLab</td></tr>
+<tr><td><code>jupyter notebook</code></td><td>Launch classic Notebook</td></tr>
+<tr><td><code>jupyter kernelspec list</code></td><td>Show registered kernels</td></tr>
+<tr><td><code>python -m ipykernel install --user --name NAME</code></td><td>Register current env as a kernel</td></tr>
+<tr><td><code>jupyter nbconvert --to html nb.ipynb</code></td><td>Export to HTML / PDF / script</td></tr>
+<tr><td><code>jupyter nbconvert --to notebook --execute nb.ipynb</code></td><td>Run a notebook headless (CI)</td></tr>
+<tr><td><code>jupyter lab --no-browser --port 8889</code></td><td>Headless server (remote work)</td></tr>
+</table>
+
+<h2 id="9-best-practices-and-common-pitfalls">9. Best Practices and Common Pitfalls</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>One env per project</h4>Create a named environment per repo and commit an <code>environment.yml</code>. Keep <code>base</code> clean so a broken install never bricks your whole conda.</div>
+  <div class="card"><h4>Notebooks explore, modules ship</h4>Prototype in a notebook, then move stable logic into importable <code>.py</code> files and <code>import</code> them back. Notebooks are not a good home for production code.</div>
+  <div class="card"><h4>Restart &amp; Run All before trusting</h4>Make linear reproducibility a habit. A notebook that only works with hidden state is a liability.</div>
+  <div class="card"><h4>Strip output before committing</h4>Notebook JSON diffs are noisy. Use <code>nbstripout</code> or Jupytext to pair with a <code>.py</code> so Git reviews are readable.</div>
+</div>
+
+<div class="callout ok"><span class="t">Do</span> Pin Python and major libraries (<code>python=3.12</code>, <code>pandas&gt;=2.2</code>). Use <code>%pip</code>/<code>%conda</code> inside notebooks. Prefer <code>conda-forge</code> as a single consistent channel. Set a project README with the one-line recreate command.</div>
+
+<div class="callout danger"><span class="t">Avoid</span> Installing everything into <code>base</code>. Mixing many channels (channel priority conflicts). Running <code>pip</code> then <code>conda</code> in the wrong order. Committing a 50 MB notebook full of embedded plot output. Relying on cell execution order you can't reproduce.</div>
+
+<details>
+<summary>Show: diagnosing "ModuleNotFoundError" in a notebook</summary>
+<div class="body">
+<p>Run this inside the misbehaving notebook to see exactly which Python the kernel uses, then install into <em>that</em> interpreter:</p>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> sys
+<span class="hljs-built_in">print</span>(sys.executable)     <span class="hljs-comment"># e.g. /opt/conda/envs/ds/bin/python</span>
+<span class="hljs-comment"># install into THIS interpreter, guaranteed:</span>
+%pip install the-missing-package</code></pre>
+<p>If <code>sys.executable</code> points at an environment you did not expect, switch the kernel via <strong>Kernel → Change Kernel</strong>, or re-register the right env with <code>ipykernel</code>.</p>
+</div>
+</details>
+
+<h2 id="10-interview-questions-amp-answers">10. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between a Jupyter front-end, a kernel, and an environment?</div><div class="a">The front-end (browser UI or editor) renders the document and sends execution requests. The kernel is a separate process that actually runs the code and holds all variable state between cells. The environment is the conda/venv that supplies the packages the kernel imports. A notebook's behaviour is determined by the kernel, and the kernel belongs to exactly one environment.</div></div>
+
+<div class="qa"><div class="q">Why can a notebook produce results you cannot reproduce by reading it top to bottom?</div><div class="a">Because cells share one persistent namespace and can be executed in any order. The number in <code>[ ]</code> is the execution count, not the position. If you run a lower cell, then edit and re-run an upper one, state carries over inconsistently. The fix is Restart Kernel and Run All, which forces linear, reproducible execution.</div></div>
+
+<div class="qa"><div class="q">conda vs pip — when would you choose each?</div><div class="a">conda when you need non-Python binaries or a complex scientific/GPU stack (CUDA, MKL, GDAL) and want one tool to manage both the environment and compiled dependencies. pip (with venv or uv) for pure-Python projects where you want the full breadth of PyPI and a lightweight footprint. They can be combined: conda first, pip last.</div></div>
+
+<div class="qa"><div class="q">What is the correct way to combine conda and pip?</div><div class="a">Install everything you can with conda first, then use pip only for packages conda lacks, and do pip last. Capture the pip packages in the <code>pip:</code> block of <code>environment.yml</code>. Running conda after pip can overwrite pip-managed files and corrupt the environment.</div></div>
+
+<div class="qa"><div class="q">What is the difference between a line magic and a cell magic?</div><div class="a">A line magic uses a single <code>%</code> and affects just that line (e.g. <code>%timeit func()</code>). A cell magic uses <code>%%</code> on the first line and applies to the entire cell (e.g. <code>%%timeit</code> times the whole block, <code>%%bash</code> runs the cell as shell). Magics are IPython kernel features, not Python syntax.</div></div>
+
+<div class="qa"><div class="q">Why should you use <code>%pip install</code> instead of <code>!pip install</code> in a notebook?</div><div class="a"><code>%pip</code> is routed to the exact Python interpreter the running kernel uses, so the package lands where your imports look. <code>!pip</code> shells out and may hit a different Python on your PATH, installing into the wrong environment — the classic cause of "I installed it but it's not found."</div></div>
+
+<div class="qa"><div class="q">How do you make a notebook reproducible for a teammate?</div><div class="a">Commit an <code>environment.yml</code> (ideally via <code>conda env export --from-history</code> for portability), pin Python and major library versions, strip output with nbstripout, and ensure the notebook passes Restart &amp; Run All. The teammate recreates with <code>conda env create -f environment.yml</code> and selects the matching kernel.</div></div>
+
+<div class="qa"><div class="q">What does <code>conda env export --from-history</code> give you that a plain export does not?</div><div class="a">It records only the packages you explicitly requested, without OS-specific build strings. A plain <code>conda env export</code> pins exact builds tied to your platform, which frequently fails to recreate on a different OS. <code>--from-history</code> is the cross-platform, human-readable choice.</div></div>
+
+<div class="qa"><div class="q">What is a kernel, concretely, and how do you add one for a specific conda env?</div><div class="a">A kernel is an OS process implementing the Jupyter messaging protocol — for Python it's IPython. To expose a conda env as a kernel: activate it, <code>conda install ipykernel</code>, then <code>python -m ipykernel install --user --name myenv --display-name "Python (myenv)"</code>. It then appears in the kernel picker and the notebook will import from that env.</div></div>
+
+<div class="qa"><div class="q">Why is <code>base</code> special, and why avoid installing into it?</div><div class="a">base is the environment conda itself runs in. Installing project packages there risks dependency conflicts that can break the <code>conda</code> command, pollutes a shared space, and makes projects non-reproducible. Keep base minimal and always work in a dedicated per-project environment.</div></div>
+
+<div class="qa"><div class="q">How would you run a notebook in CI or on a schedule?</div><div class="a">Use <code>jupyter nbconvert --to notebook --execute nb.ipynb</code> (or Papermill, which also injects parameters) to run it headless and capture outputs/errors. Pair this with a locked environment so the run is deterministic. Papermill is the common choice for parameterised, scheduled notebook jobs.</div></div>
+
+<div class="qa"><div class="q">What are the drawbacks of notebooks and how do you mitigate them?</div><div class="a">Hidden state, poor diffability, weak testing, and encouragement of monolithic code. Mitigate with Restart &amp; Run All, nbstripout/Jupytext for clean diffs, moving reusable logic into tested <code>.py</code> modules, and keeping notebooks focused on exploration and narrative rather than production pipelines.</div></div>
+
+<h2 id="11-further-learning">11. Further Learning</h2>
+<ul>
+  <li><strong>Papermill</strong> — parameterise and execute notebooks programmatically for scheduled jobs and reports.</li>
+  <li><strong>Jupytext</strong> — pair notebooks with plain <code>.py</code>/<code>.md</code> so Git diffs are clean and reviewable.</li>
+  <li><strong>nbdev / nbconvert</strong> — build libraries and docs directly from notebooks; export to HTML, PDF, slides.</li>
+  <li><strong>JupyterLab extensions</strong> — variable inspectors, Git integration, LSP code completion, debuggers.</li>
+  <li><strong>uv and Poetry</strong> — modern, fast dependency management for pure-Python projects as an alternative to conda.</li>
+  <li><strong>Mamba / Miniforge</strong> — faster solving and the conda-forge-first distribution; learn channel priority deeply.</li>
+  <li><strong>JupyterHub and Binder</strong> — multi-user deployments and one-click reproducible environments from a repo.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

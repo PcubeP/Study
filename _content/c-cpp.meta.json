@@ -1,0 +1,1 @@
+{"subtitle": "A systems-programmer's guide to the memory model, pointers, RAII, templates, the STL, and the undefined-behavior pitfalls that separate working code from code that only looks like it works.", "tags": ["c", "c++", "memory-management", "pointers", "raii", "stl", "smart-pointers"]}

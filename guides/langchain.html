@@ -1,0 +1,737 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LangChain — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Generative AI & LLMs</div>
+  <h1>LangChain</h1>
+  <div class="subtitle">Compose models, prompts, retrievers, memory, tools and agents into production LLM apps with LCEL, RAG and LangGraph.</div>
+  <div class="tags"><span>langchain</span><span>lcel</span><span>rag</span><span>agents</span><span>langgraph</span><span>llm</span><span>python</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~15 min read &middot; 3,287 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-langchain-is-amp-why-it-matters">What LangChain Is &amp; Why It Matters</a></li><li><a href="#the-langchain-ecosystem-amp-packages">The LangChain Ecosystem &amp; Packages</a></li><li><a href="#setup-amp-getting-started">Setup &amp; Getting Started</a></li><li><a href="#core-abstraction-1-chat-models-amp-messages">Core Abstraction 1 — Chat Models &amp; Messages</a></li><li><a href="#core-abstraction-2-prompt-templates">Core Abstraction 2 — Prompt Templates</a></li><li><a href="#core-abstraction-3-output-parsers-amp-structured-output">Core Abstraction 3 — Output Parsers &amp; Structured Output</a></li><li><a href="#lcel-the-runnable-composition-model">LCEL — The Runnable Composition Model</a></li><li><a href="#chains-amp-resilience-patterns">Chains &amp; Resilience Patterns</a></li><li><a href="#retrieval-amp-rag-with-langchain">Retrieval &amp; RAG with LangChain</a></li><li><a href="#memory-amp-conversation-history">Memory &amp; Conversation History</a></li><li><a href="#tools-amp-agents">Tools &amp; Agents</a></li><li><a href="#langgraph-stateful-orchestration">LangGraph — Stateful Orchestration</a></li><li><a href="#integrations-landscape">Integrations Landscape</a></li><li><a href="#cheat-sheet-amp-comparison">Cheat Sheet &amp; Comparison</a></li><li><a href="#best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-langchain-is-amp-why-it-matters">What LangChain Is &amp; Why It Matters</h2>
+<p class="lead">LangChain is a framework for building applications powered by large language models (LLMs). It gives you composable building blocks — models, prompts, parsers, retrievers, memory, tools and agents — and a declarative way to wire them together into reliable pipelines.</p>
+
+<p>Calling an LLM API once is trivial. Building a <em>product</em> around it is not: you need prompt templating, structured output, retrieval over your own data, conversation memory, tool-calling, retries, streaming, tracing, and the ability to swap one provider for another without rewriting everything. LangChain's job is to make those concerns reusable and provider-agnostic.</p>
+
+<div class="callout note"><span class="t">Mental model</span> Think of LangChain as "LEGO for LLM apps". Each brick has a uniform interface (<code>Runnable</code>), so bricks snap together with the pipe operator and the whole assembly streams, batches, and runs async for free.</div>
+
+<div class="diagram"><svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="120" width="120" height="56" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="80" y="146" text-anchor="middle" font-size="13" fill="#1a2233">User input</text>
+  <text x="80" y="163" text-anchor="middle" font-size="11" fill="#64748b">question / data</text>
+
+  <rect x="190" y="40" width="140" height="52" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="260" y="62" text-anchor="middle" font-size="13" fill="#1a2233">Prompt template</text>
+  <text x="260" y="79" text-anchor="middle" font-size="11" fill="#64748b">+ retrieved context</text>
+
+  <rect x="190" y="200" width="140" height="52" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="260" y="222" text-anchor="middle" font-size="13" fill="#1a2233">Retriever</text>
+  <text x="260" y="239" text-anchor="middle" font-size="11" fill="#64748b">vector store</text>
+
+  <rect x="390" y="120" width="130" height="56" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="455" y="146" text-anchor="middle" font-size="13" fill="#1a2233">Chat model</text>
+  <text x="455" y="163" text-anchor="middle" font-size="11" fill="#64748b">LLM + tools</text>
+
+  <rect x="580" y="120" width="150" height="56" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="655" y="146" text-anchor="middle" font-size="13" fill="#1a2233">Output parser</text>
+  <text x="655" y="163" text-anchor="middle" font-size="11" fill="#64748b">structured result</text>
+
+  <line x1="140" y1="148" x2="186" y2="80" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="140" y1="150" x2="186" y2="222" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="330" y1="66" x2="386" y2="135" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="330" y1="226" x2="386" y2="160" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="520" y1="148" x2="576" y2="148" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+</svg><div class="cap">Fig 1. A typical LangChain RAG pipeline: input fans out to a retriever and prompt, flows into the model, then through a parser.</div></div>
+
+<div class="grid c3">
+  <div class="card"><h4>Provider-agnostic</h4>Swap <code>langchain-openai</code> for <code>langchain-anthropic</code> or a local model by changing one line. The <code>Runnable</code> interface is identical.</div>
+  <div class="card"><h4>Composable</h4>LCEL lets you build pipelines with <code>|</code>. Every pipeline is itself a Runnable, so you compose pipelines of pipelines.</div>
+  <div class="card"><h4>Production-ready</h4>Streaming, async, batching, retries, fallbacks and tracing (LangSmith) come built in rather than bolted on.</div>
+</div>
+
+<h2 id="the-langchain-ecosystem-amp-packages">The LangChain Ecosystem &amp; Packages</h2>
+<p>Since v0.1 LangChain split into focused packages so you install only what you use. As of the 1.x era the layout is stable:</p>
+
+<table>
+  <tr><th>Package</th><th>Contains</th><th>Install</th></tr>
+  <tr><td><code>langchain-core</code></td><td>Base abstractions: <code>Runnable</code>, messages, prompts, output parsers, tools. Zero heavy deps.</td><td><code>pip install langchain-core</code></td></tr>
+  <tr><td><code>langchain</code></td><td>Higher-level chains, retrieval helpers, agent constructors.</td><td><code>pip install langchain</code></td></tr>
+  <tr><td><code>langchain-openai</code> / <code>-anthropic</code> / ...</td><td>Provider integrations (one package per provider).</td><td><code>pip install langchain-openai</code></td></tr>
+  <tr><td><code>langgraph</code></td><td>Stateful, graph-based orchestration for agents and multi-step workflows.</td><td><code>pip install langgraph</code></td></tr>
+  <tr><td><code>langchain-community</code></td><td>Community-maintained integrations (vector stores, loaders, tools).</td><td><code>pip install langchain-community</code></td></tr>
+  <tr><td><code>langsmith</code></td><td>Tracing, evaluation and observability SDK.</td><td><code>pip install langsmith</code></td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Rule of thumb</span> Import stable abstractions from <code>langchain_core</code>, models from provider packages, and reach for <code>langgraph</code> the moment your logic has loops, branches, or persistent state.</div>
+
+<h2 id="setup-amp-getting-started">Setup &amp; Getting Started</h2>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Create an isolated environment</span>
+python -m venv .venv &amp;&amp; <span class="hljs-built_in">source</span> .venv/bin/activate   <span class="hljs-comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="hljs-comment"># Core + a provider + langgraph for agents</span>
+pip install langchain langchain-core langchain-openai langchain-anthropic langgraph
+
+<span class="hljs-comment"># Set your API keys (never hard-code them)</span>
+<span class="hljs-built_in">export</span> OPENAI_API_KEY=<span class="hljs-string">&quot;sk-...&quot;</span>
+<span class="hljs-built_in">export</span> ANTHROPIC_API_KEY=<span class="hljs-string">&quot;sk-ant-...&quot;</span>
+
+<span class="hljs-comment"># Optional: turn on tracing to see every step in LangSmith</span>
+<span class="hljs-built_in">export</span> LANGSMITH_TRACING=<span class="hljs-literal">true</span>
+<span class="hljs-built_in">export</span> LANGSMITH_API_KEY=<span class="hljs-string">&quot;lsv2_...&quot;</span></code></pre>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># hello.py — the smallest possible LangChain program</span>
+<span class="hljs-keyword">from</span> langchain.chat_models <span class="hljs-keyword">import</span> init_chat_model
+
+<span class="hljs-comment"># init_chat_model picks the right provider package from the model string</span>
+model = init_chat_model(<span class="hljs-string">&quot;gpt-4o-mini&quot;</span>, model_provider=<span class="hljs-string">&quot;openai&quot;</span>, temperature=<span class="hljs-number">0</span>)
+
+response = model.invoke(<span class="hljs-string">&quot;Explain vector embeddings in one sentence.&quot;</span>)
+<span class="hljs-built_in">print</span>(response.content)</code></pre>
+
+<div class="callout note"><span class="t">init_chat_model</span> This helper is the modern, provider-neutral entry point. Pass <code>"anthropic:claude-sonnet-4-5"</code> or <code>"ollama:llama3.1"</code> and nothing else in your code changes.</div>
+
+<h2 id="core-abstraction-1-chat-models-amp-messages">Core Abstraction 1 — Chat Models &amp; Messages</h2>
+<p>Modern LLMs are <strong>chat models</strong>: they consume a list of typed messages and return an <code>AIMessage</code>. LangChain normalizes every provider to the same message classes.</p>
+
+<table>
+  <tr><th>Message class</th><th>Role</th><th>Purpose</th></tr>
+  <tr><td><code>SystemMessage</code></td><td>system</td><td>Instructions / persona that steer the whole conversation.</td></tr>
+  <tr><td><code>HumanMessage</code></td><td>user</td><td>Input from the end user.</td></tr>
+  <tr><td><code>AIMessage</code></td><td>assistant</td><td>Model output; may carry <code>tool_calls</code>.</td></tr>
+  <tr><td><code>ToolMessage</code></td><td>tool</td><td>Result of running a tool, fed back to the model.</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_core.messages <span class="hljs-keyword">import</span> SystemMessage, HumanMessage
+
+messages = [
+    SystemMessage(<span class="hljs-string">&quot;You are a terse senior engineer. Answer in &lt;= 3 bullet points.&quot;</span>),
+    HumanMessage(<span class="hljs-string">&quot;When should I use a message queue?&quot;</span>),
+]
+
+ai = model.invoke(messages)
+<span class="hljs-built_in">print</span>(ai.content)
+<span class="hljs-built_in">print</span>(ai.usage_metadata)   <span class="hljs-comment"># {&#x27;input_tokens&#x27;: 29, &#x27;output_tokens&#x27;: 54, ...}</span></code></pre>
+
+<h3>Common model configuration</h3>
+<table>
+  <tr><th>Parameter</th><th>Effect</th></tr>
+  <tr><td><code>temperature</code></td><td>0 = deterministic/factual, higher = more creative/varied.</td></tr>
+  <tr><td><code>max_tokens</code></td><td>Caps the length of the response.</td></tr>
+  <tr><td><code>timeout</code> / <code>max_retries</code></td><td>Resilience against slow or flaky API calls.</td></tr>
+  <tr><td><code>model_kwargs</code></td><td>Pass provider-specific knobs not surfaced directly.</td></tr>
+</table>
+
+<h2 id="core-abstraction-2-prompt-templates">Core Abstraction 2 — Prompt Templates</h2>
+<p>Hard-coding prompts does not scale. <code>PromptTemplate</code> and <code>ChatPromptTemplate</code> turn prompts into reusable, parameterized objects with typed input variables.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_core.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate
+
+prompt = ChatPromptTemplate.from_messages([
+    (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;You are a helpful assistant that explains {topic} to a {level} audience.&quot;</span>),
+    (<span class="hljs-string">&quot;human&quot;</span>, <span class="hljs-string">&quot;{question}&quot;</span>),
+])
+
+<span class="hljs-comment"># .invoke fills the variables and returns a list of messages</span>
+msgs = prompt.invoke({<span class="hljs-string">&quot;topic&quot;</span>: <span class="hljs-string">&quot;databases&quot;</span>, <span class="hljs-string">&quot;level&quot;</span>: <span class="hljs-string">&quot;beginner&quot;</span>,
+                      <span class="hljs-string">&quot;question&quot;</span>: <span class="hljs-string">&quot;What is an index?&quot;</span>})
+<span class="hljs-built_in">print</span>(msgs.to_messages())</code></pre>
+
+<p>Use <code>MessagesPlaceholder</code> to splice in a running chat history or few-shot examples:</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_core.prompts <span class="hljs-keyword">import</span> MessagesPlaceholder
+
+prompt = ChatPromptTemplate.from_messages([
+    (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;You are a coding tutor.&quot;</span>),
+    MessagesPlaceholder(<span class="hljs-string">&quot;history&quot;</span>),   <span class="hljs-comment"># list of previous messages injected here</span>
+    (<span class="hljs-string">&quot;human&quot;</span>, <span class="hljs-string">&quot;{input}&quot;</span>),
+])</code></pre>
+
+<h2 id="core-abstraction-3-output-parsers-amp-structured-output">Core Abstraction 3 — Output Parsers &amp; Structured Output</h2>
+<p>Raw text is hard to consume programmatically. Parsers convert model output into typed Python objects. The modern, most reliable path is <code>.with_structured_output()</code>, which uses the provider's native tool/JSON-schema support.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> pydantic <span class="hljs-keyword">import</span> BaseModel, Field
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MovieReview</span>(<span class="hljs-title class_ inherited__">BaseModel</span>):
+    title: <span class="hljs-built_in">str</span> = Field(description=<span class="hljs-string">&quot;The movie&#x27;s title&quot;</span>)
+    rating: <span class="hljs-built_in">int</span> = Field(ge=<span class="hljs-number">1</span>, le=<span class="hljs-number">10</span>, description=<span class="hljs-string">&quot;Score from 1 to 10&quot;</span>)
+    pros: <span class="hljs-built_in">list</span>[<span class="hljs-built_in">str</span>]
+    cons: <span class="hljs-built_in">list</span>[<span class="hljs-built_in">str</span>]
+
+structured = model.with_structured_output(MovieReview)
+review = structured.invoke(<span class="hljs-string">&quot;Review the film Inception.&quot;</span>)
+<span class="hljs-built_in">print</span>(review.rating, review.pros)   <span class="hljs-comment"># -&gt; 9 [&#x27;inventive premise&#x27;, ...]</span>
+<span class="hljs-comment"># `review` is a validated MovieReview instance, not a string</span></code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>StrOutputParser</h4>Extracts <code>.content</code> as a plain string — the most common final step in a text chain.</div>
+  <div class="card"><h4>JsonOutputParser</h4>Parses JSON and can stream partial objects as they arrive.</div>
+</div>
+
+<div class="callout tip"><span class="t">Prefer schemas over regex</span> <code>with_structured_output</code> with a Pydantic model gives you validation, type hints, and editor autocomplete — and it fails loudly when the model drifts.</div>
+
+<h2 id="lcel-the-runnable-composition-model">LCEL — The Runnable Composition Model</h2>
+<p class="lead">LCEL (LangChain Expression Language) is the heart of the framework. Every component implements the <code>Runnable</code> interface, so you compose them with the pipe operator <code>|</code> exactly like Unix pipes.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_core.output_parsers <span class="hljs-keyword">import</span> StrOutputParser
+
+<span class="hljs-comment"># prompt -&gt; model -&gt; parser, as one streaming, async-ready Runnable</span>
+chain = prompt | model | StrOutputParser()
+
+chain.invoke({<span class="hljs-string">&quot;topic&quot;</span>: <span class="hljs-string">&quot;networking&quot;</span>, <span class="hljs-string">&quot;level&quot;</span>: <span class="hljs-string">&quot;expert&quot;</span>,
+              <span class="hljs-string">&quot;question&quot;</span>: <span class="hljs-string">&quot;Explain TCP backpressure.&quot;</span>})</code></pre>
+
+<div class="pipeline"><span class="step">prompt</span><span class="arrow">-&gt;</span><span class="step">model</span><span class="arrow">-&gt;</span><span class="step">parser</span></div>
+
+<p>Because the composed object is <em>itself</em> a Runnable, you get a uniform execution surface for free:</p>
+
+<table>
+  <tr><th>Method</th><th>What it does</th></tr>
+  <tr><td><code>invoke(x)</code></td><td>Run once on a single input.</td></tr>
+  <tr><td><code>batch([x1, x2])</code></td><td>Run many inputs concurrently.</td></tr>
+  <tr><td><code>stream(x)</code></td><td>Yield output tokens/chunks as they are produced.</td></tr>
+  <tr><td><code>ainvoke</code> / <code>abatch</code> / <code>astream</code></td><td>Async equivalents of all of the above.</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Streaming tokens to a UI</span>
+<span class="hljs-keyword">for</span> chunk <span class="hljs-keyword">in</span> chain.stream({<span class="hljs-string">&quot;topic&quot;</span>: <span class="hljs-string">&quot;AI&quot;</span>, <span class="hljs-string">&quot;level&quot;</span>: <span class="hljs-string">&quot;beginner&quot;</span>,
+                           <span class="hljs-string">&quot;question&quot;</span>: <span class="hljs-string">&quot;What is a transformer?&quot;</span>}):
+    <span class="hljs-built_in">print</span>(chunk, end=<span class="hljs-string">&quot;&quot;</span>, flush=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># Concurrent batch</span>
+chain.batch([{<span class="hljs-string">&quot;topic&quot;</span>: <span class="hljs-string">&quot;git&quot;</span>, <span class="hljs-string">&quot;level&quot;</span>: <span class="hljs-string">&quot;beginner&quot;</span>, <span class="hljs-string">&quot;question&quot;</span>: q}
+             <span class="hljs-keyword">for</span> q <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;What is a commit?&quot;</span>, <span class="hljs-string">&quot;What is a rebase?&quot;</span>]])</code></pre>
+
+<h3>RunnablePassthrough, RunnableParallel &amp; RunnableLambda</h3>
+<p>These primitives build non-linear graphs. <code>RunnableParallel</code> runs branches concurrently; <code>RunnablePassthrough</code> forwards the original input; <code>RunnableLambda</code> wraps any plain function as a Runnable.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 240" width="720" height="240">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="100" width="110" height="48" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="75" y="129" text-anchor="middle" font-size="13" fill="#1a2233">question</text>
+
+  <rect x="200" y="30" width="200" height="48" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="300" y="59" text-anchor="middle" font-size="13" fill="#1a2233">retriever (context)</text>
+
+  <rect x="200" y="162" width="200" height="48" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="300" y="191" text-anchor="middle" font-size="13" fill="#1a2233">passthrough (question)</text>
+
+  <rect x="460" y="96" width="110" height="52" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="515" y="126" text-anchor="middle" font-size="13" fill="#1a2233">prompt</text>
+
+  <rect x="620" y="96" width="80" height="52" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="660" y="126" text-anchor="middle" font-size="13" fill="#1a2233">model</text>
+
+  <line x1="130" y1="118" x2="196" y2="56" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="130" y1="128" x2="196" y2="184" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="400" y1="54" x2="456" y2="112" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="400" y1="186" x2="456" y2="134" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="570" y1="122" x2="616" y2="122" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="300" y="120" text-anchor="middle" font-size="12" fill="#b45309">RunnableParallel</text>
+</svg><div class="cap">Fig 2. A <code>RunnableParallel</code> dict fans the input into named branches that run concurrently, then merges into a single dict for the next step.</div></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_core.runnables <span class="hljs-keyword">import</span> RunnableParallel, RunnablePassthrough
+
+<span class="hljs-comment"># dict literals become RunnableParallel automatically inside a chain</span>
+rag_chain = (
+    {<span class="hljs-string">&quot;context&quot;</span>: retriever, <span class="hljs-string">&quot;question&quot;</span>: RunnablePassthrough()}
+    | prompt
+    | model
+    | StrOutputParser()
+)
+rag_chain.invoke(<span class="hljs-string">&quot;What is our refund policy?&quot;</span>)</code></pre>
+
+<h2 id="chains-amp-resilience-patterns">Chains &amp; Resilience Patterns</h2>
+<p>A "chain" is just a composed Runnable. Beyond linear flows, LCEL offers production features declaratively:</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Fallbacks: if the primary model errors, transparently try a backup</span>
+robust = model.with_fallbacks([backup_model])
+
+<span class="hljs-comment"># Retries with exponential backoff</span>
+resilient = chain.with_retry(stop_after_attempt=<span class="hljs-number">3</span>)
+
+<span class="hljs-comment"># Attach config (tags, metadata) for tracing and run-time overrides</span>
+tagged = chain.with_config({<span class="hljs-string">&quot;tags&quot;</span>: [<span class="hljs-string">&quot;prod&quot;</span>, <span class="hljs-string">&quot;support-bot&quot;</span>]})
+
+<span class="hljs-comment"># Bind tools or stop sequences onto a model</span>
+model_with_tools = model.bind_tools([search, calculator])</code></pre>
+
+<div class="callout ok"><span class="t">Why this is powerful</span> Retries, fallbacks, and streaming are cross-cutting concerns. In LCEL they are composable wrappers, so you add resilience without rewriting business logic.</div>
+
+<h2 id="retrieval-amp-rag-with-langchain">Retrieval &amp; RAG with LangChain</h2>
+<p class="lead">Retrieval-Augmented Generation grounds the model in your own documents, cutting hallucination and letting the model answer questions about private or recent data it was never trained on.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 280" width="760" height="280">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="140" y="24" text-anchor="middle" font-size="13" fill="#b45309">INDEXING (offline)</text>
+  <rect x="20" y="40" width="110" height="44" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="75" y="67" text-anchor="middle" font-size="12" fill="#1a2233">Documents</text>
+  <rect x="150" y="40" width="100" height="44" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="200" y="67" text-anchor="middle" font-size="12" fill="#1a2233">Splitter</text>
+  <rect x="270" y="40" width="110" height="44" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="325" y="61" text-anchor="middle" font-size="12" fill="#1a2233">Embeddings</text>
+  <rect x="400" y="40" width="120" height="44" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="460" y="61" text-anchor="middle" font-size="12" fill="#1a2233">Vector store</text>
+  <line x1="130" y1="62" x2="146" y2="62" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="250" y1="62" x2="266" y2="62" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="380" y1="62" x2="396" y2="62" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+
+  <text x="140" y="150" text-anchor="middle" font-size="13" fill="#1e3a8a">QUERY (online)</text>
+  <rect x="20" y="166" width="110" height="44" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="75" y="193" text-anchor="middle" font-size="12" fill="#1a2233">Question</text>
+  <rect x="150" y="166" width="120" height="44" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="210" y="187" text-anchor="middle" font-size="12" fill="#1a2233">Retriever</text>
+  <text x="210" y="202" text-anchor="middle" font-size="10" fill="#64748b">top-k chunks</text>
+  <rect x="290" y="166" width="110" height="44" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="345" y="193" text-anchor="middle" font-size="12" fill="#1a2233">Prompt</text>
+  <rect x="420" y="166" width="100" height="44" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="470" y="193" text-anchor="middle" font-size="12" fill="#1a2233">Model</text>
+  <rect x="540" y="166" width="110" height="44" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="595" y="193" text-anchor="middle" font-size="12" fill="#1a2233">Answer</text>
+  <line x1="130" y1="188" x2="146" y2="188" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="270" y1="188" x2="286" y2="188" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="400" y1="188" x2="416" y2="188" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="520" y1="188" x2="536" y2="188" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="460" y1="84" x2="300" y2="164" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ah3)"/>
+  <text x="470" y="120" font-size="10" fill="#64748b">similarity search</text>
+</svg><div class="cap">Fig 3. RAG has two phases: index documents into a vector store offline, then retrieve the most relevant chunks at query time to ground the model.</div></div>
+
+<h3>Building a RAG pipeline end to end</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_community.document_loaders <span class="hljs-keyword">import</span> WebBaseLoader
+<span class="hljs-keyword">from</span> langchain_text_splitters <span class="hljs-keyword">import</span> RecursiveCharacterTextSplitter
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> OpenAIEmbeddings
+<span class="hljs-keyword">from</span> langchain_core.vectorstores <span class="hljs-keyword">import</span> InMemoryVectorStore
+
+<span class="hljs-comment"># 1) Load</span>
+docs = WebBaseLoader(<span class="hljs-string">&quot;https://docs.example.com/handbook&quot;</span>).load()
+
+<span class="hljs-comment"># 2) Split into overlapping chunks (keeps context across boundaries)</span>
+splitter = RecursiveCharacterTextSplitter(chunk_size=<span class="hljs-number">1000</span>, chunk_overlap=<span class="hljs-number">200</span>)
+chunks = splitter.split_documents(docs)
+
+<span class="hljs-comment"># 3) Embed + store</span>
+store = InMemoryVectorStore.from_documents(chunks, OpenAIEmbeddings())
+
+<span class="hljs-comment"># 4) Turn the store into a retriever (returns Documents for a query)</span>
+retriever = store.as_retriever(search_kwargs={<span class="hljs-string">&quot;k&quot;</span>: <span class="hljs-number">4</span>})
+
+<span class="hljs-comment"># 5) Compose the answer chain</span>
+<span class="hljs-keyword">from</span> langchain_core.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate
+rag_prompt = ChatPromptTemplate.from_template(
+    <span class="hljs-string">&quot;Answer using ONLY this context. If unsure, say you don&#x27;t know.\n\n&quot;</span>
+    <span class="hljs-string">&quot;Context:\n{context}\n\nQuestion: {question}&quot;</span>
+)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">format_docs</span>(<span class="hljs-params">docs</span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;\n\n&quot;</span>.join(d.page_content <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> docs)
+
+chain = (
+    {<span class="hljs-string">&quot;context&quot;</span>: retriever | format_docs, <span class="hljs-string">&quot;question&quot;</span>: RunnablePassthrough()}
+    | rag_prompt | model | StrOutputParser()
+)
+<span class="hljs-built_in">print</span>(chain.invoke(<span class="hljs-string">&quot;How many vacation days do new hires get?&quot;</span>))</code></pre>
+
+<table>
+  <tr><th>RAG knob</th><th>Trade-off</th></tr>
+  <tr><td><code>chunk_size</code></td><td>Larger = more context per chunk but noisier and more tokens.</td></tr>
+  <tr><td><code>chunk_overlap</code></td><td>Prevents facts being split across a boundary; costs duplication.</td></tr>
+  <tr><td><code>k</code> (top-k)</td><td>More chunks = higher recall but risk of distraction + cost.</td></tr>
+  <tr><td>Retriever type</td><td>Similarity, MMR (diversity), or hybrid (keyword + vector).</td></tr>
+</table>
+
+<h2 id="memory-amp-conversation-history">Memory &amp; Conversation History</h2>
+<p>LLMs are stateless — each call sees only what you pass. "Memory" means persisting prior turns and replaying them. The legacy <code>ConversationBufferMemory</code> classes are deprecated; the modern approach uses <code>RunnableWithMessageHistory</code> or, preferably, LangGraph's built-in persistence.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_core.chat_history <span class="hljs-keyword">import</span> InMemoryChatMessageHistory
+<span class="hljs-keyword">from</span> langchain_core.runnables.history <span class="hljs-keyword">import</span> RunnableWithMessageHistory
+
+store = {}
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_history</span>(<span class="hljs-params">session_id: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-keyword">return</span> store.setdefault(session_id, InMemoryChatMessageHistory())
+
+chat = ChatPromptTemplate.from_messages([
+    (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;You are a helpful assistant.&quot;</span>),
+    MessagesPlaceholder(<span class="hljs-string">&quot;history&quot;</span>),
+    (<span class="hljs-string">&quot;human&quot;</span>, <span class="hljs-string">&quot;{input}&quot;</span>),
+]) | model
+
+with_memory = RunnableWithMessageHistory(
+    chat, get_history,
+    input_messages_key=<span class="hljs-string">&quot;input&quot;</span>, history_messages_key=<span class="hljs-string">&quot;history&quot;</span>,
+)
+
+cfg = {<span class="hljs-string">&quot;configurable&quot;</span>: {<span class="hljs-string">&quot;session_id&quot;</span>: <span class="hljs-string">&quot;user-42&quot;</span>}}
+with_memory.invoke({<span class="hljs-string">&quot;input&quot;</span>: <span class="hljs-string">&quot;My name is Ada.&quot;</span>}, config=cfg)
+with_memory.invoke({<span class="hljs-string">&quot;input&quot;</span>: <span class="hljs-string">&quot;What is my name?&quot;</span>}, config=cfg)  <span class="hljs-comment"># -&gt; &quot;Ada&quot;</span></code></pre>
+
+<div class="callout warn"><span class="t">Context window is finite</span> Replaying unbounded history will blow your token budget and cost. Trim with <code>trim_messages</code>, summarize older turns, or window to the last N messages.</div>
+
+<h2 id="tools-amp-agents">Tools &amp; Agents</h2>
+<p class="lead">A tool is a function the model can choose to call. An agent is an LLM in a loop: it reasons, decides which tool to call, observes the result, and repeats until it can answer. This is how LLMs reach beyond their training data — searching, calculating, querying databases, hitting APIs.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langchain_core.tools <span class="hljs-keyword">import</span> tool
+
+<span class="hljs-meta">@tool</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_weather</span>(<span class="hljs-params">city: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;Return the current weather for a city. Use for any weather question.&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># In reality you&#x27;d call a weather API here</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;It is 22C and sunny in <span class="hljs-subst">{city}</span>.&quot;</span>
+
+<span class="hljs-meta">@tool</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">multiply</span>(<span class="hljs-params">a: <span class="hljs-built_in">int</span>, b: <span class="hljs-built_in">int</span></span>) -&gt; <span class="hljs-built_in">int</span>:
+    <span class="hljs-string">&quot;&quot;&quot;Multiply two integers.&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">return</span> a * b</code></pre>
+
+<div class="callout tip"><span class="t">The docstring is the API</span> The model decides whether to call a tool from its name, type hints and docstring. Write them as if documenting for a junior engineer — clear descriptions dramatically improve tool selection.</div>
+
+<div class="diagram"><svg viewBox="0 0 620 260" width="620" height="260">
+  <defs>
+    <marker id="ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="40" y="100" width="120" height="56" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="100" y="132" text-anchor="middle" font-size="13" fill="#1a2233">User query</text>
+
+  <rect x="240" y="100" width="140" height="56" rx="10" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="310" y="126" text-anchor="middle" font-size="13" fill="#1a2233">LLM (reason)</text>
+  <text x="310" y="143" text-anchor="middle" font-size="11" fill="#64748b">tool call?</text>
+
+  <rect x="460" y="30" width="120" height="52" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="520" y="60" text-anchor="middle" font-size="13" fill="#1a2233">Tools</text>
+
+  <rect x="460" y="176" width="120" height="52" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="520" y="206" text-anchor="middle" font-size="13" fill="#1a2233">Final answer</text>
+
+  <line x1="160" y1="128" x2="236" y2="128" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="380" y1="112" x2="456" y2="62" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="420" y="90" font-size="11" fill="#b45309">yes</text>
+  <line x1="380" y1="144" x2="456" y2="196" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="415" y="178" font-size="11" fill="#059669">no</text>
+  <path d="M520,82 C520,128 420,120 382,128" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ah4)"/>
+  <text x="470" y="118" font-size="10" fill="#64748b">observe &amp; loop</text>
+</svg><div class="cap">Fig 4. The agent loop: the LLM reasons, optionally calls a tool, observes the result, and loops until it produces a final answer.</div></div>
+
+<h3>Creating an agent (LangGraph)</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langgraph.prebuilt <span class="hljs-keyword">import</span> create_react_agent
+
+agent = create_react_agent(
+    model=<span class="hljs-string">&quot;openai:gpt-4o&quot;</span>,
+    tools=[get_weather, multiply],
+    prompt=<span class="hljs-string">&quot;You are a precise assistant. Use tools when needed.&quot;</span>,
+)
+
+result = agent.invoke(
+    {<span class="hljs-string">&quot;messages&quot;</span>: [{<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">&quot;Weather in Oslo, and what is 23*19?&quot;</span>}]}
+)
+<span class="hljs-built_in">print</span>(result[<span class="hljs-string">&quot;messages&quot;</span>][-<span class="hljs-number">1</span>].content)</code></pre>
+
+<div class="callout note"><span class="t">Where agents live now</span> As of LangChain 1.x the recommended agent runtime is <code>langgraph</code>. The older <code>AgentExecutor</code> / <code>initialize_agent</code> helpers still exist but are considered legacy — new code should use <code>create_react_agent</code> or a custom graph.</div>
+
+<h2 id="langgraph-stateful-orchestration">LangGraph — Stateful Orchestration</h2>
+<p>When your logic has branches, loops, human-in-the-loop pauses, or persistent state, a linear LCEL chain is not enough. LangGraph models your app as a <strong>state graph</strong>: nodes mutate a shared state object, edges (including conditional ones) decide what runs next.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> TypedDict, Annotated
+<span class="hljs-keyword">from</span> langgraph.graph <span class="hljs-keyword">import</span> StateGraph, START, END
+<span class="hljs-keyword">from</span> langgraph.graph.message <span class="hljs-keyword">import</span> add_messages
+<span class="hljs-keyword">from</span> langgraph.checkpoint.memory <span class="hljs-keyword">import</span> InMemorySaver
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">State</span>(<span class="hljs-title class_ inherited__">TypedDict</span>):
+    <span class="hljs-comment"># add_messages reducer appends rather than overwrites</span>
+    messages: Annotated[<span class="hljs-built_in">list</span>, add_messages]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">call_model</span>(<span class="hljs-params">state: State</span>):
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;messages&quot;</span>: [model.invoke(state[<span class="hljs-string">&quot;messages&quot;</span>])]}
+
+builder = StateGraph(State)
+builder.add_node(<span class="hljs-string">&quot;chat&quot;</span>, call_model)
+builder.add_edge(START, <span class="hljs-string">&quot;chat&quot;</span>)
+builder.add_edge(<span class="hljs-string">&quot;chat&quot;</span>, END)
+
+<span class="hljs-comment"># A checkpointer persists state per thread -&gt; durable memory + resumption</span>
+graph = builder.<span class="hljs-built_in">compile</span>(checkpointer=InMemorySaver())
+
+cfg = {<span class="hljs-string">&quot;configurable&quot;</span>: {<span class="hljs-string">&quot;thread_id&quot;</span>: <span class="hljs-string">&quot;conv-1&quot;</span>}}
+graph.invoke({<span class="hljs-string">&quot;messages&quot;</span>: [(<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;Hi, I&#x27;m Grace.&quot;</span>)]}, cfg)
+graph.invoke({<span class="hljs-string">&quot;messages&quot;</span>: [(<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;Who am I?&quot;</span>)]}, cfg)  <span class="hljs-comment"># remembers Grace</span></code></pre>
+
+<div class="grid c3">
+  <div class="card"><h4>Nodes</h4>Plain functions (or Runnables) that read state and return partial updates.</div>
+  <div class="card"><h4>Conditional edges</h4>A router function inspects state and picks the next node — this is how you build loops and branches.</div>
+  <div class="card"><h4>Checkpointers</h4>Persist state per <code>thread_id</code> for memory, time-travel, and human-in-the-loop interrupts.</div>
+</div>
+
+<h2 id="integrations-landscape">Integrations Landscape</h2>
+<table>
+  <tr><th>Category</th><th>Examples</th></tr>
+  <tr><td>Chat models</td><td>OpenAI, Anthropic, Google Gemini, AWS Bedrock, Azure, Mistral, Ollama (local)</td></tr>
+  <tr><td>Embeddings</td><td>OpenAI, Cohere, HuggingFace, Voyage, local sentence-transformers</td></tr>
+  <tr><td>Vector stores</td><td>Chroma, Pinecone, Weaviate, Qdrant, pgvector, FAISS, Milvus</td></tr>
+  <tr><td>Document loaders</td><td>PDF, web, Notion, S3, Google Drive, SQL, Confluence (100s via community)</td></tr>
+  <tr><td>Tools</td><td>Tavily/web search, Python REPL, SQL, requests, plus any MCP server</td></tr>
+  <tr><td>Observability</td><td>LangSmith (tracing, evals, datasets, prompt management)</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">MCP</span> LangChain can consume Model Context Protocol servers via <code>langchain-mcp-adapters</code>, turning any MCP server's tools into LangChain tools an agent can call.</div>
+
+<h2 id="cheat-sheet-amp-comparison">Cheat Sheet &amp; Comparison</h2>
+<table>
+  <tr><th>Task</th><th>Snippet</th></tr>
+  <tr><td>Init any model</td><td><code>init_chat_model("anthropic:claude-sonnet-4-5")</code></td></tr>
+  <tr><td>Build a chain</td><td><code>prompt | model | StrOutputParser()</code></td></tr>
+  <tr><td>Structured output</td><td><code>model.with_structured_output(MySchema)</code></td></tr>
+  <tr><td>Stream</td><td><code>for c in chain.stream(x): ...</code></td></tr>
+  <tr><td>Parallel branches</td><td><code>RunnableParallel(a=r1, b=r2)</code></td></tr>
+  <tr><td>Retriever</td><td><code>store.as_retriever(search_kwargs={"k":4})</code></td></tr>
+  <tr><td>Define a tool</td><td><code>@tool def f(x: int) -&gt; int: ...</code></td></tr>
+  <tr><td>Agent</td><td><code>create_react_agent(model, tools)</code></td></tr>
+  <tr><td>Fallback</td><td><code>model.with_fallbacks([backup])</code></td></tr>
+</table>
+
+<h3>When to use what</h3>
+<table>
+  <tr><th>Need</th><th>Reach for</th></tr>
+  <tr><td>Fixed, linear transform (prompt → model → parse)</td><td>LCEL chain (<code>|</code>)</td></tr>
+  <tr><td>Grounding in private docs</td><td>Retriever + RAG chain</td></tr>
+  <tr><td>Model must take actions / call APIs</td><td>Tools + agent</td></tr>
+  <tr><td>Branches, loops, persistence, human-in-the-loop</td><td>LangGraph</td></tr>
+  <tr><td>Multi-turn conversation</td><td>LangGraph checkpointer / <code>RunnableWithMessageHistory</code></td></tr>
+</table>
+
+<h2 id="best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Pin package versions, set <code>temperature=0</code> for extraction/classification, use <code>with_structured_output</code> for anything a program consumes, and enable LangSmith tracing early — debugging LLM apps blind is painful.</div>
+<div class="callout tip"><span class="t">Do</span> Keep prompts in templates (version them), stream to the UI for perceived speed, and cap history/context with trimming or summarization.</div>
+<div class="callout warn"><span class="t">Watch out</span> Over-large <code>k</code> or chunk sizes dilute relevance and inflate cost. Measure retrieval quality (recall/precision) before blaming the model.</div>
+<div class="callout danger"><span class="t">Avoid</span> Never pass unsanitized tool output or user input straight into shell/SQL/eval tools — prompt injection is real. Scope tool permissions, validate arguments, and add human approval for destructive actions.</div>
+<div class="callout warn"><span class="t">Deprecations</span> Avoid legacy <code>LLMChain</code>, <code>ConversationChain</code>, and <code>initialize_agent</code> in new code. The modern stack is LCEL + LangGraph.</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What problem does LangChain solve that calling an LLM API directly does not?</div><div class="a">It standardizes the surrounding plumbing: provider-agnostic model/message interfaces, reusable prompt templates, structured output, retrieval, memory, tool-calling, and production concerns (streaming, batching, async, retries, fallbacks, tracing) — all behind the uniform <code>Runnable</code> interface so components compose.</div></div>
+
+<div class="qa"><div class="q">What is LCEL and why is the Runnable interface central?</div><div class="a">LCEL (LangChain Expression Language) lets you compose components with the <code>|</code> operator. Every component is a <code>Runnable</code> exposing <code>invoke/batch/stream</code> plus async variants. Because a composed chain is itself a Runnable, you get streaming, concurrency, and resilience uniformly and can nest chains arbitrarily.</div></div>
+
+<div class="qa"><div class="q">Explain RAG and why chunking and overlap matter.</div><div class="a">RAG retrieves relevant documents and injects them into the prompt so the model answers from grounded, current, private data instead of parametric memory. Documents are split into chunks sized to balance context vs. noise and token cost; overlap prevents a fact from being severed at a chunk boundary, preserving continuity.</div></div>
+
+<div class="qa"><div class="q">How does structured output work, and why prefer it over parsing text?</div><div class="a"><code>with_structured_output(schema)</code> leverages the provider's native tool/JSON-schema support to return a validated Pydantic object. It gives type safety, validation, and autocomplete, and fails loudly when output drifts — far more robust than regex or hand-written JSON parsing.</div></div>
+
+<div class="qa"><div class="q">What is the difference between a chain and an agent?</div><div class="a">A chain is a predetermined sequence of steps — the control flow is fixed by you. An agent lets the LLM decide the control flow at runtime: it chooses which tools to call and when to stop, looping over reason→act→observe. Chains are predictable and cheap; agents are flexible but less deterministic and harder to constrain.</div></div>
+
+<div class="qa"><div class="q">When would you choose LangGraph over a plain LCEL chain?</div><div class="a">When you need cycles, conditional branching, persistent state across turns, human-in-the-loop approval, or resumable/durable execution. LCEL excels at linear DAG-style pipelines; LangGraph models stateful, cyclic workflows with checkpointing.</div></div>
+
+<div class="qa"><div class="q">How do you give an LLM memory if models are stateless?</div><div class="a">Persist prior messages and replay them on each call via a <code>MessagesPlaceholder</code>. Modern options are <code>RunnableWithMessageHistory</code> keyed by session, or a LangGraph checkpointer keyed by <code>thread_id</code>. Because context is finite, trim, window, or summarize older turns.</div></div>
+
+<div class="qa"><div class="q">What makes a tool well-designed for an agent?</div><div class="a">A clear name, precise type hints, and a descriptive docstring — the model selects tools from these. Keep each tool single-purpose, validate arguments, return concise results, and scope permissions. Vague docstrings are the number-one cause of wrong or missed tool calls.</div></div>
+
+<div class="qa"><div class="q">What is prompt injection and how do you mitigate it in a tool-using agent?</div><div class="a">Malicious instructions embedded in user input or retrieved/tool content that hijack the model into unintended actions. Mitigations: treat retrieved content as untrusted, never feed raw output into shell/SQL/eval, constrain and validate tool arguments, scope credentials, require human approval for destructive operations, and add guardrail/validation layers.</div></div>
+
+<div class="qa"><div class="q">How do you make a LangChain app production-resilient?</div><div class="a">Use <code>with_retry</code> for transient failures, <code>with_fallbacks</code> for provider outages, timeouts and token caps, caching for repeated calls, streaming for UX, and LangSmith tracing/evals to catch regressions. Pin versions and separate prompt templates for versioning.</div></div>
+
+<div class="qa"><div class="q">What does <code>RunnableParallel</code> (dict in a chain) do?</div><div class="a">It runs multiple branches concurrently on the same input and merges their outputs into a dict. A dict literal placed in an LCEL pipeline is coerced into a <code>RunnableParallel</code> — the common pattern being <code>{"context": retriever, "question": RunnablePassthrough()}</code> feeding a prompt.</div></div>
+
+<div class="qa"><div class="q">How do embeddings and vector stores enable retrieval?</div><div class="a">An embedding model maps text to a high-dimensional vector where semantic similarity ≈ geometric closeness. The vector store indexes these vectors; at query time the question is embedded and a nearest-neighbor search returns the most semantically similar chunks, regardless of exact keyword overlap.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li>Build the canonical RAG app end to end, then swap the vector store (Chroma → pgvector) to feel the provider-agnostic design.</li>
+  <li>Rebuild the same assistant as a LangGraph graph with a checkpointer; add a conditional edge and a human-in-the-loop interrupt.</li>
+  <li>Instrument everything with <strong>LangSmith</strong>: traces, a small eval dataset, and an LLM-as-judge scorer.</li>
+  <li>Study advanced retrieval: MMR, hybrid search, re-ranking, parent-document and self-query retrievers.</li>
+  <li>Explore multi-agent patterns in LangGraph (supervisor, hierarchical teams) and connect an MCP server via <code>langchain-mcp-adapters</code>.</li>
+  <li>Read the official LangChain and LangGraph docs and the conceptual guides on agents, retrieval, and streaming.</li>
+</ul>
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

@@ -1,0 +1,660 @@
+<p class="lead">Node.js is a server-side JavaScript runtime built on Chrome's V8 engine. Its single-threaded, non-blocking, event-driven architecture lets one process juggle tens of thousands of concurrent connections — making it the default choice for APIs, real-time services, tooling, and the glue of modern web stacks. This guide takes you from the event loop up to a working Express REST backend.</p>
+
+<h2>1. What Node.js Is and Why It Matters</h2>
+
+<p>Node.js wraps Google's <strong>V8</strong> JavaScript engine with a C/C++ layer (<strong>libuv</strong>) that provides an event loop, a thread pool, and asynchronous I/O. The result: JavaScript that runs outside the browser, with full access to files, networks, and the operating system.</p>
+
+<p>The defining idea is <strong>non-blocking I/O</strong>. Instead of dedicating one OS thread per request (the classic thread-per-connection model), Node runs your JavaScript on a <em>single main thread</em> and offloads slow operations — disk reads, DB queries, network calls — to the kernel or a background thread pool. When they finish, a <em>callback</em> is queued back onto the main thread. The thread is almost never idle waiting.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="160" height="80" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="100" y="55" font-size="14" text-anchor="middle" fill="#1e3a8a" font-weight="bold">Your JS code</text>
+  <text x="100" y="75" font-size="12" text-anchor="middle" fill="#1a2233">(single thread)</text>
+
+  <rect x="280" y="20" width="160" height="80" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="360" y="48" font-size="14" text-anchor="middle" fill="#059669" font-weight="bold">libuv</text>
+  <text x="360" y="68" font-size="12" text-anchor="middle" fill="#1a2233">event loop +</text>
+  <text x="360" y="84" font-size="12" text-anchor="middle" fill="#1a2233">thread pool</text>
+
+  <rect x="540" y="20" width="160" height="80" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="620" y="55" font-size="14" text-anchor="middle" fill="#b45309" font-weight="bold">OS / Kernel</text>
+  <text x="620" y="75" font-size="12" text-anchor="middle" fill="#1a2233">disk, net, DNS</text>
+
+  <line x1="180" y1="50" x2="276" y2="50" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="228" y="42" font-size="11" text-anchor="middle" fill="#1a2233">request I/O</text>
+  <line x1="440" y1="50" x2="536" y2="50" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+
+  <line x1="536" y1="80" x2="440" y2="80" stroke="#059669" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="276" y1="80" x2="184" y2="80" stroke="#059669" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="228" y="98" font-size="11" text-anchor="middle" fill="#1a2233">callback queued</text>
+
+  <text x="360" y="150" font-size="13" text-anchor="middle" fill="#1a2233" font-weight="bold">While I/O runs in the background, the JS thread keeps serving other requests.</text>
+  <rect x="120" y="180" width="480" height="90" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="360" y="210" font-size="12" text-anchor="middle" fill="#1a2233">1 req arrives -&gt; start DB query (non-blocking) -&gt; serve req 2, 3, 4...</text>
+  <text x="360" y="235" font-size="12" text-anchor="middle" fill="#1a2233">DB result ready -&gt; callback runs -&gt; respond to req 1</text>
+  <text x="360" y="258" font-size="12" text-anchor="middle" fill="#059669">No thread was blocked waiting for the database.</text>
+</svg><div class="cap">Fig 1. Node offloads slow I/O and keeps the single JS thread busy with other work.</div></div>
+
+<div class="grid c3">
+  <div class="card"><h4>Great for</h4>I/O-bound workloads: REST/GraphQL APIs, real-time (WebSockets), BFFs, microservices, CLI tooling, SSR frontends.</div>
+  <div class="card"><h4>Weak for</h4>CPU-bound work (video encode, big crypto, heavy math) blocks the single thread — offload to worker threads or another service.</div>
+  <div class="card"><h4>Ships with</h4>npm, a rich standard library, a native test runner, a REPL, and increasingly stable experimental features (fetch, watch mode).</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> JavaScript itself is single-threaded, but Node is not. libuv maintains a thread pool (default 4 threads) for filesystem and some crypto/DNS work. "Single-threaded" refers to <em>your</em> JavaScript executing one callback at a time — never two in parallel.</div>
+
+<h2>2. Setup and Getting Started</h2>
+
+<p>Install Node via the official installer, a package manager, or a version manager. <strong>nvm</strong> (Node Version Manager) is strongly recommended so you can switch versions per project.</p>
+
+<pre><code class="language-bash"># Install nvm (macOS/Linux), then a Node LTS release
+nvm install --lts
+nvm use --lts
+node --version        # v22.x (LTS as of 2026)
+npm --version
+
+# Quick REPL
+node
+&gt; 2 + 2
+4
+
+# Run a script
+node app.js
+
+# Watch mode: auto-restart on file change (stable since v22, no nodemon needed)
+node --watch app.js
+
+# Run a one-off expression
+node -e "console.log(process.platform)"</code></pre>
+
+<p>Every project begins with a <code>package.json</code> manifest. Create one and define scripts:</p>
+
+<pre><code class="language-bash">mkdir my-api &amp;&amp; cd my-api
+npm init -y                 # generate package.json with defaults
+npm pkg set type="module"   # opt into ES modules
+npm install express         # add a dependency</code></pre>
+
+<pre><code class="language-json">{
+  "name": "my-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Commit <code>package-lock.json</code>. It pins the exact dependency tree so <code>npm ci</code> installs byte-identical versions in CI and production.</div>
+
+<h2>3. Modules: CommonJS vs ESM</h2>
+
+<p>Node supports two module systems. <strong>CommonJS (CJS)</strong> is the original (<code>require</code>/<code>module.exports</code>); <strong>ES Modules (ESM)</strong> is the standardized JavaScript syntax (<code>import</code>/<code>export</code>). Node decides which to use based on the file extension and the <code>"type"</code> field in <code>package.json</code>.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>CommonJS</h4>Default for <code>.cjs</code> files and packages without <code>"type": "module"</code>. Synchronous <code>require</code>. Has <code>__dirname</code>, <code>__filename</code>, <code>module</code>, <code>exports</code> as globals.</div>
+  <div class="card"><h4>ES Modules</h4>Used for <code>.mjs</code> or when <code>"type": "module"</code>. Asynchronous, statically analyzable <code>import</code>. Top-level <code>await</code> allowed. The modern default for new projects.</div>
+</div>
+
+<pre><code class="language-javascript">// --- CommonJS (math.cjs) ---
+function add(a, b) { return a + b; }
+module.exports = { add };
+
+// consume it
+const { add } = require("./math.cjs");
+console.log(add(2, 3)); // 5</code></pre>
+
+<pre><code class="language-javascript">// --- ES Modules (math.js, with "type":"module") ---
+export function add(a, b) { return a + b; }
+export default function mul(a, b) { return a * b; }
+
+// consume it — note the explicit .js extension (required in ESM)
+import mul, { add } from "./math.js";
+console.log(add(2, 3), mul(2, 3)); // 5 6
+
+// ESM lacks __dirname; reconstruct it:
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+const __dirname = dirname(fileURLToPath(import.meta.url));</code></pre>
+
+<div class="callout warn"><span class="t">Watch out</span> You cannot <code>require()</code> an ESM module from CJS the old way (though <code>import()</code> works, and Node 22+ can synchronously require ESM graphs that have no top-level await). Core modules should be imported with the <code>node:</code> prefix — e.g. <code>import { readFile } from "node:fs/promises"</code> — which is unambiguous and faster to resolve.</div>
+
+<table>
+  <tr><th>Feature</th><th>CommonJS</th><th>ES Modules</th></tr>
+  <tr><td>Import syntax</td><td><code>const x = require(...)</code></td><td><code>import x from ...</code></td></tr>
+  <tr><td>Export syntax</td><td><code>module.exports =</code></td><td><code>export</code> / <code>export default</code></td></tr>
+  <tr><td>Loading</td><td>Synchronous</td><td>Asynchronous</td></tr>
+  <tr><td>Top-level await</td><td>No</td><td>Yes</td></tr>
+  <tr><td>File extension in path</td><td>Optional</td><td>Required</td></tr>
+  <tr><td><code>__dirname</code></td><td>Built-in</td><td>Derive from <code>import.meta.url</code></td></tr>
+</table>
+
+<h2>4. The Event Loop in Depth</h2>
+
+<p>The event loop is libuv's heartbeat. Each iteration ("tick") processes a set of ordered <strong>phases</strong>, draining a queue of callbacks in each. Understanding the order explains why some callbacks fire before others.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 360" width="700" height="360">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="350" y="24" font-size="14" text-anchor="middle" font-weight="bold" fill="#1e3a8a">One tick of the event loop (phases run top to bottom)</text>
+
+  <g font-size="12">
+    <rect x="250" y="40" width="200" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+    <text x="350" y="60" text-anchor="middle" fill="#1a2233" font-weight="bold">timers</text>
+    <text x="350" y="74" text-anchor="middle" fill="#1a2233">setTimeout / setInterval</text>
+
+    <rect x="250" y="95" width="200" height="40" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="350" y="115" text-anchor="middle" fill="#1a2233" font-weight="bold">pending callbacks</text>
+    <text x="350" y="129" text-anchor="middle" fill="#1a2233">deferred system ops</text>
+
+    <rect x="250" y="150" width="200" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/>
+    <text x="350" y="170" text-anchor="middle" fill="#1a2233" font-weight="bold">poll</text>
+    <text x="350" y="184" text-anchor="middle" fill="#1a2233">I/O callbacks (fs, net)</text>
+
+    <rect x="250" y="205" width="200" height="40" rx="6" fill="#fff7ed" stroke="#b45309"/>
+    <text x="350" y="225" text-anchor="middle" fill="#1a2233" font-weight="bold">check</text>
+    <text x="350" y="239" text-anchor="middle" fill="#1a2233">setImmediate</text>
+
+    <rect x="250" y="260" width="200" height="40" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="350" y="280" text-anchor="middle" fill="#1a2233" font-weight="bold">close callbacks</text>
+    <text x="350" y="294" text-anchor="middle" fill="#1a2233">socket.on('close')</text>
+  </g>
+
+  <path d="M250 60 C 150 60, 150 280, 250 280" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="120" y="175" font-size="11" fill="#1a2233" transform="rotate(-90 120 175)">loop repeats</text>
+
+  <rect x="480" y="130" width="200" height="90" rx="6" fill="#fff" stroke="#0891b2" stroke-dasharray="4"/>
+  <text x="580" y="152" font-size="12" text-anchor="middle" fill="#0891b2" font-weight="bold">Microtasks</text>
+  <text x="580" y="172" font-size="11" text-anchor="middle" fill="#1a2233">process.nextTick,</text>
+  <text x="580" y="188" font-size="11" text-anchor="middle" fill="#1a2233">Promise .then</text>
+  <text x="580" y="208" font-size="11" text-anchor="middle" fill="#b45309">drained BETWEEN each phase</text>
+</svg><div class="cap">Fig 2. Event loop phases. Microtask queues (nextTick, promises) are emptied between every phase, not just once per tick.</div></div>
+
+<p>The practical consequence: <strong>microtasks beat macrotasks</strong>. A resolved promise's <code>.then</code> runs before a <code>setTimeout(fn, 0)</code>, and <code>process.nextTick</code> runs before even promises.</p>
+
+<pre><code class="language-javascript">console.log("1: sync start");
+
+setTimeout(() =&gt; console.log("4: timeout (macrotask)"), 0);
+
+Promise.resolve().then(() =&gt; console.log("3: promise (microtask)"));
+
+process.nextTick(() =&gt; console.log("2: nextTick (runs first)"));
+
+console.log("1b: sync end");
+
+// Output order:
+// 1: sync start
+// 1b: sync end
+// 2: nextTick (runs first)
+// 3: promise (microtask)
+// 4: timeout (macrotask)</code></pre>
+
+<div class="callout danger"><span class="t">Blocking is fatal</span> A long synchronous loop or a huge <code>JSON.parse</code> freezes the entire server — no requests are served until it finishes. Never do heavy CPU work on the main thread; use <code>worker_threads</code>, streaming, or a separate service.</div>
+
+<h2>5. Async Patterns: Callbacks, Promises, async/await</h2>
+
+<p>Node's history is a progression of three async styles. Modern code almost always uses <code>async/await</code>, but you must recognize all three.</p>
+
+<h3>Callbacks (and callback hell)</h3>
+<pre><code class="language-javascript">import { readFile } from "node:fs";
+
+// Node's classic "error-first callback" convention: (err, data) =&gt; {}
+readFile("a.txt", "utf8", (err, a) =&gt; {
+  if (err) return console.error(err);
+  readFile("b.txt", "utf8", (err, b) =&gt; {   // nesting grows -&gt; "pyramid of doom"
+    if (err) return console.error(err);
+    console.log(a + b);
+  });
+});</code></pre>
+
+<h3>Promises</h3>
+<pre><code class="language-javascript">import { readFile } from "node:fs/promises"; // promise-based API
+
+readFile("a.txt", "utf8")
+  .then(a =&gt; readFile("b.txt", "utf8").then(b =&gt; a + b))
+  .then(combined =&gt; console.log(combined))
+  .catch(err =&gt; console.error(err));</code></pre>
+
+<h3>async/await (the modern default)</h3>
+<pre><code class="language-javascript">import { readFile } from "node:fs/promises";
+
+async function concatFiles() {
+  try {
+    // Run independent I/O in PARALLEL with Promise.all — don't await serially
+    const [a, b] = await Promise.all([
+      readFile("a.txt", "utf8"),
+      readFile("b.txt", "utf8"),
+    ]);
+    console.log(a + b);
+  } catch (err) {
+    console.error("Failed:", err.message);
+  }
+}
+concatFiles();</code></pre>
+
+<div class="callout tip"><span class="t">Parallel vs serial</span> <code>await a(); await b();</code> runs them one after another. If they don't depend on each other, start both first and <code>await Promise.all([a(), b()])</code> to overlap the waits. Use <code>Promise.allSettled</code> when you want every result even if some reject.</div>
+
+<table>
+  <tr><th>Combinator</th><th>Resolves when</th><th>Rejects when</th></tr>
+  <tr><td><code>Promise.all</code></td><td>All fulfill</td><td>Any rejects (fail-fast)</td></tr>
+  <tr><td><code>Promise.allSettled</code></td><td>All settle</td><td>Never (returns status array)</td></tr>
+  <tr><td><code>Promise.race</code></td><td>First settles</td><td>If first to settle rejects</td></tr>
+  <tr><td><code>Promise.any</code></td><td>First fulfills</td><td>All reject (AggregateError)</td></tr>
+</table>
+
+<h2>6. npm and the Package Ecosystem</h2>
+
+<p>npm is both a CLI and the world's largest software registry. It manages dependencies declared in <code>package.json</code> and installs them into <code>node_modules</code>.</p>
+
+<table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td><code>npm install pkg</code></td><td>Add runtime dependency, update lockfile</td></tr>
+  <tr><td><code>npm install -D pkg</code></td><td>Add devDependency (tooling, tests)</td></tr>
+  <tr><td><code>npm ci</code></td><td>Clean, reproducible install from lockfile (use in CI)</td></tr>
+  <tr><td><code>npm run &lt;script&gt;</code></td><td>Run a script defined in package.json</td></tr>
+  <tr><td><code>npm outdated</code></td><td>Show dependencies with newer versions</td></tr>
+  <tr><td><code>npm audit fix</code></td><td>Patch known security vulnerabilities</td></tr>
+  <tr><td><code>npx &lt;cmd&gt;</code></td><td>Run a package binary without installing globally</td></tr>
+</table>
+
+<p><strong>Semantic versioning</strong> (<code>MAJOR.MINOR.PATCH</code>) drives upgrade safety. Range specifiers in <code>package.json</code> control what <code>npm update</code> may bump to:</p>
+
+<div class="pipeline"><span class="step">^1.2.3</span><span class="arrow">-&gt;</span><span class="step">any 1.x.x</span><span class="arrow">-&gt;</span><span class="step">~1.2.3 = 1.2.x</span><span class="arrow">-&gt;</span><span class="step">1.2.3 = exact</span></div>
+
+<div class="callout note"><span class="t">dependencies vs devDependencies</span> Runtime libraries (express, pg) go in <code>dependencies</code>. Build/test-only tools (eslint, vitest, typescript) go in <code>devDependencies</code> and are skipped by <code>npm ci --omit=dev</code> in production images.</div>
+
+<h2>7. Core Modules: Files, Paths, Process, Env</h2>
+
+<p>Node ships a large standard library. The ones you reach for daily:</p>
+
+<pre><code class="language-javascript">import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { join, extname, basename } from "node:path";
+import process from "node:process";
+
+// Build cross-platform paths (never hand-concatenate with "/")
+const dataDir = join(process.cwd(), "data");
+await mkdir(dataDir, { recursive: true }); // no error if it already exists
+
+const file = join(dataDir, "users.json");
+await writeFile(file, JSON.stringify([{ id: 1 }], null, 2));
+
+const raw = await readFile(file, "utf8");
+console.log(JSON.parse(raw));
+console.log(extname(file), basename(file)); // .json users.json</code></pre>
+
+<h3>Environment variables &amp; configuration</h3>
+<p>Read config from <code>process.env</code>. Node 20.6+ can load a <code>.env</code> file natively — no <code>dotenv</code> package needed.</p>
+
+<pre><code class="language-bash"># .env
+PORT=3000
+NODE_ENV=production
+DATABASE_URL=postgres://localhost/mydb
+
+# load it natively
+node --env-file=.env server.js</code></pre>
+
+<pre><code class="language-javascript">// Validate and provide defaults — fail fast on missing required config
+const PORT = Number(process.env.PORT ?? 3000);
+const DB_URL = process.env.DATABASE_URL;
+if (!DB_URL) {
+  console.error("DATABASE_URL is required");
+  process.exit(1); // non-zero exit signals failure to orchestrators
+}
+
+// Graceful shutdown: close connections before the process dies
+process.on("SIGTERM", async () =&gt; {
+  console.log("Shutting down...");
+  // await server.close(); await db.end();
+  process.exit(0);
+});</code></pre>
+
+<div class="callout danger"><span class="t">Never commit secrets</span> Add <code>.env</code> to <code>.gitignore</code>. Secrets belong in your deployment platform's secret manager, injected as environment variables at runtime.</div>
+
+<h3>Streams &amp; Buffers (handling large data)</h3>
+<p>Reading a 2&nbsp;GB file into memory crashes. Streams process data in chunks with constant memory. A <code>Buffer</code> is Node's fixed-length raw byte container.</p>
+
+<pre><code class="language-javascript">import { createReadStream, createWriteStream } from "node:fs";
+import { pipeline } from "node:stream/promises";
+import { createGzip } from "node:zlib";
+
+// Stream + compress a huge file with backpressure handled for you
+await pipeline(
+  createReadStream("big.log"),
+  createGzip(),
+  createWriteStream("big.log.gz")
+);
+console.log("Compressed without loading the whole file into RAM.");</code></pre>
+
+<h2>8. Building an HTTP Server</h2>
+
+<p>You can build a server with only the core <code>http</code> module — useful to understand what frameworks abstract away.</p>
+
+<pre><code class="language-javascript">import { createServer } from "node:http";
+
+const server = createServer((req, res) =&gt; {
+  // req: IncomingMessage (method, url, headers)  res: ServerResponse
+  if (req.method === "GET" &amp;&amp; req.url === "/health") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ status: "ok" }));
+  }
+  res.writeHead(404, { "Content-Type": "text/plain" });
+  res.end("Not Found");
+});
+
+server.listen(3000, () =&gt; console.log("Listening on http://localhost:3000"));</code></pre>
+
+<p>Raw <code>http</code> gets verbose fast: manual routing, body parsing, and header management. That's why nearly everyone reaches for a framework. <strong>Express</strong> remains the most widely used; <strong>Fastify</strong> is a faster modern alternative with built-in schema validation. We'll use Express.</p>
+
+<h2>9. Express: Routing, Middleware, and REST</h2>
+
+<p>Express models a request as flowing through an ordered <strong>middleware pipeline</strong>. Each middleware is a function <code>(req, res, next)</code>. It can read/modify <code>req</code>/<code>res</code>, end the response, or call <code>next()</code> to pass control onward.</p>
+
+<div class="diagram"><svg viewBox="0 0 740 230" width="740" height="230">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="370" y="24" font-size="14" text-anchor="middle" font-weight="bold" fill="#1e3a8a">Express request pipeline</text>
+
+  <rect x="10" y="60" width="90" height="50" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="55" y="90" font-size="12" text-anchor="middle" fill="#1a2233">Request</text>
+
+  <rect x="130" y="60" width="110" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="185" y="83" font-size="11" text-anchor="middle" fill="#1a2233">cors / logger</text>
+  <text x="185" y="99" font-size="11" text-anchor="middle" fill="#1a2233">(global mw)</text>
+
+  <rect x="270" y="60" width="110" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="325" y="83" font-size="11" text-anchor="middle" fill="#1a2233">express.json()</text>
+  <text x="325" y="99" font-size="11" text-anchor="middle" fill="#1a2233">body parse</text>
+
+  <rect x="410" y="60" width="110" height="50" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="465" y="83" font-size="11" text-anchor="middle" fill="#1a2233">auth check</text>
+  <text x="465" y="99" font-size="11" text-anchor="middle" fill="#1a2233">(route mw)</text>
+
+  <rect x="550" y="60" width="110" height="50" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="605" y="83" font-size="11" text-anchor="middle" fill="#1a2233">route handler</text>
+  <text x="605" y="99" font-size="11" text-anchor="middle" fill="#1a2233">res.json(...)</text>
+
+  <line x1="100" y1="85" x2="126" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="240" y1="85" x2="266" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="380" y1="85" x2="406" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="520" y1="85" x2="546" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="253" y="52" font-size="10" text-anchor="middle" fill="#1a2233">next()</text>
+
+  <rect x="270" y="150" width="250" height="50" rx="6" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="395" y="173" font-size="11" text-anchor="middle" fill="#b91c1c">error-handling middleware</text>
+  <text x="395" y="189" font-size="11" text-anchor="middle" fill="#1a2233">(err, req, res, next)</text>
+  <line x1="465" y1="110" x2="430" y2="146" stroke="#b91c1c" stroke-width="2" stroke-dasharray="4" marker-end="url(#ah3)"/>
+  <text x="500" y="135" font-size="10" fill="#b91c1c">next(err)</text>
+</svg><div class="cap">Fig 3. Middleware runs in registration order. Calling next(err) skips ahead to the error handler.</div></div>
+
+<pre><code class="language-javascript">import express from "express";
+
+const app = express();
+
+// --- Global middleware (runs for every request, in order) ---
+app.use(express.json());                 // parse JSON bodies into req.body
+app.use((req, res, next) =&gt; {             // custom logger
+  console.log(`${req.method} ${req.path}`);
+  next();                                 // MUST call next() or the request hangs
+});
+
+// --- Routing: method + path -&gt; handler ---
+app.get("/users/:id", (req, res) =&gt; {
+  const { id } = req.params;              // route params  -&gt; /users/42
+  const { verbose } = req.query;          // query string  -&gt; ?verbose=true
+  res.json({ id, verbose: verbose === "true" });
+});
+
+app.post("/users", (req, res) =&gt; {
+  const user = req.body;                  // parsed by express.json()
+  res.status(201).json({ id: 99, ...user });
+});
+
+app.listen(3000, () =&gt; console.log("API on :3000"));</code></pre>
+
+<h3>Routers for modular structure</h3>
+<pre><code class="language-javascript">// routes/users.js — a mountable sub-application
+import { Router } from "express";
+const router = Router();
+
+router.get("/", (req, res) =&gt; res.json([{ id: 1 }]));
+router.get("/:id", (req, res) =&gt; res.json({ id: req.params.id }));
+export default router;
+
+// server.js
+import usersRouter from "./routes/users.js";
+app.use("/api/users", usersRouter); // all routes now prefixed with /api/users</code></pre>
+
+<table>
+  <tr><th>HTTP method</th><th>REST meaning</th><th>Typical status</th></tr>
+  <tr><td>GET</td><td>Read a resource / collection</td><td>200 OK</td></tr>
+  <tr><td>POST</td><td>Create a new resource</td><td>201 Created</td></tr>
+  <tr><td>PUT</td><td>Replace a resource fully</td><td>200 / 204</td></tr>
+  <tr><td>PATCH</td><td>Partially update</td><td>200</td></tr>
+  <tr><td>DELETE</td><td>Remove a resource</td><td>204 No Content</td></tr>
+</table>
+
+<h2>10. Error Handling</h2>
+
+<p>Errors in async code are the #1 source of production crashes. Rules of thumb:</p>
+
+<div class="grid c2">
+  <div class="card"><h4>In async/await</h4>Wrap awaits in <code>try/catch</code>. An unhandled rejection in a route handler won't be caught by Express automatically (in v4) — forward it with <code>next(err)</code>.</div>
+  <div class="card"><h4>Centralize</h4>Define ONE error-handling middleware with four args <code>(err, req, res, next)</code> at the end. Translate error types into HTTP responses there.</div>
+</div>
+
+<pre><code class="language-javascript">// A typed application error
+class AppError extends Error {
+  constructor(message, status = 500) {
+    super(message);
+    this.status = status;
+  }
+}
+
+// Wrapper so async handler rejections reach the error middleware
+const wrap = (fn) =&gt; (req, res, next) =&gt; Promise.resolve(fn(req, res, next)).catch(next);
+
+app.get("/users/:id", wrap(async (req, res) =&gt; {
+  const user = await db.find(req.params.id);
+  if (!user) throw new AppError("User not found", 404);
+  res.json(user);
+}));
+
+// 404 for unmatched routes (register AFTER all routes)
+app.use((req, res) =&gt; res.status(404).json({ error: "Not Found" }));
+
+// Central error handler — note the FOUR parameters
+app.use((err, req, res, next) =&gt; {
+  const status = err.status ?? 500;
+  if (status &gt;= 500) console.error(err); // log server faults, not client ones
+  res.status(status).json({ error: err.message });
+});</code></pre>
+
+<div class="callout warn"><span class="t">Process-level safety nets</span> Attach <code>process.on("unhandledRejection")</code> and <code>process.on("uncaughtException")</code> to log and exit gracefully. These are last resorts for logging, not a substitute for local <code>try/catch</code>. After an uncaught exception the process is in an undefined state — log it and let it restart.</div>
+
+<div class="callout tip"><span class="t">Express 5</span> In Express 5 (stable 2024+), rejected promises returned from async route handlers are automatically forwarded to the error handler, so the <code>wrap</code> helper is no longer needed. On v4 it still is.</div>
+
+<h2>11. Worked Mini-Example: A REST API Backend</h2>
+
+<p>Let's assemble the pieces into a small but complete "tasks" API with in-memory storage, validation, and centralized errors. This is the shape of a real backend minus the database.</p>
+
+<pre><code class="language-javascript">// server.js  —  run with:  node --watch --env-file=.env server.js
+import express from "express";
+
+const app = express();
+app.use(express.json());
+
+// --- "Database" (swap for Postgres/Mongo in production) ---
+const tasks = new Map();
+let nextId = 1;
+
+class AppError extends Error {
+  constructor(msg, status = 500) { super(msg); this.status = status; }
+}
+const wrap = (fn) =&gt; (req, res, next) =&gt;
+  Promise.resolve(fn(req, res, next)).catch(next);
+
+// --- CREATE ---
+app.post("/tasks", wrap(async (req, res) =&gt; {
+  const { title, done = false } = req.body ?? {};
+  if (typeof title !== "string" || title.trim() === "") {
+    throw new AppError("title is required", 400);
+  }
+  const task = { id: nextId++, title: title.trim(), done: Boolean(done) };
+  tasks.set(task.id, task);
+  res.status(201).json(task);
+}));
+
+// --- READ collection (with simple filtering) ---
+app.get("/tasks", wrap(async (req, res) =&gt; {
+  let list = [...tasks.values()];
+  if (req.query.done !== undefined) {
+    const want = req.query.done === "true";
+    list = list.filter(t =&gt; t.done === want);
+  }
+  res.json(list);
+}));
+
+// --- READ one ---
+app.get("/tasks/:id", wrap(async (req, res) =&gt; {
+  const task = tasks.get(Number(req.params.id));
+  if (!task) throw new AppError("task not found", 404);
+  res.json(task);
+}));
+
+// --- UPDATE (partial) ---
+app.patch("/tasks/:id", wrap(async (req, res) =&gt; {
+  const task = tasks.get(Number(req.params.id));
+  if (!task) throw new AppError("task not found", 404);
+  const { title, done } = req.body ?? {};
+  if (title !== undefined) task.title = String(title);
+  if (done !== undefined) task.done = Boolean(done);
+  res.json(task);
+}));
+
+// --- DELETE ---
+app.delete("/tasks/:id", wrap(async (req, res) =&gt; {
+  const existed = tasks.delete(Number(req.params.id));
+  if (!existed) throw new AppError("task not found", 404);
+  res.status(204).end();
+}));
+
+// --- 404 + central error handler (order matters) ---
+app.use((req, res) =&gt; res.status(404).json({ error: "Not Found" }));
+app.use((err, req, res, next) =&gt; {
+  const status = err.status ?? 500;
+  if (status &gt;= 500) console.error(err);
+  res.status(status).json({ error: err.message });
+});
+
+const PORT = Number(process.env.PORT ?? 3000);
+app.listen(PORT, () =&gt; console.log(`Tasks API on :${PORT}`));</code></pre>
+
+<pre><code class="language-bash"># Exercise it with curl
+curl -X POST localhost:3000/tasks -H 'Content-Type: application/json' \
+     -d '{"title":"Learn Node"}'
+# {"id":1,"title":"Learn Node","done":false}
+
+curl localhost:3000/tasks
+curl -X PATCH localhost:3000/tasks/1 -H 'Content-Type: application/json' \
+     -d '{"done":true}'
+curl -X DELETE localhost:3000/tasks/1 -w "%{http_code}\n"   # 204</code></pre>
+
+<details><summary>Show a minimal test using the built-in test runner</summary><div class="body">
+<pre><code class="language-javascript">// tasks.test.js  —  run with:  node --test
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+test("rejects empty title", async () =&gt; {
+  const res = await fetch("http://localhost:3000/tasks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: "" }),
+  });
+  assert.equal(res.status, 400);
+});</code></pre>
+</div></details>
+
+<h2>12. Cheat-Sheet Reference</h2>
+
+<table>
+  <tr><th>Task</th><th>API</th></tr>
+  <tr><td>Read file (async)</td><td><code>await readFile(path, "utf8")</code> from <code>node:fs/promises</code></td></tr>
+  <tr><td>Join paths</td><td><code>join(dir, "file.txt")</code> from <code>node:path</code></td></tr>
+  <tr><td>Env var</td><td><code>process.env.NAME</code></td></tr>
+  <tr><td>CLI args</td><td><code>process.argv.slice(2)</code></td></tr>
+  <tr><td>Exit with error</td><td><code>process.exit(1)</code></td></tr>
+  <tr><td>Current dir</td><td><code>process.cwd()</code></td></tr>
+  <tr><td>Run parallel async</td><td><code>await Promise.all([...])</code></td></tr>
+  <tr><td>Defer to next tick</td><td><code>queueMicrotask(fn)</code> / <code>setImmediate(fn)</code></td></tr>
+  <tr><td>HTTP request (built-in)</td><td><code>await fetch(url)</code> (global since v18)</td></tr>
+  <tr><td>Parse JSON body (Express)</td><td><code>app.use(express.json())</code></td></tr>
+  <tr><td>Set status + JSON</td><td><code>res.status(201).json(obj)</code></td></tr>
+  <tr><td>Route param</td><td><code>req.params.id</code></td></tr>
+</table>
+
+<table>
+  <tr><th>Runtime comparison</th><th>Node.js</th><th>Deno</th><th>Bun</th></tr>
+  <tr><td>Engine</td><td>V8</td><td>V8</td><td>JavaScriptCore</td></tr>
+  <tr><td>TypeScript</td><td>Native strip (v22+)</td><td>First-class</td><td>First-class</td></tr>
+  <tr><td>Package manager</td><td>npm</td><td>npm / JSR</td><td>bun (npm-compatible)</td></tr>
+  <tr><td>Maturity / ecosystem</td><td>Largest, battle-tested</td><td>Growing</td><td>Fast, newer</td></tr>
+</table>
+
+<h2>13. Best Practices and Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Use <code>async/await</code> with <code>try/catch</code> and a central error handler. Validate all external input (bodies, params, env). Prefer <code>node:fs/promises</code> over callback APIs. Pin dependencies with a committed lockfile and run <code>npm ci</code> in CI.</div>
+
+<div class="callout ok"><span class="t">Do</span> Keep handlers thin — push logic into a service layer. Stream large payloads. Set security middleware (helmet, rate limiting, CORS) and read config from env. Implement graceful shutdown on <code>SIGTERM</code>.</div>
+
+<div class="callout tip"><span class="t">Tip</span> Overlap independent I/O with <code>Promise.all</code>. Use the <code>node:</code> prefix for core modules. Add structured logging (pino) rather than scattering <code>console.log</code>.</div>
+
+<div class="callout warn"><span class="t">Pitfall</span> Forgetting <code>next()</code> in middleware hangs the request forever. Mixing <code>await</code> inside a <code>forEach</code> does NOT wait — use a <code>for...of</code> loop or <code>Promise.all(array.map(...))</code>. Floating promises (no <code>await</code>, no <code>.catch</code>) swallow errors.</div>
+
+<div class="callout danger"><span class="t">Danger</span> Blocking the event loop with CPU-heavy sync code stalls every connection. Never store secrets in code or logs. Don't trust <code>req.body</code> without validation — it is attacker-controlled. A single uncaught exception can leave the process in a corrupt state; restart rather than continue.</div>
+
+<h2>14. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">Is Node.js single-threaded?</div><div class="a">Your JavaScript executes on a single main thread, so only one callback runs at a time. But Node is not single-threaded overall: libuv maintains a thread pool (default 4) for filesystem/DNS/some crypto work, and the kernel handles network I/O asynchronously. You can also spawn <code>worker_threads</code> for CPU-bound parallelism.</div></div>
+
+<div class="qa"><div class="q">Explain the event loop phases.</div><div class="a">Each tick runs ordered phases: timers (setTimeout/setInterval), pending callbacks, poll (I/O callbacks), check (setImmediate), and close callbacks. Between every phase, the microtask queues are fully drained — first <code>process.nextTick</code>, then resolved promises. That's why a promise callback runs before a <code>setTimeout(0)</code>.</div></div>
+
+<div class="qa"><div class="q">What's the difference between <code>process.nextTick</code> and <code>setImmediate</code>?</div><div class="a"><code>process.nextTick</code> callbacks run immediately after the current operation, before the event loop continues and before promise microtasks — so a tight recursive <code>nextTick</code> can starve the loop. <code>setImmediate</code> runs in the "check" phase, after the current poll phase completes. Use <code>setImmediate</code> to yield to I/O; use <code>nextTick</code> sparingly.</div></div>
+
+<div class="qa"><div class="q">CommonJS vs ES Modules — key differences?</div><div class="a">CJS uses synchronous <code>require</code>/<code>module.exports</code> and has <code>__dirname</code>; ESM uses asynchronous, statically analyzable <code>import</code>/<code>export</code>, requires file extensions, allows top-level await, and derives <code>__dirname</code> from <code>import.meta.url</code>. The system is chosen by file extension (<code>.cjs</code>/<code>.mjs</code>) or the <code>"type"</code> field in package.json.</div></div>
+
+<div class="qa"><div class="q">How do you run multiple async operations efficiently?</div><div class="a">If they're independent, start them all and await together: <code>await Promise.all([a(), b()])</code> overlaps the waits. Awaiting serially (<code>await a(); await b();</code>) is slower because each waits for the previous. Use <code>Promise.allSettled</code> when you need every result even if some fail, and <code>Promise.any</code> for the first success.</div></div>
+
+<div class="qa"><div class="q">What is middleware in Express and what order does it run?</div><div class="a">Middleware is a function <code>(req, res, next)</code> that runs in the order registered. It can inspect/modify the request/response, end the response, or call <code>next()</code> to pass control. Error-handling middleware has four parameters <code>(err, req, res, next)</code> and is triggered by <code>next(err)</code>; it must be registered last.</div></div>
+
+<div class="qa"><div class="q">How do you handle errors in async Express routes?</div><div class="a">In Express 4, a rejected promise in an async handler isn't caught automatically, so you wrap the handler to <code>.catch(next)</code>, forwarding to a central error middleware. Express 5 does this automatically. Either way, centralize error-to-HTTP mapping in one error handler, and add process-level <code>unhandledRejection</code>/<code>uncaughtException</code> listeners as logging safety nets.</div></div>
+
+<div class="qa"><div class="q">What happens if you block the event loop?</div><div class="a">A long synchronous operation (big loop, synchronous crypto, giant JSON.parse) stops the single JS thread, so no other callbacks — including incoming requests — run until it finishes. The server appears frozen. Fix by streaming, chunking work, offloading to <code>worker_threads</code>, or moving the computation to another service.</div></div>
+
+<div class="qa"><div class="q">What's the difference between <code>dependencies</code> and <code>devDependencies</code>?</div><div class="a"><code>dependencies</code> are needed at runtime (express, pg) and are installed in production. <code>devDependencies</code> are only for development and build (eslint, test runners, typescript) and are omitted with <code>npm ci --omit=dev</code>. Keeping them separate shrinks production images and attack surface.</div></div>
+
+<div class="qa"><div class="q">Why use streams instead of reading a whole file?</div><div class="a">Streams process data in chunks with roughly constant memory, so you can handle files or network payloads larger than available RAM, and you start producing output before all input arrives. <code>pipeline()</code> wires streams together and handles backpressure and cleanup automatically.</div></div>
+
+<div class="qa"><div class="q">How does <code>require</code> caching work?</div><div class="a">The first <code>require</code> of a module executes it and caches the resulting <code>module.exports</code> in <code>require.cache</code> keyed by resolved path. Subsequent requires return the same cached object without re-executing — so modules are effectively singletons. ESM has analogous one-time evaluation of each module graph node.</div></div>
+
+<div class="qa"><div class="q">How would you scale a Node app across CPU cores?</div><div class="a">Because one process uses one core for JS, run multiple processes: the built-in <code>cluster</code> module or a process manager (PM2), or horizontal scaling behind a load balancer / orchestrator (Kubernetes). Keep the app stateless (store sessions in Redis) so any instance can serve any request. For CPU hotspots within a process, use <code>worker_threads</code>.</div></div>
+
+<h2>15. Further Learning</h2>
+
+<ul>
+  <li><strong>Official docs:</strong> nodejs.org/docs and the Node.js Learn guides — authoritative and current.</li>
+  <li><strong>Deepen the event loop:</strong> read the libuv design overview and experiment with <code>perf_hooks</code> to measure lag.</li>
+  <li><strong>Frameworks:</strong> compare Express with Fastify (schema validation, speed) and NestJS (opinionated, TypeScript, DI).</li>
+  <li><strong>Data layer:</strong> add a real database with Prisma or Drizzle ORM, or <code>pg</code>/<code>mongodb</code> drivers directly.</li>
+  <li><strong>Production hardening:</strong> helmet, rate limiting, input validation with zod, structured logging with pino, OpenTelemetry tracing.</li>
+  <li><strong>TypeScript:</strong> adopt it for safety; Node 22+ can run <code>.ts</code> via native type stripping, or use <code>tsx</code>/<code>ts-node</code>.</li>
+  <li><strong>Testing:</strong> the built-in <code>node:test</code> runner, or Vitest; use supertest for HTTP-level route tests.</li>
+  <li><strong>Build something:</strong> extend the tasks API with a database, auth (JWT), pagination, and deploy it to a container platform.</li>
+</ul>

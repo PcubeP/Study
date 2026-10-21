@@ -1,0 +1,1209 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MLOps & Productionizing ML — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">AI/ML Deep Dive</div>
+  <h1>MLOps & Productionizing ML</h1>
+  <div class="subtitle">From notebook to production — experiment tracking, data & model versioning, pipelines, CI/CD, serving patterns, containerisation, feature stores, drift monitoring, reproducibility, and LLMOps.</div>
+  <div class="tags"><span>mlops</span><span>production</span><span>ml-lifecycle</span><span>model-serving</span><span>monitoring</span><span>ci-cd</span><span>llmops</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~28 min read &middot; 6,147 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#why-mlops-matters-the-notebook-to-production-gap">Why MLOps Matters: The Notebook-to-Production Gap</a></li><li><a href="#the-ml-lifecycle">The ML Lifecycle</a></li><li><a href="#experiment-tracking-with-mlflow">Experiment Tracking with MLflow</a></li><li><a href="#data-versioning-with-dvc">Data Versioning with DVC</a></li><li><a href="#model-versioning-and-the-model-registry">Model Versioning and the Model Registry</a></li><li><a href="#ml-pipelines-kubeflow-prefect-and-airflow">ML Pipelines: Kubeflow, Prefect, and Airflow</a></li><li><a href="#ci-cd-for-machine-learning">CI/CD for Machine Learning</a></li><li><a href="#model-serving-patterns">Model Serving Patterns</a></li><li><a href="#containerisation-with-docker-for-ml">Containerisation with Docker for ML</a></li><li><a href="#feature-stores">Feature Stores</a></li><li><a href="#a-b-testing-and-shadow-deployment">A/B Testing and Shadow Deployment</a></li><li><a href="#monitoring-and-drift-detection">Monitoring and Drift Detection</a></li><li><a href="#reproducibility-in-machine-learning">Reproducibility in Machine Learning</a></li><li><a href="#llmops-production-llm-systems">LLMOps: Production LLM Systems</a></li><li><a href="#q-amp-a-test-your-understanding">Q&amp;A: Test Your Understanding</a></li><li><a href="#mlops-tooling-landscape">MLOps Tooling Landscape</a></li></ol></nav>
+<h2 id="why-mlops-matters-the-notebook-to-production-gap">Why MLOps Matters: The Notebook-to-Production Gap</h2>
+<p class="lead">MLOps is the discipline of taking machine learning models from experimental notebooks to reliable, monitored, and continuously-improving production systems. The gap between these two worlds is where most ML projects fail.</p>
+
+<p>A common misconception is that the hard part of building an ML product is training the model. In practice, the model itself is a small fraction of the system. Google's landmark 2015 paper <em>"Hidden Technical Debt in Machine Learning Systems"</em> illustrates this: the ML code sits in a tiny box at the centre, surrounded by data collection, feature engineering, serving infrastructure, monitoring, process management, and configuration. All of that surrounding machinery must be built, versioned, and operated. MLOps is the set of practices, tooling, and culture that makes this sustainable.</p>
+
+<div class="callout note"><span class="t">Core tension</span> Traditional software is <em>code + config</em>. ML systems are <em>code + config + data + model weights</em>. The last two mutate independently over time — data distributions shift, labels arrive late, retraining changes model behaviour — requiring versioning and monitoring that classical DevOps was never designed for.</div>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>The 3 Axes of Failure</h4>
+    <p><strong>Data:</strong> training-serving skew, schema drift, missing features in prod.</p>
+    <p><strong>Model:</strong> silent performance degradation, concept drift, stale embeddings.</p>
+    <p><strong>Operations:</strong> no rollback plan, no canary, inconsistent environments.</p>
+  </div>
+  <div class="card">
+    <h4>What MLOps Adds to DevOps</h4>
+    <p>Experiment tracking &amp; reproducibility, data &amp; model versioning, feature stores, drift monitoring, retraining pipelines, model governance, and LLM-specific concerns (prompt versioning, cost tracking).</p>
+  </div>
+  <div class="card">
+    <h4>Maturity Levels</h4>
+    <p><strong>Level 0:</strong> manual notebooks, ad-hoc deployment.</p>
+    <p><strong>Level 1:</strong> automated pipelines, experiment tracking.</p>
+    <p><strong>Level 2:</strong> full CI/CD for models, automated retraining triggers.</p>
+  </div>
+</div>
+
+<div class="callout warn"><span class="t">Stat</span> Industry surveys consistently show that over 85 % of ML projects never reach production, and of those that do, the median time from first prototype to live serving is 6–18 months. MLOps practices compress that timeline by an order of magnitude.</div>
+
+<h2 id="the-ml-lifecycle">The ML Lifecycle</h2>
+<p class="lead">Unlike classical software, the ML lifecycle is a <em>loop</em>, not a pipeline. Every production system eventually triggers a feedback signal that demands retraining, which starts the cycle again.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 780 320" width="780" height="320">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="aho" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/>
+    </marker>
+  </defs>
+  <!-- Boxes -->
+  <rect x="10"  y="130" width="100" height="50" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="60"  y="150" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233" font-weight="600">Business</text>
+  <text x="60"  y="165" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233">Problem</text>
+
+  <rect x="140" y="130" width="100" height="50" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="190" y="150" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233" font-weight="600">Data</text>
+  <text x="190" y="165" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233">Collection</text>
+
+  <rect x="270" y="130" width="100" height="50" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="320" y="150" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233" font-weight="600">Feature</text>
+  <text x="320" y="165" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233">Engineering</text>
+
+  <rect x="400" y="130" width="100" height="50" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="450" y="150" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233" font-weight="600">Model</text>
+  <text x="450" y="165" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233">Training</text>
+
+  <rect x="530" y="130" width="100" height="50" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="580" y="150" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233" font-weight="600">Evaluation</text>
+  <text x="580" y="165" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233">&amp; Registry</text>
+
+  <rect x="660" y="130" width="100" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="710" y="150" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233" font-weight="600">Serving</text>
+  <text x="710" y="165" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233">Deployment</text>
+
+  <!-- Monitor box below -->
+  <rect x="400" y="250" width="100" height="50" rx="8" fill="#fff7ed" stroke="#b45309" stroke-width="1.5"/>
+  <text x="450" y="270" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233" font-weight="600">Monitoring</text>
+  <text x="450" y="285" text-anchor="middle" font-size="11" font-family="sans-serif" fill="#1a2233">&amp; Feedback</text>
+
+  <!-- Arrows forward -->
+  <line x1="110" y1="155" x2="138" y2="155" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="240" y1="155" x2="268" y2="155" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="370" y1="155" x2="398" y2="155" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="500" y1="155" x2="528" y2="155" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah)"/>
+  <line x1="630" y1="155" x2="658" y2="155" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Serving -> Monitor -->
+  <line x1="710" y1="180" x2="710" y2="290" stroke="#059669" stroke-width="1.5"/>
+  <line x1="710" y1="290" x2="502" y2="290" stroke="#b45309" stroke-width="1.5"/>
+  <line x1="502" y1="290" x2="502" y2="253" stroke="#b45309" stroke-width="1.5" marker-end="url(#aho)"/>
+
+  <!-- Monitor -> retrain (back to data) -->
+  <path d="M400 275 Q 190 310 190 182" stroke="#b45309" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#aho)"/>
+  <text x="230" y="310" font-size="10" font-family="sans-serif" fill="#b45309">retrain trigger</text>
+
+  <!-- Labels -->
+  <text x="60"  y="120" text-anchor="middle" font-size="9" fill="#1e3a8a">PLAN</text>
+  <text x="190" y="120" text-anchor="middle" font-size="9" fill="#1e3a8a">COLLECT</text>
+  <text x="320" y="120" text-anchor="middle" font-size="9" fill="#1e3a8a">PREPARE</text>
+  <text x="450" y="120" text-anchor="middle" font-size="9" fill="#1e3a8a">BUILD</text>
+  <text x="580" y="120" text-anchor="middle" font-size="9" fill="#1e3a8a">VALIDATE</text>
+  <text x="710" y="120" text-anchor="middle" font-size="9" fill="#059669">OPERATE</text>
+</svg>
+<div class="cap">ML Lifecycle — the loop from business problem through data, features, training, evaluation and serving, with monitoring triggering continuous retraining.</div>
+</div>
+
+<p>Key insight: phases after deployment (monitoring, feedback collection, retraining triggers) receive less engineering attention than pre-deployment phases, yet they determine whether a system stays accurate over its entire lifespan.</p>
+
+<h2 id="experiment-tracking-with-mlflow">Experiment Tracking with MLflow</h2>
+<p class="lead">Every model training run generates dozens of parameters, metrics, and artefacts. Without systematic tracking, reproducing last quarter's best result is nearly impossible. MLflow is the de-facto open-source standard for experiment tracking.</p>
+
+<p>MLflow organises work around four core concepts: <strong>Experiments</strong> (a named project), <strong>Runs</strong> (a single training execution with its own ID), <strong>Params</strong> (hyperparameters logged at the start), <strong>Metrics</strong> (time-series scalars like loss or F1), and <strong>Artefacts</strong> (files: model binaries, confusion matrices, vocabulary files). All runs within an experiment are queryable and comparable in the MLflow UI.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> mlflow
+<span class="hljs-keyword">import</span> mlflow.sklearn
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> RandomForestClassifier
+
+mlflow.set_experiment(<span class="hljs-string">&quot;fraud-detection-v2&quot;</span>)
+
+<span class="hljs-keyword">with</span> mlflow.start_run(run_name=<span class="hljs-string">&quot;rf-baseline&quot;</span>):
+    params = {<span class="hljs-string">&quot;n_estimators&quot;</span>: <span class="hljs-number">200</span>, <span class="hljs-string">&quot;max_depth&quot;</span>: <span class="hljs-number">8</span>, <span class="hljs-string">&quot;random_state&quot;</span>: <span class="hljs-number">42</span>}
+    mlflow.log_params(params)
+
+    clf = RandomForestClassifier(**params)
+    clf.fit(X_train, y_train)
+
+    precision, recall, f1, _ = precision_recall_fscore_support(
+        y_test, clf.predict(X_test), average=<span class="hljs-string">&quot;binary&quot;</span>
+    )
+    mlflow.log_metrics({<span class="hljs-string">&quot;precision&quot;</span>: precision, <span class="hljs-string">&quot;recall&quot;</span>: recall, <span class="hljs-string">&quot;f1&quot;</span>: f1})
+
+    <span class="hljs-comment"># Log the model with its signature for schema enforcement</span>
+    signature = mlflow.models.infer_signature(X_train, clf.predict(X_train))
+    mlflow.sklearn.log_model(clf, <span class="hljs-string">&quot;model&quot;</span>, signature=signature)
+
+    mlflow.log_artifact(<span class="hljs-string">&quot;feature_importance.png&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Run ID: <span class="hljs-subst">{mlflow.active_run().info.run_id}</span>&quot;</span>)</code></pre>
+
+<div class="callout tip"><span class="t">Best Practice</span> Always log a <strong>model signature</strong> (input/output schema) with every run. MLflow will enforce this schema at serving time, catching training-serving skew early rather than silently returning wrong predictions.</div>
+
+<h3>MLflow Model Registry</h3>
+<p>After tracking runs, promising models are promoted into the <strong>Model Registry</strong> — a versioned catalogue with a lifecycle: <em>None → Staging → Production → Archived</em>. The registry is the single source of truth for which model version is live.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> mlflow.tracking <span class="hljs-keyword">import</span> MlflowClient
+
+client = MlflowClient()
+
+<span class="hljs-comment"># Register a run&#x27;s model artifact under a named model</span>
+result = mlflow.register_model(
+    model_uri=<span class="hljs-string">f&quot;runs:/<span class="hljs-subst">{run_id}</span>/model&quot;</span>,
+    name=<span class="hljs-string">&quot;fraud-detector&quot;</span>
+)
+
+<span class="hljs-comment"># Transition to Staging after validation</span>
+client.transition_model_version_stage(
+    name=<span class="hljs-string">&quot;fraud-detector&quot;</span>,
+    version=result.version,
+    stage=<span class="hljs-string">&quot;Staging&quot;</span>,
+    archive_existing_versions=<span class="hljs-literal">False</span>
+)
+
+<span class="hljs-comment"># Promote to Production — this is typically automated via CI/CD</span>
+client.transition_model_version_stage(
+    name=<span class="hljs-string">&quot;fraud-detector&quot;</span>,
+    version=result.version,
+    stage=<span class="hljs-string">&quot;Production&quot;</span>,
+    archive_existing_versions=<span class="hljs-literal">True</span>   <span class="hljs-comment"># auto-archive old prod version</span>
+)</code></pre>
+
+<div class="callout note"><span class="t">MLflow 2.x</span> MLflow 2.x replaces stage aliases with explicit <code>@champion</code> / <code>@challenger</code> tags, making multi-deployment strategies cleaner. The concepts remain the same; only the API surface changes.</div>
+
+<h2 id="data-versioning-with-dvc">Data Versioning with DVC</h2>
+<p class="lead">Git tracks code. DVC (Data Version Control) tracks data, models, and the pipelines that connect them. Together they give complete, reproducible lineage for every experiment.</p>
+
+<p>DVC stores large files in a remote storage backend (S3, GCS, Azure Blob, SSH) while keeping a tiny <code>.dvc</code> pointer file in Git. <code>git checkout</code> a branch and <code>dvc pull</code> to materialise the exact dataset that branch was trained on — even six months later.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Initialize DVC alongside Git</span>
+dvc init
+git add .dvc
+git commit -m <span class="hljs-string">&quot;chore: init DVC&quot;</span>
+
+<span class="hljs-comment"># Track a large dataset</span>
+dvc add data/raw/transactions.parquet
+git add data/raw/transactions.parquet.dvc .gitignore
+git commit -m <span class="hljs-string">&quot;data: add raw transactions v1&quot;</span>
+
+<span class="hljs-comment"># Configure remote storage (AWS S3)</span>
+dvc remote add -d myremote s3://my-ml-bucket/dvc-store
+dvc push          <span class="hljs-comment"># upload to S3</span>
+
+<span class="hljs-comment"># Later: reproduce the exact dataset on another machine</span>
+git checkout v1.2.0
+dvc pull          <span class="hljs-comment"># fetches the exact data version</span></code></pre>
+
+<h3>DVC Pipelines (dvc.yaml)</h3>
+<p>DVC can define a <strong>directed acyclic graph (DAG)</strong> of data transformation stages. Running <code>dvc repro</code> executes only the stages whose inputs have changed — like Make for data science.</p>
+
+<div class="code-label">YAML</div><pre><code class="hljs"><span class="hljs-attr">stages:</span>
+  <span class="hljs-attr">prepare:</span>
+    <span class="hljs-attr">cmd:</span> <span class="hljs-string">python</span> <span class="hljs-string">src/prepare.py</span>
+    <span class="hljs-attr">deps:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">data/raw/transactions.parquet</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">src/prepare.py</span>
+    <span class="hljs-attr">outs:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">data/processed/features.parquet</span>
+
+  <span class="hljs-attr">train:</span>
+    <span class="hljs-attr">cmd:</span> <span class="hljs-string">python</span> <span class="hljs-string">src/train.py</span> <span class="hljs-string">--config</span> <span class="hljs-string">params.yaml</span>
+    <span class="hljs-attr">deps:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">data/processed/features.parquet</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">src/train.py</span>
+    <span class="hljs-attr">params:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">params.yaml:</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">train.learning_rate</span>
+          <span class="hljs-bullet">-</span> <span class="hljs-string">train.n_estimators</span>
+    <span class="hljs-attr">outs:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">models/model.pkl</span>
+    <span class="hljs-attr">metrics:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">metrics/eval.json:</span>
+          <span class="hljs-attr">cache:</span> <span class="hljs-literal">false</span></code></pre>
+
+<div class="callout tip"><span class="t">DVC + MLflow</span> Use DVC for <em>data and pipeline</em> versioning and MLflow for <em>experiment</em> tracking. They complement each other: DVC stages can call MLflow-instrumented training scripts, giving you full lineage from raw data to registered model.</div>
+
+<h2 id="model-versioning-and-the-model-registry">Model Versioning and the Model Registry</h2>
+<p class="lead">A model registry is the central catalogue that maps model names to versioned, validated artefacts, bridging the gap between data scientists and deployment engineers.</p>
+
+<p>Beyond MLflow's built-in registry, production teams use dedicated platforms. The registry must answer three questions: <em>which version is in production right now?</em>, <em>who approved it and when?</em>, and <em>where is the artefact stored?</em></p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>What a Registry Stores</h4>
+    <ul>
+      <li>Model artefact URI (S3 path, container image digest)</li>
+      <li>Framework and serialisation format (pickle, ONNX, TorchScript, SavedModel)</li>
+      <li>Input/output schema (feature names, dtypes, expected shape)</li>
+      <li>Training run lineage (MLflow run ID, Git SHA, dataset version)</li>
+      <li>Evaluation metrics, approval audit trail</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Registry Lifecycle Stages</h4>
+    <p><strong>Candidate:</strong> newly logged from a training run, not yet validated.</p>
+    <p><strong>Staging:</strong> passed automated tests, awaiting human sign-off or A/B evaluation.</p>
+    <p><strong>Production:</strong> serving live traffic; only one version per alias at a time.</p>
+    <p><strong>Archived:</strong> replaced but retained for rollback. Auto-archived by policy after N days.</p>
+  </div>
+</div>
+
+<h3>Model Serialisation Formats</h3>
+<table>
+  <tr><th>Format</th><th>Portability</th><th>Performance</th><th>Best For</th></tr>
+  <tr><td>Pickle / Joblib</td><td>Python-only</td><td>Baseline</td><td>sklearn, quick iteration</td></tr>
+  <tr><td>ONNX</td><td>Cross-language, cross-runtime</td><td>Up to 3× faster inference</td><td>Cross-platform deployment, edge</td></tr>
+  <tr><td>TorchScript</td><td>C++ / mobile</td><td>Good; graph-optimised</td><td>PyTorch to production or mobile</td></tr>
+  <tr><td>TF SavedModel</td><td>TensorFlow Serving, TF.js</td><td>Excellent with TF Serving</td><td>TensorFlow ecosystem</td></tr>
+  <tr><td>MLflow pyfunc</td><td>Any environment with mlflow</td><td>Wrapper overhead</td><td>Framework-agnostic serving API</td></tr>
+  <tr><td>Container image</td><td>Any Kubernetes cluster</td><td>Depends on inner runtime</td><td>Custom preprocessing, complex deps</td></tr>
+</table>
+
+<h2 id="ml-pipelines-kubeflow-prefect-and-airflow">ML Pipelines: Kubeflow, Prefect, and Airflow</h2>
+<p class="lead">Manual, notebook-driven training cannot scale. ML pipelines automate every step from data ingestion through model deployment, making retraining a push-button (or fully automatic) operation.</p>
+
+<div class="callout note"><span class="t">Key distinction</span> Data engineering pipelines (Airflow, Spark) orchestrate data movement. ML pipelines orchestrate <em>training runs</em> and need ML-specific primitives: GPU scheduling, experiment tracking integration, distributed training, and artefact passing between steps.</div>
+
+<h3>Kubeflow Pipelines</h3>
+<p>Kubeflow Pipelines (KFP) runs on Kubernetes and compiles Python-defined DAGs into Argo Workflow YAML. Each step executes in its own container, enabling per-step resource requests (CPU, GPU, memory).</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> kfp <span class="hljs-keyword">import</span> dsl
+<span class="hljs-keyword">from</span> kfp.components <span class="hljs-keyword">import</span> create_component_from_func
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">preprocess</span>(<span class="hljs-params">data_path: <span class="hljs-built_in">str</span>, output_path: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+    df = pd.read_parquet(data_path)
+    df.dropna().to_parquet(output_path)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">train</span>(<span class="hljs-params">features_path: <span class="hljs-built_in">str</span>, model_output: <span class="hljs-built_in">str</span>, n_estimators: <span class="hljs-built_in">int</span> = <span class="hljs-number">200</span></span>):
+    <span class="hljs-keyword">import</span> mlflow, joblib
+    <span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> RandomForestClassifier
+    <span class="hljs-comment"># ... training code</span>
+    joblib.dump(clf, model_output)
+
+preprocess_op = create_component_from_func(preprocess, base_image=<span class="hljs-string">&quot;python:3.11-slim&quot;</span>)
+train_op       = create_component_from_func(train,       base_image=<span class="hljs-string">&quot;ml-training:latest&quot;</span>)
+
+<span class="hljs-meta">@dsl.pipeline(<span class="hljs-params">name=<span class="hljs-string">&quot;fraud-pipeline&quot;</span>, description=<span class="hljs-string">&quot;Weekly retraining&quot;</span></span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fraud_pipeline</span>(<span class="hljs-params">data_path: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;s3://bucket/raw/&quot;</span></span>):
+    prep = preprocess_op(data_path=data_path, output_path=<span class="hljs-string">&quot;/tmp/features.parquet&quot;</span>)
+    train_op(features_path=prep.outputs[<span class="hljs-string">&quot;output_path&quot;</span>], model_output=<span class="hljs-string">&quot;/tmp/model.pkl&quot;</span>)</code></pre>
+
+<h3>Apache Airflow for ML</h3>
+<p>Airflow excels at scheduling and dependency management. Its <code>KubernetesPodOperator</code> and <code>DockerOperator</code> allow ML tasks to run in isolated containers. Airflow is the right choice when you already have data engineering pipelines in Airflow and want to attach retraining triggers to data availability events.</p>
+
+<h3>Prefect</h3>
+<p>Prefect 2.x uses native Python functions decorated with <code>@flow</code> and <code>@task</code>. It runs locally, on Prefect Cloud, or on Kubernetes. Its dynamic scheduling, automatic retries, and result caching make it popular for teams that find Airflow's XML/YAML overhead excessive.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> prefect <span class="hljs-keyword">import</span> flow, task
+<span class="hljs-keyword">from</span> prefect.tasks <span class="hljs-keyword">import</span> task_input_hash
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> timedelta
+
+<span class="hljs-meta">@task(<span class="hljs-params">cache_key_fn=task_input_hash, cache_expiration=timedelta(<span class="hljs-params">hours=<span class="hljs-number">24</span></span>)</span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">load_features</span>(<span class="hljs-params">dataset_version: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-comment"># load and return features — result is cached by version hash</span>
+    ...
+
+<span class="hljs-meta">@task(<span class="hljs-params">retries=<span class="hljs-number">3</span>, retry_delay_seconds=<span class="hljs-number">30</span></span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">train_model</span>(<span class="hljs-params">features, params: <span class="hljs-built_in">dict</span></span>):
+    ...
+
+<span class="hljs-meta">@flow(<span class="hljs-params">name=<span class="hljs-string">&quot;weekly-retrain&quot;</span>, log_prints=<span class="hljs-literal">True</span></span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">retrain_pipeline</span>(<span class="hljs-params">dataset_version: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;latest&quot;</span></span>):
+    features = load_features(dataset_version)
+    model    = train_model(features, params={<span class="hljs-string">&quot;n_estimators&quot;</span>: <span class="hljs-number">300</span>})
+    evaluate_and_register(model)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    retrain_pipeline(dataset_version=<span class="hljs-string">&quot;2026-09-28&quot;</span>)</code></pre>
+
+<table>
+  <tr><th>Orchestrator</th><th>Strength</th><th>Weakness</th><th>ML-native?</th></tr>
+  <tr><td>Kubeflow Pipelines</td><td>Container-native, GPU scheduling, KFP SDK</td><td>Kubernetes required, complex setup</td><td>Yes — built for ML</td></tr>
+  <tr><td>Apache Airflow</td><td>Mature, huge operator library, broad community</td><td>Verbose DAG syntax, no native ML artefacts</td><td>Partial (via operators)</td></tr>
+  <tr><td>Prefect 2.x</td><td>Pure Python, easy local dev, caching, Prefect Cloud</td><td>Smaller operator ecosystem than Airflow</td><td>Partial (via tasks)</td></tr>
+  <tr><td>Metaflow (Netflix)</td><td>Notebook-to-cloud, versioning built-in, S3 integration</td><td>AWS-centric historically</td><td>Yes — built for DS teams</td></tr>
+  <tr><td>ZenML</td><td>Stack-agnostic abstractions, built-in lineage, registry</td><td>Newer ecosystem</td><td>Yes — MLOps-first design</td></tr>
+</table>
+
+<h2 id="ci-cd-for-machine-learning">CI/CD for Machine Learning</h2>
+<p class="lead">Classical CI/CD tests code correctness. ML CI/CD also tests <em>data quality</em>, <em>model performance gates</em>, and <em>serving infrastructure</em> — only promoting a new model version when all three pass.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 780 230" width="780" height="230">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/>
+    </marker>
+  </defs>
+  <!-- Trigger -->
+  <rect x="10"  y="90" width="90" height="50" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="55"  y="111" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233" font-weight="600">Git Push</text>
+  <text x="55"  y="126" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">/ Schedule</text>
+
+  <!-- Code tests -->
+  <rect x="125" y="60" width="100" height="50" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="175" y="81" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233" font-weight="600">Unit &amp; Lint</text>
+  <text x="175" y="96" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Tests</text>
+  <text x="175" y="117" text-anchor="middle" font-size="9" fill="#059669">✓ code quality</text>
+
+  <!-- Data validation -->
+  <rect x="125" y="125" width="100" height="50" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="175" y="146" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233" font-weight="600">Data</text>
+  <text x="175" y="161" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Validation</text>
+  <text x="175" y="182" text-anchor="middle" font-size="9" fill="#059669">✓ schema, stats</text>
+
+  <!-- Model training -->
+  <rect x="255" y="90" width="100" height="50" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="305" y="111" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233" font-weight="600">Pipeline</text>
+  <text x="305" y="126" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Training Run</text>
+
+  <!-- Eval gate -->
+  <rect x="385" y="90" width="110" height="50" rx="6" fill="#fff7ed" stroke="#b45309" stroke-width="1.5"/>
+  <text x="440" y="108" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233" font-weight="600">Performance</text>
+  <text x="440" y="122" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Gate (F1≥0.9)</text>
+  <text x="440" y="136" text-anchor="middle" font-size="9" fill="#b45309">⚠ blocks if fails</text>
+
+  <!-- Registry -->
+  <rect x="525" y="90" width="100" height="50" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="575" y="111" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233" font-weight="600">Registry Push</text>
+  <text x="575" y="126" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">→ Staging</text>
+
+  <!-- Deploy -->
+  <rect x="655" y="90" width="110" height="50" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="710" y="111" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233" font-weight="600">Shadow / Canary</text>
+  <text x="710" y="126" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Deploy</text>
+
+  <!-- Arrows -->
+  <line x1="100" y1="115" x2="123" y2="90"  stroke="#1e3a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="100" y1="115" x2="123" y2="145" stroke="#1e3a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="225" y1="85"  x2="253" y2="110" stroke="#1e3a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="225" y1="150" x2="253" y2="120" stroke="#1e3a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="355" y1="115" x2="383" y2="115" stroke="#1e3a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="495" y1="115" x2="523" y2="115" stroke="#1e3a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="625" y1="115" x2="653" y2="115" stroke="#1e3a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+
+  <!-- Fail arrow from gate -->
+  <line x1="440" y1="140" x2="440" y2="200" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="450" y="210" font-size="9" font-family="sans-serif" fill="#b45309">FAIL → notify, block merge</text>
+</svg>
+<div class="cap">ML CI/CD Pipeline — code and data validations run in parallel; only when both pass does training execute, followed by a performance gate before registry promotion.</div>
+</div>
+
+<h3>GitHub Actions for ML CI</h3>
+<div class="code-label">YAML</div><pre><code class="hljs"><span class="hljs-attr">name:</span> <span class="hljs-string">ML</span> <span class="hljs-string">CI</span> <span class="hljs-string">Pipeline</span>
+<span class="hljs-attr">on:</span>
+  <span class="hljs-attr">push:</span>
+    <span class="hljs-attr">branches:</span> [<span class="hljs-string">main</span>]
+  <span class="hljs-attr">schedule:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">cron:</span> <span class="hljs-string">&quot;0 3 * * 1&quot;</span>   <span class="hljs-comment"># weekly Monday 03:00 UTC</span>
+
+<span class="hljs-attr">jobs:</span>
+  <span class="hljs-attr">data-validation:</span>
+    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span>
+    <span class="hljs-attr">steps:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v4</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-python@v5</span>
+        <span class="hljs-attr">with:</span> { <span class="hljs-attr">python-version:</span> <span class="hljs-string">&quot;3.11&quot;</span> }
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">pip</span> <span class="hljs-string">install</span> <span class="hljs-string">great-expectations</span> <span class="hljs-string">dvc[s3]</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">dvc</span> <span class="hljs-string">pull</span> <span class="hljs-string">data/processed/features.parquet</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">python</span> <span class="hljs-string">src/validate_data.py</span>   <span class="hljs-comment"># raises if schema/stats fail</span>
+
+  <span class="hljs-attr">train-and-gate:</span>
+    <span class="hljs-attr">needs:</span> <span class="hljs-string">data-validation</span>
+    <span class="hljs-attr">runs-on:</span> [<span class="hljs-string">self-hosted</span>, <span class="hljs-string">gpu</span>]
+    <span class="hljs-attr">steps:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">python</span> <span class="hljs-string">src/train.py</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">python</span> <span class="hljs-string">src/evaluate.py</span> <span class="hljs-string">--threshold</span> <span class="hljs-number">0.90</span>   <span class="hljs-comment"># exits non-zero if below</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Register</span> <span class="hljs-string">to</span> <span class="hljs-string">Staging</span>
+        <span class="hljs-attr">run:</span> <span class="hljs-string">python</span> <span class="hljs-string">src/register_model.py</span> <span class="hljs-string">--stage</span> <span class="hljs-string">Staging</span>
+        <span class="hljs-attr">env:</span>
+          <span class="hljs-attr">MLFLOW_TRACKING_URI:</span> <span class="hljs-string">${{</span> <span class="hljs-string">secrets.MLFLOW_URI</span> <span class="hljs-string">}}</span></code></pre>
+
+<div class="callout tip"><span class="t">ML-specific tests to add</span> (1) <em>Data schema tests</em>: assert column types, value ranges, null rates using Great Expectations or Pandera. (2) <em>Model invariance tests</em>: small perturbations to input should not cause wild prediction swings. (3) <em>Baseline comparison</em>: new model must beat current prod model's metric by at least Δ threshold. (4) <em>Load test</em>: serving container must meet latency SLA (P99 &lt; 200 ms) under expected QPS.</div>
+
+<h2 id="model-serving-patterns">Model Serving Patterns</h2>
+<p class="lead">How a model is served determines its latency, throughput, cost, and operational complexity. The right pattern depends on the use case — not every application needs a real-time REST endpoint.</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Batch Inference</h4>
+    <p><strong>Pattern:</strong> Scheduled job reads a dataset, runs predictions, writes results to a database or file.</p>
+    <p><strong>Latency:</strong> Minutes to hours.</p>
+    <p><strong>Cost:</strong> Very low — spot instances, no always-on server.</p>
+    <p><strong>Best for:</strong> Nightly recommendations, fraud scoring on closed transactions, churn scoring.</p>
+    <p><strong>Tools:</strong> Spark, Ray, AWS Batch, Databricks Jobs.</p>
+  </div>
+  <div class="card">
+    <h4>Online / Real-time REST</h4>
+    <p><strong>Pattern:</strong> Always-on HTTP server; clients send a feature payload and receive a prediction synchronously.</p>
+    <p><strong>Latency:</strong> Single-digit to low-double-digit ms.</p>
+    <p><strong>Cost:</strong> Continuous compute; auto-scaling critical.</p>
+    <p><strong>Best for:</strong> Real-time fraud, search ranking, ad click prediction, chatbots.</p>
+    <p><strong>Tools:</strong> BentoML, TorchServe, TF Serving, Triton Inference Server, FastAPI.</p>
+  </div>
+  <div class="card">
+    <h4>Streaming Inference</h4>
+    <p><strong>Pattern:</strong> Model consumes events from a message queue (Kafka/Kinesis) and emits prediction events downstream.</p>
+    <p><strong>Latency:</strong> Near-real-time (seconds).</p>
+    <p><strong>Cost:</strong> Moderate; event-driven scale.</p>
+    <p><strong>Best for:</strong> IoT anomaly detection, session-level personalisation, continuous log scoring.</p>
+    <p><strong>Tools:</strong> Flink ML, Kafka Streams + model sidecar, Ray Streaming.</p>
+  </div>
+</div>
+
+<h3>Building a REST Serving Endpoint with BentoML</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> bentoml
+<span class="hljs-keyword">from</span> bentoml.io <span class="hljs-keyword">import</span> NumpyNdarray, JSON
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-comment"># Save a trained model into the BentoML model store</span>
+bentoml.sklearn.save_model(<span class="hljs-string">&quot;fraud_detector&quot;</span>, clf,
+    signatures={<span class="hljs-string">&quot;predict&quot;</span>: {<span class="hljs-string">&quot;batchable&quot;</span>: <span class="hljs-literal">True</span>, <span class="hljs-string">&quot;batch_dim&quot;</span>: <span class="hljs-number">0</span>}},
+    metadata={<span class="hljs-string">&quot;training_run_id&quot;</span>: run_id, <span class="hljs-string">&quot;f1&quot;</span>: <span class="hljs-number">0.947</span>}
+)
+
+<span class="hljs-comment"># Define a Service</span>
+svc = bentoml.Service(<span class="hljs-string">&quot;fraud_svc&quot;</span>, runners=[
+    bentoml.sklearn.get(<span class="hljs-string">&quot;fraud_detector:latest&quot;</span>).to_runner()
+])
+
+<span class="hljs-meta">@svc.api(<span class="hljs-params"><span class="hljs-built_in">input</span>=JSON(<span class="hljs-params"></span>), output=JSON(<span class="hljs-params"></span>)</span>)</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">predict</span>(<span class="hljs-params">features: <span class="hljs-built_in">dict</span></span>) -&gt; <span class="hljs-built_in">dict</span>:
+    arr = np.array([[features[k] <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> FEATURE_NAMES]])
+    prob = <span class="hljs-keyword">await</span> fraud_runner.predict.async_run(arr)
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;fraud_probability&quot;</span>: <span class="hljs-built_in">float</span>(prob[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]),
+            <span class="hljs-string">&quot;decision&quot;</span>: <span class="hljs-string">&quot;BLOCK&quot;</span> <span class="hljs-keyword">if</span> prob[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>] &gt; <span class="hljs-number">0.85</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;ALLOW&quot;</span>}</code></pre>
+
+<h3>Triton Inference Server</h3>
+<p>NVIDIA Triton is the production standard for GPU-accelerated serving. It supports ONNX, TensorRT, TorchScript, TF SavedModel, and Python backends in a single server, with dynamic batching, concurrent model instances, and model ensembling. Triton's dynamic batcher accumulates incoming requests into mini-batches transparently, dramatically improving GPU utilisation without client-side changes.</p>
+
+<div class="callout note"><span class="t">Latency vs Throughput</span> Online endpoints must minimise P99 latency. Batch endpoints maximise throughput. Streaming endpoints optimise for end-to-end event lag. These goals conflict — design each serving tier with only one objective in mind and measure the right SLI.</div>
+
+<h2 id="containerisation-with-docker-for-ml">Containerisation with Docker for ML</h2>
+<p class="lead">Docker provides the reproducible environment that bridges a data scientist's laptop and a Kubernetes cluster. ML containers have unique requirements: large base images, GPU drivers, CUDA versions, and efficient layer caching.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Multi-stage ML Dockerfile</span>
+<span class="hljs-comment"># Stage 1: build/install deps (not shipped to prod)</span>
+FROM python:3.11-slim AS builder
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --prefix=/install --no-cache-dir -r requirements.txt
+
+<span class="hljs-comment"># Stage 2: lean runtime image</span>
+FROM python:3.11-slim AS runtime
+WORKDIR /app
+COPY --from=builder /install /usr/local
+COPY src/ ./src/
+COPY models/ ./models/
+
+<span class="hljs-comment"># Non-root user for security</span>
+RUN useradd -m mluser
+USER mluser
+
+ENV MODEL_PATH=/app/models/fraud_detector.pkl
+EXPOSE 8080
+HEALTHCHECK --interval=30s CMD curl -f http://localhost:8080/health || <span class="hljs-built_in">exit</span> 1
+CMD [<span class="hljs-string">&quot;uvicorn&quot;</span>, <span class="hljs-string">&quot;src.serve:app&quot;</span>, <span class="hljs-string">&quot;--host&quot;</span>, <span class="hljs-string">&quot;0.0.0.0&quot;</span>, <span class="hljs-string">&quot;--port&quot;</span>, <span class="hljs-string">&quot;8080&quot;</span>]</code></pre>
+
+<h3>GPU-Enabled Containers</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># CUDA base image — pin the exact CUDA + cuDNN version</span>
+FROM nvcr.io/nvidia/pytorch:24.05-py3
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+<span class="hljs-comment"># NVIDIA runtime must be configured in daemon.json on the host:</span>
+<span class="hljs-comment"># {&quot;runtimes&quot;: {&quot;nvidia&quot;: {&quot;path&quot;: &quot;nvidia-container-runtime&quot;}}}</span>
+<span class="hljs-comment"># docker run --gpus all --rm -it my-ml-image:latest</span></code></pre>
+
+<div class="callout tip"><span class="t">Layer caching strategy</span> Order Dockerfile instructions from least-frequently-changed to most: (1) OS packages, (2) heavy Python deps (torch, tensorflow), (3) project dependencies (requirements.txt), (4) application code. This maximises cache hits and keeps rebuild times under a minute for code-only changes.</div>
+
+<div class="callout warn"><span class="t">Model size anti-pattern</span> Never <code>COPY</code> large model weights into the Docker image. Images become multi-GB, CI/CD slows to a crawl, and you cannot update the model without rebuilding. Instead, mount weights from a volume or pull from a model registry at container startup using the model path as an environment variable.</div>
+
+<h2 id="feature-stores">Feature Stores</h2>
+<p class="lead">A feature store is a centralised repository for computed features. It solves the two biggest sources of training-serving skew: feature reuse across teams, and identical feature computation in both the training pipeline and the real-time serving path.</p>
+
+<p>Without a feature store, team A writes an "average spend last 30 days" feature in Spark for training, and team B writes a slightly different SQL version for the API. The model is trained on one definition and scored on another. This silent mismatch causes unexplained production performance degradation.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Offline Store</h4>
+    <p>Stores historical feature values at scale — typically a columnar format like Parquet on S3 or a data warehouse (BigQuery, Redshift). Used for model training and batch inference. Supports point-in-time correct joins to prevent label leakage.</p>
+    <p><strong>Key requirement:</strong> point-in-time retrieval — "what were the feature values for entity X at time T?" — essential for backtesting and avoiding leakage.</p>
+  </div>
+  <div class="card">
+    <h4>Online Store</h4>
+    <p>Low-latency (sub-millisecond) key-value store — typically Redis, DynamoDB, or Bigtable. Stores the <em>latest</em> feature values for real-time serving. Features are materialised from the offline store via a batch/streaming job.</p>
+    <p><strong>Key requirement:</strong> P99 lookup latency under 5 ms to not dominate the model's own inference time.</p>
+  </div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> feast <span class="hljs-keyword">import</span> FeatureStore, Entity, FeatureView, Field
+<span class="hljs-keyword">from</span> feast.types <span class="hljs-keyword">import</span> Float64, Int64
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+
+store = FeatureStore(repo_path=<span class="hljs-string">&quot;.&quot;</span>)
+
+<span class="hljs-comment"># Training: retrieve historical features with point-in-time correctness</span>
+training_df = store.get_historical_features(
+    entity_df=pd.DataFrame({
+        <span class="hljs-string">&quot;customer_id&quot;</span>: [<span class="hljs-number">101</span>, <span class="hljs-number">202</span>, <span class="hljs-number">303</span>],
+        <span class="hljs-string">&quot;event_timestamp&quot;</span>: pd.to_datetime([<span class="hljs-string">&quot;2026-09-01&quot;</span>, <span class="hljs-string">&quot;2026-09-05&quot;</span>, <span class="hljs-string">&quot;2026-09-10&quot;</span>])
+    }),
+    features=[<span class="hljs-string">&quot;customer_stats:avg_spend_30d&quot;</span>, <span class="hljs-string">&quot;customer_stats:txn_count_7d&quot;</span>]
+).to_df()
+
+<span class="hljs-comment"># Serving: retrieve latest features from online store (Redis)</span>
+online_features = store.get_online_features(
+    features=[<span class="hljs-string">&quot;customer_stats:avg_spend_30d&quot;</span>, <span class="hljs-string">&quot;customer_stats:txn_count_7d&quot;</span>],
+    entity_rows=[{<span class="hljs-string">&quot;customer_id&quot;</span>: <span class="hljs-number">101</span>}]
+).to_dict()</code></pre>
+
+<div class="callout note"><span class="t">Popular Feature Stores 2026</span> <strong>Feast</strong> (open-source, cloud-agnostic), <strong>Tecton</strong> (managed, streaming + batch), <strong>Hopsworks</strong> (open-source with enterprise tier), <strong>Vertex AI Feature Store</strong> (GCP-native), <strong>SageMaker Feature Store</strong> (AWS-native), <strong>Databricks Feature Engineering</strong> (Delta Lake-backed).</div>
+
+<h2 id="a-b-testing-and-shadow-deployment">A/B Testing and Shadow Deployment</h2>
+<p class="lead">Deploying a new model version directly to 100 % of production traffic is high-risk. Progressive deployment patterns — shadow, canary, and A/B — reduce the blast radius of a bad model.</p>
+
+<div class="pipeline">
+  <span class="step">Shadow Deploy</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Canary (5 %)</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">A/B Test (50/50)</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Full Rollout</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Archive Old</span>
+</div>
+
+<h3>Shadow Mode</h3>
+<p>The new model receives a copy of every production request, runs inference, and logs results — but its predictions are <strong>not returned to users</strong>. Engineers compare shadow predictions vs production predictions offline to detect regressions, latency differences, or error rates before any user impact.</p>
+
+<h3>Canary Deployment</h3>
+<p>Route a small percentage (1–10 %) of live traffic to the new model version. Monitor business metrics (conversion rate, error rate, revenue per session) on the canary slice versus the baseline. Automated rollback triggers fire if the canary metric degrades beyond a threshold.</p>
+
+<h3>A/B Testing</h3>
+<p>Split traffic into controlled groups (A = current model, B = new model). Randomise assignment at the user or session level to avoid confounders. Run for sufficient time (typically until statistical power is achieved — a minimum detectable effect at 80 % power). Analyse with a two-proportion z-test or a Bayesian framework.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> scipy <span class="hljs-keyword">import</span> stats
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-comment"># Observed business metric: conversion rate</span>
+conversions_a = <span class="hljs-number">1240</span>; visitors_a = <span class="hljs-number">12400</span>   <span class="hljs-comment"># 10.0 %</span>
+conversions_b = <span class="hljs-number">1380</span>; visitors_b = <span class="hljs-number">12300</span>   <span class="hljs-comment"># 11.2 %</span>
+
+p_a = conversions_a / visitors_a
+p_b = conversions_b / visitors_b
+p_pool = (conversions_a + conversions_b) / (visitors_a + visitors_b)
+se = np.sqrt(p_pool * (<span class="hljs-number">1</span> - p_pool) * (<span class="hljs-number">1</span>/visitors_a + <span class="hljs-number">1</span>/visitors_b))
+z = (p_b - p_a) / se
+p_value = stats.norm.sf(<span class="hljs-built_in">abs</span>(z)) * <span class="hljs-number">2</span>   <span class="hljs-comment"># two-tailed</span>
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Lift: <span class="hljs-subst">{(p_b - p_a) / p_a * <span class="hljs-number">100</span>:<span class="hljs-number">.1</span>f}</span> %&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;p-value: <span class="hljs-subst">{p_value:<span class="hljs-number">.4</span>f}</span>&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Significant!&quot;</span> <span class="hljs-keyword">if</span> p_value &lt; <span class="hljs-number">0.05</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;Not significant&quot;</span>)</code></pre>
+
+<div class="callout warn"><span class="t">A/B pitfalls in ML</span> (1) <em>Sample ratio mismatch</em>: traffic split is not what you configured — indicates a routing bug. (2) <em>Novelty effect</em>: users respond to anything new; wait for behaviour to stabilise. (3) <em>Cannibalism</em>: A/B groups interact (social features, inventory). (4) <em>Metric alignment</em>: optimise the <em>business</em> metric, not the proxy ML metric used during training.</div>
+
+<h2 id="monitoring-and-drift-detection">Monitoring and Drift Detection</h2>
+<p class="lead">A model's accuracy silently decays after deployment as the world changes. Drift detection is the automated system that notices this decay before business metrics suffer.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 310" width="760" height="310">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/>
+    </marker>
+  </defs>
+
+  <!-- Left: Input features over time (data drift) -->
+  <text x="30" y="25" font-size="12" font-family="sans-serif" font-weight="700" fill="#1a2233">Data Drift</text>
+  <text x="30" y="42" font-size="10" font-family="sans-serif" fill="#6b7280">P_train(X) ≠ P_serve(X)</text>
+  <!-- Training distribution bell -->
+  <path d="M30,130 Q80,40 130,130" stroke="#2563eb" stroke-width="2" fill="#eff4ff" fill-opacity="0.7"/>
+  <text x="75" y="148" font-size="9" fill="#2563eb">Train dist.</text>
+  <!-- Serving distribution bell (shifted) -->
+  <path d="M100,130 Q160,40 220,130" stroke="#b45309" stroke-width="2" fill="#fff7ed" fill-opacity="0.7"/>
+  <text x="145" y="148" font-size="9" fill="#b45309">Serve dist.</text>
+  <!-- PSI meter -->
+  <rect x="30" y="162" width="200" height="20" rx="4" fill="#e5e7eb"/>
+  <rect x="30" y="162" width="140" height="20" rx="4" fill="#b45309" opacity="0.7"/>
+  <text x="30" y="200" font-size="9" fill="#6b7280">PSI = 0.28 → WARNING (&gt;0.2)</text>
+
+  <!-- Divider -->
+  <line x1="260" y1="10" x2="260" y2="295" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Middle: Concept drift -->
+  <text x="280" y="25" font-size="12" font-family="sans-serif" font-weight="700" fill="#1a2233">Concept Drift</text>
+  <text x="280" y="42" font-size="10" font-family="sans-serif" fill="#6b7280">P_train(Y|X) ≠ P_serve(Y|X)</text>
+  <!-- F1 score over time line -->
+  <polyline points="280,130 330,120 380,125 420,115 460,130 490,145 510,165 530,180" stroke="#059669" stroke-width="2" fill="none"/>
+  <line x1="490" y1="80" x2="490" y2="200" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="494" y="76" font-size="9" fill="#b45309">drift event</text>
+  <text x="280" y="200" font-size="9" fill="#059669">Model F1 over time →</text>
+  <text x="280" y="215" font-size="9" fill="#6b7280">(e.g., fraud patterns changed)</text>
+
+  <!-- Divider -->
+  <line x1="555" y1="10" x2="555" y2="295" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Right: Response -->
+  <text x="572" y="25" font-size="12" font-family="sans-serif" font-weight="700" fill="#1a2233">Response</text>
+  <rect x="572" y="50"  width="170" height="36" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="657" y="71" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Alert → Data Science Team</text>
+  <rect x="572" y="98"  width="170" height="36" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="657" y="119" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Trigger Retraining Pipeline</text>
+  <rect x="572" y="146" width="170" height="36" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="657" y="167" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Shadow New Model</text>
+  <rect x="572" y="194" width="170" height="36" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="657" y="215" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#1a2233">Promote Champion</text>
+
+  <line x1="657" y1="86"  x2="657" y2="96"  stroke="#0891b2" stroke-width="1.5" marker-end="url(#ah3)"/>
+  <line x1="657" y1="134" x2="657" y2="144" stroke="#0891b2" stroke-width="1.5" marker-end="url(#ah3)"/>
+  <line x1="657" y1="182" x2="657" y2="192" stroke="#0891b2" stroke-width="1.5" marker-end="url(#ah3)"/>
+</svg>
+<div class="cap">Drift Monitoring — data drift (distribution shift in inputs) and concept drift (degrading model accuracy) each trigger an automated response chain ending in model replacement.</div>
+</div>
+
+<h3>Types of Drift</h3>
+<table>
+  <tr><th>Type</th><th>Definition</th><th>Detection Method</th><th>Example</th></tr>
+  <tr><td>Data / Covariate drift</td><td>Input feature distribution shifts: P(X) changes</td><td>PSI, KL-divergence, KS test, chi-squared</td><td>New demographics entering market, seasonal patterns</td></tr>
+  <tr><td>Concept drift</td><td>Relationship between features and target changes: P(Y|X) changes</td><td>Monitor accuracy on labelled samples, performance metrics</td><td>Fraud tactics evolve, consumer preferences shift</td></tr>
+  <tr><td>Label drift</td><td>Target variable distribution changes: P(Y) changes</td><td>Track prediction distribution, compare to historical label rates</td><td>Class imbalance worsens after a business event</td></tr>
+  <tr><td>Schema drift</td><td>Feature names, types, or cardinalities change upstream</td><td>Schema validation on every batch, Great Expectations</td><td>Upstream team renames a column</td></tr>
+  <tr><td>Prediction drift</td><td>Model output distribution shifts even without ground truth</td><td>Monitor output histogram, Jensen-Shannon divergence</td><td>Serving skew or upstream feature pipeline change</td></tr>
+</table>
+
+<h3>Drift Detection with Evidently AI</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">from</span> evidently.report <span class="hljs-keyword">import</span> Report
+<span class="hljs-keyword">from</span> evidently.metric_preset <span class="hljs-keyword">import</span> DataDriftPreset, ModelPerformancePreset
+
+reference_df = pd.read_parquet(<span class="hljs-string">&quot;data/reference_month.parquet&quot;</span>)
+current_df   = pd.read_parquet(<span class="hljs-string">&quot;data/current_week.parquet&quot;</span>)
+
+<span class="hljs-comment"># Data drift report — PSI and KS test for every feature</span>
+report = Report(metrics=[DataDriftPreset(stattest=<span class="hljs-string">&quot;psi&quot;</span>, threshold=<span class="hljs-number">0.2</span>)])
+report.run(reference_data=reference_df, current_data=current_df)
+
+<span class="hljs-comment"># Access results programmatically for alerting</span>
+result = report.as_dict()
+drifted_features = [
+    f[<span class="hljs-string">&quot;column_name&quot;</span>]
+    <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> result[<span class="hljs-string">&quot;metrics&quot;</span>][<span class="hljs-number">0</span>][<span class="hljs-string">&quot;result&quot;</span>][<span class="hljs-string">&quot;drift_by_columns&quot;</span>].values()
+    <span class="hljs-keyword">if</span> f[<span class="hljs-string">&quot;drift_detected&quot;</span>]
+]
+
+<span class="hljs-keyword">if</span> drifted_features:
+    send_alert(<span class="hljs-string">f&quot;Data drift detected in: <span class="hljs-subst">{drifted_features}</span>&quot;</span>)
+    trigger_retraining_pipeline()
+
+report.save_html(<span class="hljs-string">&quot;reports/drift_report.html&quot;</span>)</code></pre>
+
+<div class="callout ok"><span class="t">Golden signals for ML monitoring</span> Borrow from SRE: (1) <em>Latency</em> — P50/P99 inference time. (2) <em>Traffic</em> — requests/sec, prediction volume. (3) <em>Errors</em> — prediction failures, null inputs, schema violations. (4) <em>Saturation</em> — GPU/CPU utilisation, queue depth. Add ML-specific: (5) <em>Prediction distribution</em> — output histogram shift. (6) <em>Feature drift</em> — PSI per feature. (7) <em>Business metrics</em> — downstream KPIs tied to model outputs.</div>
+
+<h2 id="reproducibility-in-machine-learning">Reproducibility in Machine Learning</h2>
+<p class="lead">Reproducibility means any team member can re-run any experiment from any point in time and obtain the same result. Without it, debugging production issues or auditing model decisions is nearly impossible.</p>
+
+<p>Reproducibility in ML is harder than in software because it requires versioning four independent artefacts simultaneously: <strong>code</strong> (Git SHA), <strong>data</strong> (DVC commit), <strong>environment</strong> (Docker image digest or conda lock file), and <strong>hyperparameters</strong> (MLflow params). Losing any one of these makes exact reproduction impossible.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> random, numpy <span class="hljs-keyword">as</span> np, torch, os
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">set_global_seed</span>(<span class="hljs-params">seed: <span class="hljs-built_in">int</span> = <span class="hljs-number">42</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;Fix all random sources for reproducible training.&quot;&quot;&quot;</span>
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    <span class="hljs-comment"># Make CuDNN deterministic (trades some speed for reproducibility)</span>
+    torch.backends.cudnn.deterministic = <span class="hljs-literal">True</span>
+    torch.backends.cudnn.benchmark = <span class="hljs-literal">False</span>
+    os.environ[<span class="hljs-string">&quot;PYTHONHASHSEED&quot;</span>] = <span class="hljs-built_in">str</span>(seed)
+
+set_global_seed(<span class="hljs-number">42</span>)
+
+<span class="hljs-comment"># Log the seed in MLflow so it&#x27;s always captured</span>
+mlflow.log_param(<span class="hljs-string">&quot;random_seed&quot;</span>, <span class="hljs-number">42</span>)</code></pre>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Environment Pinning</h4>
+    <p>Use <code>pip-compile</code> (pip-tools) or <code>conda lock</code> to generate a fully-resolved, hash-pinned dependency file. <code>requirements.in</code> expresses intent; <code>requirements.txt</code> pins the exact resolved tree. Commit both files.</p>
+    <div class="code-label">BASH</div><pre><code class="hljs">pip-compile requirements.in --generate-hashes -o requirements.txt
+<span class="hljs-comment"># Locks every transitive dep with SHA-256 hashes</span></code></pre>
+  </div>
+  <div class="card">
+    <h4>Data Lineage</h4>
+    <p>Every model artefact in the registry should trace back to: the DVC data commit hash, the Git code SHA, the MLflow run ID, and the Docker image digest used for training. Many teams embed this in model metadata at log-time so the registry UI shows complete lineage.</p>
+    <div class="code-label">PYTHON</div><pre><code class="hljs">mlflow.log_params({
+    <span class="hljs-string">&quot;git_sha&quot;</span>:    subprocess.check_output(
+                    [<span class="hljs-string">&quot;git&quot;</span>, <span class="hljs-string">&quot;rev-parse&quot;</span>, <span class="hljs-string">&quot;HEAD&quot;</span>]).decode().strip(),
+    <span class="hljs-string">&quot;dvc_commit&quot;</span>: subprocess.check_output(
+                    [<span class="hljs-string">&quot;dvc&quot;</span>, <span class="hljs-string">&quot;params&quot;</span>, <span class="hljs-string">&quot;diff&quot;</span>]).decode().strip(),
+    <span class="hljs-string">&quot;docker_image&quot;</span>: os.getenv(<span class="hljs-string">&quot;IMAGE_DIGEST&quot;</span>),
+})</code></pre>
+  </div>
+</div>
+
+<div class="callout warn"><span class="t">Non-determinism sources to eliminate</span> (1) Unset random seeds. (2) Non-deterministic GPU ops (cuBLAS, cuDNN default). (3) Multi-threaded data loading without fixed worker seeds. (4) Floating-point non-associativity in distributed training. (5) Time-dependent features computed at train time (use a fixed reference timestamp). (6) External data sources queried live (snapshot data before training).</div>
+
+<h2 id="llmops-production-llm-systems">LLMOps: Production LLM Systems</h2>
+<p class="lead">Large language models in production introduce an entirely new set of operational concerns beyond classical MLOps: prompt versioning, non-deterministic outputs, hallucination risk, cost at scale, RAG pipeline monitoring, and evaluation frameworks that cannot rely on a single scalar metric.</p>
+
+<h3>Prompt Versioning</h3>
+<p>A prompt is code. Changing a system prompt without versioning is the LLM equivalent of deploying untested changes to production. Every prompt change must be: versioned in Git, tested against a regression evaluation suite, and rolled back independently of the model version.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> langfuse <span class="hljs-keyword">import</span> Langfuse
+
+langfuse = Langfuse()
+
+<span class="hljs-comment"># Pull a versioned prompt from Langfuse Prompt Management</span>
+prompt_template = langfuse.get_prompt(
+    name=<span class="hljs-string">&quot;contract-summariser&quot;</span>,
+    version=<span class="hljs-number">12</span>,          <span class="hljs-comment"># pin the exact version in prod</span>
+    label=<span class="hljs-string">&quot;production&quot;</span>   <span class="hljs-comment"># or use labels for stage-based routing</span>
+)
+
+<span class="hljs-comment"># Compile with variables</span>
+final_prompt = prompt_template.<span class="hljs-built_in">compile</span>(
+    document=document_text,
+    max_length=<span class="hljs-string">&quot;200 words&quot;</span>,
+    language=<span class="hljs-string">&quot;English&quot;</span>
+)
+
+<span class="hljs-comment"># All calls are automatically traced to the prompt version</span>
+generation = langfuse.generation(
+    name=<span class="hljs-string">&quot;summarise&quot;</span>,
+    model=<span class="hljs-string">&quot;claude-sonnet-4-6&quot;</span>,
+    <span class="hljs-built_in">input</span>=final_prompt,
+    prompt=prompt_template   <span class="hljs-comment"># links trace to prompt version</span>
+)</code></pre>
+
+<h3>RAG Pipeline Monitoring</h3>
+<p>A RAG system has multiple failure modes invisible to traditional metrics: poor retrieval recall (right answer not in retrieved context), context window overflow, stale vector embeddings after document updates, and answer hallucinations that contradict the retrieved passages.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>RAG-Specific Metrics</h4>
+    <ul>
+      <li><strong>Retrieval Recall@K</strong> — what fraction of relevant chunks were returned in the top-K results?</li>
+      <li><strong>Context Relevance</strong> — are retrieved chunks actually useful for the question?</li>
+      <li><strong>Faithfulness / Groundedness</strong> — does the answer contradict the retrieved context?</li>
+      <li><strong>Answer Relevance</strong> — does the answer address the original question?</li>
+      <li><strong>Embedding drift</strong> — are document embeddings stale relative to the corpus?</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>RAG Monitoring Stack</h4>
+    <p><strong>Tracing:</strong> LangSmith, Langfuse, or Phoenix — capture every retrieval call, chunk, and generation with full input/output logging.</p>
+    <p><strong>Evaluation:</strong> RAGAS framework computes retrieval and generation metrics automatically using an LLM-as-judge approach.</p>
+    <p><strong>Embedding drift:</strong> Compare cosine similarity distributions in your vector index weekly against a reference period.</p>
+    <p><strong>Cost:</strong> Track tokens per query (prompt + completion) to forecast spend; set per-user budget guardrails.</p>
+  </div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> ragas <span class="hljs-keyword">import</span> evaluate
+<span class="hljs-keyword">from</span> ragas.metrics <span class="hljs-keyword">import</span> (
+    faithfulness, answer_relevancy,
+    context_precision, context_recall
+)
+<span class="hljs-keyword">from</span> datasets <span class="hljs-keyword">import</span> Dataset
+
+<span class="hljs-comment"># Build evaluation dataset (questions, contexts, answers, ground truths)</span>
+eval_data = Dataset.from_dict({
+    <span class="hljs-string">&quot;question&quot;</span>:    questions,
+    <span class="hljs-string">&quot;contexts&quot;</span>:    retrieved_contexts,   <span class="hljs-comment"># list of lists</span>
+    <span class="hljs-string">&quot;answer&quot;</span>:      generated_answers,
+    <span class="hljs-string">&quot;ground_truth&quot;</span>: reference_answers
+})
+
+result = evaluate(
+    dataset=eval_data,
+    metrics=[faithfulness, answer_relevancy, context_precision, context_recall]
+)
+
+<span class="hljs-built_in">print</span>(result)
+<span class="hljs-comment"># faithfulness: 0.87 | answer_relevancy: 0.91</span>
+<span class="hljs-comment"># context_precision: 0.74 | context_recall: 0.82</span></code></pre>
+
+<h3>LLM Evaluation in Production</h3>
+<p>LLM outputs cannot be compared with a single scalar metric. Production evaluation uses a combination of: (1) <strong>LLM-as-judge</strong> — a capable model (e.g., Claude Opus) scores generated outputs against criteria; (2) <strong>Reference-based</strong> — BLEU/ROUGE for summarisation when gold references exist; (3) <strong>Human annotation</strong> — periodic sampling of prod outputs scored by humans and used to calibrate the LLM judge; (4) <strong>Regression suites</strong> — curated evaluation sets run on every prompt change.</p>
+
+<h3>Cost Tracking and Optimisation</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> anthropic
+
+client = anthropic.Anthropic()
+
+<span class="hljs-comment"># Track token usage per request</span>
+response = client.messages.create(
+    model=<span class="hljs-string">&quot;claude-sonnet-4-6&quot;</span>,
+    max_tokens=<span class="hljs-number">1024</span>,
+    messages=[{<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;content&quot;</span>: prompt}]
+)
+
+input_tokens  = response.usage.input_tokens
+output_tokens = response.usage.output_tokens
+
+<span class="hljs-comment"># Pricing as of 2026 (always verify at anthropic.com/pricing)</span>
+PRICE_PER_MTok_INPUT  = <span class="hljs-number">3.00</span>   <span class="hljs-comment"># USD per million tokens</span>
+PRICE_PER_MTok_OUTPUT = <span class="hljs-number">15.00</span>
+
+cost_usd = (input_tokens * PRICE_PER_MTok_INPUT +
+            output_tokens * PRICE_PER_MTok_OUTPUT) / <span class="hljs-number">1_000_000</span>
+
+log_to_cost_dashboard(user_id, cost_usd, input_tokens, output_tokens)</code></pre>
+
+<div class="callout tip"><span class="t">LLMOps cost levers</span> (1) <em>Prompt caching</em> — Anthropic's prompt caching reduces cost for repeated system prompts by up to 90 %. (2) <em>Model routing</em> — use cheaper/faster models (Haiku) for simple classification; escalate to larger models only when needed. (3) <em>Output length control</em> — enforce structured outputs (JSON) to reduce verbose preambles. (4) <em>Batch API</em> — for non-latency-sensitive workloads, batch requests at 50 % discount. (5) <em>Caching at the application layer</em> — semantic cache identical or near-duplicate queries.</div>
+
+<details>
+  <summary>LLMOps Tooling Quick Reference</summary>
+  <div class="body">
+    <table>
+      <tr><th>Concern</th><th>Tool</th><th>Notes</th></tr>
+      <tr><td>Tracing &amp; observability</td><td>Langfuse, LangSmith, Arize Phoenix</td><td>Full trace with token counts, costs, latencies</td></tr>
+      <tr><td>Prompt versioning</td><td>Langfuse, PromptLayer, LangSmith Hub</td><td>Store, version, A/B test prompts</td></tr>
+      <tr><td>RAG evaluation</td><td>RAGAS, TruLens, DeepEval</td><td>Faithfulness, relevancy, groundedness metrics</td></tr>
+      <tr><td>Guardrails</td><td>Guardrails AI, NVIDIA NeMo Guardrails</td><td>Input/output validation, PII detection</td></tr>
+      <tr><td>Fine-tuning ops</td><td>Axolotl, LitGPT, Unsloth</td><td>Efficient PEFT/LoRA training pipelines</td></tr>
+      <tr><td>LLM gateway / router</td><td>LiteLLM, PortKey, Helicone</td><td>Multi-provider routing, cost tracking, caching</td></tr>
+    </table>
+  </div>
+</details>
+
+<h2 id="q-amp-a-test-your-understanding">Q&amp;A: Test Your Understanding</h2>
+
+<div class="qa">
+  <div class="q">Q1. What is training-serving skew and how does it cause silent production failures?</div>
+  <div class="a">Training-serving skew occurs when the feature computation used during model training differs from that used at serving time. For example, training computes "average spend last 30 days" on historical data using Spark, but serving computes the same feature differently in a microservice. The model was never trained on what it actually receives in production, so accuracy degrades invisibly without any error being thrown. The fix is a feature store: a single, shared computation path used by both training and serving.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q2. Why is a scheduled retraining cadence (e.g., retrain every Monday) insufficient?</div>
+  <div class="a">A fixed schedule retrains whether or not drift has occurred (wasting compute) and does <em>not</em> retrain fast enough when a sudden concept drift event hits mid-week (e.g., a market shock, viral trend, or fraud tactic change). Event-driven retraining — triggered by monitored drift thresholds — is more efficient and more responsive. In practice, most mature systems combine both: a scheduled safety-net weekly retrain plus a drift-triggered emergency retrain.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q3. Explain the difference between data drift and concept drift with a fraud detection example.</div>
+  <div class="a"><strong>Data drift</strong> (covariate shift): the distribution of input features changes. In fraud detection, a new payment method becomes popular and the "payment_type" feature distribution shifts. The model was never trained on this new category. <strong>Concept drift</strong>: the relationship between features and the target changes. Fraudsters adapt their tactics, so transactions with the <em>same</em> features that were benign last quarter are now fraudulent. Data drift can be detected without labels; concept drift requires labelled ground truth (or a proxy metric) to detect.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q4. What is the purpose of a model signature in MLflow and when is it enforced?</div>
+  <div class="a">A model signature defines the expected input schema (column names, dtypes, shapes) and output schema. It is enforced at <em>serving time</em> when a request arrives: if the payload does not match the signature, MLflow's serving layer raises a 400 error instead of passing malformed data to the model, which would produce a silent wrong prediction. This catches training-serving skew at the schema level early. Signatures are inferred from sample input/output at log time: <code>mlflow.models.infer_signature(X_train, model.predict(X_train))</code>.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q5. What is shadow deployment and what specific questions does it answer before a canary release?</div>
+  <div class="a">In shadow deployment, the new model receives a <em>copy</em> of every live production request and produces predictions, but those predictions are discarded — users see only the existing model's output. It answers: (1) Does the new model crash on any real-world input it wasn't tested on? (2) Are its prediction latencies acceptable under real production load? (3) Does its prediction distribution diverge from the production model in unexpected ways? Only after shadow validation passes does the team proceed to a canary (routing a small percentage of <em>live</em> traffic to the new model).</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q6. Why should model weights not be baked into a Docker image, and what is the recommended alternative?</div>
+  <div class="a">Embedding model weights makes images multi-GB, causing multi-minute CI/CD push/pull cycles, bloated container registries, and requiring a full image rebuild every time weights are updated. The recommended pattern is a lean base image containing only the serving code and its Python dependencies, with weights loaded at startup from a model registry (S3, GCS, MLflow artefact store) using an environment variable pointing to the artefact URI. The image is rebuilt on code changes; the model is rolled forward by updating the environment variable in the Kubernetes Deployment.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q7. What is the Population Stability Index (PSI) and what thresholds indicate action?</div>
+  <div class="a">PSI measures how much a feature's distribution has shifted between a reference (training) dataset and a current (production) dataset. It bins the reference distribution and computes: PSI = Σ (% reference − % current) × ln(% reference / % current). Thresholds: PSI &lt; 0.1 = no significant change; 0.1–0.2 = slight shift, monitor closely; &gt; 0.2 = significant shift, trigger alert and consider retraining. PSI works on continuous features (after binning) and directly on categorical ones. It is symmetric and interpretable but sensitive to bin choice.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q8. How does DVC's point-in-time data retrieval prevent label leakage during model training?</div>
+  <div class="a">Label leakage occurs when features used at training time were computed using information available only after the event being predicted (e.g., using "account_closed_within_30_days" to predict churn, when that feature is unknown at prediction time). DVC itself stores data snapshots but does not compute features. The prevention of leakage requires a feature store's <em>point-in-time correct join</em> capability — the store retrieves feature values as they existed at a given entity timestamp, not their latest values. DVC ensures the exact dataset version used for a training run can be reproduced; the feature store ensures that dataset was assembled correctly.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q9. What is "faithfulness" in the context of RAG evaluation and why is it not the same as accuracy?</div>
+  <div class="a">Faithfulness (or groundedness) measures whether the LLM's generated answer is fully supported by the retrieved context — i.e., does the model invent facts not present in the passages? A model can be faithful (everything it says is in the context) but still inaccurate if the retrieved context itself contains wrong information. Conversely, a model can produce an accurate answer by hallucinating from training knowledge, which scores low on faithfulness. For RAG systems, faithfulness is often more important than accuracy because it measures whether the system is reliably using the provided source of truth rather than relying on potentially stale or incorrect parametric knowledge.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Q10. What are the three conditions that must be met for an ML experiment to be considered reproducible?</div>
+  <div class="a">(1) <strong>Same code</strong>: the exact Git commit SHA must be recorded; any uncommitted change breaks reproducibility. (2) <strong>Same data</strong>: the DVC commit hash must point to the exact dataset, including preprocessing scripts; the data must not have been re-fetched or re-processed with updated logic. (3) <strong>Same environment</strong>: the Docker image digest (or conda lock file hash) must be pinned; different library versions — even patch versions — can change numerical results. Additionally, all random seeds must be fixed and any non-deterministic GPU operations disabled. MLflow's run metadata should store all four identifiers (Git SHA, DVC hash, image digest, seed) at training time.</div>
+</div>
+
+<h2 id="mlops-tooling-landscape">MLOps Tooling Landscape</h2>
+<p class="lead">The MLOps ecosystem is broad and fast-moving. This table maps the major concerns to mature, widely-used tools as of 2026.</p>
+
+<table>
+  <tr><th>Concern</th><th>Open-Source Tools</th><th>Managed / Cloud</th><th>Notes</th></tr>
+  <tr>
+    <td>Experiment tracking</td>
+    <td>MLflow, Weights &amp; Biases (OSS)</td>
+    <td>W&amp;B Cloud, Comet ML, Neptune.ai</td>
+    <td>MLflow is most portable; W&amp;B has best UI for deep learning</td>
+  </tr>
+  <tr>
+    <td>Data versioning</td>
+    <td>DVC, LakeFS</td>
+    <td>Databricks Unity Catalog</td>
+    <td>DVC for files/datasets; LakeFS for Delta/Iceberg lake branching</td>
+  </tr>
+  <tr>
+    <td>ML pipelines</td>
+    <td>Kubeflow Pipelines, Prefect, ZenML, Metaflow</td>
+    <td>Vertex AI Pipelines, SageMaker Pipelines, Azure ML Pipelines</td>
+    <td>Choose based on your orchestration maturity and cloud affinity</td>
+  </tr>
+  <tr>
+    <td>Model registry</td>
+    <td>MLflow Registry, BentoML Models</td>
+    <td>Vertex AI Model Registry, SageMaker Model Registry, HF Hub</td>
+    <td>Critical to have before going to production</td>
+  </tr>
+  <tr>
+    <td>Feature store</td>
+    <td>Feast, Hopsworks (community)</td>
+    <td>Tecton, Vertex AI Feature Store, SageMaker Feature Store</td>
+    <td>High upfront cost; highest ROI in companies with 5+ ML models</td>
+  </tr>
+  <tr>
+    <td>Model serving</td>
+    <td>BentoML, TorchServe, TF Serving, Triton, Ray Serve</td>
+    <td>Vertex AI Endpoints, SageMaker Endpoints, Azure ML</td>
+    <td>Triton for GPU; BentoML for ease of use; Ray Serve for Python-native scaling</td>
+  </tr>
+  <tr>
+    <td>Data validation</td>
+    <td>Great Expectations, Pandera, TFDV</td>
+    <td>Monte Carlo, Bigeye</td>
+    <td>Run in CI and as a pipeline pre-check before every training run</td>
+  </tr>
+  <tr>
+    <td>Drift monitoring</td>
+    <td>Evidently AI, NannyML, Alibi Detect</td>
+    <td>Arize AI, Fiddler AI, WhyLabs</td>
+    <td>NannyML excels at monitoring without ground truth labels</td>
+  </tr>
+  <tr>
+    <td>LLM tracing &amp; monitoring</td>
+    <td>Langfuse (OSS), Arize Phoenix, OpenTelemetry</td>
+    <td>LangSmith, Helicone, PromptLayer</td>
+    <td>Full span tracing essential for multi-step LLM chains</td>
+  </tr>
+  <tr>
+    <td>LLM evaluation</td>
+    <td>RAGAS, DeepEval, TruLens, Promptfoo</td>
+    <td>W&amp;B Weave, Braintrust</td>
+    <td>RAGAS for RAG; DeepEval for general LLM eval with custom metrics</td>
+  </tr>
+  <tr>
+    <td>Containerisation</td>
+    <td>Docker, Kaniko (CI), BuildKit</td>
+    <td>ECR, GCR, ACR, GHCR</td>
+    <td>Kaniko for rootless builds in Kubernetes CI runners</td>
+  </tr>
+  <tr>
+    <td>Kubernetes ML platform</td>
+    <td>Kubeflow, MLRun</td>
+    <td>Vertex AI, SageMaker, Azure ML, Databricks</td>
+    <td>Managed platforms trade flexibility for ops simplicity</td>
+  </tr>
+  <tr>
+    <td>CI/CD for ML</td>
+    <td>GitHub Actions, GitLab CI, DVC + CML</td>
+    <td>GitHub Actions + cloud runners</td>
+    <td>CML (Continuous Machine Learning) by Iterai adds ML-specific GitHub Actions</td>
+  </tr>
+  <tr>
+    <td>A/B / experimentation</td>
+    <td>Unleash, Flipt</td>
+    <td>LaunchDarkly, Split.io, Optimizely</td>
+    <td>Use a feature flag system; never implement your own traffic split logic</td>
+  </tr>
+</table>
+
+<div class="callout tip"><span class="t">Stack selection principles</span> (1) <strong>Start minimal</strong>: Git + DVC + MLflow + Docker + a monitoring tool covers 80 % of teams' needs. (2) <strong>Avoid vendor lock-in</strong> in the critical path: the model registry, serving layer, and pipeline orchestrator should be portable. (3) <strong>Buy the undifferentiated heavy lifting</strong>: GPU infrastructure, logging, and alerting are commodity; feature stores and evaluation frameworks are where teams build competitive advantages. (4) <strong>Add a feature store only after</strong> you have two or more teams training models on overlapping data.</div>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

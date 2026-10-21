@@ -1,0 +1,117 @@
+<p class="lead">A fast, interview-focused tour of the data structures, algorithms, and problem-solving patterns that show up again and again in technical interviews. Start here with the mindset and the math.</p>
+
+<h2>How to Approach a Coding Interview</h2>
+<p>Most candidates lose points not because they lack knowledge, but because they jump straight to code. Interviewers are grading your <strong>process</strong>: how you clarify, how you reason about trade-offs, and how you verify. A repeatable framework keeps you calm and makes your thinking visible.</p>
+
+<h3>The UMPIRE framework</h3>
+<p>UMPIRE is a durable checklist you can run on any problem. It maps cleanly onto the shorter <em>clarify &rarr; plan &rarr; code &rarr; test</em> loop that experienced engineers use instinctively.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>U &mdash; Understand</h4>Restate the problem in your own words. Ask about input size, types, duplicates, empty/negative cases, and expected output format.</div>
+  <div class="card"><h4>M &mdash; Match</h4>Which known category is this? Sorting, graph search, DP, two pointers? Pattern-matching narrows the solution space fast.</div>
+  <div class="card"><h4>P &mdash; Plan</h4>Sketch the approach in plain language or pseudocode <em>before</em> typing. Agree on it with the interviewer.</div>
+  <div class="card"><h4>I &mdash; Implement</h4>Write clean, idiomatic code. Narrate as you go so your reasoning is auditable.</div>
+  <div class="card"><h4>R &mdash; Review</h4>Re-read your code line by line. Hunt for off-by-one errors, null handling, and mutation bugs.</div>
+  <div class="card"><h4>E &mdash; Evaluate</h4>State time and space complexity. Walk through examples and edge cases out loud.</div>
+</div>
+
+<div class="pipeline">
+  <span class="step">Clarify</span><span class="arrow">-&gt;</span>
+  <span class="step">Examples</span><span class="arrow">-&gt;</span>
+  <span class="step">Plan</span><span class="arrow">-&gt;</span>
+  <span class="step">Code</span><span class="arrow">-&gt;</span>
+  <span class="step">Test</span><span class="arrow">-&gt;</span>
+  <span class="step">Optimize</span>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 640 220" width="640" height="220">
+  <defs>
+    <marker id="ah1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect x="20" y="80" width="110" height="54" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="75" y="104" text-anchor="middle" font-size="13" fill="#1e3a8a">Clarify</text>
+  <text x="75" y="122" text-anchor="middle" font-size="11" fill="#1a2233">inputs, edges</text>
+  <rect x="170" y="80" width="110" height="54" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="225" y="104" text-anchor="middle" font-size="13" fill="#1e3a8a">Plan</text>
+  <text x="225" y="122" text-anchor="middle" font-size="11" fill="#1a2233">pseudocode</text>
+  <rect x="320" y="80" width="110" height="54" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="375" y="104" text-anchor="middle" font-size="13" fill="#1e3a8a">Code</text>
+  <text x="375" y="122" text-anchor="middle" font-size="11" fill="#1a2233">implement</text>
+  <rect x="470" y="80" width="110" height="54" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="525" y="104" text-anchor="middle" font-size="13" fill="#059669">Test</text>
+  <text x="525" y="122" text-anchor="middle" font-size="11" fill="#1a2233">verify + edges</text>
+  <line x1="130" y1="107" x2="166" y2="107" stroke="#2563eb" stroke-width="2" marker-end="url(#ah1)"/>
+  <line x1="280" y1="107" x2="316" y2="107" stroke="#2563eb" stroke-width="2" marker-end="url(#ah1)"/>
+  <line x1="430" y1="107" x2="466" y2="107" stroke="#2563eb" stroke-width="2" marker-end="url(#ah1)"/>
+  <path d="M525,134 C525,185 75,185 75,136" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ah1)"/>
+  <text x="300" y="178" text-anchor="middle" font-size="11" fill="#b45309">optimize &amp; iterate if needed</text>
+</svg>
+<div class="cap">Fig 1. The core interview loop &mdash; clarify before you code, test before you declare done.</div>
+</div>
+
+<div class="callout tip"><span class="t">Tip</span> Spend the first 2&ndash;3 minutes only on understanding and examples. A concrete worked example (including an edge case) catches most misunderstandings before they cost you.</div>
+
+<div class="callout warn"><span class="t">Watch out</span> Don't optimize prematurely. Get a correct brute-force solution verbalized first, then improve. A working O(n&sup2;) beats a broken O(n).</div>
+
+<h3>Communication checklist</h3>
+<ul>
+  <li><strong>Think out loud.</strong> Silence reads as being stuck.</li>
+  <li><strong>Name your complexity</strong> as soon as you have an approach.</li>
+  <li><strong>Ask before assuming</strong> &mdash; can inputs be empty? sorted? contain duplicates or negatives?</li>
+  <li><strong>Dry-run</strong> your final code on one normal case and one edge case.</li>
+</ul>
+
+<h2>Big-O &amp; Complexity Analysis</h2>
+<p>Big-O describes how an algorithm's running time or memory grows as the input size <span class="kbd">n</span> grows. We drop constants and lower-order terms and keep the <em>dominant</em> growth term, because that is what matters at scale.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 640 320" width="640" height="320">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#1a2233"/>
+    </marker>
+  </defs>
+  <line x1="60" y1="280" x2="610" y2="280" stroke="#1a2233" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="60" y1="280" x2="60" y2="20" stroke="#1a2233" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <text x="600" y="300" font-size="12" fill="#1a2233">n (input size)</text>
+  <text x="18" y="30" font-size="12" fill="#1a2233">ops</text>
+  <path d="M60,276 L600,268" fill="none" stroke="#059669" stroke-width="2.5"/>
+  <text x="520" y="258" font-size="12" fill="#059669">O(1), O(log n)</text>
+  <path d="M60,276 L600,120" fill="none" stroke="#0891b2" stroke-width="2.5"/>
+  <text x="500" y="112" font-size="12" fill="#0891b2">O(n)</text>
+  <path d="M60,276 C260,250 420,150 600,60" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="470" y="70" font-size="12" fill="#2563eb">O(n log n)</text>
+  <path d="M60,276 C180,276 300,120 360,30" fill="none" stroke="#b45309" stroke-width="2.5"/>
+  <text x="300" y="48" font-size="12" fill="#b45309">O(n&sup2;)</text>
+  <path d="M60,276 C120,276 150,120 170,30" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="150" y="26" font-size="12" fill="#dc2626">O(2&#8319;)</text>
+</svg>
+<div class="cap">Fig 2. Growth curves. Flatter is better &mdash; small differences in order explode at large n.</div>
+</div>
+
+<h3>Complexity cheat-sheet</h3>
+<table>
+  <tr><th>Notation</th><th>Name</th><th>Example operation</th><th>Verdict</th></tr>
+  <tr><td>O(1)</td><td>Constant</td><td>Array index, hash lookup, stack push</td><td><span class="badge g">Excellent</span></td></tr>
+  <tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search, balanced-BST lookup</td><td><span class="badge g">Excellent</span></td></tr>
+  <tr><td>O(n)</td><td>Linear</td><td>Single scan, linked-list traversal</td><td><span class="badge g">Good</span></td></tr>
+  <tr><td>O(n log n)</td><td>Linearithmic</td><td>Merge sort, heap sort, efficient sorts</td><td><span class="badge">Good</span></td></tr>
+  <tr><td>O(n&sup2;)</td><td>Quadratic</td><td>Nested loops, naive pair comparison</td><td><span class="badge o">Caution</span></td></tr>
+  <tr><td>O(2&#8319;)</td><td>Exponential</td><td>Naive recursion over subsets</td><td><span class="badge o">Bad</span></td></tr>
+  <tr><td>O(n!)</td><td>Factorial</td><td>Brute-force permutations (travelling salesman)</td><td><span class="badge o">Bad</span></td></tr>
+</table>
+
+<div class="callout note"><span class="t">Note</span> <strong>Amortized</strong> complexity averages cost over a sequence of operations. A dynamic array's <code>append</code> is O(1) amortized even though occasional resizes cost O(n), because resizes are rare and double capacity.</div>
+
+<h3>Analyzing your own code</h3>
+<ul>
+  <li><strong>Sequential</strong> statements add: O(a) + O(b) = O(a + b).</li>
+  <li><strong>Nested</strong> loops multiply: a loop inside a loop over n is O(n&sup2;).</li>
+  <li><strong>Halving</strong> the input each step gives a log n factor.</li>
+  <li><strong>Space</strong> counts auxiliary memory: the recursion call stack, extra arrays, and hash maps all add up.</li>
+</ul>
+
+<div class="callout ok"><span class="t">Rule of thumb</span> For n up to ~10&#8309; an O(n log n) solution runs comfortably within a one-second limit. If n is tiny (&le; 20), an exponential solution may be acceptable &mdash; and sometimes expected.</div>

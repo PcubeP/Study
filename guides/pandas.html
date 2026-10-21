@@ -1,0 +1,784 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pandas — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Data Science</div>
+  <h1>Pandas</h1>
+  <div class="subtitle">Master DataFrames end to end — indexing, groupby, joins, reshaping, time series, I/O, and the vectorized habits that keep pandas fast.</div>
+  <div class="tags"><span>pandas</span><span>python</span><span>data-science</span><span>dataframe</span><span>groupby</span><span>etl</span><span>analytics</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~17 min read &middot; 3,836 words</div>
+</header>
+<main class="wrap">
+
+<p class="lead">Pandas is the workhorse of tabular data in Python: a fast, expressive layer over NumPy that gives you labeled, heterogeneous tables you can slice, group, join, reshape, and analyze in a handful of lines. If NumPy gives you arrays, pandas gives you a spreadsheet with a programmable brain.</p>
+
+<h2 id="what-it-is">What It Is and Why It Matters</h2>
+
+<p>Pandas provides two core data structures. A <span class="badge">Series</span> is a one-dimensional labeled array (a single column). A <span class="badge">DataFrame</span> is a two-dimensional labeled table — effectively a dictionary of Series that share a common row index. Everything you do in pandas revolves around these two objects and the <em>index</em> that labels them.</p>
+
+<div class="callout note"><span class="t">Mental model</span> Think of a DataFrame as columns of NumPy arrays glued together, each sharing one row index. Column operations are vectorized and fast; per-row Python loops are slow. The whole art of good pandas is pushing work into vectorized column operations.</div>
+
+<div class="diagram"><svg viewBox="0 0 640 300" width="640" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="20" y="28" font-size="14" fill="#1a2233" font-weight="bold">DataFrame = aligned Series sharing one Index</text>
+  <!-- index column -->
+  <rect x="20" y="50" width="90" height="30" fill="#1e3a8a"/>
+  <text x="30" y="70" font-size="13" fill="#ffffff">Index</text>
+  <rect x="20" y="80" width="90" height="40" fill="#eff4ff" stroke="#94a3b8"/>
+  <rect x="20" y="120" width="90" height="40" fill="#eff4ff" stroke="#94a3b8"/>
+  <rect x="20" y="160" width="90" height="40" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="55" y="105" font-size="13" fill="#1a2233">0</text>
+  <text x="55" y="145" font-size="13" fill="#1a2233">1</text>
+  <text x="55" y="185" font-size="13" fill="#1a2233">2</text>
+  <!-- columns -->
+  <g>
+    <rect x="130" y="50" width="130" height="30" fill="#2563eb"/>
+    <text x="150" y="70" font-size="13" fill="#ffffff">"name" (object)</text>
+    <rect x="130" y="80" width="130" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="130" y="120" width="130" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="130" y="160" width="130" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="140" y="105" font-size="12" fill="#1a2233">Ada</text>
+    <text x="140" y="145" font-size="12" fill="#1a2233">Linus</text>
+    <text x="140" y="185" font-size="12" fill="#1a2233">Grace</text>
+  </g>
+  <g>
+    <rect x="280" y="50" width="120" height="30" fill="#059669"/>
+    <text x="298" y="70" font-size="13" fill="#ffffff">"age" (int64)</text>
+    <rect x="280" y="80" width="120" height="40" fill="#ecfdf5" stroke="#94a3b8"/>
+    <rect x="280" y="120" width="120" height="40" fill="#ecfdf5" stroke="#94a3b8"/>
+    <rect x="280" y="160" width="120" height="40" fill="#ecfdf5" stroke="#94a3b8"/>
+    <text x="330" y="105" font-size="12" fill="#1a2233">36</text>
+    <text x="330" y="145" font-size="12" fill="#1a2233">54</text>
+    <text x="330" y="185" font-size="12" fill="#1a2233">45</text>
+  </g>
+  <g>
+    <rect x="420" y="50" width="140" height="30" fill="#0891b2"/>
+    <text x="438" y="70" font-size="13" fill="#ffffff">"active" (bool)</text>
+    <rect x="420" y="80" width="140" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="420" y="120" width="140" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <rect x="420" y="160" width="140" height="40" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="470" y="105" font-size="12" fill="#1a2233">True</text>
+    <text x="470" y="145" font-size="12" fill="#1a2233">False</text>
+    <text x="470" y="185" font-size="12" fill="#1a2233">True</text>
+  </g>
+  <text x="130" y="235" font-size="12" fill="#b45309">each column is a Series; one Series = Index + one column</text>
+  <path d="M60 200 L60 235 L120 235" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>
+  <text x="130" y="268" font-size="12" fill="#1a2233">Columns need not share a dtype — that heterogeneity is what a DataFrame adds over a 2D NumPy array.</text>
+</svg><div class="cap">Fig 1 — Anatomy of a DataFrame: a shared index plus typed columns.</div></div>
+
+<div class="grid c3">
+  <div class="card"><h4>Labeled</h4>Rows and columns carry labels, so alignment is automatic and bugs from positional mismatch disappear.</div>
+  <div class="card"><h4>Vectorized</h4>Operations run in C over whole columns — orders of magnitude faster than Python loops.</div>
+  <div class="card"><h4>Interoperable</h4>Reads CSV, Excel, Parquet, JSON, SQL; integrates with NumPy, matplotlib, scikit-learn, Arrow.</div>
+</div>
+
+<h2 id="setup">Setup / Getting Started</h2>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Install (pandas 2.x is current; 2.0+ brings Arrow-backed dtypes)</span>
+pip install pandas
+
+<span class="hljs-comment"># Recommended extras for I/O you will actually use</span>
+pip install pyarrow openpyxl sqlalchemy   <span class="hljs-comment"># parquet, excel, SQL</span>
+
+<span class="hljs-comment"># Verify</span>
+python -c <span class="hljs-string">&quot;import pandas as pd; print(pd.__version__)&quot;</span></code></pre>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-comment"># Build a DataFrame from a dict of columns (most common constructor)</span>
+df = pd.DataFrame({
+    <span class="hljs-string">&quot;name&quot;</span>:   [<span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-string">&quot;Linus&quot;</span>, <span class="hljs-string">&quot;Grace&quot;</span>, <span class="hljs-string">&quot;Alan&quot;</span>],
+    <span class="hljs-string">&quot;age&quot;</span>:    [<span class="hljs-number">36</span>, <span class="hljs-number">54</span>, <span class="hljs-number">45</span>, <span class="hljs-number">41</span>],
+    <span class="hljs-string">&quot;team&quot;</span>:   [<span class="hljs-string">&quot;A&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>, <span class="hljs-string">&quot;A&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>],
+    <span class="hljs-string">&quot;salary&quot;</span>: [<span class="hljs-number">95000</span>, <span class="hljs-number">88000</span>, <span class="hljs-number">120000</span>, np.nan],
+})
+
+<span class="hljs-built_in">print</span>(df.shape)      <span class="hljs-comment"># (4, 4)  -&gt; rows, cols</span>
+<span class="hljs-built_in">print</span>(df.dtypes)     <span class="hljs-comment"># per-column types</span>
+df.head(<span class="hljs-number">2</span>)           <span class="hljs-comment"># first 2 rows</span>
+df.info()            <span class="hljs-comment"># dtypes + non-null counts + memory</span>
+df.describe()        <span class="hljs-comment"># summary stats for numeric columns</span></code></pre>
+
+<div class="callout tip"><span class="t">Display sanity</span> In notebooks, set <code>pd.set_option("display.max_columns", None)</code> and <code>pd.set_option("display.width", 160)</code> so wide tables stop wrapping awkwardly.</div>
+
+<h2 id="series-dataframe">Series &amp; DataFrame Essentials</h2>
+
+<p>A Series pairs <code>values</code> (a NumPy or Arrow-backed array) with an <code>index</code>. A DataFrame adds a <code>columns</code> index on top.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">s = pd.Series([<span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">30</span>], index=[<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>], name=<span class="hljs-string">&quot;score&quot;</span>)
+s[<span class="hljs-string">&quot;b&quot;</span>]            <span class="hljs-comment"># 20  -&gt; label access</span>
+s.values          <span class="hljs-comment"># array([10, 20, 30])</span>
+s.index           <span class="hljs-comment"># Index([&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;], dtype=&#x27;object&#x27;)</span>
+
+<span class="hljs-comment"># Alignment: arithmetic matches on the index, NOT position</span>
+left  = pd.Series([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], index=[<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>])
+right = pd.Series([<span class="hljs-number">10</span>, <span class="hljs-number">20</span>],   index=[<span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>])
+left + right      <span class="hljs-comment"># a=NaN, b=12, c=23  (a has no match -&gt; NaN)</span>
+
+<span class="hljs-comment"># DataFrame column access</span>
+df[<span class="hljs-string">&quot;age&quot;</span>]         <span class="hljs-comment"># a Series</span>
+df[[<span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-string">&quot;age&quot;</span>]]   <span class="hljs-comment"># a DataFrame (list -&gt; multiple columns)</span>
+df.age            <span class="hljs-comment"># attribute access (only for valid identifier names)</span></code></pre>
+
+<div class="callout warn"><span class="t">Columns vs rows</span> <code>df["age"]</code> selects a <em>column</em>. To select <em>rows</em> you need <code>.loc</code> / <code>.iloc</code> (next section). <code>df[0]</code> raises a KeyError unless a column is literally named <code>0</code>.</div>
+
+<h3>Dtypes you should recognize</h3>
+<table>
+  <tr><th>Dtype</th><th>Means</th><th>Note</th></tr>
+  <tr><td><code>int64</code> / <code>float64</code></td><td>NumPy numeric</td><td>float64 holds NaN; int64 cannot</td></tr>
+  <tr><td><code>object</code></td><td>Python objects, usually strings</td><td>Slow; prefer <code>string</code> dtype</td></tr>
+  <tr><td><code>string</code></td><td>Dedicated string dtype</td><td><code>df["c"].astype("string")</code></td></tr>
+  <tr><td><code>category</code></td><td>Finite set of labels</td><td>Big memory + speed win for low-cardinality text</td></tr>
+  <tr><td><code>datetime64[ns]</code></td><td>Timestamps</td><td>Unlocks <code>.dt</code> accessor</td></tr>
+  <tr><td><code>Int64</code> (capital I)</td><td>Nullable integer</td><td>Holds <code>pd.NA</code>, unlike int64</td></tr>
+  <tr><td><code>bool</code> / <code>boolean</code></td><td>Boolean / nullable boolean</td><td>Used for masks</td></tr>
+</table>
+
+<h2 id="indexing">Indexing: loc, iloc, and Selection</h2>
+
+<p>This is the single most important thing to get right. There are two selectors:</p>
+
+<div class="grid c2">
+  <div class="card"><h4><code>.loc[rows, cols]</code></h4>Label-based. Endpoints are <strong>inclusive</strong>. Use for named rows/columns and boolean masks.</div>
+  <div class="card"><h4><code>.iloc[rows, cols]</code></h4>Integer-position based. Endpoints are <strong>exclusive</strong> (like Python slices). Use for positional access.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 640 250" width="640" height="250">
+  <text x="20" y="26" font-size="14" fill="#1a2233" font-weight="bold">loc (labels, inclusive) vs iloc (positions, exclusive)</text>
+  <!-- grid -->
+  <g font-size="12" fill="#1a2233">
+    <text x="30" y="60">pos</text><text x="30" y="90">0</text><text x="30" y="120">1</text><text x="30" y="150">2</text><text x="30" y="180">3</text>
+    <text x="80" y="60">label</text><text x="85" y="90">"w"</text><text x="85" y="120">"x"</text><text x="85" y="150">"y"</text><text x="85" y="180">"z"</text>
+  </g>
+  <g>
+    <rect x="140" y="75" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+    <rect x="140" y="105" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+    <rect x="140" y="135" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+    <rect x="140" y="165" width="120" height="30" fill="#eff4ff" stroke="#94a3b8"/>
+  </g>
+  <!-- loc bracket -->
+  <rect x="300" y="75" width="150" height="90" fill="none" stroke="#059669" stroke-width="2"/>
+  <text x="305" y="68" font-size="12" fill="#059669">df.loc["w":"y"]  -&gt; w, x, y (3 rows)</text>
+  <!-- iloc bracket -->
+  <rect x="470" y="75" width="150" height="60" fill="none" stroke="#b45309" stroke-width="2"/>
+  <text x="475" y="68" font-size="12" fill="#b45309">df.iloc[0:2] -&gt; pos 0,1 (2 rows)</text>
+  <text x="140" y="225" font-size="12" fill="#1a2233">Same object, two coordinate systems. Mixing them is the #1 source of off-by-one bugs.</text>
+</svg><div class="cap">Fig 2 — Label slicing includes the endpoint; positional slicing does not.</div></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">df = df.set_index(<span class="hljs-string">&quot;name&quot;</span>)   <span class="hljs-comment"># make &#x27;name&#x27; the row label</span>
+
+<span class="hljs-comment"># --- label-based (.loc) ---</span>
+df.loc[<span class="hljs-string">&quot;Ada&quot;</span>]                     <span class="hljs-comment"># one row as a Series</span>
+df.loc[<span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-string">&quot;age&quot;</span>]              <span class="hljs-comment"># scalar</span>
+df.loc[[<span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-string">&quot;Grace&quot;</span>], [<span class="hljs-string">&quot;age&quot;</span>, <span class="hljs-string">&quot;team&quot;</span>]]   <span class="hljs-comment"># subframe</span>
+df.loc[<span class="hljs-string">&quot;Ada&quot;</span>:<span class="hljs-string">&quot;Grace&quot;</span>]             <span class="hljs-comment"># label slice, INCLUSIVE of Grace</span>
+
+<span class="hljs-comment"># --- position-based (.iloc) ---</span>
+df.iloc[<span class="hljs-number">0</span>]                        <span class="hljs-comment"># first row</span>
+df.iloc[<span class="hljs-number">0</span>:<span class="hljs-number">2</span>]                      <span class="hljs-comment"># first two rows, EXCLUSIVE of index 2</span>
+df.iloc[-<span class="hljs-number">1</span>]                       <span class="hljs-comment"># last row</span>
+df.iloc[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]                     <span class="hljs-comment"># row 0, column 1 by position</span>
+
+<span class="hljs-comment"># --- boolean filtering (goes through .loc) ---</span>
+df.loc[df[<span class="hljs-string">&quot;age&quot;</span>] &gt; <span class="hljs-number">42</span>]            <span class="hljs-comment"># rows where age &gt; 42</span>
+df.loc[(df[<span class="hljs-string">&quot;age&quot;</span>] &gt; <span class="hljs-number">42</span>) &amp; (df[<span class="hljs-string">&quot;team&quot;</span>] == <span class="hljs-string">&quot;A&quot;</span>)]   <span class="hljs-comment"># &amp; / | , parens required</span>
+df.loc[df[<span class="hljs-string">&quot;team&quot;</span>].isin([<span class="hljs-string">&quot;A&quot;</span>])]
+df.loc[df[<span class="hljs-string">&quot;age&quot;</span>].between(<span class="hljs-number">40</span>, <span class="hljs-number">50</span>)]
+
+<span class="hljs-comment"># --- assignment through loc (no chained-indexing trap) ---</span>
+df.loc[df[<span class="hljs-string">&quot;age&quot;</span>] &gt; <span class="hljs-number">50</span>, <span class="hljs-string">&quot;team&quot;</span>] = <span class="hljs-string">&quot;senior&quot;</span></code></pre>
+
+<div class="callout danger"><span class="t">Chained indexing</span> Never assign via <code>df[df.age &gt; 50]["team"] = ...</code>. That is <em>chained indexing</em>: it may write to a temporary copy and silently do nothing (the classic <code>SettingWithCopyWarning</code>). Always use a single <code>df.loc[mask, "col"] = value</code>.</div>
+
+<h2 id="filtering">Filtering &amp; Transforming Columns</h2>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># query(): string expressions, often cleaner for complex filters</span>
+df.query(<span class="hljs-string">&quot;age &gt; 42 and team == &#x27;A&#x27;&quot;</span>)
+threshold = <span class="hljs-number">42</span>
+df.query(<span class="hljs-string">&quot;age &gt; @threshold&quot;</span>)          <span class="hljs-comment"># @ references Python variables</span>
+
+<span class="hljs-comment"># Create / overwrite columns</span>
+df[<span class="hljs-string">&quot;bonus&quot;</span>] = df[<span class="hljs-string">&quot;salary&quot;</span>] * <span class="hljs-number">0.1</span>
+df[<span class="hljs-string">&quot;senior&quot;</span>] = df[<span class="hljs-string">&quot;age&quot;</span>] &gt;= <span class="hljs-number">45</span>
+
+<span class="hljs-comment"># assign(): returns a new frame, chainable, no mutation</span>
+out = (df
+       .assign(tax=<span class="hljs-keyword">lambda</span> d: d[<span class="hljs-string">&quot;salary&quot;</span>] * <span class="hljs-number">0.3</span>,
+               net=<span class="hljs-keyword">lambda</span> d: d[<span class="hljs-string">&quot;salary&quot;</span>] - d[<span class="hljs-string">&quot;salary&quot;</span>] * <span class="hljs-number">0.3</span>))
+
+<span class="hljs-comment"># Drop / rename</span>
+df.drop(columns=[<span class="hljs-string">&quot;bonus&quot;</span>])
+df.rename(columns={<span class="hljs-string">&quot;salary&quot;</span>: <span class="hljs-string">&quot;pay&quot;</span>})
+df.drop(index=[<span class="hljs-string">&quot;Alan&quot;</span>])               <span class="hljs-comment"># drop a row by label</span></code></pre>
+
+<div class="callout tip"><span class="t">Method chaining</span> Chaining with <code>.assign</code>, <code>.query</code>, <code>.pipe</code> keeps transformations readable and avoids intermediate variables. Wrap the chain in parentheses so you can put each step on its own line.</div>
+
+<h2 id="missing-data">Missing Data</h2>
+
+<p>Missing values appear as <code>NaN</code> (float), <code>NaT</code> (datetime), or <code>pd.NA</code> (nullable dtypes). Detect, drop, or fill them.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">df.isna()                 <span class="hljs-comment"># boolean DataFrame</span>
+df.isna().<span class="hljs-built_in">sum</span>()           <span class="hljs-comment"># count of missing per column  &lt;- do this first</span>
+df[<span class="hljs-string">&quot;salary&quot;</span>].notna()
+
+<span class="hljs-comment"># Drop</span>
+df.dropna()                       <span class="hljs-comment"># drop rows with ANY NaN</span>
+df.dropna(subset=[<span class="hljs-string">&quot;salary&quot;</span>])      <span class="hljs-comment"># only consider these columns</span>
+df.dropna(axis=<span class="hljs-number">1</span>, thresh=<span class="hljs-number">3</span>)       <span class="hljs-comment"># drop cols with &lt; 3 non-null values</span>
+
+<span class="hljs-comment"># Fill</span>
+df[<span class="hljs-string">&quot;salary&quot;</span>].fillna(df[<span class="hljs-string">&quot;salary&quot;</span>].median())
+df.fillna({<span class="hljs-string">&quot;salary&quot;</span>: <span class="hljs-number">0</span>, <span class="hljs-string">&quot;team&quot;</span>: <span class="hljs-string">&quot;unknown&quot;</span>})   <span class="hljs-comment"># per-column fills</span>
+df[<span class="hljs-string">&quot;salary&quot;</span>].ffill()              <span class="hljs-comment"># forward-fill (carry last valid)</span>
+df[<span class="hljs-string">&quot;salary&quot;</span>].bfill()              <span class="hljs-comment"># back-fill</span>
+
+<span class="hljs-comment"># Interpolate (time series / ordered numeric)</span>
+df[<span class="hljs-string">&quot;salary&quot;</span>].interpolate(method=<span class="hljs-string">&quot;linear&quot;</span>)</code></pre>
+
+<div class="callout warn"><span class="t">int64 cannot hold NaN</span> A column of integers with a missing value becomes <code>float64</code> automatically. If you need true nullable integers, use the <code>Int64</code> dtype: <code>df["n"].astype("Int64")</code>.</div>
+
+<h2 id="groupby">GroupBy: Split-Apply-Combine</h2>
+
+<p>GroupBy is pandas' most powerful idiom. You <strong>split</strong> rows into groups by key, <strong>apply</strong> a function to each group, and <strong>combine</strong> the results back into a Series or DataFrame.</p>
+
+<div class="diagram"><svg viewBox="0 0 640 280" width="640" height="280">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="20" y="24" font-size="14" fill="#1a2233" font-weight="bold">Split - Apply - Combine</text>
+  <!-- source -->
+  <rect x="20" y="50" width="120" height="150" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="40" y="45" font-size="12" fill="#1a2233">rows</text>
+  <text x="35" y="80" font-size="12" fill="#1a2233">A  95k</text>
+  <text x="35" y="105" font-size="12" fill="#1a2233">B  88k</text>
+  <text x="35" y="130" font-size="12" fill="#1a2233">A  120k</text>
+  <text x="35" y="155" font-size="12" fill="#1a2233">B  70k</text>
+  <path d="M145 125 L200 90" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <path d="M145 125 L200 190" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <!-- groups -->
+  <rect x="205" y="60" width="150" height="60" fill="#ecfdf5" stroke="#059669"/>
+  <text x="215" y="80" font-size="12" fill="#1a2233">group A: 95k, 120k</text>
+  <text x="215" y="105" font-size="12" fill="#059669">split by "team"</text>
+  <rect x="205" y="160" width="150" height="60" fill="#ecfdf5" stroke="#059669"/>
+  <text x="215" y="180" font-size="12" fill="#1a2233">group B: 88k, 70k</text>
+  <path d="M360 90 L420 125" stroke="#b45309" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <path d="M360 190 L420 135" stroke="#b45309" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <text x="360" y="55" font-size="12" fill="#b45309">apply mean()</text>
+  <!-- result -->
+  <rect x="425" y="100" width="180" height="70" fill="#ffffff" stroke="#1e3a8a"/>
+  <text x="440" y="125" font-size="12" fill="#1a2233">team  salary</text>
+  <text x="440" y="145" font-size="12" fill="#1a2233">A     107500</text>
+  <text x="440" y="162" font-size="12" fill="#1a2233">B      79000</text>
+  <text x="440" y="195" font-size="12" fill="#1e3a8a">combine -&gt; one row per group</text>
+</svg><div class="cap">Fig 3 — GroupBy partitions rows by key, reduces each partition, and stitches results together.</div></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Single aggregation</span>
+df.groupby(<span class="hljs-string">&quot;team&quot;</span>)[<span class="hljs-string">&quot;salary&quot;</span>].mean()
+
+<span class="hljs-comment"># Multiple columns, multiple functions via agg()</span>
+df.groupby(<span class="hljs-string">&quot;team&quot;</span>).agg(
+    avg_pay=(<span class="hljs-string">&quot;salary&quot;</span>, <span class="hljs-string">&quot;mean&quot;</span>),
+    max_age=(<span class="hljs-string">&quot;age&quot;</span>, <span class="hljs-string">&quot;max&quot;</span>),
+    n=(<span class="hljs-string">&quot;salary&quot;</span>, <span class="hljs-string">&quot;size&quot;</span>),
+)   <span class="hljs-comment"># named aggregation -&gt; clean, flat column names</span>
+
+<span class="hljs-comment"># Group by several keys -&gt; MultiIndex result</span>
+df.groupby([<span class="hljs-string">&quot;team&quot;</span>, <span class="hljs-string">&quot;senior&quot;</span>])[<span class="hljs-string">&quot;salary&quot;</span>].<span class="hljs-built_in">sum</span>()
+
+<span class="hljs-comment"># transform(): broadcast group result back to original shape (same length)</span>
+df[<span class="hljs-string">&quot;pay_vs_team_avg&quot;</span>] = df[<span class="hljs-string">&quot;salary&quot;</span>] - df.groupby(<span class="hljs-string">&quot;team&quot;</span>)[<span class="hljs-string">&quot;salary&quot;</span>].transform(<span class="hljs-string">&quot;mean&quot;</span>)
+
+<span class="hljs-comment"># filter(): keep only groups meeting a condition</span>
+df.groupby(<span class="hljs-string">&quot;team&quot;</span>).<span class="hljs-built_in">filter</span>(<span class="hljs-keyword">lambda</span> g: g[<span class="hljs-string">&quot;salary&quot;</span>].mean() &gt; <span class="hljs-number">80000</span>)
+
+<span class="hljs-comment"># apply(): most flexible, slowest — use when agg/transform cannot express it</span>
+df.groupby(<span class="hljs-string">&quot;team&quot;</span>).apply(<span class="hljs-keyword">lambda</span> g: g.nlargest(<span class="hljs-number">2</span>, <span class="hljs-string">&quot;salary&quot;</span>))</code></pre>
+
+<div class="callout tip"><span class="t">agg vs transform</span> Use <code>agg</code> when you want one row per group (a summary). Use <code>transform</code> when you want a result aligned to the original rows (e.g. group mean on every row). Reach for <code>apply</code> only when neither fits — it is the slow fallback.</div>
+
+<h2 id="merge-join">Merge, Join &amp; Concatenate</h2>
+
+<p>Combine datasets by key (<code>merge</code>), by index (<code>join</code>), or by stacking (<code>concat</code>).</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">employees = pd.DataFrame({<span class="hljs-string">&quot;emp_id&quot;</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-string">&quot;name&quot;</span>: [<span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-string">&quot;Linus&quot;</span>, <span class="hljs-string">&quot;Grace&quot;</span>], <span class="hljs-string">&quot;dept_id&quot;</span>: [<span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">10</span>]})
+depts     = pd.DataFrame({<span class="hljs-string">&quot;dept_id&quot;</span>: [<span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">30</span>], <span class="hljs-string">&quot;dept&quot;</span>: [<span class="hljs-string">&quot;Eng&quot;</span>, <span class="hljs-string">&quot;Sales&quot;</span>, <span class="hljs-string">&quot;Ops&quot;</span>]})
+
+<span class="hljs-comment"># INNER (default): only matching keys</span>
+pd.merge(employees, depts, on=<span class="hljs-string">&quot;dept_id&quot;</span>, how=<span class="hljs-string">&quot;inner&quot;</span>)
+
+<span class="hljs-comment"># LEFT: keep all left rows, NaN where no match</span>
+pd.merge(employees, depts, on=<span class="hljs-string">&quot;dept_id&quot;</span>, how=<span class="hljs-string">&quot;left&quot;</span>)
+
+<span class="hljs-comment"># Different key names on each side</span>
+pd.merge(a, b, left_on=<span class="hljs-string">&quot;country_code&quot;</span>, right_on=<span class="hljs-string">&quot;iso&quot;</span>, how=<span class="hljs-string">&quot;left&quot;</span>)
+
+<span class="hljs-comment"># Stacking</span>
+pd.concat([df1, df2], axis=<span class="hljs-number">0</span>)             <span class="hljs-comment"># stack rows (union)</span>
+pd.concat([df1, df2], axis=<span class="hljs-number">1</span>)             <span class="hljs-comment"># stack columns (align on index)</span>
+
+<span class="hljs-comment"># validate guards against accidental fan-out / dup keys</span>
+pd.merge(employees, depts, on=<span class="hljs-string">&quot;dept_id&quot;</span>, how=<span class="hljs-string">&quot;left&quot;</span>, validate=<span class="hljs-string">&quot;many_to_one&quot;</span>)</code></pre>
+
+<table>
+  <tr><th>how</th><th>Keeps</th><th>SQL analog</th></tr>
+  <tr><td><code>inner</code></td><td>Only keys in both</td><td>INNER JOIN</td></tr>
+  <tr><td><code>left</code></td><td>All left + matches</td><td>LEFT JOIN</td></tr>
+  <tr><td><code>right</code></td><td>All right + matches</td><td>RIGHT JOIN</td></tr>
+  <tr><td><code>outer</code></td><td>Union of keys</td><td>FULL OUTER JOIN</td></tr>
+  <tr><td><code>cross</code></td><td>Cartesian product</td><td>CROSS JOIN</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Silent row explosion</span> If the right side has duplicate keys, a left merge multiplies rows (a many-to-many fan-out). Pass <code>validate="many_to_one"</code> or <code>"one_to_one"</code> to make pandas raise instead of silently inflating your data.</div>
+
+<h2 id="reshape-pivot">Reshaping: pivot, melt, stack</h2>
+
+<p>Data arrives either <em>wide</em> (one column per variable) or <em>long</em> (one row per observation). Reshape between them.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Long -&gt; wide: pivot_table (aggregates duplicates safely)</span>
+sales = pd.DataFrame({
+    <span class="hljs-string">&quot;date&quot;</span>: [<span class="hljs-string">&quot;2026-01&quot;</span>, <span class="hljs-string">&quot;2026-01&quot;</span>, <span class="hljs-string">&quot;2026-02&quot;</span>, <span class="hljs-string">&quot;2026-02&quot;</span>],
+    <span class="hljs-string">&quot;region&quot;</span>: [<span class="hljs-string">&quot;N&quot;</span>, <span class="hljs-string">&quot;S&quot;</span>, <span class="hljs-string">&quot;N&quot;</span>, <span class="hljs-string">&quot;S&quot;</span>],
+    <span class="hljs-string">&quot;revenue&quot;</span>: [<span class="hljs-number">100</span>, <span class="hljs-number">80</span>, <span class="hljs-number">120</span>, <span class="hljs-number">95</span>],
+})
+wide = sales.pivot_table(index=<span class="hljs-string">&quot;date&quot;</span>, columns=<span class="hljs-string">&quot;region&quot;</span>,
+                         values=<span class="hljs-string">&quot;revenue&quot;</span>, aggfunc=<span class="hljs-string">&quot;sum&quot;</span>, fill_value=<span class="hljs-number">0</span>)
+
+<span class="hljs-comment"># Wide -&gt; long: melt</span>
+long = wide.reset_index().melt(id_vars=<span class="hljs-string">&quot;date&quot;</span>,
+                               var_name=<span class="hljs-string">&quot;region&quot;</span>, value_name=<span class="hljs-string">&quot;revenue&quot;</span>)
+
+<span class="hljs-comment"># stack / unstack move an index level between rows and columns</span>
+multi = df.groupby([<span class="hljs-string">&quot;team&quot;</span>, <span class="hljs-string">&quot;senior&quot;</span>])[<span class="hljs-string">&quot;salary&quot;</span>].<span class="hljs-built_in">sum</span>()
+multi.unstack()          <span class="hljs-comment"># &#x27;senior&#x27; level -&gt; columns</span>
+multi.unstack().stack()  <span class="hljs-comment"># back to long</span>
+
+<span class="hljs-comment"># crosstab: frequency table</span>
+pd.crosstab(df[<span class="hljs-string">&quot;team&quot;</span>], df[<span class="hljs-string">&quot;senior&quot;</span>])</code></pre>
+
+<div class="callout note"><span class="t">pivot vs pivot_table</span> <code>pivot</code> fails if there are duplicate index/column pairs. <code>pivot_table</code> aggregates them via <code>aggfunc</code> — use it as your default and reserve <code>pivot</code> for guaranteed-unique data.</div>
+
+<h2 id="apply-map">apply, map &amp; Vectorization</h2>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># map(): element-wise on a Series (dict lookup or function)</span>
+df[<span class="hljs-string">&quot;team_full&quot;</span>] = df[<span class="hljs-string">&quot;team&quot;</span>].<span class="hljs-built_in">map</span>({<span class="hljs-string">&quot;A&quot;</span>: <span class="hljs-string">&quot;Alpha&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>: <span class="hljs-string">&quot;Bravo&quot;</span>})
+
+<span class="hljs-comment"># apply() on a Series: element-wise function</span>
+df[<span class="hljs-string">&quot;name_len&quot;</span>] = df.index.to_series().apply(<span class="hljs-built_in">len</span>)
+
+<span class="hljs-comment"># apply() on a DataFrame: axis=1 runs per row (SLOW — avoid in hot paths)</span>
+df[<span class="hljs-string">&quot;flag&quot;</span>] = df.apply(<span class="hljs-keyword">lambda</span> r: <span class="hljs-string">&quot;hi&quot;</span> <span class="hljs-keyword">if</span> r[<span class="hljs-string">&quot;salary&quot;</span>] &gt; <span class="hljs-number">100000</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;lo&quot;</span>, axis=<span class="hljs-number">1</span>)
+
+<span class="hljs-comment"># Prefer vectorized / np.where for the common case</span>
+df[<span class="hljs-string">&quot;flag&quot;</span>] = np.where(df[<span class="hljs-string">&quot;salary&quot;</span>] &gt; <span class="hljs-number">100000</span>, <span class="hljs-string">&quot;hi&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>)
+df[<span class="hljs-string">&quot;bucket&quot;</span>] = np.select(
+    [df[<span class="hljs-string">&quot;age&quot;</span>] &lt; <span class="hljs-number">40</span>, df[<span class="hljs-string">&quot;age&quot;</span>] &lt; <span class="hljs-number">50</span>],
+    [<span class="hljs-string">&quot;junior&quot;</span>, <span class="hljs-string">&quot;mid&quot;</span>],
+    default=<span class="hljs-string">&quot;senior&quot;</span>,
+)
+
+<span class="hljs-comment"># String operations are vectorized via .str</span>
+df[<span class="hljs-string">&quot;name&quot;</span>].<span class="hljs-built_in">str</span>.upper()
+df[<span class="hljs-string">&quot;name&quot;</span>].<span class="hljs-built_in">str</span>.contains(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-keyword">case</span>=<span class="hljs-literal">False</span>)
+df[<span class="hljs-string">&quot;name&quot;</span>].<span class="hljs-built_in">str</span>.replace(<span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-string">&quot;ADA&quot;</span>, regex=<span class="hljs-literal">False</span>)</code></pre>
+
+<div class="callout danger"><span class="t">apply(axis=1) is a loop in disguise</span> It calls your Python function once per row. On a million rows it can be 100x slower than the vectorized equivalent. Reach for <code>np.where</code>, <code>np.select</code>, <code>.str</code>, <code>.dt</code>, or boolean masks first.</div>
+
+<h2 id="datetime">Datetime &amp; Time Series</h2>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Parse strings to datetime64</span>
+df[<span class="hljs-string">&quot;ts&quot;</span>] = pd.to_datetime(df[<span class="hljs-string">&quot;ts&quot;</span>], <span class="hljs-built_in">format</span>=<span class="hljs-string">&quot;%Y-%m-%d&quot;</span>, errors=<span class="hljs-string">&quot;coerce&quot;</span>)
+
+<span class="hljs-comment"># The .dt accessor exposes calendar fields</span>
+df[<span class="hljs-string">&quot;ts&quot;</span>].dt.year
+df[<span class="hljs-string">&quot;ts&quot;</span>].dt.month_name()
+df[<span class="hljs-string">&quot;ts&quot;</span>].dt.dayofweek          <span class="hljs-comment"># Monday=0</span>
+df[<span class="hljs-string">&quot;ts&quot;</span>].dt.quarter
+
+<span class="hljs-comment"># Set a DatetimeIndex to unlock resampling &amp; partial-string slicing</span>
+ts = df.set_index(<span class="hljs-string">&quot;ts&quot;</span>).sort_index()
+ts.loc[<span class="hljs-string">&quot;2026-01&quot;</span>]              <span class="hljs-comment"># all rows in January 2026</span>
+ts.loc[<span class="hljs-string">&quot;2026-01-01&quot;</span>:<span class="hljs-string">&quot;2026-03-31&quot;</span>]
+
+<span class="hljs-comment"># Resample: groupby over time buckets</span>
+ts[<span class="hljs-string">&quot;revenue&quot;</span>].resample(<span class="hljs-string">&quot;ME&quot;</span>).<span class="hljs-built_in">sum</span>()     <span class="hljs-comment"># month-end totals</span>
+ts[<span class="hljs-string">&quot;revenue&quot;</span>].resample(<span class="hljs-string">&quot;W&quot;</span>).mean()      <span class="hljs-comment"># weekly average</span>
+
+<span class="hljs-comment"># Rolling windows</span>
+ts[<span class="hljs-string">&quot;revenue&quot;</span>].rolling(window=<span class="hljs-number">7</span>).mean()  <span class="hljs-comment"># 7-period moving average</span>
+ts[<span class="hljs-string">&quot;revenue&quot;</span>].shift(<span class="hljs-number">1</span>)                  <span class="hljs-comment"># lag by one period</span>
+ts[<span class="hljs-string">&quot;revenue&quot;</span>].pct_change()              <span class="hljs-comment"># period-over-period % change</span>
+
+<span class="hljs-comment"># Timezones</span>
+ts.tz_localize(<span class="hljs-string">&quot;UTC&quot;</span>).tz_convert(<span class="hljs-string">&quot;Asia/Kolkata&quot;</span>)</code></pre>
+
+<div class="callout tip"><span class="t">Always sort a time index</span> Partial-string slicing and <code>rolling</code> assume monotonic order. Call <code>.sort_index()</code> right after you set a DatetimeIndex.</div>
+
+<h2 id="io">Reading &amp; Writing: CSV, Excel, SQL, Parquet</h2>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># CSV — the daily driver</span>
+df = pd.read_csv(<span class="hljs-string">&quot;data.csv&quot;</span>,
+                 parse_dates=[<span class="hljs-string">&quot;date&quot;</span>],       <span class="hljs-comment"># parse while reading</span>
+                 dtype={<span class="hljs-string">&quot;zip&quot;</span>: <span class="hljs-string">&quot;string&quot;</span>},     <span class="hljs-comment"># keep leading zeros</span>
+                 usecols=[<span class="hljs-string">&quot;date&quot;</span>, <span class="hljs-string">&quot;zip&quot;</span>, <span class="hljs-string">&quot;amount&quot;</span>],  <span class="hljs-comment"># read only what you need</span>
+                 na_values=[<span class="hljs-string">&quot;&quot;</span>, <span class="hljs-string">&quot;NA&quot;</span>, <span class="hljs-string">&quot;null&quot;</span>])
+df.to_csv(<span class="hljs-string">&quot;out.csv&quot;</span>, index=<span class="hljs-literal">False</span>)
+
+<span class="hljs-comment"># Excel (needs openpyxl)</span>
+pd.read_excel(<span class="hljs-string">&quot;book.xlsx&quot;</span>, sheet_name=<span class="hljs-string">&quot;Q1&quot;</span>)
+df.to_excel(<span class="hljs-string">&quot;out.xlsx&quot;</span>, sheet_name=<span class="hljs-string">&quot;results&quot;</span>, index=<span class="hljs-literal">False</span>)
+
+<span class="hljs-comment"># SQL (needs SQLAlchemy engine)</span>
+<span class="hljs-keyword">from</span> sqlalchemy <span class="hljs-keyword">import</span> create_engine
+engine = create_engine(<span class="hljs-string">&quot;postgresql+psycopg2://user:pw@host/db&quot;</span>)
+pd.read_sql(<span class="hljs-string">&quot;SELECT * FROM sales WHERE year = 2026&quot;</span>, engine)
+df.to_sql(<span class="hljs-string">&quot;results&quot;</span>, engine, if_exists=<span class="hljs-string">&quot;replace&quot;</span>, index=<span class="hljs-literal">False</span>)
+
+<span class="hljs-comment"># Parquet — columnar, typed, compressed; best for analytics pipelines</span>
+df.to_parquet(<span class="hljs-string">&quot;data.parquet&quot;</span>)            <span class="hljs-comment"># needs pyarrow</span>
+pd.read_parquet(<span class="hljs-string">&quot;data.parquet&quot;</span>, columns=[<span class="hljs-string">&quot;date&quot;</span>, <span class="hljs-string">&quot;amount&quot;</span>])
+
+<span class="hljs-comment"># JSON</span>
+pd.read_json(<span class="hljs-string">&quot;data.json&quot;</span>)
+pd.json_normalize(nested_records)        <span class="hljs-comment"># flatten nested JSON into columns</span></code></pre>
+
+<div class="callout note"><span class="t">Prefer Parquet for pipelines</span> CSV loses dtypes, has no compression, and reparses on every read. Parquet stores dtypes, compresses well, and lets you read only the columns you need — often 5-20x faster and smaller.</div>
+
+<h2 id="worked-example">Mini Worked Example: Monthly Revenue Report</h2>
+
+<p>A realistic end-to-end chain: read raw orders, clean, enrich, aggregate, and export.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+
+orders = pd.read_csv(<span class="hljs-string">&quot;orders.csv&quot;</span>, parse_dates=[<span class="hljs-string">&quot;order_date&quot;</span>])
+customers = pd.read_csv(<span class="hljs-string">&quot;customers.csv&quot;</span>)   <span class="hljs-comment"># customer_id, region, tier</span>
+
+report = (
+    orders
+      .dropna(subset=[<span class="hljs-string">&quot;amount&quot;</span>])                       <span class="hljs-comment"># drop incomplete rows</span>
+      .assign(month=<span class="hljs-keyword">lambda</span> d: d[<span class="hljs-string">&quot;order_date&quot;</span>].dt.to_period(<span class="hljs-string">&quot;M&quot;</span>))
+      .merge(customers, on=<span class="hljs-string">&quot;customer_id&quot;</span>, how=<span class="hljs-string">&quot;left&quot;</span>,  <span class="hljs-comment"># enrich with region</span>
+             validate=<span class="hljs-string">&quot;many_to_one&quot;</span>)
+      .groupby([<span class="hljs-string">&quot;month&quot;</span>, <span class="hljs-string">&quot;region&quot;</span>], as_index=<span class="hljs-literal">False</span>)    <span class="hljs-comment"># split by month+region</span>
+      .agg(revenue=(<span class="hljs-string">&quot;amount&quot;</span>, <span class="hljs-string">&quot;sum&quot;</span>),
+           orders=(<span class="hljs-string">&quot;amount&quot;</span>, <span class="hljs-string">&quot;size&quot;</span>),
+           avg_order=(<span class="hljs-string">&quot;amount&quot;</span>, <span class="hljs-string">&quot;mean&quot;</span>))
+      .sort_values([<span class="hljs-string">&quot;month&quot;</span>, <span class="hljs-string">&quot;revenue&quot;</span>], ascending=[<span class="hljs-literal">True</span>, <span class="hljs-literal">False</span>])
+)
+
+report[<span class="hljs-string">&quot;revenue_share&quot;</span>] = (
+    report[<span class="hljs-string">&quot;revenue&quot;</span>] / report.groupby(<span class="hljs-string">&quot;month&quot;</span>)[<span class="hljs-string">&quot;revenue&quot;</span>].transform(<span class="hljs-string">&quot;sum&quot;</span>)
+)
+report.to_parquet(<span class="hljs-string">&quot;monthly_revenue.parquet&quot;</span>, index=<span class="hljs-literal">False</span>)
+<span class="hljs-built_in">print</span>(report.head())</code></pre>
+
+<details><summary>Show the transformation step by step</summary><div class="body">
+<div class="pipeline">
+  <span class="step">read_csv</span><span class="arrow">-&gt;</span>
+  <span class="step">dropna</span><span class="arrow">-&gt;</span>
+  <span class="step">assign month</span><span class="arrow">-&gt;</span>
+  <span class="step">merge region</span><span class="arrow">-&gt;</span>
+  <span class="step">groupby+agg</span><span class="arrow">-&gt;</span>
+  <span class="step">transform share</span><span class="arrow">-&gt;</span>
+  <span class="step">to_parquet</span>
+</div>
+<p>Each step returns a new DataFrame, so the chain never mutates the raw <code>orders</code> frame — safe to re-run and easy to debug by truncating the chain.</p>
+</div></details>
+
+<h2 id="cheatsheet">Cheat-Sheet Reference</h2>
+
+<table>
+  <tr><th>Task</th><th>Code</th></tr>
+  <tr><td>Shape / columns</td><td><code>df.shape</code>, <code>df.columns</code></td></tr>
+  <tr><td>First / last n</td><td><code>df.head(n)</code>, <code>df.tail(n)</code></td></tr>
+  <tr><td>Random sample</td><td><code>df.sample(5)</code></td></tr>
+  <tr><td>Select column</td><td><code>df["c"]</code></td></tr>
+  <tr><td>Select rows by label</td><td><code>df.loc[mask]</code></td></tr>
+  <tr><td>Select rows by position</td><td><code>df.iloc[0:5]</code></td></tr>
+  <tr><td>Filter</td><td><code>df.query("a &gt; 1")</code></td></tr>
+  <tr><td>New column</td><td><code>df.assign(c=...)</code></td></tr>
+  <tr><td>Sort</td><td><code>df.sort_values("c", ascending=False)</code></td></tr>
+  <tr><td>Unique / counts</td><td><code>df["c"].unique()</code>, <code>df["c"].value_counts()</code></td></tr>
+  <tr><td>Aggregate by group</td><td><code>df.groupby("k").agg(...)</code></td></tr>
+  <tr><td>Join</td><td><code>pd.merge(a, b, on="k", how="left")</code></td></tr>
+  <tr><td>Pivot</td><td><code>df.pivot_table(index=, columns=, values=)</code></td></tr>
+  <tr><td>Missing count</td><td><code>df.isna().sum()</code></td></tr>
+  <tr><td>Rename</td><td><code>df.rename(columns={"a": "b"})</code></td></tr>
+  <tr><td>Reset / set index</td><td><code>df.reset_index()</code>, <code>df.set_index("c")</code></td></tr>
+  <tr><td>Apply vectorized bins</td><td><code>pd.cut(df["c"], bins=[0,10,20])</code></td></tr>
+  <tr><td>Memory usage</td><td><code>df.memory_usage(deep=True)</code></td></tr>
+</table>
+
+<h3>Pandas vs SQL vs Excel</h3>
+<table>
+  <tr><th>Concept</th><th>Pandas</th><th>SQL</th></tr>
+  <tr><td>Filter rows</td><td><code>df.query("x &gt; 1")</code></td><td><code>WHERE x &gt; 1</code></td></tr>
+  <tr><td>Pick columns</td><td><code>df[["a","b"]]</code></td><td><code>SELECT a, b</code></td></tr>
+  <tr><td>Aggregate</td><td><code>groupby().agg()</code></td><td><code>GROUP BY</code></td></tr>
+  <tr><td>Join</td><td><code>merge(how="left")</code></td><td><code>LEFT JOIN</code></td></tr>
+  <tr><td>Sort</td><td><code>sort_values()</code></td><td><code>ORDER BY</code></td></tr>
+  <tr><td>Distinct</td><td><code>drop_duplicates()</code></td><td><code>DISTINCT</code></td></tr>
+  <tr><td>Top-N per group</td><td><code>groupby().head(n)</code></td><td><code>ROW_NUMBER() &lt;= n</code></td></tr>
+</table>
+
+<h2 id="performance">Performance Tips</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Vectorize everything</h4>Replace <code>apply(axis=1)</code> and Python loops with column arithmetic, <code>np.where</code>, <code>np.select</code>, and <code>.str</code>/<code>.dt</code> accessors.</div>
+  <div class="card"><h4>Shrink dtypes</h4>Convert low-cardinality strings to <code>category</code> and downcast numerics (<code>pd.to_numeric(s, downcast="integer")</code>). Big memory wins.</div>
+  <div class="card"><h4>Read less</h4>Use <code>usecols</code>, <code>dtype</code>, and <code>nrows</code> on read. Prefer Parquet so you only load needed columns.</div>
+  <div class="card"><h4>Avoid growing frames</h4>Never <code>concat</code> inside a loop. Collect pieces in a list and <code>pd.concat</code> once at the end.</div>
+  <div class="card"><h4>Chunk big files</h4><code>pd.read_csv(path, chunksize=100_000)</code> yields chunks you can process and reduce without loading everything.</div>
+  <div class="card"><h4>Know when to leave</h4>At tens of GB, consider Polars, DuckDB, or Dask. Pandas is single-machine and largely single-threaded.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Measure before optimizing</span>
+%timeit df.apply(<span class="hljs-keyword">lambda</span> r: r.a + r.b, axis=<span class="hljs-number">1</span>)   <span class="hljs-comment"># slow (row loop)</span>
+%timeit df[<span class="hljs-string">&quot;a&quot;</span>] + df[<span class="hljs-string">&quot;b&quot;</span>]                         <span class="hljs-comment"># fast (vectorized)</span>
+
+<span class="hljs-comment"># Category dtype can cut memory of text columns by 10x+</span>
+before = df.memory_usage(deep=<span class="hljs-literal">True</span>).<span class="hljs-built_in">sum</span>()
+df[<span class="hljs-string">&quot;team&quot;</span>] = df[<span class="hljs-string">&quot;team&quot;</span>].astype(<span class="hljs-string">&quot;category&quot;</span>)
+after = df.memory_usage(deep=<span class="hljs-literal">True</span>).<span class="hljs-built_in">sum</span>()
+
+<span class="hljs-comment"># Build once, not in a loop</span>
+pieces = [process(chunk) <span class="hljs-keyword">for</span> chunk <span class="hljs-keyword">in</span> pd.read_csv(<span class="hljs-string">&quot;big.csv&quot;</span>, chunksize=<span class="hljs-number">100_000</span>)]
+result = pd.concat(pieces, ignore_index=<span class="hljs-literal">True</span>)</code></pre>
+
+<div class="callout ok"><span class="t">Rule of thumb</span> If you wrote a Python <code>for</code> loop over rows, there is almost always a vectorized pandas/NumPy expression that is both shorter and dramatically faster. Look for it first.</div>
+
+<h2 id="best-practices">Best Practices &amp; Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Use <code>.loc[mask, col] = value</code> for conditional assignment; chain with <code>.assign</code>/<code>.query</code>/<code>.pipe</code>; set explicit dtypes on read; profile with <code>df.info()</code> and <code>%timeit</code>; keep a tidy (long) layout for analysis.</div>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>inplace=True</code> rarely saves memory and often hurts readability — prefer reassignment. Comparing floats with <code>==</code> is unreliable; use <code>np.isclose</code>. <code>df.append</code> was removed in pandas 2.0 — use <code>pd.concat</code>.</div>
+
+<div class="callout danger"><span class="t">Classic bugs</span> (1) Chained-indexing assignment silently fails. (2) Merging on a non-unique key explodes row counts. (3) Forgetting that integer columns coerce to float on missing data. (4) Using Python <code>and</code>/<code>or</code> instead of <code>&amp;</code>/<code>|</code> in masks (and forgetting parentheses).</div>
+
+<h2 id="interview">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between <code>.loc</code> and <code>.iloc</code>?</div><div class="a"><code>.loc</code> is label-based and its slice endpoints are inclusive; <code>.iloc</code> is integer-position based and its endpoints are exclusive, like Python slicing. Use <code>.loc</code> with named labels and boolean masks, <code>.iloc</code> for positional access. Mixing them is a common off-by-one source.</div></div>
+
+<div class="qa"><div class="q">Explain split-apply-combine and when you'd use transform vs agg.</div><div class="a">GroupBy splits rows into groups by key, applies a function to each group, and combines results. <code>agg</code> reduces each group to one row (a summary). <code>transform</code> returns a result the same length as the input, broadcasting the group result back to every row — ideal for things like subtracting a per-group mean. <code>apply</code> is the flexible but slow fallback.</div></div>
+
+<div class="qa"><div class="q">What is the <code>SettingWithCopyWarning</code> and how do you avoid it?</div><div class="a">It warns that you may be assigning to a temporary copy produced by chained indexing (<code>df[mask]["col"] = x</code>), so the write might not land on the original frame. Fix it by doing a single indexed assignment: <code>df.loc[mask, "col"] = x</code>.</div></div>
+
+<div class="qa"><div class="q">Why does an integer column become float after you introduce a missing value?</div><div class="a">NumPy's <code>int64</code> has no representation for NaN, so pandas upcasts the column to <code>float64</code> to store the missing value. To keep integers, use the nullable <code>Int64</code> dtype, which supports <code>pd.NA</code>.</div></div>
+
+<div class="qa"><div class="q">How do merge types differ, and what causes a row explosion in a join?</div><div class="a"><code>inner</code> keeps only matching keys, <code>left</code>/<code>right</code> keep all rows from one side, <code>outer</code> keeps the union. A row explosion happens when the key is non-unique on the other side, creating a many-to-many fan-out. Guard with the <code>validate</code> parameter (e.g. <code>"many_to_one"</code>).</div></div>
+
+<div class="qa"><div class="q">When should you avoid <code>apply(axis=1)</code>?</div><div class="a">Almost always in performance-sensitive code: it calls a Python function per row, defeating vectorization and running 10-100x slower. Prefer vectorized arithmetic, <code>np.where</code>, <code>np.select</code>, boolean masks, or the <code>.str</code>/<code>.dt</code> accessors.</div></div>
+
+<div class="qa"><div class="q">How do you reshape between wide and long formats?</div><div class="a"><code>pivot_table</code> (or <code>pivot</code>) goes long-to-wide, aggregating duplicates via <code>aggfunc</code>; <code>melt</code> goes wide-to-long. <code>stack</code>/<code>unstack</code> move levels between the row and column indexes. Prefer <code>pivot_table</code> because <code>pivot</code> errors on duplicate index/column pairs.</div></div>
+
+<div class="qa"><div class="q">What does <code>groupby().transform("mean")</code> return versus <code>groupby().mean()</code>?</div><div class="a"><code>mean()</code> returns one value per group (shape = number of groups). <code>transform("mean")</code> returns a Series the same length as the original, with each row filled by its group's mean — useful for creating per-row derived features like deviation from the group average.</div></div>
+
+<div class="qa"><div class="q">How would you reduce the memory footprint of a large DataFrame?</div><div class="a">Convert low-cardinality text columns to <code>category</code>, downcast numerics with <code>pd.to_numeric(..., downcast=...)</code>, read only needed columns with <code>usecols</code>, set explicit dtypes on read, and store intermediate data as Parquet. Measure with <code>df.memory_usage(deep=True)</code>.</div></div>
+
+<div class="qa"><div class="q">What is index alignment and how does it affect arithmetic?</div><div class="a">Pandas aligns operands on their index labels (not position) before arithmetic. Labels present in one operand but not the other produce <code>NaN</code>. This prevents silent position-based mismatches but surprises people who expect positional behavior — use <code>.values</code> or <code>.reset_index(drop=True)</code> to force positional math.</div></div>
+
+<div class="qa"><div class="q">How do you handle a CSV with dates and leading-zero zip codes?</div><div class="a">Pass <code>parse_dates=["date"]</code> so dates become <code>datetime64</code>, and <code>dtype={"zip": "string"}</code> so the zip stays text and keeps leading zeros (reading it as a number would strip them). Also set <code>na_values</code> to catch the file's missing-value sentinels.</div></div>
+
+<div class="qa"><div class="q">When would you choose Polars or DuckDB over pandas?</div><div class="a">When data exceeds comfortable single-machine memory, when you need multi-core/parallel execution, or when you want lazy query optimization. Pandas is single-machine and mostly single-threaded; Polars (Rust, multi-threaded, lazy) and DuckDB (in-process SQL on larger-than-memory data) scale better while interoperating with pandas via Arrow.</div></div>
+
+<h2 id="further">Further Learning</h2>
+<ul>
+  <li><strong>Official docs</strong> — the "10 minutes to pandas" and "Essential basic functionality" guides; the API reference is excellent for discovering parameters.</li>
+  <li><strong>Tidy data</strong> — Hadley Wickham's paper; the long-format discipline makes groupby/pivot natural.</li>
+  <li><strong>NumPy fundamentals</strong> — broadcasting and dtypes underpin pandas performance.</li>
+  <li><strong>Arrow &amp; Parquet</strong> — the modern columnar backbone; learn <code>pyarrow</code> dtypes in pandas 2.x.</li>
+  <li><strong>Polars &amp; DuckDB</strong> — the next step when pandas hits scale limits; both read/write Arrow and Parquet.</li>
+  <li><strong>Practice</strong> — rebuild a SQL analytics report entirely in pandas, then profile and vectorize the slow parts.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

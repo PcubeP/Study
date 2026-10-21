@@ -1,0 +1,409 @@
+<h2>What Git Is and Why It Matters</h2>
+<p class="lead">Git is a distributed version control system (VCS): it records snapshots of your project over time, lets many people work in parallel, and makes it safe to experiment because nothing is ever truly lost. GitHub is a hosting platform built on top of Git that adds collaboration — pull requests, reviews, issues, and CI/CD.</p>
+
+<p>Every developer touches Git daily, and interviewers probe it because fluency signals you can collaborate on real codebases without creating chaos. The key mental shift: Git does not store diffs by default — it stores <strong>snapshots</strong> of your entire tree, with unchanged files stored as pointers to identical content. Each snapshot (a <em>commit</em>) is identified by a SHA-1/SHA-256 hash of its content, which is why history is tamper-evident.</p>
+
+<div class="callout note"><span class="t">Distributed</span> Unlike older centralized systems (SVN, CVS), every clone is a <em>full</em> repository with complete history. You can commit, branch, diff, and view logs entirely offline; the network is only needed to share.</div>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+<defs>
+<marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+</defs>
+<rect x="20" y="20" width="200" height="110" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+<text x="120" y="42" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Working Directory</text>
+<text x="120" y="66" text-anchor="middle" font-size="12" fill="#1a2233">Your actual files</text>
+<text x="120" y="88" text-anchor="middle" font-size="12" fill="#1a2233">on disk (editable)</text>
+<text x="120" y="110" text-anchor="middle" font-size="11" fill="#b45309">untracked / modified</text>
+
+<rect x="260" y="20" width="200" height="110" rx="8" fill="#ecfdf5" stroke="#059669"/>
+<text x="360" y="42" text-anchor="middle" font-size="14" fill="#059669" font-weight="bold">Staging Area</text>
+<text x="360" y="66" text-anchor="middle" font-size="12" fill="#1a2233">(the "index")</text>
+<text x="360" y="88" text-anchor="middle" font-size="12" fill="#1a2233">next commit's</text>
+<text x="360" y="110" text-anchor="middle" font-size="12" fill="#1a2233">proposed snapshot</text>
+
+<rect x="500" y="20" width="200" height="110" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+<text x="600" y="42" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Local Repository</text>
+<text x="600" y="66" text-anchor="middle" font-size="12" fill="#1a2233">.git/ — commits,</text>
+<text x="600" y="88" text-anchor="middle" font-size="12" fill="#1a2233">branches, tags</text>
+<text x="600" y="110" text-anchor="middle" font-size="11" fill="#0891b2">permanent history</text>
+
+<line x1="222" y1="60" x2="256" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+<text x="240" y="52" text-anchor="middle" font-size="10" fill="#1a2233">add</text>
+<line x1="462" y1="60" x2="496" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+<text x="480" y="52" text-anchor="middle" font-size="10" fill="#1a2233">commit</text>
+<line x1="496" y1="100" x2="462" y2="100" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+<text x="480" y="118" text-anchor="middle" font-size="10" fill="#1a2233">checkout</text>
+
+<rect x="500" y="180" width="200" height="90" rx="8" fill="#fff" stroke="#0891b2"/>
+<text x="600" y="210" text-anchor="middle" font-size="14" fill="#0891b2" font-weight="bold">Remote (GitHub)</text>
+<text x="600" y="234" text-anchor="middle" font-size="12" fill="#1a2233">shared origin</text>
+<text x="600" y="256" text-anchor="middle" font-size="11" fill="#b45309">push / fetch / pull</text>
+<line x1="600" y1="132" x2="600" y2="178" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+<text x="640" y="160" text-anchor="middle" font-size="10" fill="#1a2233">push</text>
+</svg><div class="cap">Fig 1. The three local states plus the remote. Files flow right as you add → commit → push, and left as you checkout → pull.</div></div>
+
+<h2>Setup and Getting Started</h2>
+<p>Install Git, then set your identity — these values are stamped into every commit you author.</p>
+
+<pre><code class="language-bash"># Verify / install
+git --version
+
+# One-time global identity (used in every commit)
+git config --global user.name "Ada Lovelace"
+git config --global user.email "ada@example.com"
+
+# Sensible defaults
+git config --global init.defaultBranch main   # name the first branch "main"
+git config --global pull.rebase false          # merge on pull (explicit is good)
+git config --global core.editor "code --wait"  # use VS Code for messages
+
+# See everything (and where it came from)
+git config --list --show-origin</code></pre>
+
+<p>Create a repo two ways: start fresh, or copy an existing one.</p>
+<pre><code class="language-bash"># Start a brand-new repo in the current folder
+git init
+
+# Or clone an existing remote (creates a folder, downloads full history)
+git clone https://github.com/owner/repo.git
+git clone git@github.com:owner/repo.git   # SSH form (needs an SSH key)</code></pre>
+
+<div class="callout tip"><span class="t">SSH keys</span> Generate once with <span class="kbd">ssh-keygen -t ed25519 -C "ada@example.com"</span>, add the <code>.pub</code> key to GitHub → Settings → SSH keys. SSH avoids typing credentials and is the standard for push access.</div>
+
+<h2>The Core Loop: Status, Stage, Commit</h2>
+<p>The everyday rhythm is a tight loop. <code>git status</code> is your compass — run it constantly.</p>
+
+<pre><code class="language-bash">git status                 # what's changed, staged, untracked
+git add file.py            # stage one file
+git add .                  # stage everything in current dir (respects .gitignore)
+git add -p                 # interactively stage selected hunks (great for clean commits)
+git commit -m "Add login validation"
+git commit -am "Fix typo"  # stage all TRACKED files + commit in one step
+git log --oneline --graph --all   # compact, visual history</code></pre>
+
+<div class="callout warn"><span class="t">-am skips new files</span> <code>git commit -am</code> only stages files Git already tracks. Brand-new (untracked) files still need an explicit <code>git add</code> first.</div>
+
+<h3>Anatomy of a commit</h3>
+<p>A commit stores: the snapshot (a tree of file contents), author + committer + timestamps, a message, and the hash(es) of its parent commit(s). Chaining parents forms the history graph.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 180" width="700" height="180">
+<defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+<circle cx="90" cy="90" r="30" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+<text x="90" y="86" text-anchor="middle" font-size="12" fill="#1e3a8a">C1</text>
+<text x="90" y="102" text-anchor="middle" font-size="10" fill="#1a2233">a3f9</text>
+<circle cx="260" cy="90" r="30" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+<text x="260" y="86" text-anchor="middle" font-size="12" fill="#1e3a8a">C2</text>
+<text x="260" y="102" text-anchor="middle" font-size="10" fill="#1a2233">b7c1</text>
+<circle cx="430" cy="90" r="30" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+<text x="430" y="86" text-anchor="middle" font-size="12" fill="#059669">C3</text>
+<text x="430" y="102" text-anchor="middle" font-size="10" fill="#1a2233">d2e8</text>
+<line x1="230" y1="90" x2="122" y2="90" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+<line x1="400" y1="90" x2="292" y2="90" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+<text x="175" y="78" text-anchor="middle" font-size="10" fill="#1a2233">parent</text>
+<rect x="560" y="60" width="110" height="60" rx="6" fill="#fff" stroke="#b45309"/>
+<text x="615" y="86" text-anchor="middle" font-size="12" fill="#b45309" font-weight="bold">main</text>
+<text x="615" y="104" text-anchor="middle" font-size="10" fill="#1a2233">(branch ptr)</text>
+<line x1="558" y1="90" x2="462" y2="90" stroke="#b45309" stroke-width="2" marker-end="url(#ah2)"/>
+</svg><div class="cap">Fig 2. Each commit points back to its parent. A branch is just a lightweight, movable pointer to one commit.</div></div>
+
+<h2>Branches: Cheap, Fast, Essential</h2>
+<p>A branch is literally a 41-byte file containing a commit hash. Creating one is instant. Branches let you isolate work — a feature, a bugfix, an experiment — without disturbing <code>main</code>.</p>
+
+<pre><code class="language-bash">git branch                      # list local branches (* = current)
+git branch feature/login        # create (does not switch)
+git switch feature/login        # switch to it (modern)
+git switch -c feature/login     # create AND switch
+git checkout -b feature/login   # older equivalent of the line above
+
+git switch main                 # go back
+git branch -d feature/login     # delete (safe: refuses if unmerged)
+git branch -D feature/login     # force delete
+git branch -m old new           # rename</code></pre>
+
+<p><code>HEAD</code> is the pointer to "where you are" — usually it points at a branch, which points at a commit. Checking out a commit directly puts you in <em>detached HEAD</em> (commits you make there belong to no branch and can be lost).</p>
+
+<div class="callout tip"><span class="t">switch vs checkout</span> Modern Git split the overloaded <code>checkout</code> into two verbs: <code>git switch</code> for branches and <code>git restore</code> for files. They're clearer and harder to misuse — prefer them.</div>
+
+<h2>Merge vs Rebase</h2>
+<p>Both integrate changes from one branch into another, but they produce different histories. This is a top interview topic.</p>
+
+<div class="grid c2">
+<div class="card"><h4>Merge</h4><p>Creates a <strong>merge commit</strong> with two parents, tying the branches together. History is non-linear but <em>truthful</em> — it records exactly what happened. Non-destructive.</p><pre><code class="language-bash">git switch main
+git merge feature/login</code></pre></div>
+<div class="card"><h4>Rebase</h4><p>Replays your branch's commits one-by-one <em>on top of</em> the target, creating new commits with new hashes. History is <strong>linear and clean</strong>, but you rewrote it.</p><pre><code class="language-bash">git switch feature/login
+git rebase main</code></pre></div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 320" width="720" height="320">
+<defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+<text x="20" y="30" font-size="13" fill="#1e3a8a" font-weight="bold">MERGE</text>
+<circle cx="70" cy="70" r="18" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="75" text-anchor="middle" font-size="11">A</text>
+<circle cx="160" cy="70" r="18" fill="#eff4ff" stroke="#2563eb"/><text x="160" y="75" text-anchor="middle" font-size="11">B</text>
+<circle cx="340" cy="70" r="18" fill="#eff4ff" stroke="#2563eb"/><text x="340" y="75" text-anchor="middle" font-size="11">M</text>
+<circle cx="250" cy="130" r="18" fill="#ecfdf5" stroke="#059669"/><text x="250" y="135" text-anchor="middle" font-size="11">F1</text>
+<line x1="142" y1="70" x2="90" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+<line x1="322" y1="70" x2="178" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+<line x1="326" y1="82" x2="266" y2="120" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+<line x1="234" y1="124" x2="176" y2="80" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+<text x="400" y="75" font-size="11" fill="#1a2233">M = merge commit (2 parents)</text>
+
+<text x="20" y="210" font-size="13" fill="#059669" font-weight="bold">REBASE</text>
+<circle cx="70" cy="250" r="18" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="255" text-anchor="middle" font-size="11">A</text>
+<circle cx="160" cy="250" r="18" fill="#eff4ff" stroke="#2563eb"/><text x="160" y="255" text-anchor="middle" font-size="11">B</text>
+<circle cx="250" cy="250" r="18" fill="#ecfdf5" stroke="#059669"/><text x="250" y="255" text-anchor="middle" font-size="11">F1'</text>
+<line x1="142" y1="250" x2="90" y2="250" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+<line x1="232" y1="250" x2="178" y2="250" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+<text x="300" y="255" font-size="11" fill="#1a2233">F1' = rewritten, new hash — linear history</text>
+</svg><div class="cap">Fig 3. Merge preserves the branch topology with a join commit; rebase rewrites feature commits onto the tip of main for a straight line.</div></div>
+
+<div class="callout danger"><span class="t">The Golden Rule of Rebase</span> Never rebase commits that others have already pulled (anything pushed to a shared branch like <code>main</code>). Rebasing rewrites hashes; collaborators' histories diverge and merges become a nightmare. Rebase only <em>local, private, unpushed</em> work.</div>
+
+<h3>Interactive rebase — polish before you share</h3>
+<pre><code class="language-bash">git rebase -i HEAD~4   # edit the last 4 commits
+# In the editor, change the verb before each commit:
+#   pick    — keep as-is
+#   reword  — change the message
+#   squash  — fold into previous commit (keep both messages)
+#   fixup   — fold into previous, discard this message
+#   drop    — delete the commit
+#   edit    — pause to amend content</code></pre>
+
+<h2>Remotes, Push, Pull, Fetch</h2>
+<p>A <em>remote</em> is a named URL to another copy of the repo. The default is <code>origin</code>. Remote-tracking branches like <code>origin/main</code> are your local cache of where the remote was at your last fetch.</p>
+
+<pre><code class="language-bash">git remote -v                          # list remotes
+git remote add origin git@github.com:owner/repo.git
+git push -u origin main                # push + set upstream (first time)
+git push                               # thereafter
+
+git fetch origin                       # download new commits, DON'T merge
+git pull                               # = fetch + merge (or rebase) into current branch
+git pull --rebase                      # fetch then rebase (linear local history)</code></pre>
+
+<div class="pipeline"><span class="step">fetch</span><span class="arrow">-></span><span class="step">review</span><span class="arrow">-></span><span class="step">merge/rebase</span><span class="arrow">-></span><span class="step">push</span></div>
+
+<div class="callout tip"><span class="t">Fetch, then look</span> <code>git pull</code> blends two steps and can surprise you. <code>git fetch</code> + <code>git log origin/main</code> lets you inspect incoming changes before integrating — safer on busy teams.</div>
+
+<h2>Resolving Merge Conflicts</h2>
+<p>A conflict happens when two branches change the same lines (or one edits a file the other deleted). Git pauses and marks the file with conflict markers.</p>
+
+<pre><code class="language-text">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+color = "blue"        # your current branch's version
+=======
+color = "green"       # the incoming branch's version
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/theme</code></pre>
+
+<p>Resolve by editing the file to the final desired content, removing all three marker lines, then staging and continuing.</p>
+
+<pre><code class="language-bash">git status                 # lists "both modified" files
+# ...edit each conflicted file by hand or with a mergetool...
+git add resolved_file.py   # mark as resolved
+git commit                 # finish a merge (message pre-filled)
+# If you were rebasing instead:
+git rebase --continue
+git merge --abort          # bail out entirely, restore pre-merge state
+git rebase --abort</code></pre>
+
+<div class="callout note"><span class="t">Reduce conflicts</span> Pull/rebase from <code>main</code> frequently, keep branches short-lived and small, and agree on formatting (a shared formatter kills whitespace conflicts). Enable <code>git rerere</code> to auto-reuse recorded conflict resolutions.</div>
+
+<h2>Ignoring Files with .gitignore</h2>
+<p>A <code>.gitignore</code> file lists patterns Git should not track — build artifacts, dependencies, secrets, OS cruft. Commit it so the whole team shares the rules.</p>
+
+<pre><code class="language-bash"># .gitignore — one pattern per line
+node_modules/        # directory (trailing slash)
+*.log                # all .log files
+dist/                # build output
+.env                 # secrets — NEVER commit these
+.DS_Store            # macOS junk
+!keep.log            # ! negates: force-track this one
+/config.local        # leading / anchors to repo root only</code></pre>
+
+<div class="callout danger"><span class="t">Already-tracked files are not ignored</span> <code>.gitignore</code> only affects <em>untracked</em> files. If you already committed <code>.env</code>, add the pattern <strong>and</strong> run <code>git rm --cached .env</code>. If a secret was pushed, rotate it immediately — it lives in history forever until the history is rewritten.</div>
+
+<h2>Tags and Releases</h2>
+<p>Tags mark a specific commit, typically a release version. Use annotated tags (they store author, date, message, and can be signed) for releases.</p>
+
+<pre><code class="language-bash">git tag v1.4.0                       # lightweight (just a pointer)
+git tag -a v1.4.0 -m "Release 1.4.0" # annotated (recommended)
+git tag                              # list
+git show v1.4.0                      # inspect
+git push origin v1.4.0               # tags are NOT pushed by default
+git push origin --tags               # push all tags
+git tag -d v1.4.0                    # delete locally</code></pre>
+
+<div class="callout tip"><span class="t">SemVer</span> Follow Semantic Versioning: <code>MAJOR.MINOR.PATCH</code> — bump MAJOR for breaking changes, MINOR for backward-compatible features, PATCH for bug fixes. On GitHub, a tag can be promoted to a <em>Release</em> with notes and binaries.</div>
+
+<h2>GitHub Flow and Pull Requests</h2>
+<p>GitHub Flow is a simple, widely used branching model: <code>main</code> is always deployable; all work happens on short-lived branches merged back via <strong>pull requests (PRs)</strong>.</p>
+
+<div class="pipeline"><span class="step">branch</span><span class="arrow">-></span><span class="step">commit</span><span class="arrow">-></span><span class="step">push</span><span class="arrow">-></span><span class="step">open PR</span><span class="arrow">-></span><span class="step">review + CI</span><span class="arrow">-></span><span class="step">merge</span><span class="arrow">-></span><span class="step">delete branch</span></div>
+
+<p>A PR is a request to merge your branch, with a diff, discussion, line comments, and automated checks (CI/CD). Reviewers approve or request changes; merging is often gated on green checks and approvals.</p>
+
+<pre><code class="language-bash"># Typical PR workflow with the GitHub CLI (gh)
+git switch -c feature/search
+# ...work, commit...
+git push -u origin feature/search
+gh pr create --title "Add search" --body "Implements fuzzy search"
+gh pr status          # see your PRs
+gh pr checks          # CI status
+gh pr merge --squash --delete-branch</code></pre>
+
+<h3>Merge strategies on GitHub</h3>
+<table>
+<tr><th>Strategy</th><th>Result</th><th>Use when</th></tr>
+<tr><td>Merge commit</td><td>Keeps all commits + a merge commit</td><td>You want full, truthful history</td></tr>
+<tr><td>Squash and merge</td><td>Collapses the PR into one commit on main</td><td>Feature branches with messy WIP commits (most common)</td></tr>
+<tr><td>Rebase and merge</td><td>Replays commits, no merge commit</td><td>You want linear history and clean per-commit changes</td></tr>
+</table>
+
+<h3>Fork-based contribution (open source)</h3>
+<div class="pipeline"><span class="step">fork</span><span class="arrow">-></span><span class="step">clone</span><span class="arrow">-></span><span class="step">branch</span><span class="arrow">-></span><span class="step">push to fork</span><span class="arrow">-></span><span class="step">PR to upstream</span></div>
+<pre><code class="language-bash">git clone git@github.com:you/project.git
+git remote add upstream git@github.com:original/project.git
+git fetch upstream
+git switch -c fix/typo upstream/main
+# ...commit, push to YOUR fork, open PR against upstream...
+git push origin fix/typo</code></pre>
+
+<h2>Undoing Mistakes</h2>
+<p>Git rarely loses data — knowing the right undo tool turns panic into a two-command fix. The right choice depends on <em>where</em> the change lives (working dir, staged, committed, pushed).</p>
+
+<table>
+<tr><th>Goal</th><th>Command</th><th>Notes</th></tr>
+<tr><td>Discard unstaged file changes</td><td><code>git restore file</code></td><td>Destroys uncommitted edits</td></tr>
+<tr><td>Unstage (keep edits)</td><td><code>git restore --staged file</code></td><td>Reverse of <code>git add</code></td></tr>
+<tr><td>Fix the last commit</td><td><code>git commit --amend</code></td><td>Rewrites it — only if unpushed</td></tr>
+<tr><td>Move branch back, keep changes staged</td><td><code>git reset --soft HEAD~1</code></td><td>Undo commit, keep work</td></tr>
+<tr><td>Move back, keep changes unstaged</td><td><code>git reset HEAD~1</code></td><td>Default (mixed)</td></tr>
+<tr><td>Nuke commits AND changes</td><td><code>git reset --hard HEAD~1</code></td><td>Destructive — careful</td></tr>
+<tr><td>Undo a pushed commit safely</td><td><code>git revert &lt;sha&gt;</code></td><td>New commit that inverts it</td></tr>
+<tr><td>Recover "lost" commits</td><td><code>git reflog</code></td><td>Your safety net</td></tr>
+</table>
+
+<div class="callout danger"><span class="t">reset vs revert</span> <code>reset</code> rewrites history (moves the branch pointer) — safe only on unpushed, private commits. <code>revert</code> adds a new commit that undoes a previous one — the correct tool for anything already shared, because it doesn't rewrite history others depend on.</div>
+
+<div class="diagram"><svg viewBox="0 0 700 160" width="700" height="160">
+<defs><marker id="ah4" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+<text x="20" y="30" font-size="12" fill="#b45309" font-weight="bold">reset --hard HEAD~1 (rewrites):</text>
+<circle cx="80" cy="70" r="16" fill="#eff4ff" stroke="#2563eb"/><text x="80" y="74" text-anchor="middle" font-size="10">A</text>
+<circle cx="160" cy="70" r="16" fill="#eff4ff" stroke="#2563eb"/><text x="160" y="74" text-anchor="middle" font-size="10">B</text>
+<circle cx="240" cy="70" r="16" fill="#fee2e2" stroke="#b45309" stroke-dasharray="4"/><text x="240" y="74" text-anchor="middle" font-size="10">C</text>
+<text x="240" y="104" text-anchor="middle" font-size="10" fill="#b45309">discarded</text>
+<rect x="140" y="104" width="40" height="24" rx="4" fill="#fff" stroke="#059669"/><text x="160" y="120" text-anchor="middle" font-size="10" fill="#059669">main</text>
+<line x1="200" y1="70" x2="178" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+<line x1="142" y1="70" x2="98" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+
+<text x="400" y="30" font-size="12" fill="#059669" font-weight="bold">revert C (adds inverse):</text>
+<circle cx="430" cy="70" r="16" fill="#eff4ff" stroke="#2563eb"/><text x="430" y="74" text-anchor="middle" font-size="10">A</text>
+<circle cx="500" cy="70" r="16" fill="#eff4ff" stroke="#2563eb"/><text x="500" y="74" text-anchor="middle" font-size="10">B</text>
+<circle cx="570" cy="70" r="16" fill="#eff4ff" stroke="#2563eb"/><text x="570" y="74" text-anchor="middle" font-size="10">C</text>
+<circle cx="640" cy="70" r="16" fill="#ecfdf5" stroke="#059669"/><text x="640" y="74" text-anchor="middle" font-size="10">C'</text>
+<line x1="454" y1="70" x2="446" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+<line x1="524" y1="70" x2="516" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+<line x1="594" y1="70" x2="586" y2="70" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+</svg><div class="cap">Fig 4. reset moves the branch pointer back (history changes); revert leaves history intact and appends a commit that cancels the target.</div></div>
+
+<h3>Stash — park work temporarily</h3>
+<pre><code class="language-bash">git stash                 # shelve all tracked changes, clean the working dir
+git stash -u              # include untracked files
+git stash push -m "wip: half-done nav"   # named stash
+git stash list            # stash@{0}, stash@{1}, ...
+git stash pop             # re-apply newest and remove it from the stack
+git stash apply stash@{1} # re-apply a specific one, keep it in the stack
+git stash drop stash@{0}  # delete one</code></pre>
+
+<h3>The reflog safety net</h3>
+<pre><code class="language-bash"># Accidentally reset --hard and lost commit C?
+git reflog                # shows every HEAD movement with its sha
+git reset --hard a3f9c21  # jump back to that recorded state
+# reflog entries persist ~90 days by default — almost nothing is truly gone</code></pre>
+
+<h2>Worked Mini-Example: A Feature from Scratch to Merged</h2>
+<p>A complete, realistic flow adding a feature, keeping it current, and shipping it via a PR.</p>
+
+<pre><code class="language-bash"># 1. Start from an up-to-date main
+git switch main
+git pull
+
+# 2. Branch for the feature
+git switch -c feature/user-avatars
+
+# 3. Work in small, meaningful commits
+git add src/avatar.js
+git commit -m "Add Avatar component with fallback initials"
+git add src/avatar.css
+git commit -m "Style avatar sizes and ring"
+
+# 4. main moved on while you worked — integrate it
+git fetch origin
+git rebase origin/main        # replay your 2 commits on the latest main
+#   (resolve any conflicts, then: git add <file> && git rebase --continue)
+
+# 5. Clean up the history before sharing (optional)
+git rebase -i origin/main     # squash the two commits into one tidy commit
+
+# 6. Push and open a PR
+git push -u origin feature/user-avatars
+gh pr create --fill
+
+# 7. After approval + green CI, squash-merge and clean up
+gh pr merge --squash --delete-branch
+git switch main &amp;&amp; git pull</code></pre>
+
+<h2>Cheat-Sheet Reference</h2>
+<table>
+<tr><th>Task</th><th>Command</th></tr>
+<tr><td>Clone a repo</td><td><code>git clone &lt;url&gt;</code></td></tr>
+<tr><td>Check state</td><td><code>git status</code></td></tr>
+<tr><td>Stage all</td><td><code>git add .</code></td></tr>
+<tr><td>Commit</td><td><code>git commit -m "msg"</code></td></tr>
+<tr><td>New branch + switch</td><td><code>git switch -c name</code></td></tr>
+<tr><td>Merge branch into current</td><td><code>git merge name</code></td></tr>
+<tr><td>Rebase onto main</td><td><code>git rebase main</code></td></tr>
+<tr><td>Push first time</td><td><code>git push -u origin name</code></td></tr>
+<tr><td>Update from remote</td><td><code>git pull --rebase</code></td></tr>
+<tr><td>See history graph</td><td><code>git log --oneline --graph --all</code></td></tr>
+<tr><td>Diff working vs staged</td><td><code>git diff</code> / <code>git diff --staged</code></td></tr>
+<tr><td>Undo pushed commit</td><td><code>git revert &lt;sha&gt;</code></td></tr>
+<tr><td>Recover lost work</td><td><code>git reflog</code></td></tr>
+<tr><td>Shelve work</td><td><code>git stash</code> / <code>git stash pop</code></td></tr>
+<tr><td>Who changed this line?</td><td><code>git blame file</code></td></tr>
+<tr><td>Find the bad commit</td><td><code>git bisect start</code></td></tr>
+</table>
+
+<h2>Best Practices</h2>
+<div class="callout ok"><span class="t">Commit small and often</span> Each commit should be one logical change that builds and passes tests. Small commits are easier to review, revert, and bisect.</div>
+<div class="callout ok"><span class="t">Write good messages</span> Imperative subject under ~50 chars ("Add rate limiting"), blank line, then a body explaining <em>why</em>. Conventional Commits (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>) enable automated changelogs and versioning.</div>
+<div class="callout tip"><span class="t">Branch per task</span> Short-lived branches with descriptive names (<code>feat/</code>, <code>fix/</code>, <code>chore/</code>) keep <code>main</code> clean and PRs focused.</div>
+<div class="callout tip"><span class="t">Protect main</span> On GitHub, enable branch protection: require PR reviews, passing CI, and up-to-date branches before merge. Never force-push shared branches.</div>
+
+<h2>Common Pitfalls</h2>
+<div class="callout warn"><span class="t">Committing secrets</span> API keys and <code>.env</code> files leak constantly. Add them to <code>.gitignore</code> up front, use secret scanning, and rotate anything exposed — rewriting history alone is not enough.</div>
+<div class="callout warn"><span class="t">Giant commits</span> "Fix everything" commits are unreviewable and un-revertable. Stage selectively with <code>git add -p</code>.</div>
+<div class="callout danger"><span class="t">force-push on shared branches</span> <code>git push --force</code> can erase teammates' commits. If you must, use <code>--force-with-lease</code>, which refuses if the remote moved since your last fetch.</div>
+<div class="callout warn"><span class="t">Confusing fetch and pull</span> <code>pull</code> auto-merges and can create surprise merge commits or conflicts mid-flow. Prefer <code>fetch</code> + inspect, or set <code>pull.rebase true</code>.</div>
+
+<h2>Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What's the difference between <code>git merge</code> and <code>git rebase</code>?</div><div class="a">Merge integrates branches by creating a merge commit with two parents, preserving the true, non-linear history. Rebase replays your commits on top of the target branch, producing new commits with new hashes and a clean linear history. Merge is safe for shared branches; rebase should only be used on local, unpushed commits (the Golden Rule) because it rewrites history.</div></div>
+<div class="qa"><div class="q">Explain the three areas: working directory, staging area, repository.</div><div class="a">The working directory holds your actual editable files. The staging area (index) holds the proposed contents of your next commit — you choose exactly what goes in with <code>git add</code>. The repository (<code>.git</code>) stores committed snapshots permanently. Changes flow working → staged → committed.</div></div>
+<div class="qa"><div class="q">When would you use <code>reset</code> vs <code>revert</code>?</div><div class="a">Use <code>reset</code> to move a branch pointer backward on <em>local, unpushed</em> commits (<code>--soft</code> keeps staged, <code>--mixed</code> keeps unstaged, <code>--hard</code> discards). Use <code>revert</code> for commits already pushed/shared: it creates a new commit that inverts the target, so no history is rewritten and collaborators are unaffected.</div></div>
+<div class="qa"><div class="q">What is <code>HEAD</code>, and what is a detached HEAD?</div><div class="a"><code>HEAD</code> is a pointer to your current location — normally it points to a branch, which points to a commit. A detached HEAD occurs when you check out a commit (or tag) directly; new commits you make belong to no branch and can be garbage-collected unless you create a branch to keep them.</div></div>
+<div class="qa"><div class="q">How do you resolve a merge conflict?</div><div class="a">Run <code>git status</code> to find conflicted files. Open each, locate the <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> / <code>=======</code> / <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> markers, edit to the correct final content, and delete the markers. Then <code>git add</code> the resolved files and <code>git commit</code> (or <code>git rebase --continue</code>). Use <code>--abort</code> to bail out.</div></div>
+<div class="qa"><div class="q">What does <code>git cherry-pick</code> do?</div><div class="a">It applies the change introduced by a specific commit onto your current branch as a new commit. Useful for backporting a single bugfix to a release branch without merging the whole feature branch: <code>git cherry-pick &lt;sha&gt;</code>.</div></div>
+<div class="qa"><div class="q">How would you find which commit introduced a bug?</div><div class="a"><code>git bisect</code>: mark a known-good and known-bad commit, and Git binary-searches the range, checking out midpoints for you to test (<code>git bisect good</code>/<code>bad</code>). In O(log n) steps it pinpoints the first bad commit. For a single line, <code>git blame</code> shows who last changed it.</div></div>
+<div class="qa"><div class="q">What's the difference between <code>git fetch</code> and <code>git pull</code>?</div><div class="a"><code>fetch</code> downloads new commits and updates remote-tracking branches (e.g. <code>origin/main</code>) but does <em>not</em> change your working branch. <code>pull</code> is <code>fetch</code> followed by an automatic <code>merge</code> (or <code>rebase</code>) into your current branch. Fetch is non-destructive and lets you inspect before integrating.</div></div>
+<div class="qa"><div class="q">You committed to the wrong branch. How do you fix it?</div><div class="a">If unpushed: note the commit sha, <code>git switch correct-branch</code>, <code>git cherry-pick &lt;sha&gt;</code>, then return and <code>git reset --hard HEAD~1</code> on the wrong branch to remove it. Alternatively <code>git reset --soft HEAD~1</code> to uncommit (keeping changes staged), stash, switch, and re-commit.</div></div>
+<div class="qa"><div class="q">What is <code>git stash</code> and when is it useful?</div><div class="a">It shelves your uncommitted changes and reverts the working directory to a clean HEAD, storing them on a stack. Useful when you must switch branches urgently (e.g. a hotfix) but your current work isn't ready to commit. Restore with <code>git stash pop</code> (apply + remove) or <code>apply</code> (apply + keep).</div></div>
+<div class="qa"><div class="q">Why are Git commit hashes content-addressable, and why does that matter?</div><div class="a">A commit's hash is derived from its content (tree, parents, author, message). Any change to history produces different hashes downstream, making tampering detectable and guaranteeing integrity. It's also why rebasing/amending creates new commits rather than editing in place.</div></div>
+<div class="qa"><div class="q">What is <code>--force-with-lease</code> and why prefer it over <code>--force</code>?</div><div class="a">After a rebase you must force-push to update a remote branch. Plain <code>--force</code> overwrites the remote unconditionally and can erase a teammate's commits pushed since you last fetched. <code>--force-with-lease</code> only succeeds if the remote is still where you last saw it, acting as a safety check against clobbering others' work.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+<li>Read <em>Pro Git</em> (Chacon &amp; Straub) — free online; the authoritative, approachable reference.</li>
+<li>Practice interactively at <strong>Learn Git Branching</strong> (visualizes branches, merge, and rebase).</li>
+<li>Master the <strong>GitHub CLI</strong> (<code>gh</code>) and GitHub Actions for CI/CD on your PRs.</li>
+<li>Explore advanced tools: <code>git bisect</code>, <code>git worktree</code>, <code>git submodule</code>, and <code>git rerere</code>.</li>
+<li>Adopt <strong>Conventional Commits</strong> + semantic-release for automated versioning and changelogs.</li>
+<li>Learn to read the plumbing: <code>git cat-file</code>, <code>git rev-parse</code>, and how objects (blob/tree/commit/tag) form the DAG.</li>
+</ul>

@@ -1,0 +1,661 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SAP BTP — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Cloud & Platforms</div>
+  <h1>SAP BTP</h1>
+  <div class="subtitle">Build and extend SAP applications the clean-core way — environments, the CAP model, destinations, XSUAA auth, side-by-side extensibility, and Fiori/UI5.</div>
+  <div class="tags"><span>sap-btp</span><span>cap</span><span>cloud-foundry</span><span>xsuaa</span><span>fiori</span><span>kyma</span><span>destinations</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~16 min read &middot; 3,455 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-sap-btp-is-amp-why-it-matters">What SAP BTP Is &amp; Why It Matters</a></li><li><a href="#account-model-amp-getting-started">Account Model &amp; Getting Started</a></li><li><a href="#the-three-runtime-environments">The Three Runtime Environments</a></li><li><a href="#the-cloud-application-programming-cap-model">The Cloud Application Programming (CAP) Model</a></li><li><a href="#destinations-amp-connectivity">Destinations &amp; Connectivity</a></li><li><a href="#xsuaa-authentication-amp-authorization">XSUAA — Authentication &amp; Authorization</a></li><li><a href="#extension-vs-side-by-side">Extension vs Side-by-Side</a></li><li><a href="#fiori-ui5-in-the-btp-picture">Fiori / UI5 in the BTP Picture</a></li><li><a href="#deploying-to-btp-mta">Deploying to BTP: MTA</a></li><li><a href="#cheat-sheet-amp-comparisons">Cheat-Sheet &amp; Comparisons</a></li><li><a href="#best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-sap-btp-is-amp-why-it-matters">What SAP BTP Is &amp; Why It Matters</h2>
+<p class="lead">SAP Business Technology Platform (BTP) is SAP's unified Platform-as-a-Service for building, extending, and integrating applications around a company's SAP core (S/4HANA, SuccessFactors, Ariba, and more) — without modifying that core.</p>
+
+<p>BTP bundles four technology pillars under one roof: <strong>application development</strong> (runtimes, the CAP model, Fiori/UI5), <strong>integration</strong> (Integration Suite, APIs, events), <strong>data &amp; analytics</strong> (SAP HANA Cloud, Datasphere, SAP Analytics Cloud), and <strong>AI</strong> (SAP AI Core, Joule, Generative AI Hub). The strategic promise is the <em>clean core</em>: keep your ERP standard and upgradable, and push all customization into a governed platform alongside it.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Extend, don't modify</h4>Add custom logic and UIs <em>next to</em> S/4HANA instead of patching it, so upgrades stay painless and your core stays "clean."</div>
+  <div class="card"><h4>One account, many services</h4>A single global account gives entitlement-based access to dozens of services across multiple hyperscaler regions (AWS, Azure, GCP, AliCloud).</div>
+  <div class="card"><h4>Open &amp; standards-based</h4>Cloud Foundry, Kubernetes (Kyma), OData, OAuth 2.0, OpenAPI, CloudEvents — not a proprietary silo.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 780 340" width="780" height="340">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="390" y="24" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">BTP as the extension layer around a clean core</text>
+
+  <rect x="300" y="130" width="180" height="80" rx="10" fill="#eff4ff" stroke="#1e3a8a" stroke-width="2"/>
+  <text x="390" y="162" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">SAP Digital Core</text>
+  <text x="390" y="182" text-anchor="middle" font-size="11" fill="#1a2233">S/4HANA, SuccessFactors</text>
+  <text x="390" y="198" text-anchor="middle" font-size="11" fill="#1a2233">Ariba, Concur…</text>
+
+  <rect x="40" y="60" width="200" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="140" y="86" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">App Dev &amp; Automation</text>
+  <text x="140" y="104" text-anchor="middle" font-size="10" fill="#1a2233">CAP, Fiori/UI5, Build Apps</text>
+
+  <rect x="540" y="60" width="200" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="640" y="86" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">Integration Suite</text>
+  <text x="640" y="104" text-anchor="middle" font-size="10" fill="#1a2233">APIs, events, iFlows</text>
+
+  <rect x="40" y="230" width="200" height="60" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="140" y="256" text-anchor="middle" font-size="12" fill="#0891b2" font-weight="bold">Data &amp; Analytics</text>
+  <text x="140" y="274" text-anchor="middle" font-size="10" fill="#1a2233">HANA Cloud, Datasphere, SAC</text>
+
+  <rect x="540" y="230" width="200" height="60" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="640" y="256" text-anchor="middle" font-size="12" fill="#b45309" font-weight="bold">AI</text>
+  <text x="640" y="274" text-anchor="middle" font-size="10" fill="#1a2233">AI Core, Joule, GenAI Hub</text>
+
+  <line x1="240" y1="90" x2="300" y2="150" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="540" y1="90" x2="480" y2="150" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="240" y1="260" x2="300" y2="190" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="540" y1="260" x2="480" y2="190" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+</svg><div class="cap">Fig 1 — BTP services surround the digital core; extensions live outside it, connected through destinations and events.</div></div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of BTP as "the App Store, dev environment, and integration bus for your SAP landscape." Your ERP is the system of record; BTP is where you build everything that would otherwise be a risky core modification.</div>
+
+<h2 id="account-model-amp-getting-started">Account Model &amp; Getting Started</h2>
+<p>Before you deploy anything you must understand the BTP account hierarchy. It is the governance and billing backbone, and interviewers love to probe it.</p>
+
+<div class="pipeline"><span class="step">Global Account</span><span class="arrow">-&gt;</span><span class="step">Directory (optional)</span><span class="arrow">-&gt;</span><span class="step">Subaccount</span><span class="arrow">-&gt;</span><span class="step">Space (CF) / Namespace (Kyma)</span></div>
+
+<div class="grid c2">
+  <div class="card"><h4>Global Account</h4>The top contract with SAP. Holds your entitlements and quotas, and is tied to a commercial model (consumption-based <span class="badge g">CPEA/BTPEA</span> or subscription).</div>
+  <div class="card"><h4>Directory</h4>Optional grouping of subaccounts for shared entitlements, custom properties, and authorization inheritance.</div>
+  <div class="card"><h4>Subaccount</h4>The real working unit: pinned to a <em>region</em> and <em>provider</em>, carries its own trust config, destinations, and enabled environment (CF/Kyma/ABAP).</div>
+  <div class="card"><h4>Space / Namespace</h4>Within a subaccount: a Cloud Foundry <em>space</em> or a Kyma <em>namespace</em> isolates deployed apps and their service instances.</div>
+</div>
+
+<p>Install the two CLIs you will use daily — the BTP CLI (account/platform management) and the Cloud Foundry CLI (app lifecycle):</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># btp CLI — manage global accounts, subaccounts, entitlements, trust</span>
+btp login --url https://cli.btp.cloud.sap
+btp list accounts/subaccount
+btp assign security/role-collection <span class="hljs-string">&quot;Subaccount Administrator&quot;</span> --to-user you@corp.com
+
+<span class="hljs-comment"># Cloud Foundry CLI — target an org/space and push apps</span>
+cf login -a https://api.cf.eu10-004.hana.ondemand.com
+cf target -o my-org -s dev
+cf marketplace            <span class="hljs-comment"># list available services (plans)</span>
+cf services               <span class="hljs-comment"># instances already created</span></code></pre>
+
+<p>For local development you install the CAP toolkit and the MTA build tool:</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Node.js CAP development kit (the `cds` command)</span>
+npm install -g @sap/cds-dk
+cds --version
+
+<span class="hljs-comment"># Multi-Target Application (MTA) build tool — packages apps for BTP</span>
+npm install -g mbt
+npm install -g @sap/approuter   <span class="hljs-comment"># the application router</span></code></pre>
+
+<div class="callout tip"><span class="t">Trial vs free tier</span> Use the <strong>BTP free tier</strong> (within a productive global account, cancellable services) or a <strong>trial account</strong> to learn. Free-tier service plans are real services with capacity caps — perfect for a portfolio project.</div>
+
+<h2 id="the-three-runtime-environments">The Three Runtime Environments</h2>
+<p>A subaccount can enable one or more <em>environments</em>. Choosing between them is a classic design decision.</p>
+
+<div class="diagram"><svg viewBox="0 0 780 300" width="780" height="300">
+  <defs><marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/></marker></defs>
+  <text x="390" y="24" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Pick a runtime by workload shape</text>
+
+  <rect x="30" y="60" width="220" height="200" rx="10" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="140" y="88" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Cloud Foundry</text>
+  <text x="140" y="112" text-anchor="middle" font-size="11" fill="#1a2233">Managed PaaS, buildpacks</text>
+  <text x="140" y="132" text-anchor="middle" font-size="11" fill="#1a2233">push an app, SAP runs it</text>
+  <text x="140" y="152" text-anchor="middle" font-size="11" fill="#1a2233">Node.js, Java, Python…</text>
+  <text x="140" y="172" text-anchor="middle" font-size="11" fill="#1a2233">spaces + service bindings</text>
+  <text x="140" y="202" text-anchor="middle" font-size="11" fill="#059669" font-weight="bold">Best: most CAP apps</text>
+  <text x="140" y="222" text-anchor="middle" font-size="10" fill="#1a2233">fastest path, least ops</text>
+
+  <rect x="280" y="60" width="220" height="200" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="390" y="88" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Kyma</text>
+  <text x="390" y="112" text-anchor="middle" font-size="11" fill="#1a2233">Managed Kubernetes</text>
+  <text x="390" y="132" text-anchor="middle" font-size="11" fill="#1a2233">+ Istio + Serverless</text>
+  <text x="390" y="152" text-anchor="middle" font-size="11" fill="#1a2233">containers &amp; functions</text>
+  <text x="390" y="172" text-anchor="middle" font-size="11" fill="#1a2233">eventing, CRDs, Helm</text>
+  <text x="390" y="202" text-anchor="middle" font-size="11" fill="#059669" font-weight="bold">Best: cloud-native teams</text>
+  <text x="390" y="222" text-anchor="middle" font-size="10" fill="#1a2233">full k8s control, polyglot</text>
+
+  <rect x="530" y="60" width="220" height="200" rx="10" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="640" y="88" text-anchor="middle" font-size="13" fill="#b45309" font-weight="bold">ABAP (Steampunk)</text>
+  <text x="640" y="112" text-anchor="middle" font-size="11" fill="#1a2233">ABAP Cloud in BTP</text>
+  <text x="640" y="132" text-anchor="middle" font-size="11" fill="#1a2233">RAP programming model</text>
+  <text x="640" y="152" text-anchor="middle" font-size="11" fill="#1a2233">released APIs only</text>
+  <text x="640" y="172" text-anchor="middle" font-size="11" fill="#1a2233">ADT / Eclipse</text>
+  <text x="640" y="202" text-anchor="middle" font-size="11" fill="#059669" font-weight="bold">Best: ABAP shops</text>
+  <text x="640" y="222" text-anchor="middle" font-size="10" fill="#1a2233">reuse ABAP skills, OData</text>
+</svg><div class="cap">Fig 2 — Cloud Foundry, Kyma, and the ABAP environment side by side.</div></div>
+
+<h4>Cloud Foundry</h4>
+<p>The default and most mature environment. You <code>cf push</code> an application; buildpacks detect the language and produce a running container. Services are consumed via <em>service instances</em> bound to the app, which inject credentials as the <code>VCAP_SERVICES</code> environment variable.</p>
+
+<h4>Kyma</h4>
+<p>A fully managed Kubernetes cluster with Istio service mesh, API Gateway, and a serverless Function engine. You deploy standard container images and Helm charts, define <code>APIRule</code> resources to expose services, and use SAP BTP Service Operator to provision BTP services as Kubernetes resources.</p>
+
+<h4>ABAP Environment</h4>
+<p>Nicknamed "Steampunk," this is ABAP in the cloud. You develop in ABAP Development Tools (ADT) using the <strong>RAP</strong> (RESTful Application Programming) model and may only call <em>released</em> SAP APIs — enforcing the clean-core discipline at the language level. Ideal for teams with deep ABAP investment.</p>
+
+<h2 id="the-cloud-application-programming-cap-model">The Cloud Application Programming (CAP) Model</h2>
+<p class="lead">CAP is SAP's opinionated, framework for building services and apps. You model data and services declaratively in <strong>CDS</strong> (Core Data Services), and CAP generates a running OData/REST service with sensible defaults — you add custom logic only where needed.</p>
+
+<p>CAP comes in two flavors: <strong>Node.js</strong> (<code>@sap/cds</code>) and <strong>Java</strong> (CAP Java SDK). The CDS modeling language is identical across both. A CAP project has a conventional layout:</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs">my-cap-app/
+├── db/            <span class="hljs-comment"># domain model (entities) + .csv seed data</span>
+│   └── schema.cds
+├── srv/           <span class="hljs-comment"># service definitions + custom handlers</span>
+│   ├── cat-service.cds
+│   └── cat-service.js
+├── app/           <span class="hljs-comment"># UI modules (Fiori/UI5), Fiori preview config</span>
+├── package.json   <span class="hljs-comment"># cds config, dependencies</span>
+└── mta.yaml       <span class="hljs-comment"># deployment descriptor (generated by `cds add mta`)</span></code></pre>
+
+<h4>1. Define the domain model (CDS)</h4>
+<div class="code-label">CDS</div><pre><code class="hljs"><span class="hljs-comment">// db/schema.cds</span>
+namespace my.bookshop;
+
+using { managed, cuid } from <span class="hljs-string">&#x27;@sap/cds/common&#x27;</span>;
+
+entity <span class="hljs-title class_">Books</span> : cuid, managed {
+  title  : <span class="hljs-title class_">String</span>(<span class="hljs-number">111</span>);
+  stock  : <span class="hljs-title class_">Integer</span>;
+  price  : <span class="hljs-title class_">Decimal</span>(<span class="hljs-number">9</span>,<span class="hljs-number">2</span>);
+  author : <span class="hljs-title class_">Association</span> to <span class="hljs-title class_">Authors</span>;   <span class="hljs-comment">// managed foreign-key association</span>
+}
+
+entity <span class="hljs-title class_">Authors</span> : cuid, managed {
+  name  : <span class="hljs-title class_">String</span>(<span class="hljs-number">111</span>);
+  books : <span class="hljs-title class_">Association</span> to many <span class="hljs-title class_">Books</span> <span class="hljs-keyword">on</span> books.author = $self;
+}</code></pre>
+
+<h4>2. Expose a service</h4>
+<div class="code-label">CDS</div><pre><code class="hljs"><span class="hljs-comment">// srv/cat-service.cds</span>
+using my.bookshop <span class="hljs-keyword">as</span> my from <span class="hljs-string">&#x27;../db/schema&#x27;</span>;
+
+service <span class="hljs-title class_">CatalogService</span> @(path: <span class="hljs-string">&#x27;/browse&#x27;</span>) {
+  <span class="hljs-meta">@readonly</span> entity <span class="hljs-title class_">Books</span>   <span class="hljs-keyword">as</span> projection <span class="hljs-keyword">on</span> my.<span class="hljs-title class_">Books</span>;
+            entity <span class="hljs-title class_">Authors</span> <span class="hljs-keyword">as</span> projection <span class="hljs-keyword">on</span> my.<span class="hljs-title class_">Authors</span>;
+
+  <span class="hljs-comment">// an unbound action — custom business operation</span>
+  action <span class="hljs-title function_">submitOrder</span>(book : UUID, quantity : <span class="hljs-title class_">Integer</span>) returns { stock : <span class="hljs-title class_">Integer</span> };
+}</code></pre>
+
+<h4>3. Add custom logic with event handlers</h4>
+<p>CAP's runtime is event-driven: every CRUD request and action fires events you can hook with <code>before</code>, <code>on</code>, and <code>after</code> handlers.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// srv/cat-service.js</span>
+<span class="hljs-keyword">const</span> cds = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@sap/cds&#x27;</span>)
+
+<span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = <span class="hljs-keyword">class</span> <span class="hljs-title class_">CatalogService</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">cds.ApplicationService</span> {
+  <span class="hljs-title function_">init</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">Books</span> } = <span class="hljs-variable language_">this</span>.<span class="hljs-property">entities</span>
+
+    <span class="hljs-comment">// Validate before every CREATE/UPDATE on Books</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">before</span>([<span class="hljs-string">&#x27;CREATE&#x27;</span>, <span class="hljs-string">&#x27;UPDATE&#x27;</span>], <span class="hljs-title class_">Books</span>, <span class="hljs-function">(<span class="hljs-params">req</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (req.<span class="hljs-property">data</span>.<span class="hljs-property">stock</span> &lt; <span class="hljs-number">0</span>) req.<span class="hljs-title function_">error</span>(<span class="hljs-number">400</span>, <span class="hljs-string">&#x27;Stock must not be negative&#x27;</span>)
+    })
+
+    <span class="hljs-comment">// Enrich each row after reading</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">after</span>(<span class="hljs-string">&#x27;READ&#x27;</span>, <span class="hljs-title class_">Books</span>, <span class="hljs-function">(<span class="hljs-params">books</span>) =&gt;</span> {
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> b <span class="hljs-keyword">of</span> books) <span class="hljs-keyword">if</span> (b.<span class="hljs-property">stock</span> &lt; <span class="hljs-number">5</span>) b.<span class="hljs-property">title</span> += <span class="hljs-string">&#x27; (low stock!)&#x27;</span>
+    })
+
+    <span class="hljs-comment">// Custom action implementation</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;submitOrder&#x27;</span>, <span class="hljs-title function_">async</span> (req) =&gt; {
+      <span class="hljs-keyword">const</span> { book, quantity } = req.<span class="hljs-property">data</span>
+      <span class="hljs-keyword">const</span> row = <span class="hljs-keyword">await</span> <span class="hljs-variable constant_">SELECT</span>.<span class="hljs-property">one</span>.<span class="hljs-title function_">from</span>(<span class="hljs-title class_">Books</span>).<span class="hljs-title function_">where</span>({ <span class="hljs-attr">ID</span>: book })
+      <span class="hljs-keyword">if</span> (!row) <span class="hljs-keyword">return</span> req.<span class="hljs-title function_">error</span>(<span class="hljs-number">404</span>, <span class="hljs-string">&#x27;Book not found&#x27;</span>)
+      <span class="hljs-keyword">if</span> (quantity &gt; row.<span class="hljs-property">stock</span>) <span class="hljs-keyword">return</span> req.<span class="hljs-title function_">error</span>(<span class="hljs-number">409</span>, <span class="hljs-string">&#x27;Not enough stock&#x27;</span>)
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">UPDATE</span>(<span class="hljs-title class_">Books</span>).<span class="hljs-title function_">set</span>({ <span class="hljs-attr">stock</span>: { <span class="hljs-string">&#x27;-=&#x27;</span>: quantity } }).<span class="hljs-title function_">where</span>({ <span class="hljs-attr">ID</span>: book })
+      <span class="hljs-keyword">return</span> { <span class="hljs-attr">stock</span>: row.<span class="hljs-property">stock</span> - quantity }
+    })
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">super</span>.<span class="hljs-title function_">init</span>()
+  }
+}</code></pre>
+
+<h4>4. Run it locally</h4>
+<div class="code-label">BASH</div><pre><code class="hljs">cds watch        <span class="hljs-comment"># starts an in-memory SQLite DB, serves OData, hot-reloads</span>
+<span class="hljs-comment"># Browse:  http://localhost:4004/browse/Books</span>
+<span class="hljs-comment"># OData:   http://localhost:4004/browse/$metadata</span></code></pre>
+
+<div class="callout tip"><span class="t">Why CAP wins</span> You wrote ~20 lines of model and got a full OData v4 service with CRUD, deep-insert, pagination (<code>$top/$skip</code>), filtering (<code>$filter</code>), draft handling, and input validation — plus a path to HANA with zero rewrite.</div>
+
+<p>The CAP request lifecycle is worth internalizing:</p>
+<div class="diagram"><svg viewBox="0 0 780 170" width="780" height="170">
+  <defs><marker id="ar3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect x="20" y="60" width="110" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="90" text-anchor="middle" font-size="12" fill="#1e3a8a">Request</text>
+  <rect x="165" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="220" y="85" text-anchor="middle" font-size="12" fill="#059669">before</text><text x="220" y="101" text-anchor="middle" font-size="9" fill="#1a2233">validate</text>
+  <rect x="310" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="365" y="85" text-anchor="middle" font-size="12" fill="#059669">on</text><text x="365" y="101" text-anchor="middle" font-size="9" fill="#1a2233">handle / to DB</text>
+  <rect x="455" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="510" y="85" text-anchor="middle" font-size="12" fill="#059669">after</text><text x="510" y="101" text-anchor="middle" font-size="9" fill="#1a2233">enrich result</text>
+  <rect x="600" y="60" width="110" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="655" y="90" text-anchor="middle" font-size="12" fill="#1e3a8a">Response</text>
+  <line x1="130" y1="85" x2="163" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+  <line x1="275" y1="85" x2="308" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+  <line x1="420" y1="85" x2="453" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+  <line x1="565" y1="85" x2="598" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+</svg><div class="cap">Fig 3 — CAP event phases: before (validation), on (persistence/custom), after (post-processing).</div></div>
+
+<h2 id="destinations-amp-connectivity">Destinations &amp; Connectivity</h2>
+<p>A <strong>destination</strong> is a reusable, centrally managed definition of a remote endpoint — URL, authentication type, and credentials. Your app never hard-codes a system's URL or secrets; it asks the Destination service for a destination by name at runtime.</p>
+
+<div class="code-label">JSON</div><pre><code class="hljs"><span class="hljs-comment">// A destination configured in the BTP cockpit (shown as its JSON form)</span>
+<span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;Name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S4HANA_API&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;URL&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://my-s4.s4hana.ondemand.com&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;Type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;HTTP&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;ProxyType&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Internet&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;Authentication&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;OAuth2SAMLBearerAssertion&quot;</span><span class="hljs-punctuation">,</span>  <span class="hljs-comment">// principal propagation</span>
+  <span class="hljs-attr">&quot;tokenServiceURL&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://.../oauth/token&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;clientId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;sb-...&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;sap-client&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;100&quot;</span>
+<span class="hljs-punctuation">}</span></code></pre>
+
+<p>CAP consumes destinations transparently when you declare a remote service and bind the destination + connectivity services:</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// package.json → cds.requires</span>
+<span class="hljs-comment">// &quot;S4bupa&quot;: { &quot;kind&quot;: &quot;odata-v2&quot;, &quot;credentials&quot;: { &quot;destination&quot;: &quot;S4HANA_API&quot; } }</span>
+
+<span class="hljs-keyword">const</span> s4 = <span class="hljs-keyword">await</span> cds.<span class="hljs-property">connect</span>.<span class="hljs-title function_">to</span>(<span class="hljs-string">&#x27;S4bupa&#x27;</span>)
+<span class="hljs-keyword">const</span> partners = <span class="hljs-keyword">await</span> s4.<span class="hljs-title function_">run</span>(
+  <span class="hljs-variable constant_">SELECT</span>.<span class="hljs-title function_">from</span>(<span class="hljs-string">&#x27;A_BusinessPartner&#x27;</span>).<span class="hljs-title function_">limit</span>(<span class="hljs-number">10</span>)
+)   <span class="hljs-comment">// CAP builds the HTTP call, resolves the destination, attaches the token</span></code></pre>
+
+<div class="callout note"><span class="t">On-premise reach</span> To call systems behind a corporate firewall, pair the Destination service with the <strong>Cloud Connector</strong> (a lightweight on-prem agent) and set <code>ProxyType: OnPremise</code>. The Connectivity service tunnels the request securely — no inbound firewall holes.</div>
+
+<h2 id="xsuaa-authentication-amp-authorization">XSUAA — Authentication &amp; Authorization</h2>
+<p class="lead">XSUAA (Extended Services for UAA) is BTP's OAuth 2.0 authorization server. It issues JWT access tokens, maps your Identity Provider's users to application-defined <em>scopes</em> and <em>role collections</em>, and is the backbone of security on Cloud Foundry.</p>
+
+<p>You declare your app's security model in <code>xs-security.json</code>: scopes (atomic permissions), attributes, and role templates.</p>
+
+<div class="code-label">JSON</div><pre><code class="hljs"><span class="hljs-comment">// xs-security.json</span>
+<span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;xsappname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;bookshop&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;tenant-mode&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;dedicated&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;scopes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;$XSAPPNAME.Read&quot;</span><span class="hljs-punctuation">,</span>  <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Read books&quot;</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;$XSAPPNAME.Admin&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Manage catalog&quot;</span> <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;role-templates&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+    <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Viewer&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;scope-references&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;$XSAPPNAME.Read&quot;</span><span class="hljs-punctuation">]</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Administrator&quot;</span><span class="hljs-punctuation">,</span>
+      <span class="hljs-attr">&quot;scope-references&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;$XSAPPNAME.Read&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;$XSAPPNAME.Admin&quot;</span><span class="hljs-punctuation">]</span> <span class="hljs-punctuation">}</span>
+  <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre>
+
+<p>In CDS you annotate services with <code>@requires</code> and <code>@restrict</code>; CAP enforces the scopes from the JWT automatically:</p>
+
+<div class="code-label">CDS</div><pre><code class="hljs"><span class="hljs-selector-tag">service</span> <span class="hljs-selector-tag">CatalogService</span> {
+  <span class="hljs-variable">@requires:</span> <span class="hljs-string">&#x27;authenticated-user&#x27;</span>
+  entity Books @(<span class="hljs-attribute">restrict</span>: [
+    { <span class="hljs-attribute">grant</span>: <span class="hljs-string">&#x27;READ&#x27;</span>,  <span class="hljs-attribute">to</span>: <span class="hljs-string">&#x27;Viewer&#x27;</span> },
+    { <span class="hljs-attribute">grant</span>: [<span class="hljs-string">&#x27;CREATE&#x27;</span>,<span class="hljs-string">&#x27;UPDATE&#x27;</span>,<span class="hljs-string">&#x27;DELETE&#x27;</span>], <span class="hljs-attribute">to</span>: <span class="hljs-string">&#x27;Administrator&#x27;</span> }
+  ]) as projection on my.Books;
+}</code></pre>
+
+<p>The runtime flow ties the Approuter, XSUAA, and your service together:</p>
+<div class="diagram"><svg viewBox="0 0 780 300" width="780" height="300">
+  <defs><marker id="ar4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect x="20" y="120" width="120" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="80" y="146" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="bold">Browser</text><text x="80" y="164" text-anchor="middle" font-size="10" fill="#1a2233">user</text>
+  <rect x="200" y="120" width="130" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="265" y="146" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">Approuter</text><text x="265" y="164" text-anchor="middle" font-size="10" fill="#1a2233">@sap/approuter</text>
+  <rect x="400" y="30" width="140" height="60" rx="8" fill="#fff7ed" stroke="#b45309"/><text x="470" y="56" text-anchor="middle" font-size="12" fill="#b45309" font-weight="bold">XSUAA</text><text x="470" y="74" text-anchor="middle" font-size="10" fill="#1a2233">OAuth server + IdP</text>
+  <rect x="610" y="120" width="140" height="60" rx="8" fill="#eff4ff" stroke="#0891b2"/><text x="680" y="146" text-anchor="middle" font-size="12" fill="#0891b2" font-weight="bold">CAP service</text><text x="680" y="164" text-anchor="middle" font-size="10" fill="#1a2233">validates JWT scopes</text>
+
+  <line x1="140" y1="150" x2="198" y2="150" stroke="#2563eb" marker-end="url(#ar4)"/><text x="168" y="142" text-anchor="middle" font-size="9" fill="#1a2233">1. request</text>
+  <line x1="300" y1="120" x2="420" y2="92" stroke="#2563eb" marker-end="url(#ar4)"/><text x="360" y="100" text-anchor="middle" font-size="9" fill="#1a2233">2. login / token</text>
+  <line x1="470" y1="90" x2="300" y2="128" stroke="#94a3b8" stroke-dasharray="4 3" marker-end="url(#ar4)"/><text x="400" y="124" text-anchor="middle" font-size="9" fill="#1a2233">3. JWT</text>
+  <line x1="330" y1="150" x2="608" y2="150" stroke="#2563eb" marker-end="url(#ar4)"/><text x="470" y="142" text-anchor="middle" font-size="9" fill="#1a2233">4. forward + Bearer JWT</text>
+</svg><div class="cap">Fig 4 — The Approuter authenticates users at XSUAA, then forwards requests with a JWT the backend validates against required scopes.</div></div>
+
+<div class="callout warn"><span class="t">XSUAA vs IAS</span> XSUAA handles <em>authorization</em> (scopes/roles) for apps. SAP <strong>Identity Authentication Service (IAS)</strong> is the <em>authentication</em> IdP for users across the whole tenant. Modern BTP setups increasingly front XSUAA with IAS; know the distinction.</div>
+
+<h2 id="extension-vs-side-by-side">Extension vs Side-by-Side</h2>
+<p>"Extensibility" is BTP's reason to exist. There are three recognized tiers — interviewers expect you to name and contrast them.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Key-user (in-app)</h4>No-code/low-code adaptations <em>inside</em> S/4HANA by a business expert: custom fields, UI layout tweaks, custom logic via released BAdIs. Stays in the core but upgrade-safe.</div>
+  <div class="card"><h4>Developer (in-stack)</h4>ABAP Cloud developments <em>on</em> the S/4HANA stack (or the BTP ABAP environment), restricted to released APIs. More power, still governed.</div>
+  <div class="card"><h4>Side-by-side</h4>A separate app <em>on BTP</em> (CAP/Fiori/Kyma) that integrates via OData APIs, events, and destinations. Maximum freedom, independent lifecycle, polyglot.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 780 230" width="780" height="230">
+  <defs><marker id="ar5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/></marker></defs>
+  <rect x="60" y="70" width="260" height="110" rx="10" fill="#eff4ff" stroke="#1e3a8a" stroke-width="2"/>
+  <text x="190" y="98" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">S/4HANA (clean core)</text>
+  <text x="190" y="122" text-anchor="middle" font-size="11" fill="#1a2233">key-user + in-stack</text>
+  <text x="190" y="140" text-anchor="middle" font-size="11" fill="#1a2233">extensions live here</text>
+  <text x="190" y="162" text-anchor="middle" font-size="10" fill="#b45309">released APIs only</text>
+
+  <rect x="460" y="70" width="260" height="110" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="590" y="98" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">BTP side-by-side app</text>
+  <text x="590" y="122" text-anchor="middle" font-size="11" fill="#1a2233">CAP / Fiori / Kyma</text>
+  <text x="590" y="140" text-anchor="middle" font-size="11" fill="#1a2233">own DB, own lifecycle</text>
+  <text x="590" y="162" text-anchor="middle" font-size="10" fill="#1a2233">scales independently</text>
+
+  <line x1="320" y1="110" x2="458" y2="110" stroke="#64748b" marker-end="url(#ar5)"/><text x="389" y="102" text-anchor="middle" font-size="10" fill="#1a2233">OData / events</text>
+  <line x1="458" y1="145" x2="322" y2="145" stroke="#64748b" marker-end="url(#ar5)"/><text x="389" y="162" text-anchor="middle" font-size="10" fill="#1a2233">destinations</text>
+</svg><div class="cap">Fig 5 — Side-by-side keeps the core untouched; integration happens over APIs and events.</div></div>
+
+<div class="callout ok"><span class="t">Rule of thumb</span> If it changes core data behavior and is small, extend in-app/in-stack. If it has its own UI, data, scaling needs, or non-ABAP tech, build it side-by-side on BTP.</div>
+
+<h2 id="fiori-ui5-in-the-btp-picture">Fiori / UI5 in the BTP Picture</h2>
+<p>SAP Fiori is the design language; SAPUI5 is the JavaScript framework that implements it. On BTP, a CAP OData service plus a Fiori <strong>elements</strong> app is the canonical full-stack combo — the UI is largely generated from OData annotations rather than hand-coded.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// Scaffold a Fiori elements app over your CAP service</span>
+<span class="hljs-comment">// (via the SAP Fiori generator in VS Code / Business Application Studio)</span>
+<span class="hljs-comment">// Annotations drive the List Report + Object Page UI:</span></code></pre>
+
+<div class="code-label">CDS</div><pre><code class="hljs"><span class="hljs-comment">// app/annotations.cds — no imperative UI code needed</span>
+using <span class="hljs-title class_">CatalogService</span> <span class="hljs-keyword">as</span> service from <span class="hljs-string">&#x27;../srv/cat-service&#x27;</span>;
+
+annotate service.<span class="hljs-title class_">Books</span> <span class="hljs-keyword">with</span> @(
+  UI: {
+    <span class="hljs-title class_">LineItem</span>: [
+      { <span class="hljs-title class_">Value</span>: title },
+      { <span class="hljs-title class_">Value</span>: stock },
+      { <span class="hljs-title class_">Value</span>: price }
+    ],
+    <span class="hljs-title class_">HeaderInfo</span>: { <span class="hljs-title class_">TypeName</span>: <span class="hljs-string">&#x27;Book&#x27;</span>, <span class="hljs-title class_">TypeNamePlural</span>: <span class="hljs-string">&#x27;Books&#x27;</span>, <span class="hljs-title class_">Title</span>: { <span class="hljs-title class_">Value</span>: title } }
+  }
+);</code></pre>
+
+<p>Freestyle UI5 (hand-written XML views + controllers) is used when you need full control:</p>
+<div class="code-label">XML</div><pre><code class="hljs"><span class="hljs-tag">&lt;<span class="hljs-name">mvc:View</span> <span class="hljs-attr">controllerName</span>=<span class="hljs-string">&quot;bookshop.controller.List&quot;</span>
+  <span class="hljs-attr">xmlns:mvc</span>=<span class="hljs-string">&quot;sap.ui.core.mvc&quot;</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;sap.m&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">Table</span> <span class="hljs-attr">items</span>=<span class="hljs-string">&quot;{/Books}&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">columns</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Column</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">Text</span> <span class="hljs-attr">text</span>=<span class="hljs-string">&quot;Title&quot;</span>/&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">Column</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">columns</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">items</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">ColumnListItem</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">cells</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">Text</span> <span class="hljs-attr">text</span>=<span class="hljs-string">&quot;{title}&quot;</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">cells</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">ColumnListItem</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">items</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Table</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">mvc:View</span>&gt;</span></code></pre>
+
+<p>Finished apps are published to the <strong>SAP Build Work Zone</strong> (formerly Launchpad service), which gives users a single tile-based entry point across all their Fiori apps.</p>
+
+<h2 id="deploying-to-btp-mta">Deploying to BTP: MTA</h2>
+<p>Multi-Target Applications bundle every module — the CAP service, the Approuter, the UI, the HANA DB deployer — into one deployable archive described by <code>mta.yaml</code>.</p>
+
+<div class="code-label">YAML</div><pre><code class="hljs"><span class="hljs-comment"># mta.yaml (abridged)</span>
+<span class="hljs-attr">ID:</span> <span class="hljs-string">bookshop</span>
+<span class="hljs-attr">version:</span> <span class="hljs-number">1.0</span><span class="hljs-number">.0</span>
+<span class="hljs-attr">modules:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-srv</span>            <span class="hljs-comment"># CAP service</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">nodejs</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">gen/srv</span>
+    <span class="hljs-attr">requires:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-db</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-auth</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-db-deployer</span>    <span class="hljs-comment"># pushes schema to HANA Cloud</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">hdb</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">gen/db</span>
+    <span class="hljs-attr">requires:</span> [{ <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-db</span> }]
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-approuter</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">approuter.nodejs</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">app/router</span>
+    <span class="hljs-attr">requires:</span> [{ <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-auth</span> }]
+<span class="hljs-attr">resources:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-db</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">com.sap.xs.hdi-container</span>     <span class="hljs-comment"># HANA HDI container</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bookshop-auth</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">org.cloudfoundry.managed-service</span>
+    <span class="hljs-attr">parameters:</span> { <span class="hljs-attr">service:</span> <span class="hljs-string">xsuaa</span>, <span class="hljs-attr">service-plan:</span> <span class="hljs-string">application</span> }</code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs">cds add hana,xsuaa,approuter,mta   <span class="hljs-comment"># wire up the deployment artifacts</span>
+mbt build                          <span class="hljs-comment"># produces mta_archives/bookshop_1.0.0.mtar</span>
+cf deploy mta_archives/bookshop_1.0.0.mtar   <span class="hljs-comment"># needs the MultiApps CF plugin</span></code></pre>
+
+<h2 id="cheat-sheet-amp-comparisons">Cheat-Sheet &amp; Comparisons</h2>
+<table>
+<tr><th>Command</th><th>What it does</th></tr>
+<tr><td><code>btp login --url ...</code></td><td>Authenticate the BTP CLI to a region</td></tr>
+<tr><td><code>btp list accounts/subaccount</code></td><td>List subaccounts in the global account</td></tr>
+<tr><td><code>cf push</code></td><td>Build &amp; deploy an app to Cloud Foundry</td></tr>
+<tr><td><code>cf create-service xsuaa application my-auth</code></td><td>Provision an XSUAA instance</td></tr>
+<tr><td><code>cf bind-service my-app my-auth</code></td><td>Inject service credentials into an app</td></tr>
+<tr><td><code>cds watch</code></td><td>Run the CAP app locally with hot reload</td></tr>
+<tr><td><code>cds add hana,xsuaa,mta</code></td><td>Add production deployment artifacts</td></tr>
+<tr><td><code>mbt build</code></td><td>Build the MTA archive (.mtar)</td></tr>
+<tr><td><code>cf deploy app.mtar</code></td><td>Deploy a multi-target application</td></tr>
+</table>
+
+<table>
+<tr><th>Aspect</th><th>Cloud Foundry</th><th>Kyma</th><th>ABAP Env.</th></tr>
+<tr><td>Abstraction</td><td>PaaS / buildpacks</td><td>Managed Kubernetes</td><td>ABAP platform</td></tr>
+<tr><td>Deploy unit</td><td><code>cf push</code> / MTA</td><td>Container + Helm</td><td>Transport / ADT</td></tr>
+<tr><td>Languages</td><td>Node, Java, Python…</td><td>Any (containers)</td><td>ABAP Cloud</td></tr>
+<tr><td>Ops burden</td><td>Lowest</td><td>Higher (k8s skills)</td><td>Low (SAP-managed)</td></tr>
+<tr><td>Best fit</td><td>Most CAP apps</td><td>Cloud-native, eventing</td><td>ABAP teams, RAP</td></tr>
+</table>
+
+<table>
+<tr><th>Concept</th><th>One-line definition</th></tr>
+<tr><td>Entitlement</td><td>The <em>right</em> to use a service plan, assigned to a subaccount</td></tr>
+<tr><td>Service instance</td><td>A provisioned, bindable instance of a service</td></tr>
+<tr><td>Destination</td><td>Named, managed definition of a remote endpoint + auth</td></tr>
+<tr><td>Approuter</td><td>Single entry point handling auth, routing, static content</td></tr>
+<tr><td>Role collection</td><td>Bundle of roles assigned to users/groups in a subaccount</td></tr>
+<tr><td>HDI container</td><td>Isolated schema in SAP HANA Cloud for one app</td></tr>
+</table>
+
+<h2 id="best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Keep the core clean</span> Default to side-by-side or released-API extensions. Never modify standard SAP objects; it breaks upgrades and support.</div>
+<div class="callout tip"><span class="t">Externalize everything</span> Use destinations for URLs/credentials and user-provided or service bindings for secrets. No hard-coded endpoints or passwords in code.</div>
+<div class="callout tip"><span class="t">Multitenancy early</span> If you may sell your extension to multiple customers, design for SaaS multitenancy from day one — retrofitting <code>tenant-mode: shared</code> is painful.</div>
+<div class="callout warn"><span class="t">Mind the quotas</span> Entitlements are finite. A failed deploy is often just an unassigned entitlement or an exhausted quota in the subaccount, not a code bug.</div>
+<div class="callout warn"><span class="t">Don't skip the Approuter</span> Calling a CAP service directly in production bypasses central auth and CSRF handling. The Approuter (or Work Zone) must front user-facing apps.</div>
+<div class="callout danger"><span class="t">Token &amp; trust pitfalls</span> JWT audience/scope mismatches cause silent 403s. Verify <code>xsappname</code>, that the right role collections are assigned, and that your subaccount trusts the correct IdP.</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What problem does SAP BTP solve?</div><div class="a">It provides a governed platform to extend and integrate SAP systems <em>without</em> modifying the core, enabling the "clean core" strategy: the ERP stays standard and upgradable while customization lives on BTP via app dev, integration, data/analytics, and AI services.</div></div>
+<div class="qa"><div class="q">Explain the BTP account hierarchy.</div><div class="a">Global account (commercial contract + entitlements) → optional directories (grouping) → subaccounts (region/provider-bound working units with their own trust, destinations, environments) → spaces (Cloud Foundry) or namespaces (Kyma).</div></div>
+<div class="qa"><div class="q">Compare the three runtime environments.</div><div class="a">Cloud Foundry: managed PaaS via buildpacks, lowest ops, best for most CAP apps. Kyma: managed Kubernetes + Istio + serverless, for cloud-native polyglot workloads. ABAP (Steampunk): ABAP Cloud with the RAP model and released APIs only, for ABAP-centric teams.</div></div>
+<div class="qa"><div class="q">What is the CAP model and why use it?</div><div class="a">Cloud Application Programming is SAP's framework where you model data/services declaratively in CDS and get a full OData/REST service with CRUD, pagination, filtering, draft handling, and validation out of the box. You add imperative logic only via before/on/after event handlers. It runs on Node.js or Java and deploys cleanly to HANA.</div></div>
+<div class="qa"><div class="q">What is a destination and why not just hard-code URLs?</div><div class="a">A destination is a centrally managed definition of a remote endpoint (URL, auth type, credentials). It decouples code from environment config, lets admins rotate secrets without redeploying, and — with the Cloud Connector — securely reaches on-premise systems via <code>ProxyType: OnPremise</code>.</div></div>
+<div class="qa"><div class="q">What is XSUAA and how does auth flow work?</div><div class="a">XSUAA is BTP's OAuth 2.0 authorization server. The Approuter authenticates the user (often via IAS), obtains a JWT, and forwards requests with it. The backend validates the JWT and checks scopes defined in <code>xs-security.json</code>. Scopes map to role templates → roles → role collections assigned to users.</div></div>
+<div class="qa"><div class="q">Difference between XSUAA and IAS?</div><div class="a">IAS (Identity Authentication Service) authenticates <em>who the user is</em> (the IdP). XSUAA handles <em>what they can do</em> (authorization scopes/roles) for applications. Modern setups front XSUAA with IAS for unified authentication.</div></div>
+<div class="qa"><div class="q">Explain extension vs side-by-side.</div><div class="a">Key-user and in-stack (ABAP Cloud) extensions live on the core, limited to released APIs, upgrade-safe but constrained. Side-by-side runs a separate app on BTP integrating via OData/events/destinations — maximum freedom, independent lifecycle and scaling, polyglot tech.</div></div>
+<div class="qa"><div class="q">What does the Approuter do?</div><div class="a">It is the single entry point for a BTP app: handles user authentication against XSUAA, manages login sessions and CSRF tokens, serves static UI content, and reverse-proxies routes to backend microservices with the JWT attached.</div></div>
+<div class="qa"><div class="q">How do you deploy a full CAP+UI app to BTP?</div><div class="a">Run <code>cds add hana,xsuaa,approuter,mta</code> to generate deployment artifacts, <code>mbt build</code> to produce an <code>.mtar</code> archive bundling the service, DB deployer, Approuter, and UI, then <code>cf deploy</code> it. The MTA descriptor wires modules to resources like the HDI container and XSUAA instance.</div></div>
+<div class="qa"><div class="q">What is Fiori elements vs freestyle UI5?</div><div class="a">Fiori elements generates standardized floorplans (List Report, Object Page) from OData annotations — little custom JS, consistent UX, fast. Freestyle UI5 is hand-coded XML views and controllers for full control when a scenario doesn't fit the standard templates.</div></div>
+<div class="qa"><div class="q">How does CAP connect to a remote S/4HANA service?</div><div class="a">Declare a required remote service in <code>cds.requires</code> pointing at a destination, then <code>cds.connect.to('Service')</code> and run CQL queries against it. CAP builds the HTTP/OData call, resolves the destination, and attaches the token (e.g. principal propagation via OAuth2SAMLBearerAssertion).</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li>Work through the official <strong>CAP (capire)</strong> documentation and build the bookshop sample end to end on the free tier.</li>
+  <li>Complete the SAP <strong>Learning Journey</strong> "Developing Applications on SAP BTP" and the CAP + Fiori elements tutorials on the SAP Tutorial Navigator.</li>
+  <li>Deploy a side-by-side extension that reads S/4HANA Business Partners via a destination and the Cloud Connector.</li>
+  <li>Explore Kyma: containerize a service, expose it with an <code>APIRule</code>, and trigger a serverless Function from a business event.</li>
+  <li>Study <strong>RAP</strong> (RESTful ABAP Programming) if you work in ABAP shops, and the <strong>SAP Integration Suite</strong> for iFlows and API management.</li>
+  <li>Target the <strong>SAP Certified Development Associate — SAP BTP Extensions</strong> (CAP, Fiori) certification to validate your skills.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

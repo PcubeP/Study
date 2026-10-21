@@ -1,0 +1,369 @@
+<h2>What LLMs Are and Why They Matter</h2>
+<p class="lead">A Large Language Model (LLM) is a neural network — almost always a Transformer — trained on enormous text corpora to predict the next token. From that single objective emerges fluent generation, translation, reasoning, coding, and tool use. GPT and LLaMA are the two archetypal families: one closed and API-first, one open-weight and self-hostable.</p>
+
+<p>At their core, modern LLMs are <strong>autoregressive next-token predictors</strong>. Given a sequence of tokens, the model outputs a probability distribution over the vocabulary for the next token, samples one, appends it, and repeats. Everything else — chat, summarization, agents — is this loop plus clever prompting and post-training.</p>
+
+<div class="callout note"><span class="t">Mental model</span> Think of an LLM as a gigantic, differentiable autocomplete. It has no database of facts and no execution engine inside; it has <em>weights</em> that encode statistical structure of language. "Knowledge" is lossy compression of the training set into those weights.</div>
+
+<div class="diagram"><svg viewBox="0 0 720 230" width="720" height="230">
+<defs><marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+<rect x="10" y="90" width="150" height="48" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+<text x="85" y="112" font-size="13" text-anchor="middle" fill="#1a2233">Prompt tokens</text>
+<text x="85" y="128" font-size="11" text-anchor="middle" fill="#64748b">"The cat sat on"</text>
+<rect x="210" y="60" width="160" height="108" rx="8" fill="#1e3a8a" stroke="#1e3a8a"/>
+<text x="290" y="100" font-size="14" text-anchor="middle" fill="#fff">Transformer</text>
+<text x="290" y="120" font-size="11" text-anchor="middle" fill="#cbd5e1">N decoder layers</text>
+<text x="290" y="138" font-size="11" text-anchor="middle" fill="#cbd5e1">self-attention + MLP</text>
+<rect x="420" y="60" width="150" height="108" rx="8" fill="#ecfdf5" stroke="#059669"/>
+<text x="495" y="95" font-size="12" text-anchor="middle" fill="#1a2233">logits -&gt; softmax</text>
+<text x="495" y="115" font-size="11" text-anchor="middle" fill="#059669">the: 0.62</text>
+<text x="495" y="131" font-size="11" text-anchor="middle" fill="#059669">a: 0.21</text>
+<text x="495" y="147" font-size="11" text-anchor="middle" fill="#64748b">mat: 0.09 ...</text>
+<rect x="610" y="90" width="100" height="48" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+<text x="660" y="118" font-size="12" text-anchor="middle" fill="#1a2233">sample 1</text>
+<line x1="162" y1="114" x2="206" y2="114" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="372" y1="114" x2="416" y2="114" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+<line x1="572" y1="114" x2="606" y2="114" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M660,142 C660,200 85,200 85,142" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ah)"/>
+<text x="370" y="215" font-size="11" text-anchor="middle" fill="#64748b">append chosen token, feed back in (autoregression)</text>
+</svg><div class="cap">Fig 1. The autoregressive generation loop: predict a distribution, sample, append, repeat.</div></div>
+
+<p>Why they matter: a single pretrained model generalizes across tasks it was never explicitly trained for (<strong>in-context learning</strong>). This collapses what used to be dozens of bespoke NLP models into one general-purpose system you steer with natural language.</p>
+
+<h2>Setup and Getting Started</h2>
+<p>You interact with LLMs two ways: hosted <strong>APIs</strong> (closed models like GPT) or <strong>local weights</strong> (open models like LLaMA). Below are both.</p>
+
+<h4>Hosted API (OpenAI-style)</h4>
+<pre><code class="language-bash"># Install the official SDK
+pip install openai
+
+# Set your key (never hard-code it)
+export OPENAI_API_KEY="sk-..."</code></pre>
+
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI()  # reads OPENAI_API_KEY from the environment
+
+resp = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a terse assistant."},
+        {"role": "user", "content": "Explain attention in one sentence."},
+    ],
+    temperature=0.7,
+    max_tokens=120,
+)
+print(resp.choices[0].message.content)</code></pre>
+
+<h4>Local open-weight model (LLaMA via Hugging Face)</h4>
+<pre><code class="language-bash">pip install "transformers&gt;=4.44" accelerate torch
+# Access to Meta LLaMA weights requires accepting the license on the model page.
+huggingface-cli login</code></pre>
+
+<pre><code class="language-python">import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+name = "meta-llama/Llama-3.1-8B-Instruct"
+tok = AutoTokenizer.from_pretrained(name)
+model = AutoModelForCausalLM.from_pretrained(
+    name, torch_dtype=torch.bfloat16, device_map="auto"
+)
+
+msgs = [{"role": "user", "content": "Give me a haiku about tensors."}]
+# Chat templates insert the correct special tokens for this model family.
+ids = tok.apply_chat_template(msgs, add_generation_prompt=True, return_tensors="pt").to(model.device)
+out = model.generate(ids, max_new_tokens=64, do_sample=True, temperature=0.8, top_p=0.9)
+print(tok.decode(out[0][ids.shape[-1]:], skip_special_tokens=True))</code></pre>
+
+<div class="callout tip"><span class="t">Fast local serving</span> For a one-command local chat server, <span class="kbd">ollama run llama3.1</span> downloads a quantized GGUF and exposes an OpenAI-compatible endpoint on <code>localhost:11434</code>. Great for prototyping without GPUs.</div>
+
+<h2>Tokenization: How Text Becomes Numbers</h2>
+<p>Models do not see characters or words — they see <strong>tokens</strong>, integer IDs for subword fragments produced by a <strong>Byte-Pair Encoding (BPE)</strong>-style tokenizer. Common words are single tokens; rare words split into pieces.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 150" width="700" height="150">
+<text x="20" y="30" font-size="13" fill="#1a2233">"tokenization isn't magic"</text>
+<rect x="20" y="55" width="70" height="34" rx="5" fill="#eff4ff" stroke="#2563eb"/><text x="55" y="77" font-size="12" text-anchor="middle">token</text>
+<rect x="94" y="55" width="60" height="34" rx="5" fill="#eff4ff" stroke="#2563eb"/><text x="124" y="77" font-size="12" text-anchor="middle">ization</text>
+<rect x="158" y="55" width="40" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="178" y="77" font-size="12" text-anchor="middle">isn</text>
+<rect x="202" y="55" width="34" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="219" y="77" font-size="12" text-anchor="middle">'t</text>
+<rect x="240" y="55" width="78" height="34" rx="5" fill="#eff4ff" stroke="#2563eb"/><text x="279" y="77" font-size="12" text-anchor="middle">magic</text>
+<text x="20" y="120" font-size="12" fill="#64748b">IDs:  3722   2065   4994   956   7866   (5 tokens, not 3 words)</text>
+</svg><div class="cap">Fig 2. Subword tokenization splits uncommon strings; whitespace is usually attached to the following token.</div></div>
+
+<pre><code class="language-python">import tiktoken  # OpenAI's BPE tokenizer
+
+enc = tiktoken.get_encoding("o200k_base")  # GPT-4o vocabulary
+ids = enc.encode("tokenization isn't magic")
+print(ids)            # list of integer token ids
+print(len(ids))       # token count -> this is what you pay for
+print([enc.decode([i]) for i in ids])  # round-trip each piece</code></pre>
+
+<div class="callout warn"><span class="t">Tokens != words</span> English averages ~0.75 words per token (~4 chars/token). Code, non-Latin scripts, and long numbers tokenize far less efficiently. Always measure cost and context limits in <em>tokens</em>, never characters.</div>
+
+<h2>The Transformer Architecture</h2>
+<p>GPT and LLaMA are both <strong>decoder-only</strong> Transformers. A stack of identical layers transforms token embeddings into context-aware representations; a final linear head projects to vocabulary logits.</p>
+
+<div class="diagram"><svg viewBox="0 0 480 360" width="480" height="360">
+<defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+<rect x="150" y="310" width="180" height="34" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="240" y="332" font-size="12" text-anchor="middle">Token + Positional embed</text>
+<rect x="120" y="150" width="240" height="140" rx="8" fill="none" stroke="#1e3a8a" stroke-dasharray="4,3"/>
+<text x="240" y="168" font-size="12" text-anchor="middle" fill="#1e3a8a">Decoder layer x N</text>
+<rect x="140" y="238" width="200" height="34" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="240" y="260" font-size="12" text-anchor="middle">Masked Multi-Head Attention</text>
+<rect x="140" y="188" width="200" height="34" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="240" y="210" font-size="12" text-anchor="middle">Feed-Forward (MLP)</text>
+<rect x="150" y="60" width="180" height="34" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="240" y="82" font-size="12" text-anchor="middle">Final norm + LM head</text>
+<rect x="150" y="12" width="180" height="34" rx="6" fill="#fff7ed" stroke="#b45309"/><text x="240" y="34" font-size="12" text-anchor="middle">logits over vocab</text>
+<line x1="240" y1="310" x2="240" y2="292" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+<line x1="240" y1="238" x2="240" y2="224" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+<line x1="240" y1="188" x2="240" y2="96" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+<line x1="240" y1="60" x2="240" y2="48" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+<text x="372" y="214" font-size="10" fill="#64748b">+ residual</text>
+<text x="372" y="264" font-size="10" fill="#64748b">+ residual</text>
+</svg><div class="cap">Fig 3. Decoder-only block: each layer applies masked self-attention then an MLP, both wrapped in residual connections and normalization.</div></div>
+
+<h3>Self-Attention: the core operation</h3>
+<p>Each token builds a <strong>query</strong>, and compares it against every other token's <strong>key</strong> to decide how much of each token's <strong>value</strong> to pull in. The causal mask prevents attending to future tokens.</p>
+
+<p>The scaled dot-product attention is: <code>Attention(Q,K,V) = softmax(QKᵀ / √d_k) V</code>.</p>
+
+<pre><code class="language-python">import torch, torch.nn.functional as F
+
+def causal_self_attention(x, Wq, Wk, Wv):
+    # x: (seq, d_model)
+    Q, K, V = x @ Wq, x @ Wk, x @ Wv       # (seq, d_k)
+    d_k = Q.shape[-1]
+    scores = (Q @ K.transpose(-2, -1)) / d_k**0.5   # (seq, seq)
+    # causal mask: token i may not look at j &gt; i
+    mask = torch.triu(torch.ones_like(scores), diagonal=1).bool()
+    scores = scores.masked_fill(mask, float("-inf"))
+    attn = F.softmax(scores, dim=-1)        # rows sum to 1
+    return attn @ V                          # weighted blend of values</code></pre>
+
+<div class="callout note"><span class="t">Why "multi-head"</span> Instead of one attention, the model runs <em>h</em> parallel heads on lower-dimensional projections, each free to specialize (syntax, coreference, position). Outputs are concatenated and mixed. This is cheap parallelism that adds representational richness.</div>
+
+<h3>What GPT and LLaMA changed from the original Transformer</h3>
+<table>
+<tr><th>Component</th><th>Original (2017)</th><th>Modern GPT / LLaMA</th></tr>
+<tr><td>Structure</td><td>Encoder-decoder</td><td>Decoder-only</td></tr>
+<tr><td>Positional info</td><td>Absolute sinusoidal</td><td>RoPE (rotary) — LLaMA; learned/absolute — early GPT</td></tr>
+<tr><td>Normalization</td><td>Post-LayerNorm</td><td>Pre-norm; RMSNorm in LLaMA</td></tr>
+<tr><td>Activation</td><td>ReLU</td><td>SwiGLU / GeGLU</td></tr>
+<tr><td>Attention (serving)</td><td>Full MHA</td><td>Grouped-Query Attention (GQA) to shrink KV cache</td></tr>
+</table>
+
+<h2>Pretraining vs Fine-Tuning vs Alignment</h2>
+<p>A deployed chat model goes through distinct stages. Confusing them is a common interview trap.</p>
+
+<div class="pipeline"><span class="step">Pretraining</span><span class="arrow">-&gt;</span><span class="step">SFT</span><span class="arrow">-&gt;</span><span class="step">RLHF / DPO</span><span class="arrow">-&gt;</span><span class="step">Deployed model</span></div>
+
+<div class="grid c3">
+<div class="card"><h4>1. Pretraining</h4>Self-supervised next-token prediction on trillions of tokens of web text, code, books. Produces a <em>base model</em> with broad knowledge but no instruction-following manners. The expensive stage (millions of GPU-hours).</div>
+<div class="card"><h4>2. Supervised Fine-Tuning</h4>Train on curated (prompt, ideal-response) pairs so the base model learns the chat/instruction format. Cheap relative to pretraining; produces an <em>instruct</em> model.</div>
+<div class="card"><h4>3. Preference alignment</h4>RLHF or DPO nudges the model toward responses humans prefer — helpful, honest, harmless. Shapes <em>style and safety</em>, not raw knowledge.</div>
+</div>
+
+<h3>RLHF and its simpler cousin DPO</h3>
+<p><strong>RLHF</strong> (Reinforcement Learning from Human Feedback) trains a <em>reward model</em> on human comparisons of pairs of answers, then optimizes the LLM against that reward with PPO, keeping a KL penalty so it does not drift far from the SFT model. <strong>DPO</strong> (Direct Preference Optimization) skips the separate reward model and PPO loop, optimizing a closed-form loss directly on preference pairs — simpler and now very common.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 200" width="700" height="200">
+<defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+<rect x="10" y="80" width="120" height="44" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="100" font-size="12" text-anchor="middle">SFT model</text><text x="70" y="116" font-size="10" text-anchor="middle" fill="#64748b">generates 2 answers</text>
+<rect x="180" y="80" width="130" height="44" rx="8" fill="#fff7ed" stroke="#b45309"/><text x="245" y="100" font-size="12" text-anchor="middle">Human picks</text><text x="245" y="116" font-size="10" text-anchor="middle" fill="#64748b">A &gt; B preference</text>
+<rect x="360" y="80" width="130" height="44" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="425" y="100" font-size="12" text-anchor="middle">Reward model</text><text x="425" y="116" font-size="10" text-anchor="middle" fill="#64748b">scores answers</text>
+<rect x="540" y="80" width="150" height="44" rx="8" fill="#eff4ff" stroke="#1e3a8a"/><text x="615" y="100" font-size="12" text-anchor="middle">PPO update</text><text x="615" y="116" font-size="10" text-anchor="middle" fill="#64748b">+ KL penalty</text>
+<line x1="132" y1="102" x2="176" y2="102" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+<line x1="312" y1="102" x2="356" y2="102" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+<line x1="492" y1="102" x2="536" y2="102" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+<path d="M615,124 C615,175 70,175 70,126" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ah3)"/>
+<text x="345" y="192" font-size="10" text-anchor="middle" fill="#64748b">updated policy regenerates — loop continues</text>
+</svg><div class="cap">Fig 4. The RLHF loop. DPO collapses the reward-model + PPO stages into a single supervised-style objective on the preference pairs.</div></div>
+
+<h3>Parameter-efficient fine-tuning (LoRA)</h3>
+<p>Full fine-tuning of a large model is costly. <strong>LoRA</strong> freezes the base weights and learns small low-rank adapter matrices, cutting trainable parameters by 100-1000x. <strong>QLoRA</strong> adds 4-bit quantization so a 7B-13B model fine-tunes on a single consumer GPU.</p>
+
+<pre><code class="language-python">from peft import LoraConfig, get_peft_model
+
+cfg = LoraConfig(
+    r=16, lora_alpha=32, lora_dropout=0.05,
+    target_modules=["q_proj", "v_proj"],  # inject adapters into attention
+    task_type="CAUSAL_LM",
+)
+model = get_peft_model(base_model, cfg)
+model.print_trainable_parameters()  # e.g. 0.1% of total params are trainable</code></pre>
+
+<h2>Context Windows and the KV Cache</h2>
+<p>The <strong>context window</strong> is the maximum number of tokens (prompt + generation) a model can attend to at once — 8K for early LLaMA, 128K for GPT-4o, up to 1M+ for frontier long-context models in 2026. It bounds how much you can stuff into a single call.</p>
+
+<p>During generation the model caches each layer's keys and values for past tokens — the <strong>KV cache</strong> — so it does not recompute them every step. This makes decoding fast but memory-hungry: KV memory grows linearly with sequence length and is often the real serving bottleneck.</p>
+
+<div class="callout warn"><span class="t">Quadratic cost</span> Attention compute scales as O(n²) with sequence length n. Doubling context roughly quadruples attention FLOPs. Long-context models rely on tricks (GQA, FlashAttention, sliding-window/sparse attention) to stay tractable.</div>
+
+<table>
+<tr><th>Term</th><th>Meaning</th><th>Practical impact</th></tr>
+<tr><td>Context window</td><td>Max total tokens per call</td><td>Hard cap on prompt + output</td></tr>
+<tr><td>KV cache</td><td>Stored keys/values of past tokens</td><td>GPU memory grows with length</td></tr>
+<tr><td>Prefill</td><td>Processing the input prompt</td><td>Compute-bound, parallel</td></tr>
+<tr><td>Decode</td><td>Generating tokens one by one</td><td>Memory-bandwidth-bound, serial</td></tr>
+</table>
+
+<h2>Sampling: Controlling the Output</h2>
+<p>At each step you have a distribution over the vocabulary. <strong>Decoding strategy</strong> decides which token to actually emit — the knob between deterministic and creative.</p>
+
+<div class="grid c2">
+<div class="card"><h4>Temperature</h4>Divides logits before softmax. <code>T&lt;1</code> sharpens (safer, repetitive); <code>T&gt;1</code> flattens (diverse, riskier); <code>T=0</code> is greedy/argmax.</div>
+<div class="card"><h4>Top-k</h4>Keep only the k highest-probability tokens, renormalize, then sample. Caps the tail of unlikely tokens.</div>
+<div class="card"><h4>Top-p (nucleus)</h4>Keep the smallest set whose cumulative probability exceeds p (e.g. 0.9). Adapts the candidate count to the distribution's shape.</div>
+<div class="card"><h4>Repetition / frequency penalty</h4>Down-weight tokens already seen to reduce loops and verbatim repetition.</div>
+</div>
+
+<pre><code class="language-python">import torch, torch.nn.functional as F
+
+def sample(logits, temperature=0.8, top_p=0.9):
+    logits = logits / max(temperature, 1e-6)
+    probs = F.softmax(logits, dim=-1)
+    # nucleus (top-p) filtering
+    sorted_probs, idx = torch.sort(probs, descending=True)
+    cum = torch.cumsum(sorted_probs, dim=-1)
+    keep = cum - sorted_probs &lt;= top_p          # keep until mass exceeds p
+    sorted_probs = sorted_probs * keep
+    sorted_probs /= sorted_probs.sum()
+    choice = torch.multinomial(sorted_probs, 1)
+    return idx[choice]                          # map back to vocab id</code></pre>
+
+<div class="callout tip"><span class="t">Rule of thumb</span> Factual extraction, classification, code edits: <code>temperature=0</code> for reproducibility. Brainstorming, creative writing: <code>0.7-1.0</code> with <code>top_p=0.9</code>. Avoid setting both high temperature and high top-p/top-k if you need coherence.</div>
+
+<h2>GPT vs LLaMA: Families, Open vs Closed</h2>
+<p>The two families embody the industry's central tension: <strong>closed, hosted, frontier</strong> capability versus <strong>open-weight, self-hostable</strong> control.</p>
+
+<table>
+<tr><th>Dimension</th><th>GPT family (OpenAI)</th><th>LLaMA family (Meta)</th></tr>
+<tr><td>Access</td><td>Closed — API only, weights private</td><td>Open-weight — download, run, fine-tune</td></tr>
+<tr><td>Hosting</td><td>Vendor cloud</td><td>Your hardware or any cloud</td></tr>
+<tr><td>Customization</td><td>Fine-tuning via API, prompting</td><td>Full fine-tuning, LoRA, quantization, surgery</td></tr>
+<tr><td>Cost model</td><td>Per-token usage billing</td><td>Upfront GPU / infra cost</td></tr>
+<tr><td>Data control</td><td>Data leaves your boundary</td><td>Fully on-prem possible</td></tr>
+<tr><td>Typical edge</td><td>Peak frontier capability, tooling</td><td>Privacy, cost at scale, no lock-in</td></tr>
+</table>
+
+<div class="callout note"><span class="t">"Open" nuance</span> LLaMA is <em>open-weight</em>, not fully open-source: Meta publishes weights under a community license (with some use restrictions) but not the training data or full pipeline. Truly open efforts (e.g. OLMo) release data and code too. In interviews, say "open-weight" — it signals precision.</div>
+
+<h3>Choosing between them</h3>
+<div class="grid c2">
+<div class="card"><h4>Reach for closed (GPT)</h4>You want the highest capability now, minimal ops burden, strong tool/function-calling, and token-based cost is acceptable. Fast to ship.</div>
+<div class="card"><h4>Reach for open (LLaMA)</h4>Data must stay on-prem, you need predictable cost at high volume, deep customization, offline/edge deployment, or freedom from vendor changes.</div>
+</div>
+
+<h2>Inference Cost and Optimization</h2>
+<p>Serving dominates lifetime cost. Two levers: reduce the model's footprint and reduce per-request waste.</p>
+
+<div class="grid c3">
+<div class="card"><h4>Quantization</h4>Store weights in 8-bit or 4-bit instead of 16-bit. 4x smaller, modest quality loss. GGUF/AWQ/GPTQ formats make LLaMA run on laptops.</div>
+<div class="card"><h4>Batching</h4>Continuous/in-flight batching (vLLM, TGI) packs many requests through the GPU together, hugely improving throughput and $/token.</div>
+<div class="card"><h4>Caching</h4>Prompt/prefix caching reuses the KV cache for shared system prompts. Speculative decoding uses a small draft model to propose tokens a big model verifies.</div>
+</div>
+
+<pre><code class="language-bash"># High-throughput open-model serving with vLLM (OpenAI-compatible API)
+pip install vllm
+vllm serve meta-llama/Llama-3.1-8B-Instruct \
+  --max-model-len 8192 --dtype bfloat16 --quantization awq</code></pre>
+
+<div class="callout tip"><span class="t">Cost intuition</span> You pay for input (prompt) and output tokens, usually at different rates, with output tokens typically costing more because decoding is serial. Trimming system prompts, truncating RAG context, and capping <code>max_tokens</code> are the cheapest wins.</div>
+
+<h2>Common Patterns and a Worked Mini-Example</h2>
+<p>Most production LLM value comes from a few repeatable patterns.</p>
+
+<div class="grid c2">
+<div class="card"><h4>RAG</h4>Retrieve relevant chunks from a vector store, inject into the prompt. Grounds answers in your data and reduces hallucination.</div>
+<div class="card"><h4>Function / tool calling</h4>Model emits structured JSON requesting a tool; your code runs it and feeds results back. Foundation of agents.</div>
+<div class="card"><h4>Structured output</h4>Constrain generation to a JSON schema for reliable downstream parsing.</div>
+<div class="card"><h4>Few-shot prompting</h4>Show 2-5 examples in the prompt to steer format and behavior without any training.</div>
+</div>
+
+<h4>Mini-example: a grounded Q&A over your own docs (RAG)</h4>
+<pre><code class="language-python">from openai import OpenAI
+client = OpenAI()
+
+# 1) Pretend retrieval: top chunks from a vector search for the user query.
+chunks = [
+    "Refunds are issued within 14 days of purchase.",
+    "Digital goods are non-refundable once downloaded.",
+]
+context = "\n".join(f"- {c}" for c in chunks)
+
+user_q = "Can I get a refund on a downloaded ebook after 3 days?"
+
+resp = client.chat.completions.create(
+    model="gpt-4o",
+    temperature=0,  # deterministic for a policy answer
+    messages=[
+        {"role": "system", "content":
+         "Answer ONLY from the context. If unsupported, say you don't know."},
+        {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {user_q}"},
+    ],
+)
+print(resp.choices[0].message.content)
+# -&gt; Grounded answer citing the non-refundable-digital-goods rule.</code></pre>
+
+<h2>Cheat-Sheet and Comparison Reference</h2>
+<table>
+<tr><th>Concept</th><th>One-line definition</th></tr>
+<tr><td>Token</td><td>Subword unit the model reads/writes; billing + context unit</td></tr>
+<tr><td>Embedding</td><td>Dense vector representation of a token or text</td></tr>
+<tr><td>Attention</td><td>Weighted lookup letting each token read others</td></tr>
+<tr><td>Context window</td><td>Max tokens per call (prompt + output)</td></tr>
+<tr><td>Temperature</td><td>Randomness knob for sampling</td></tr>
+<tr><td>Top-p</td><td>Nucleus sampling cutoff on cumulative probability</td></tr>
+<tr><td>SFT</td><td>Supervised fine-tuning on instruction pairs</td></tr>
+<tr><td>RLHF / DPO</td><td>Align outputs to human preferences</td></tr>
+<tr><td>LoRA / QLoRA</td><td>Cheap low-rank (and quantized) fine-tuning</td></tr>
+<tr><td>RAG</td><td>Retrieve external docs into the prompt</td></tr>
+<tr><td>Hallucination</td><td>Confident but false generated content</td></tr>
+<tr><td>Quantization</td><td>Lower-precision weights for cheaper inference</td></tr>
+</table>
+
+<table>
+<tr><th>Decoding setting</th><th>Deterministic</th><th>Creative</th></tr>
+<tr><td>temperature</td><td>0.0</td><td>0.8 - 1.0</td></tr>
+<tr><td>top_p</td><td>1.0 (unused)</td><td>0.9</td></tr>
+<tr><td>Use for</td><td>Extraction, code, classification</td><td>Writing, ideation</td></tr>
+</table>
+
+<h2>Best Practices and Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Put stable instructions in the system prompt; measure everything in tokens; set <code>temperature=0</code> when you need reproducibility; ground factual tasks with RAG; validate structured output against a schema; log prompts and versions for evals.</div>
+<div class="callout tip"><span class="t">Do</span> Pin a specific model version in production, keep a regression eval set, and A/B before upgrading — model updates can silently change behavior.</div>
+<div class="callout warn"><span class="t">Watch out</span> Context limits are shared by input and output — a huge prompt can starve the response. Lost-in-the-middle: models attend less to content buried mid-context, so put the most important instructions at the start or end.</div>
+<div class="callout danger"><span class="t">Never</span> Trust an LLM for facts, math, or citations without verification or tools — it will hallucinate fluently and confidently. Never paste secrets into third-party APIs you have not vetted. Never assume output is safe to execute or render without sanitization (prompt injection is real).</div>
+
+<h2>Limitations and Hallucination</h2>
+<p>Understanding failure modes is as important as capabilities — and a frequent interview focus.</p>
+<div class="grid c2">
+<div class="card"><h4>Hallucination</h4>The objective rewards plausible <em>continuations</em>, not truth. With no grounding the model fabricates confidently. Mitigate with RAG, tool use, citations, and lower temperature.</div>
+<div class="card"><h4>Knowledge cutoff</h4>Weights freeze at training time; the model is unaware of later events unless given tools/retrieval.</div>
+<div class="card"><h4>Weak symbolic reasoning</h4>Multi-step arithmetic and strict logic are error-prone. Offload to code/tools; chain-of-thought helps but is not a guarantee.</div>
+<div class="card"><h4>Prompt injection</h4>Untrusted text in the context can hijack instructions. Treat retrieved/user content as data, not commands; isolate privileges.</div>
+</div>
+<div class="callout note"><span class="t">Bias &amp; cost</span> Models reflect biases in training data, are non-deterministic by default, and are computationally expensive. These are engineering constraints to design around, not bugs to be fully "fixed."</div>
+
+<h2>Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">Why are modern LLMs decoder-only instead of encoder-decoder?</div><div class="a">Pure next-token prediction with a causal mask scales cleanly, uses one unified stack, and lets the same model do generation, few-shot learning, and (via prompting) tasks that once needed an encoder. The simpler architecture trains and serves more efficiently at scale.</div></div>
+<div class="qa"><div class="q">Explain self-attention in one paragraph.</div><div class="a">Each token projects into a query, key, and value. The query dot-products with every key to score relevance, scaled by √d_k and softmaxed into weights; the output is the weighted sum of values. A causal mask blocks attending to future tokens. This lets every token gather context from the whole sequence in parallel.</div></div>
+<div class="qa"><div class="q">What is the difference between pretraining, SFT, and RLHF?</div><div class="a">Pretraining is self-supervised next-token prediction on raw text — it builds knowledge. SFT fine-tunes on curated instruction/response pairs to teach the chat format. RLHF (or DPO) aligns outputs to human preferences for helpfulness and safety. Knowledge mostly comes from pretraining; manners and style come from the later stages.</div></div>
+<div class="qa"><div class="q">What does temperature do, and when would you set it to 0?</div><div class="a">Temperature scales logits before softmax, controlling randomness. Lower sharpens the distribution; 0 makes decoding greedy/deterministic. Use 0 for extraction, classification, code, or anywhere you need reproducible, factual output.</div></div>
+<div class="qa"><div class="q">Why does doubling the context window more than double the cost?</div><div class="a">Self-attention is O(n²) in sequence length, so attention compute roughly quadruples when n doubles, and the KV cache memory grows linearly, often becoming the serving bottleneck. That is why long-context models use GQA, FlashAttention, and sparse/sliding-window attention.</div></div>
+<div class="qa"><div class="q">What is the KV cache and why does it matter?</div><div class="a">During autoregressive decoding, each layer's keys and values for past tokens are cached so they aren't recomputed every step. It makes generation fast but its memory grows with sequence length and batch size, frequently limiting how many concurrent requests a GPU can serve.</div></div>
+<div class="qa"><div class="q">How does LoRA make fine-tuning cheap?</div><div class="a">It freezes the base weights and injects small trainable low-rank matrices (A·B) into chosen layers, so only a tiny fraction of parameters update. QLoRA adds 4-bit quantization of the frozen base, letting mid-size models fine-tune on a single consumer GPU with minimal quality loss.</div></div>
+<div class="qa"><div class="q">Open-weight vs closed models — how do you choose?</div><div class="a">Closed (GPT) gives peak capability and low ops burden with per-token billing. Open-weight (LLaMA) gives data control, on-prem/offline deployment, deep customization, and predictable cost at high volume. Choose on data-privacy requirements, volume economics, customization needs, and tolerance for vendor lock-in.</div></div>
+<div class="qa"><div class="q">Why do LLMs hallucinate and how do you reduce it?</div><div class="a">The training objective rewards plausible continuations, not verified truth, so with no grounding the model fills gaps confidently. Reduce it with retrieval-augmented generation, tool/function calling, requiring citations, lower temperature, and asking the model to abstain when context is insufficient.</div></div>
+<div class="qa"><div class="q">What is the difference between top-k and top-p sampling?</div><div class="a">Top-k keeps a fixed number k of highest-probability tokens; top-p (nucleus) keeps the smallest set whose cumulative probability exceeds p, so the candidate count adapts to how peaked or flat the distribution is. Top-p generally handles varied distributions more gracefully.</div></div>
+<div class="qa"><div class="q">What is prompt injection and how do you defend against it?</div><div class="a">It's when untrusted text (user input or retrieved documents) contains instructions that hijack the model's behavior. Defend by treating external content as data not commands, separating trusted system instructions, least-privilege tool access, output validation, and never auto-executing model output without checks.</div></div>
+<div class="qa"><div class="q">How does RLHF differ from DPO?</div><div class="a">RLHF trains a separate reward model from human preference comparisons, then optimizes the policy against it with PPO plus a KL penalty. DPO reparameterizes the problem into a single supervised-style loss directly on preference pairs — no reward model or RL loop — making it simpler, more stable, and cheaper while often matching RLHF quality.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+<li>Read the original <strong>"Attention Is All You Need"</strong> (2017) and the GPT-2/GPT-3 papers for the scaling story.</li>
+<li>Study the <strong>LLaMA</strong> technical reports for the modern decoder recipe (RoPE, RMSNorm, SwiGLU, GQA).</li>
+<li>Implement a tiny Transformer from scratch (Karpathy's <strong>nanoGPT / minGPT</strong>) to internalize attention and training.</li>
+<li>Build a small <strong>RAG app</strong> with a vector DB, then add tool/function calling and structured output.</li>
+<li>Fine-tune an open model with <strong>LoRA/QLoRA</strong> on a domain dataset; serve it with <strong>vLLM</strong> and measure throughput.</li>
+<li>Set up an <strong>eval harness</strong> (golden set + LLM-as-judge) so you can safely compare and upgrade models.</li>
+<li>Explore agent frameworks and the <strong>Model Context Protocol</strong> to connect LLMs to real tools and data.</li>
+</ul>

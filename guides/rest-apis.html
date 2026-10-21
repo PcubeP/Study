@@ -1,0 +1,748 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>REST APIs — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Web & App Development</div>
+  <h1>REST APIs</h1>
+  <div class="subtitle">Design, secure, document, and test resource-oriented HTTP APIs the way production teams and interviewers expect.</div>
+  <div class="tags"><span>rest</span><span>http</span><span>api-design</span><span>json</span><span>jwt</span><span>oauth</span><span>openapi</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~17 min read &middot; 3,692 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-rest-is-and-why-it-matters">What REST Is and Why It Matters</a></li><li><a href="#setup-and-getting-started">Setup and Getting Started</a></li><li><a href="#resources-and-uri-design">Resources and URI Design</a></li><li><a href="#http-methods-and-semantics">HTTP Methods and Semantics</a></li><li><a href="#status-codes">Status Codes</a></li><li><a href="#request-and-response-anatomy">Request and Response Anatomy</a></li><li><a href="#authentication-and-authorization">Authentication and Authorization</a></li><li><a href="#versioning-pagination-and-idempotency">Versioning, Pagination, and Idempotency</a></li><li><a href="#a-worked-mini-example-a-tasks-api">A Worked Mini-Example: A Tasks API</a></li><li><a href="#designing-and-documenting-with-openapi">Designing and Documenting with OpenAPI</a></li><li><a href="#testing-rest-apis">Testing REST APIs</a></li><li><a href="#best-practices-and-common-pitfalls">Best Practices and Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-rest-is-and-why-it-matters">What REST Is and Why It Matters</h2>
+<p class="lead">REST (Representational State Transfer) is an architectural style for networked applications. It is not a protocol or a standard — it is a set of constraints that, when applied over HTTP, produce APIs that are scalable, cacheable, and simple to reason about. Nearly every public web API you have ever used speaks REST.</p>
+
+<p>Coined by Roy Fielding in his 2000 doctoral dissertation, REST describes how the Web itself is built. The core idea: expose your application's data and functionality as <strong>resources</strong>, give each resource a stable address (a URI), and manipulate those resources using a small, uniform set of HTTP verbs. The client and server exchange <em>representations</em> of resources — most commonly JSON — rather than calling remote procedures directly.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect x="20" y="110" width="170" height="80" rx="10" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="105" y="145" text-anchor="middle" font-size="15" fill="#1e3a8a" font-weight="bold">Client</text>
+  <text x="105" y="166" text-anchor="middle" font-size="12" fill="#1a2233">browser / app / curl</text>
+
+  <rect x="300" y="40" width="170" height="60" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="385" y="68" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Request</text>
+  <text x="385" y="86" text-anchor="middle" font-size="12" fill="#1a2233">GET /users/42</text>
+
+  <rect x="300" y="200" width="170" height="60" rx="10" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="385" y="228" text-anchor="middle" font-size="13" fill="#b45309" font-weight="bold">Response</text>
+  <text x="385" y="246" text-anchor="middle" font-size="12" fill="#1a2233">200 OK + JSON</text>
+
+  <rect x="580" y="110" width="160" height="80" rx="10" fill="#eff4ff" stroke="#1e3a8a" stroke-width="2"/>
+  <text x="660" y="145" text-anchor="middle" font-size="15" fill="#1e3a8a" font-weight="bold">Server</text>
+  <text x="660" y="166" text-anchor="middle" font-size="12" fill="#1a2233">resources + data</text>
+
+  <path d="M190,140 Q245,70 300,70" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <path d="M470,70 Q525,110 575,135" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <path d="M580,160 Q525,230 470,230" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <path d="M300,230 Q245,215 192,172" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="385" y="150" text-anchor="middle" font-size="12" fill="#94a3b8">stateless request/response cycle</text>
+</svg><div class="cap">Fig 1. The REST request/response cycle: the client addresses a resource by URI and a verb; the server returns a representation and a status code.</div></div>
+
+<div class="callout note"><span class="t">Note</span> "RESTful" is a spectrum, not a checkbox. Most real-world APIs follow the pragmatic conventions here (resources, verbs, status codes, JSON) without implementing every one of Fielding's constraints — notably HATEOAS, which is rare in practice.</div>
+
+<h3>The Six REST Constraints</h3>
+<div class="grid c3">
+  <div class="card"><h4>Client-Server</h4>Separation of concerns: UI lives on the client, data on the server. Each evolves independently.</div>
+  <div class="card"><h4>Stateless</h4>Every request carries all context needed. The server stores no session state between requests.</div>
+  <div class="card"><h4>Cacheable</h4>Responses declare whether they can be cached, improving performance and scalability.</div>
+  <div class="card"><h4>Uniform Interface</h4>Resources, standard verbs, and self-descriptive messages — the heart of REST.</div>
+  <div class="card"><h4>Layered System</h4>Clients cannot tell whether they talk to the origin server or an intermediary (proxy, gateway, CDN).</div>
+  <div class="card"><h4>Code on Demand</h4>Optional: servers may send executable code (e.g. JavaScript) to extend the client.</div>
+</div>
+
+<h2 id="setup-and-getting-started">Setup and Getting Started</h2>
+<p>You do not need a framework to <em>call</em> a REST API — just an HTTP client. To <em>build</em> one, pick a language and web framework. Below are the tools you will reach for constantly.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># ---- Calling an API with curl ----</span>
+<span class="hljs-comment"># GET a resource</span>
+curl https://api.example.com/v1/users/42
+
+<span class="hljs-comment"># GET with headers (auth + content negotiation)</span>
+curl -H <span class="hljs-string">&quot;Authorization: Bearer <span class="hljs-variable">$TOKEN</span>&quot;</span> \
+     -H <span class="hljs-string">&quot;Accept: application/json&quot;</span> \
+     https://api.example.com/v1/users/42
+
+<span class="hljs-comment"># POST JSON to create a resource</span>
+curl -X POST https://api.example.com/v1/users \
+     -H <span class="hljs-string">&quot;Content-Type: application/json&quot;</span> \
+     -d <span class="hljs-string">&#x27;{&quot;name&quot;:&quot;Ada&quot;,&quot;email&quot;:&quot;ada@example.com&quot;}&#x27;</span>
+
+<span class="hljs-comment"># PATCH to partially update; -i shows response headers + status line</span>
+curl -i -X PATCH https://api.example.com/v1/users/42 \
+     -H <span class="hljs-string">&quot;Content-Type: application/json&quot;</span> \
+     -d <span class="hljs-string">&#x27;{&quot;name&quot;:&quot;Ada Lovelace&quot;}&#x27;</span>
+
+<span class="hljs-comment"># DELETE</span>
+curl -X DELETE https://api.example.com/v1/users/42 \
+     -H <span class="hljs-string">&quot;Authorization: Bearer <span class="hljs-variable">$TOKEN</span>&quot;</span></code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># ---- Spin up a tiny REST server to experiment ----</span>
+<span class="hljs-comment"># Node.js + Express</span>
+npm init -y
+npm install express
+<span class="hljs-comment"># Python + FastAPI</span>
+pip install fastapi uvicorn
+<span class="hljs-comment"># httpie: a friendlier curl for exploration</span>
+pip install httpie
+http GET api.example.com/v1/users/42 Authorization:<span class="hljs-string">&quot;Bearer <span class="hljs-variable">$TOKEN</span>&quot;</span></code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Keep a REST client like <span class="badge">Postman</span>, <span class="badge">Insomnia</span>, or VS Code's <span class="badge">REST Client</span> extension handy. Save requests as collections so you can replay auth flows and share them with teammates.</div>
+
+<h2 id="resources-and-uri-design">Resources and URI Design</h2>
+<p>A resource is any "thing" your API exposes: a user, an order, a photo, a search result. URIs are the names of those things. Good URI design is the single highest-leverage decision in an API — it is the part clients see most and the part hardest to change later.</p>
+
+<h3>Rules of Thumb</h3>
+<div class="grid c2">
+  <div class="card"><h4>Nouns, not verbs</h4>The verb lives in the HTTP method. Use <code>/orders</code>, never <code>/getOrders</code> or <code>/createOrder</code>.</div>
+  <div class="card"><h4>Plural collections</h4>Use <code>/users</code> for the collection and <code>/users/42</code> for a member. Consistency beats cleverness.</div>
+  <div class="card"><h4>Hierarchy for relationships</h4><code>/users/42/orders</code> reads as "the orders belonging to user 42".</div>
+  <div class="card"><h4>Lowercase, hyphenated</h4><code>/shipping-addresses</code>, not <code>/shippingAddresses</code> or <code>/Shipping_Addresses</code>.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 740 250" width="740" height="250">
+  <text x="20" y="30" font-size="14" fill="#1a2233" font-weight="bold">URI anatomy</text>
+  <rect x="20" y="55" width="90" height="42" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="65" y="81" text-anchor="middle" font-size="13" fill="#1e3a8a">https://</text>
+  <rect x="112" y="55" width="150" height="42" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="187" y="81" text-anchor="middle" font-size="13" fill="#059669">api.example.com</text>
+  <rect x="264" y="55" width="56" height="42" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="292" y="81" text-anchor="middle" font-size="13" fill="#b45309">/v1</text>
+  <rect x="322" y="55" width="150" height="42" rx="6" fill="#e0f2fe" stroke="#0891b2"/>
+  <text x="397" y="81" text-anchor="middle" font-size="13" fill="#0891b2">/users/42/orders</text>
+  <rect x="474" y="55" width="170" height="42" rx="6" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="559" y="81" text-anchor="middle" font-size="12" fill="#1a2233">?status=open&amp;sort=-date</text>
+
+  <text x="65" y="120" text-anchor="middle" font-size="11" fill="#94a3b8">scheme</text>
+  <text x="187" y="120" text-anchor="middle" font-size="11" fill="#94a3b8">host</text>
+  <text x="292" y="120" text-anchor="middle" font-size="11" fill="#94a3b8">version</text>
+  <text x="397" y="120" text-anchor="middle" font-size="11" fill="#94a3b8">resource path</text>
+  <text x="559" y="120" text-anchor="middle" font-size="11" fill="#94a3b8">query string</text>
+
+  <text x="20" y="175" font-size="13" fill="#1a2233" font-weight="bold">Path = identity &amp; hierarchy</text>
+  <text x="20" y="197" font-size="13" fill="#1a2233">Query string = filtering, sorting, pagination, search</text>
+  <text x="20" y="219" font-size="13" fill="#1a2233">Collections are plural; members are addressed by id</text>
+</svg><div class="cap">Fig 2. Anatomy of a REST URI — path encodes identity and hierarchy; the query string encodes how you want the collection shaped.</div></div>
+
+<table>
+  <tr><th>Intent</th><th>Method + URI</th><th>Meaning</th></tr>
+  <tr><td>List users</td><td><code>GET /users</code></td><td>Collection of all users</td></tr>
+  <tr><td>Get one user</td><td><code>GET /users/42</code></td><td>A single member</td></tr>
+  <tr><td>Create user</td><td><code>POST /users</code></td><td>Server assigns the id</td></tr>
+  <tr><td>Replace user</td><td><code>PUT /users/42</code></td><td>Full representation</td></tr>
+  <tr><td>Update fields</td><td><code>PATCH /users/42</code></td><td>Partial update</td></tr>
+  <tr><td>Delete user</td><td><code>DELETE /users/42</code></td><td>Remove the member</td></tr>
+  <tr><td>Sub-collection</td><td><code>GET /users/42/orders</code></td><td>Related resources</td></tr>
+  <tr><td>Filter/search</td><td><code>GET /orders?status=open</code></td><td>Query parameters</td></tr>
+</table>
+
+<h2 id="http-methods-and-semantics">HTTP Methods and Semantics</h2>
+<p>The uniform interface boils down to a handful of verbs. Two properties define their behaviour: <strong>safe</strong> methods never modify server state, and <strong>idempotent</strong> methods produce the same result whether called once or many times.</p>
+
+<table>
+  <tr><th>Method</th><th>Purpose</th><th>Safe</th><th>Idempotent</th><th>Request body</th></tr>
+  <tr><td><code>GET</code></td><td>Read a resource</td><td><span class="badge g">yes</span></td><td><span class="badge g">yes</span></td><td>no</td></tr>
+  <tr><td><code>HEAD</code></td><td>Read headers only</td><td><span class="badge g">yes</span></td><td><span class="badge g">yes</span></td><td>no</td></tr>
+  <tr><td><code>POST</code></td><td>Create / process</td><td><span class="badge o">no</span></td><td><span class="badge o">no</span></td><td>yes</td></tr>
+  <tr><td><code>PUT</code></td><td>Replace entirely</td><td><span class="badge o">no</span></td><td><span class="badge g">yes</span></td><td>yes</td></tr>
+  <tr><td><code>PATCH</code></td><td>Partial update</td><td><span class="badge o">no</span></td><td>not required</td><td>yes</td></tr>
+  <tr><td><code>DELETE</code></td><td>Remove a resource</td><td><span class="badge o">no</span></td><td><span class="badge g">yes</span></td><td>no</td></tr>
+  <tr><td><code>OPTIONS</code></td><td>Discover capabilities</td><td><span class="badge g">yes</span></td><td><span class="badge g">yes</span></td><td>no</td></tr>
+</table>
+
+<h3>PUT vs PATCH</h3>
+<p>Both update, but differently. <code>PUT</code> sends the <em>complete</em> new representation and replaces the resource; omitted fields are cleared. <code>PATCH</code> sends only the fields that change.</p>
+
+<div class="code-label">HTTP</div><pre><code class="hljs"><span class="hljs-keyword">PUT</span> <span class="hljs-string">/users/42</span> <span class="hljs-meta">HTTP/1.1</span>
+<span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/json
+
+<span class="language-pgsql">{ &quot;name&quot;: &quot;Ada&quot;, &quot;email&quot;: &quot;ada@example.com&quot;, &quot;role&quot;: &quot;admin&quot; }
+# <span class="hljs-keyword">Any</span> field <span class="hljs-keyword">not</span> sent <span class="hljs-keyword">is</span> removed/<span class="hljs-keyword">reset</span> — <span class="hljs-keyword">full</span> replacement.
+
+PATCH /users/<span class="hljs-number">42</span> HTTP/<span class="hljs-number">1.1</span>
+Content-<span class="hljs-keyword">Type</span>: application/<span class="hljs-type">json</span>
+
+{ &quot;role&quot;: &quot;admin&quot; }
+# <span class="hljs-keyword">Only</span> <span class="hljs-keyword">role</span> changes; <span class="hljs-type">name</span> <span class="hljs-keyword">and</span> email are untouched.</span></code></pre>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>POST</code> is not idempotent. Submitting the same "create order" POST twice creates two orders. For retry-safe creation, use an idempotency key (covered later).</div>
+
+<h2 id="status-codes">Status Codes</h2>
+<p>The status code is the first thing a client inspects. Use the <em>right</em> code — do not return <code>200 OK</code> with an error buried in the body. The number carries machine-readable meaning.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>2xx Success</h4><code>200</code> OK · <code>201</code> Created · <code>202</code> Accepted · <code>204</code> No Content</div>
+  <div class="card"><h4>3xx Redirect</h4><code>301</code> Moved · <code>304</code> Not Modified · <code>307</code>/<code>308</code> Temporary/Permanent</div>
+  <div class="card"><h4>4xx Client error</h4><code>400</code> · <code>401</code> · <code>403</code> · <code>404</code> · <code>409</code> · <code>422</code> · <code>429</code></div>
+  <div class="card"><h4>5xx Server error</h4><code>500</code> Internal · <code>502</code> Bad Gateway · <code>503</code> Unavailable · <code>504</code> Timeout</div>
+</div>
+
+<table>
+  <tr><th>Code</th><th>Name</th><th>When to use it</th></tr>
+  <tr><td><code>200</code></td><td>OK</td><td>Successful GET/PUT/PATCH returning a body</td></tr>
+  <tr><td><code>201</code></td><td>Created</td><td>POST created a resource; return a <code>Location</code> header</td></tr>
+  <tr><td><code>204</code></td><td>No Content</td><td>Success with no body (e.g. DELETE)</td></tr>
+  <tr><td><code>400</code></td><td>Bad Request</td><td>Malformed syntax or invalid parameters</td></tr>
+  <tr><td><code>401</code></td><td>Unauthorized</td><td>Missing or invalid authentication</td></tr>
+  <tr><td><code>403</code></td><td>Forbidden</td><td>Authenticated but not permitted</td></tr>
+  <tr><td><code>404</code></td><td>Not Found</td><td>Resource does not exist</td></tr>
+  <tr><td><code>409</code></td><td>Conflict</td><td>State conflict, e.g. duplicate or version mismatch</td></tr>
+  <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>Syntactically valid but semantically invalid</td></tr>
+  <tr><td><code>429</code></td><td>Too Many Requests</td><td>Rate limit exceeded; send <code>Retry-After</code></td></tr>
+  <tr><td><code>500</code></td><td>Internal Server Error</td><td>Unhandled server-side failure</td></tr>
+  <tr><td><code>503</code></td><td>Service Unavailable</td><td>Overloaded or down for maintenance</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">401 vs 403</span> <code>401</code> means "I don't know who you are — authenticate." <code>403</code> means "I know who you are, but you may not do this." Mixing them up is a classic bug.</div>
+
+<h2 id="request-and-response-anatomy">Request and Response Anatomy</h2>
+<p>An HTTP message has a start line, headers, a blank line, and an optional body. Mastering the common headers is most of the job.</p>
+
+<div class="code-label">HTTP</div><pre><code class="hljs"><span class="hljs-keyword">POST</span> <span class="hljs-string">/v1/orders</span> <span class="hljs-meta">HTTP/1.1</span>
+<span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>api.example.com
+<span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer eyJhbGciOiJIUzI1NiIsIn...
+<span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/json
+<span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>application/json
+<span class="hljs-attribute">Idempotency-Key</span><span class="hljs-punctuation">: </span>7f3c-9a21-b004
+
+<span class="language-json"><span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;productId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;sku-991&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;quantity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span> <span class="hljs-punctuation">}</span></span></code></pre>
+
+<div class="code-label">HTTP</div><pre><code class="hljs"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">201</span> Created
+<span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/json
+<span class="hljs-attribute">Location</span><span class="hljs-punctuation">: </span>/v1/orders/5581
+<span class="hljs-attribute">Cache-Control</span><span class="hljs-punctuation">: </span>no-store
+<span class="hljs-attribute">X-RateLimit-Remaining</span><span class="hljs-punctuation">: </span>59
+
+<span class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">5581</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;productId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;sku-991&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;quantity&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;pending&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;createdAt&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-10-01T09:12:44Z&quot;</span>
+<span class="hljs-punctuation">}</span></span></code></pre>
+
+<table>
+  <tr><th>Header</th><th>Direction</th><th>Role</th></tr>
+  <tr><td><code>Content-Type</code></td><td>both</td><td>Media type of the body (<code>application/json</code>)</td></tr>
+  <tr><td><code>Accept</code></td><td>request</td><td>Media types the client can handle</td></tr>
+  <tr><td><code>Authorization</code></td><td>request</td><td>Credentials (Bearer token, Basic, etc.)</td></tr>
+  <tr><td><code>Location</code></td><td>response</td><td>URI of a newly created resource</td></tr>
+  <tr><td><code>ETag</code></td><td>response</td><td>Version tag for caching / concurrency</td></tr>
+  <tr><td><code>Cache-Control</code></td><td>both</td><td>Caching directives</td></tr>
+  <tr><td><code>Retry-After</code></td><td>response</td><td>How long to wait after 429/503</td></tr>
+</table>
+
+<h3>JSON: The Lingua Franca</h3>
+<p>JSON is the default representation for REST. It is human-readable, language-agnostic, and maps cleanly onto objects. Keep key names consistent (pick <code>camelCase</code> or <code>snake_case</code> and never mix), use ISO-8601 for timestamps, and return numbers as numbers, not strings.</p>
+
+<div class="code-label">JSON</div><pre><code class="hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">42</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Ada Lovelace&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ada@example.com&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;isActive&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;roles&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;admin&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;editor&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;createdAt&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-10-01T09:12:44Z&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;address&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;city&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;London&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;country&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;UK&quot;</span> <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+
+<div class="callout note"><span class="t">Error envelopes</span> Standardize errors. RFC 9457 "Problem Details" (<code>application/problem+json</code>) is the modern standard: a body with <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, and <code>instance</code>.</div>
+
+<div class="code-label">JSON</div><pre><code class="hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://api.example.com/errors/validation&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;title&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Validation failed&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">422</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;detail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;quantity must be a positive integer&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;instance&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/v1/orders&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;errors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;field&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;quantity&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;must be &gt;= 1&quot;</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span></code></pre>
+
+<h2 id="authentication-and-authorization">Authentication and Authorization</h2>
+<p>Authentication proves <em>who</em> you are; authorization decides <em>what</em> you may do. Three schemes dominate REST APIs.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 320" width="760" height="320">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/>
+    </marker>
+  </defs>
+  <text x="20" y="26" font-size="14" font-weight="bold" fill="#1a2233">OAuth 2.0 Authorization Code flow (simplified)</text>
+  <rect x="20" y="60" width="120" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="80" y="95" text-anchor="middle" font-size="13" fill="#1e3a8a">User /</text>
+  <text x="80" y="112" text-anchor="middle" font-size="13" fill="#1e3a8a">Browser</text>
+  <rect x="320" y="60" width="130" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="385" y="95" text-anchor="middle" font-size="13" fill="#059669">Auth Server</text>
+  <text x="385" y="112" text-anchor="middle" font-size="11" fill="#1a2233">(identity provider)</text>
+  <rect x="620" y="60" width="120" height="60" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="680" y="95" text-anchor="middle" font-size="13" fill="#b45309">API /</text>
+  <text x="680" y="112" text-anchor="middle" font-size="13" fill="#b45309">Resource</text>
+
+  <path d="M140,80 L318,80" fill="none" stroke="#1e3a8a" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <text x="229" y="72" text-anchor="middle" font-size="11" fill="#1a2233">1. login + consent</text>
+  <path d="M320,105 L142,105" fill="none" stroke="#1e3a8a" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <text x="229" y="135" text-anchor="middle" font-size="11" fill="#1a2233">2. auth code</text>
+
+  <path d="M80,120 L80,200 L383,200 L383,122" fill="none" stroke="#1e3a8a" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <text x="230" y="192" text-anchor="middle" font-size="11" fill="#1a2233">3. exchange code -&gt; access token (+ refresh token)</text>
+
+  <path d="M80,210 L80,270 L680,270 L680,122" fill="none" stroke="#1e3a8a" stroke-width="1.8" marker-end="url(#ah2)"/>
+  <text x="380" y="262" text-anchor="middle" font-size="11" fill="#1a2233">4. call API with  Authorization: Bearer &lt;access token&gt;</text>
+  <path d="M620,90 L452,90" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ah2)"/>
+  <text x="536" y="82" text-anchor="middle" font-size="11" fill="#94a3b8">5. validate token</text>
+</svg><div class="cap">Fig 3. OAuth 2.0 Authorization Code flow: the API never sees the user's password; it trusts a short-lived access token minted by the auth server.</div></div>
+
+<div class="grid c3">
+  <div class="card"><h4>API Keys</h4>A single opaque string identifying the caller. Simple, good for server-to-server and public data. Weakness: no built-in expiry or scopes; treat like a password.</div>
+  <div class="card"><h4>JWT (Bearer)</h4>A signed, self-contained token carrying claims (user id, scopes, expiry). The server verifies the signature — no DB lookup. Stateless and fast.</div>
+  <div class="card"><h4>OAuth 2.0</h4>A delegation framework. Lets a third-party app act on a user's behalf without seeing their password. OIDC adds an identity layer on top.</div>
+</div>
+
+<h3>JWT Up Close</h3>
+<p>A JWT has three Base64URL parts separated by dots: <code>header.payload.signature</code>. The signature is computed over the header and payload with a secret (HMAC) or private key (RSA/ECDSA), so tampering is detectable.</p>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-comment">// Node.js — issue and verify a JWT with jsonwebtoken</span>
+<span class="hljs-keyword">import</span> jwt <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;jsonwebtoken&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SECRET</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">JWT_SECRET</span>;
+
+<span class="hljs-comment">// Sign a token at login (short-lived access token)</span>
+<span class="hljs-keyword">const</span> token = jwt.<span class="hljs-title function_">sign</span>(
+  { <span class="hljs-attr">sub</span>: <span class="hljs-string">&quot;42&quot;</span>, <span class="hljs-attr">scope</span>: <span class="hljs-string">&quot;orders:read orders:write&quot;</span> },
+  <span class="hljs-variable constant_">SECRET</span>,
+  { <span class="hljs-attr">expiresIn</span>: <span class="hljs-string">&quot;15m&quot;</span>, <span class="hljs-attr">issuer</span>: <span class="hljs-string">&quot;api.example.com&quot;</span> }
+);
+
+<span class="hljs-comment">// Verify on each protected request (Express middleware)</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">auth</span>(<span class="hljs-params">req, res, next</span>) {
+  <span class="hljs-keyword">const</span> header = req.<span class="hljs-property">headers</span>.<span class="hljs-property">authorization</span> || <span class="hljs-string">&quot;&quot;</span>;
+  <span class="hljs-keyword">const</span> [scheme, value] = header.<span class="hljs-title function_">split</span>(<span class="hljs-string">&quot; &quot;</span>);
+  <span class="hljs-keyword">if</span> (scheme !== <span class="hljs-string">&quot;Bearer&quot;</span> || !value) {
+    <span class="hljs-keyword">return</span> res.<span class="hljs-title function_">status</span>(<span class="hljs-number">401</span>).<span class="hljs-title function_">json</span>({ <span class="hljs-attr">title</span>: <span class="hljs-string">&quot;Missing bearer token&quot;</span> });
+  }
+  <span class="hljs-keyword">try</span> {
+    req.<span class="hljs-property">user</span> = jwt.<span class="hljs-title function_">verify</span>(value, <span class="hljs-variable constant_">SECRET</span>);   <span class="hljs-comment">// throws if invalid/expired</span>
+    <span class="hljs-title function_">next</span>();
+  } <span class="hljs-keyword">catch</span> (err) {
+    <span class="hljs-keyword">return</span> res.<span class="hljs-title function_">status</span>(<span class="hljs-number">401</span>).<span class="hljs-title function_">json</span>({ <span class="hljs-attr">title</span>: <span class="hljs-string">&quot;Invalid or expired token&quot;</span> });
+  }
+}</code></pre>
+
+<div class="callout danger"><span class="t">Danger</span> Never put secrets or sensitive PII in a JWT payload — it is only Base64-encoded, not encrypted, and anyone holding the token can read it. Keep access tokens short-lived and rotate with refresh tokens. Always serve APIs over HTTPS.</div>
+
+<table>
+  <tr><th>Scheme</th><th>Best for</th><th>Expiry</th><th>Scopes</th><th>Stateless</th></tr>
+  <tr><td>API Key</td><td>Internal / public read</td><td>manual</td><td>limited</td><td>yes</td></tr>
+  <tr><td>JWT</td><td>SPAs, microservices</td><td>built-in (<code>exp</code>)</td><td>via claims</td><td>yes</td></tr>
+  <tr><td>OAuth 2.0</td><td>Third-party delegation</td><td>built-in</td><td>rich</td><td>token-dependent</td></tr>
+</table>
+
+<h2 id="versioning-pagination-and-idempotency">Versioning, Pagination, and Idempotency</h2>
+
+<h3>Versioning</h3>
+<p>APIs change. Versioning lets you evolve without breaking existing clients. The three common strategies trade off visibility against purity.</p>
+<table>
+  <tr><th>Strategy</th><th>Example</th><th>Pros / Cons</th></tr>
+  <tr><td>URI path</td><td><code>/v1/users</code></td><td>Obvious, cache-friendly; "impure" per REST</td></tr>
+  <tr><td>Header</td><td><code>Accept: application/vnd.ex.v2+json</code></td><td>Clean URIs; harder to test/debug</td></tr>
+  <tr><td>Query param</td><td><code>/users?version=2</code></td><td>Easy to default; clutters the query string</td></tr>
+</table>
+<div class="callout tip"><span class="t">Pragmatic choice</span> URI path versioning (<code>/v1</code>) is the most widely used because it is visible, easy to route, and trivial to curl. Only bump the major version for breaking changes; add fields additively within a version.</div>
+
+<h3>Pagination</h3>
+<p>Never return an unbounded list. Two dominant styles:</p>
+<div class="grid c2">
+  <div class="card"><h4>Offset / limit</h4><code>GET /users?limit=20&amp;offset=40</code>. Simple and jumpable, but slow and inconsistent on large, changing datasets.</div>
+  <div class="card"><h4>Cursor / keyset</h4><code>GET /users?limit=20&amp;cursor=eyJpZCI6NDB9</code>. Stable and fast at scale; cannot jump to an arbitrary page.</div>
+</div>
+
+<div class="code-label">JSON</div><pre><code class="hljs"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">41</span> <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span> <span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">42</span> <span class="hljs-punctuation">}</span> <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;pagination&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;limit&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;nextCursor&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eyJpZCI6NjB9&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;hasMore&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span>
+  <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+
+<h3>Idempotency Keys</h3>
+<p>To make non-idempotent <code>POST</code> requests safe to retry (network glitch, timeout), the client sends a unique <code>Idempotency-Key</code>. The server records the key with the first result and replays that stored result for any repeat — so a double-submit never creates two orders.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 230" width="720" height="230">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#059669"/>
+    </marker>
+  </defs>
+  <rect x="20" y="30" width="150" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="60" text-anchor="middle" font-size="13" fill="#1e3a8a">POST + key K1</text>
+  <rect x="300" y="30" width="170" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="385" y="52" text-anchor="middle" font-size="12" fill="#059669">K1 unseen -&gt; process</text>
+  <text x="385" y="70" text-anchor="middle" font-size="12" fill="#1a2233">store result for K1</text>
+  <rect x="560" y="30" width="140" height="50" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="630" y="60" text-anchor="middle" font-size="13" fill="#b45309">201 Created</text>
+  <path d="M170,55 L298,55" stroke="#059669" stroke-width="1.8" marker-end="url(#ah3)"/>
+  <path d="M470,55 L558,55" stroke="#059669" stroke-width="1.8" marker-end="url(#ah3)"/>
+
+  <rect x="20" y="140" width="150" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="170" text-anchor="middle" font-size="13" fill="#1e3a8a">RETRY + key K1</text>
+  <rect x="300" y="140" width="170" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="385" y="162" text-anchor="middle" font-size="12" fill="#059669">K1 seen -&gt; skip work</text>
+  <text x="385" y="180" text-anchor="middle" font-size="12" fill="#1a2233">replay stored result</text>
+  <rect x="560" y="140" width="140" height="50" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="630" y="170" text-anchor="middle" font-size="13" fill="#b45309">same 201</text>
+  <path d="M170,165 L298,165" stroke="#059669" stroke-width="1.8" marker-end="url(#ah3)"/>
+  <path d="M470,165 L558,165" stroke="#059669" stroke-width="1.8" marker-end="url(#ah3)"/>
+</svg><div class="cap">Fig 4. Idempotency keys make POST retry-safe: the second call with the same key replays the first result instead of creating a duplicate.</div></div>
+
+<h2 id="a-worked-mini-example-a-tasks-api">A Worked Mini-Example: A Tasks API</h2>
+<p>Let us build a small, idiomatic CRUD endpoint set with FastAPI. It demonstrates resources, status codes, validation, and pagination in under 60 lines.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI, HTTPException, Response, status
+<span class="hljs-keyword">from</span> pydantic <span class="hljs-keyword">import</span> BaseModel, Field
+<span class="hljs-keyword">from</span> uuid <span class="hljs-keyword">import</span> uuid4
+
+app = FastAPI(title=<span class="hljs-string">&quot;Tasks API&quot;</span>, version=<span class="hljs-string">&quot;1.0.0&quot;</span>)
+db: <span class="hljs-built_in">dict</span>[<span class="hljs-built_in">str</span>, <span class="hljs-built_in">dict</span>] = {}   <span class="hljs-comment"># in-memory store for the demo</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TaskIn</span>(<span class="hljs-title class_ inherited__">BaseModel</span>):
+    title: <span class="hljs-built_in">str</span> = Field(min_length=<span class="hljs-number">1</span>, max_length=<span class="hljs-number">120</span>)
+    done: <span class="hljs-built_in">bool</span> = <span class="hljs-literal">False</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Task</span>(<span class="hljs-title class_ inherited__">TaskIn</span>):
+    <span class="hljs-built_in">id</span>: <span class="hljs-built_in">str</span>
+
+<span class="hljs-meta">@app.get(<span class="hljs-params"><span class="hljs-string">&quot;/v1/tasks&quot;</span></span>)                       </span><span class="hljs-comment"># list + simple pagination</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">list_tasks</span>(<span class="hljs-params">limit: <span class="hljs-built_in">int</span> = <span class="hljs-number">20</span>, offset: <span class="hljs-built_in">int</span> = <span class="hljs-number">0</span></span>):
+    items = <span class="hljs-built_in">list</span>(db.values())
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;data&quot;</span>: items[offset: offset + limit],
+            <span class="hljs-string">&quot;pagination&quot;</span>: {<span class="hljs-string">&quot;limit&quot;</span>: limit, <span class="hljs-string">&quot;offset&quot;</span>: offset,
+                           <span class="hljs-string">&quot;total&quot;</span>: <span class="hljs-built_in">len</span>(items)}}
+
+<span class="hljs-meta">@app.post(<span class="hljs-params"><span class="hljs-string">&quot;/v1/tasks&quot;</span>, status_code=status.HTTP_201_CREATED</span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">create_task</span>(<span class="hljs-params">body: TaskIn, response: Response</span>):
+    task = Task(<span class="hljs-built_in">id</span>=<span class="hljs-built_in">str</span>(uuid4()), **body.model_dump())
+    db[task.<span class="hljs-built_in">id</span>] = task.model_dump()
+    response.headers[<span class="hljs-string">&quot;Location&quot;</span>] = <span class="hljs-string">f&quot;/v1/tasks/<span class="hljs-subst">{task.<span class="hljs-built_in">id</span>}</span>&quot;</span>   <span class="hljs-comment"># 201 best practice</span>
+    <span class="hljs-keyword">return</span> task
+
+<span class="hljs-meta">@app.get(<span class="hljs-params"><span class="hljs-string">&quot;/v1/tasks/{task_id}&quot;</span></span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_task</span>(<span class="hljs-params">task_id: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-keyword">if</span> task_id <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> db:
+        <span class="hljs-keyword">raise</span> HTTPException(status.HTTP_404_NOT_FOUND, <span class="hljs-string">&quot;task not found&quot;</span>)
+    <span class="hljs-keyword">return</span> db[task_id]
+
+<span class="hljs-meta">@app.patch(<span class="hljs-params"><span class="hljs-string">&quot;/v1/tasks/{task_id}&quot;</span></span>)           </span><span class="hljs-comment"># partial update</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">update_task</span>(<span class="hljs-params">task_id: <span class="hljs-built_in">str</span>, body: TaskIn</span>):
+    <span class="hljs-keyword">if</span> task_id <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> db:
+        <span class="hljs-keyword">raise</span> HTTPException(status.HTTP_404_NOT_FOUND, <span class="hljs-string">&quot;task not found&quot;</span>)
+    db[task_id].update(body.model_dump())
+    <span class="hljs-keyword">return</span> db[task_id]
+
+<span class="hljs-meta">@app.delete(<span class="hljs-params"><span class="hljs-string">&quot;/v1/tasks/{task_id}&quot;</span>,
+            status_code=status.HTTP_204_NO_CONTENT</span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">delete_task</span>(<span class="hljs-params">task_id: <span class="hljs-built_in">str</span></span>):
+    db.pop(task_id, <span class="hljs-literal">None</span>)                   <span class="hljs-comment"># 204: no body on success</span></code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Run it, then explore the auto-generated docs at /docs</span>
+uvicorn main:app --reload
+curl -X POST localhost:8000/v1/tasks -H <span class="hljs-string">&quot;Content-Type: application/json&quot;</span> \
+     -d <span class="hljs-string">&#x27;{&quot;title&quot;:&quot;Write the REST guide&quot;}&#x27;</span></code></pre>
+
+<div class="callout ok"><span class="t">Nice</span> FastAPI generates an interactive OpenAPI (Swagger) UI at <code>/docs</code> automatically from your type hints — documentation and validation for free.</div>
+
+<h2 id="designing-and-documenting-with-openapi">Designing and Documenting with OpenAPI</h2>
+<p>OpenAPI (formerly Swagger) is the de-facto standard for describing REST APIs in a machine-readable YAML/JSON document. From one spec you can generate interactive docs, client SDKs, server stubs, and contract tests. Design-first teams write the spec before the code.</p>
+
+<div class="code-label">YAML</div><pre><code class="hljs"><span class="hljs-attr">openapi:</span> <span class="hljs-number">3.1</span><span class="hljs-number">.0</span>
+<span class="hljs-attr">info:</span>
+  <span class="hljs-attr">title:</span> <span class="hljs-string">Tasks</span> <span class="hljs-string">API</span>
+  <span class="hljs-attr">version:</span> <span class="hljs-number">1.0</span><span class="hljs-number">.0</span>
+<span class="hljs-attr">paths:</span>
+  <span class="hljs-string">/v1/tasks:</span>
+    <span class="hljs-attr">get:</span>
+      <span class="hljs-attr">summary:</span> <span class="hljs-string">List</span> <span class="hljs-string">tasks</span>
+      <span class="hljs-attr">parameters:</span>
+        <span class="hljs-bullet">-</span> { <span class="hljs-attr">name:</span> <span class="hljs-string">limit</span>, <span class="hljs-attr">in:</span> <span class="hljs-string">query</span>, <span class="hljs-attr">schema:</span> { <span class="hljs-attr">type:</span> <span class="hljs-string">integer</span>, <span class="hljs-attr">default:</span> <span class="hljs-number">20</span> } }
+      <span class="hljs-attr">responses:</span>
+        <span class="hljs-attr">&quot;200&quot;:</span>
+          <span class="hljs-attr">description:</span> <span class="hljs-string">A</span> <span class="hljs-string">page</span> <span class="hljs-string">of</span> <span class="hljs-string">tasks</span>
+          <span class="hljs-attr">content:</span>
+            <span class="hljs-attr">application/json:</span>
+              <span class="hljs-attr">schema:</span> { <span class="hljs-string">$ref:</span> <span class="hljs-string">&quot;#/components/schemas/TaskList&quot;</span> }
+    <span class="hljs-attr">post:</span>
+      <span class="hljs-attr">summary:</span> <span class="hljs-string">Create</span> <span class="hljs-string">a</span> <span class="hljs-string">task</span>
+      <span class="hljs-attr">requestBody:</span>
+        <span class="hljs-attr">required:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-attr">content:</span>
+          <span class="hljs-attr">application/json:</span>
+            <span class="hljs-attr">schema:</span> { <span class="hljs-string">$ref:</span> <span class="hljs-string">&quot;#/components/schemas/TaskIn&quot;</span> }
+      <span class="hljs-attr">responses:</span>
+        <span class="hljs-attr">&quot;201&quot;:</span> { <span class="hljs-attr">description:</span> <span class="hljs-string">Created</span> }
+<span class="hljs-attr">components:</span>
+  <span class="hljs-attr">schemas:</span>
+    <span class="hljs-attr">TaskIn:</span>
+      <span class="hljs-attr">type:</span> <span class="hljs-string">object</span>
+      <span class="hljs-attr">required:</span> [<span class="hljs-string">title</span>]
+      <span class="hljs-attr">properties:</span>
+        <span class="hljs-attr">title:</span> { <span class="hljs-attr">type:</span> <span class="hljs-string">string</span>, <span class="hljs-attr">maxLength:</span> <span class="hljs-number">120</span> }
+        <span class="hljs-attr">done:</span>  { <span class="hljs-attr">type:</span> <span class="hljs-string">boolean</span>, <span class="hljs-attr">default:</span> <span class="hljs-literal">false</span> }</code></pre>
+
+<div class="pipeline"><span class="step">Write OpenAPI spec</span><span class="arrow">-&gt;</span><span class="step">Generate docs + SDKs</span><span class="arrow">-&gt;</span><span class="step">Implement</span><span class="arrow">-&gt;</span><span class="step">Contract test</span></div>
+
+<h2 id="testing-rest-apis">Testing REST APIs</h2>
+<p>Test at multiple levels: unit tests for handlers, integration tests that hit the real HTTP layer, and contract tests that verify you still match the OpenAPI spec. Below, a Python example using <code>pytest</code> + FastAPI's test client.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> fastapi.testclient <span class="hljs-keyword">import</span> TestClient
+<span class="hljs-keyword">from</span> main <span class="hljs-keyword">import</span> app
+
+client = TestClient(app)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_create_and_fetch_task</span>():
+    <span class="hljs-comment"># Create -&gt; expect 201 and a Location header</span>
+    r = client.post(<span class="hljs-string">&quot;/v1/tasks&quot;</span>, json={<span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;ship it&quot;</span>})
+    <span class="hljs-keyword">assert</span> r.status_code == <span class="hljs-number">201</span>
+    task = r.json()
+    <span class="hljs-keyword">assert</span> task[<span class="hljs-string">&quot;title&quot;</span>] == <span class="hljs-string">&quot;ship it&quot;</span>
+    <span class="hljs-keyword">assert</span> <span class="hljs-string">&quot;Location&quot;</span> <span class="hljs-keyword">in</span> r.headers
+
+    <span class="hljs-comment"># Fetch the created resource -&gt; 200</span>
+    r2 = client.get(<span class="hljs-string">f&quot;/v1/tasks/<span class="hljs-subst">{task[<span class="hljs-string">&#x27;id&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-keyword">assert</span> r2.status_code == <span class="hljs-number">200</span>
+    <span class="hljs-keyword">assert</span> r2.json()[<span class="hljs-string">&quot;done&quot;</span>] <span class="hljs-keyword">is</span> <span class="hljs-literal">False</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_missing_task_returns_404</span>():
+    r = client.get(<span class="hljs-string">&quot;/v1/tasks/does-not-exist&quot;</span>)
+    <span class="hljs-keyword">assert</span> r.status_code == <span class="hljs-number">404</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_validation_rejects_empty_title</span>():
+    r = client.post(<span class="hljs-string">&quot;/v1/tasks&quot;</span>, json={<span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;&quot;</span>})
+    <span class="hljs-keyword">assert</span> r.status_code == <span class="hljs-number">422</span>   <span class="hljs-comment"># Pydantic validation error</span></code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Add a smoke-test suite that runs against a deployed environment with real auth. Tools like <span class="badge">Postman/Newman</span>, <span class="badge">Schemathesis</span> (property-based from your OpenAPI spec), and <span class="badge">Pact</span> (consumer-driven contracts) catch regressions curl never will.</div>
+
+<h2 id="best-practices-and-common-pitfalls">Best Practices and Common Pitfalls</h2>
+<div class="grid c2">
+  <div class="card"><h4>Do</h4>Use nouns + proper verbs, correct status codes, consistent JSON casing, pagination on all lists, HTTPS everywhere, and versioned URIs.</div>
+  <div class="card"><h4>Do</h4>Return a <code>Location</code> header on 201, a standard error envelope, and rate-limit headers (<code>X-RateLimit-*</code>, <code>Retry-After</code>).</div>
+</div>
+
+<div class="callout ok"><span class="t">Best practice</span> Make GET, PUT, and DELETE idempotent and GET side-effect-free. Design for backward compatibility: add fields, never repurpose or remove them within a version.</div>
+<div class="callout warn"><span class="t">Pitfall</span> Returning <code>200 OK</code> for errors ("tunneling" errors in the body) breaks clients, caches, and monitoring. Let the status code tell the truth.</div>
+<div class="callout danger"><span class="t">Pitfall</span> Verbs in URIs (<code>/createUser</code>), chatty N+1 round trips, leaking stack traces in 500s, unbounded list endpoints, and putting secrets in query strings (they land in logs). Avoid all five.</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What makes an API "RESTful"?</div><div class="a">It follows REST's constraints: a client-server split, statelessness, cacheability, a layered system, and — above all — a uniform interface built on resources (addressed by URIs) manipulated with standard HTTP verbs that exchange self-descriptive representations. In practice this means nouns in URIs, correct verbs and status codes, and stateless requests.</div></div>
+<div class="qa"><div class="q">Explain safe vs idempotent methods.</div><div class="a">A safe method does not modify server state (GET, HEAD, OPTIONS). An idempotent method yields the same server state whether called once or N times (GET, PUT, DELETE, HEAD). All safe methods are idempotent, but not vice versa — PUT is idempotent yet not safe. POST is neither.</div></div>
+<div class="qa"><div class="q">PUT vs PATCH — when do you use each?</div><div class="a">PUT replaces the entire resource with the representation you send; omitted fields are cleared. PATCH applies a partial modification, changing only the fields you include. Use PUT when the client holds the full state, PATCH for targeted updates.</div></div>
+<div class="qa"><div class="q">POST returned a timeout but may have succeeded. How do you retry safely?</div><div class="a">Use an idempotency key: the client sends a unique <code>Idempotency-Key</code> header; the server stores the result against that key on first processing and replays the stored response on any retry, so no duplicate resource is created.</div></div>
+<div class="qa"><div class="q">What is the difference between 401 and 403?</div><div class="a">401 Unauthorized means authentication is missing or invalid — the server does not know who you are. 403 Forbidden means you are authenticated but lack permission for this action. 401 is about identity; 403 is about authorization.</div></div>
+<div class="qa"><div class="q">How does a JWT work, and what are its risks?</div><div class="a">A JWT is a signed token of three Base64URL parts — header, payload (claims like <code>sub</code>, <code>exp</code>, scopes), and signature. The server verifies the signature with a secret or public key, so it trusts the claims without a DB lookup (stateless). Risks: the payload is readable (not encrypted), tokens cannot be revoked individually before expiry, and a leaked signing key is catastrophic. Mitigate with short expiry, refresh tokens, HTTPS, and a rotation/denylist strategy.</div></div>
+<div class="qa"><div class="q">Offset vs cursor pagination?</div><div class="a">Offset/limit is simple and lets you jump to any page, but it degrades on large tables and can skip or duplicate rows when data changes mid-scroll. Cursor (keyset) pagination encodes the position of the last item, giving stable, fast, O(log n) reads at scale — at the cost of not being able to jump to an arbitrary page.</div></div>
+<div class="qa"><div class="q">How do you version a REST API without breaking clients?</div><div class="a">Bump a major version (commonly in the URI path, <code>/v2</code>) only for breaking changes. Within a version, evolve additively — add new optional fields and endpoints, never remove or repurpose existing ones. Communicate deprecation with a timeline and the <code>Deprecation</code>/<code>Sunset</code> headers.</div></div>
+<div class="qa"><div class="q">REST vs GraphQL — when would you choose each?</div><div class="a">REST shines with resource-oriented, cacheable APIs and a stable, well-understood surface; HTTP caching and tooling come for free. GraphQL lets clients request exactly the fields they need in one round trip, avoiding over/under-fetching — valuable for complex, nested data and many client types. GraphQL trades HTTP-level caching and simplicity for flexibility.</div></div>
+<div class="qa"><div class="q">What is HATEOAS and why is it rare?</div><div class="a">HATEOAS (Hypermedia As The Engine Of Application State) means responses include links telling the client what actions are available next, so clients navigate by following links rather than hard-coding URIs. It is the highest REST maturity level but rare because it adds complexity and most clients are built against documented, fixed endpoints instead.</div></div>
+<div class="qa"><div class="q">How do you handle rate limiting?</div><div class="a">Return <code>429 Too Many Requests</code> when a client exceeds its quota, include <code>Retry-After</code> telling it when to try again, and expose <code>X-RateLimit-Limit/Remaining/Reset</code> headers so well-behaved clients can self-throttle. Common algorithms are token bucket and sliding window.</div></div>
+<div class="qa"><div class="q">Why must REST be stateless, and where does session state live?</div><div class="a">Statelessness means each request carries all context (e.g. an auth token), so any server instance can handle any request — enabling horizontal scaling, simple load balancing, and resilience. State that must persist (user sessions, carts) lives in the client (tokens) or a shared store (database, Redis), not in per-server memory.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li>Read Roy Fielding's dissertation, chapter 5, for REST's original rationale.</li>
+  <li>Study the HTTP semantics specs: RFC 9110 (HTTP semantics) and RFC 9457 (Problem Details for error bodies).</li>
+  <li>Build the Tasks API above, then add JWT auth, cursor pagination, and an OpenAPI spec; generate a client SDK from it.</li>
+  <li>Explore adjacent styles — GraphQL, gRPC, and webhooks — to understand REST's trade-offs.</li>
+  <li>Practice with Schemathesis and Pact to make contract testing part of your CI pipeline.</li>
+  <li>Review real-world API design guides from Stripe, GitHub, and Google (AIPs) — they are masterclasses in pragmatic REST.</li>
+</ul>
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

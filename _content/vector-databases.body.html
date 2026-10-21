@@ -1,0 +1,508 @@
+<p class="lead">A vector database turns <em>meaning</em> into geometry. Text, images, and audio become high-dimensional points; "find things similar to this" becomes "find the nearest points." Master embeddings, approximate-nearest-neighbour (ANN) indexes, and two workhorse engines — <span class="badge">FAISS</span> for raw in-process speed and <span class="badge g">ChromaDB</span> for a batteries-included store — and you can build the retrieval layer behind RAG, semantic search, recommendations, and deduplication.</p>
+
+<h2>1. What a Vector Database Is and Why It Matters</h2>
+
+<p>Classic databases index <em>exact</em> values: a B-tree on <code>email = 'x@y.com'</code>. But "which support tickets are <em>about the same problem</em> as this one?" has no exact key — the match is semantic, not lexical. The trick is to convert each item into an <strong>embedding</strong>: a dense vector (often 384–3072 floats) produced by a neural network such that <em>semantically similar inputs land close together</em> in the vector space. Searching becomes a geometry problem: given a query vector, return the <span class="kbd">k</span> stored vectors with the smallest distance.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Semantic recall</h4>"car won't start" matches "engine fails to crank" even with zero shared words — meaning, not keywords.</div>
+  <div class="card"><h4>Multimodal</h4>The same geometry works for images, audio, and code once each modality has an embedding model.</div>
+  <div class="card"><h4>Scales sub-linearly</h4>ANN indexes answer queries over millions of vectors in milliseconds, far below a brute-force scan.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="150" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="42" text-anchor="middle" font-size="13" fill="#1a2233">Raw data</text>
+  <text x="95" y="58" text-anchor="middle" font-size="11" fill="#64748b">docs, images, code</text>
+
+  <rect x="230" y="20" width="150" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="305" y="42" text-anchor="middle" font-size="13" fill="#1a2233">Embedding model</text>
+  <text x="305" y="58" text-anchor="middle" font-size="11" fill="#64748b">text -&gt; float[d]</text>
+
+  <rect x="440" y="20" width="150" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="515" y="42" text-anchor="middle" font-size="13" fill="#1a2233">Vector index</text>
+  <text x="515" y="58" text-anchor="middle" font-size="11" fill="#64748b">+ metadata store</text>
+
+  <line x1="170" y1="45" x2="230" y2="45" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="380" y1="45" x2="440" y2="45" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+
+  <!-- vector space scatter -->
+  <rect x="60" y="110" width="300" height="170" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="210" y="128" text-anchor="middle" font-size="12" fill="#64748b">2-D projection of the vector space</text>
+  <circle cx="130" cy="190" r="7" fill="#2563eb"/><text x="130" y="178" text-anchor="middle" font-size="10" fill="#1a2233">cat</text>
+  <circle cx="150" cy="210" r="7" fill="#2563eb"/><text x="168" y="214" font-size="10" fill="#1a2233">kitten</text>
+  <circle cx="140" cy="230" r="7" fill="#2563eb"/><text x="158" y="246" font-size="10" fill="#1a2233">feline</text>
+  <circle cx="290" cy="160" r="7" fill="#b45309"/><text x="290" y="150" text-anchor="middle" font-size="10" fill="#1a2233">invoice</text>
+  <circle cx="300" cy="185" r="7" fill="#b45309"/><text x="320" y="189" font-size="10" fill="#1a2233">receipt</text>
+  <circle cx="210" cy="245" r="9" fill="#059669"/><text x="210" y="268" text-anchor="middle" font-size="10" fill="#059669">query q</text>
+
+  <!-- knn arrows -->
+  <line x1="210" y1="245" x2="140" y2="230" stroke="#059669" stroke-width="1.5" stroke-dasharray="3 2"/>
+  <line x1="210" y1="245" x2="150" y2="210" stroke="#059669" stroke-width="1.5" stroke-dasharray="3 2"/>
+
+  <rect x="400" y="110" width="260" height="170" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="530" y="128" text-anchor="middle" font-size="12" fill="#64748b">Query result (k = 2)</text>
+  <text x="420" y="155" font-size="12" fill="#1a2233">1.  feline   dist 0.08</text>
+  <text x="420" y="180" font-size="12" fill="#1a2233">2.  kitten   dist 0.11</text>
+  <text x="420" y="215" font-size="11" fill="#64748b">Nearest neighbours of q are the</text>
+  <text x="420" y="231" font-size="11" fill="#64748b">cat cluster — not the invoice cluster.</text>
+</svg>
+<div class="cap">Fig 1 — Ingest pipeline (top) and the geometric view (bottom): similar meanings cluster, and k-NN around the query returns the right neighbours.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> An embedding model is a <em>meaning compressor</em>; the vector DB is a <em>spatial index</em> over its output. The DB never understands text — it only does fast geometry. Retrieval quality is therefore capped by your embedding model, not your index.</div>
+
+<h2>2. Embeddings and Similarity</h2>
+
+<p>An embedding is a point in <span class="kbd">R^d</span>. Three distance/similarity measures dominate; choosing the right one — and matching it to how the model was trained — is the single most common source of silent bugs.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Cosine similarity</h4>Angle between vectors, ignores magnitude. The default for text embeddings. Range [-1, 1]; higher = more similar.</div>
+  <div class="card"><h4>Dot (inner) product</h4>Angle <em>and</em> magnitude. Equals cosine when vectors are L2-normalised. Used by many retrieval models trained with it.</div>
+  <div class="card"><h4>Euclidean (L2)</h4>Straight-line distance. Lower = more similar. On normalised vectors, L2 and cosine rank identically.</div>
+</div>
+
+<div class="callout tip"><span class="t">Normalise and the choice collapses</span> If you L2-normalise every vector (unit length), then cosine, dot product, and L2 produce the <em>same ranking</em>. Normalising up front lets you use the fastest metric the index supports without changing results.</div>
+
+<pre><code class="language-python">import numpy as np
+
+def l2_normalize(v: np.ndarray) -&gt; np.ndarray:
+    """Scale each row to unit length so cosine == dot product."""
+    norm = np.linalg.norm(v, axis=-1, keepdims=True)
+    return v / np.clip(norm, 1e-12, None)   # avoid divide-by-zero
+
+a = np.array([1.0, 2.0, 2.0])
+b = np.array([2.0, 4.0, 4.0])              # same direction, 2x magnitude
+
+cos = a @ b / (np.linalg.norm(a) * np.linalg.norm(b))
+print(round(cos, 4))                        # 1.0  -> identical meaning
+
+an, bn = l2_normalize(a), l2_normalize(b)
+print(round(float(an @ bn), 4))             # 1.0  -> dot == cosine after norm
+print(round(float(np.linalg.norm(an - bn)), 4))  # 0.0 -> L2 agrees</code></pre>
+
+<p>Producing embeddings is a model call. The de-facto open default is <code>sentence-transformers</code>; hosted options (OpenAI <code>text-embedding-3</code>, Cohere, Voyage) trade local control for quality and zero ops.</p>
+
+<pre><code class="language-python">from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("BAAI/bge-small-en-v1.5")   # 384-dim, fast, strong
+docs = ["The engine won't crank", "Payment receipt attached", "My car fails to start"]
+
+emb = model.encode(docs, normalize_embeddings=True)      # normalise at the source
+print(emb.shape)                                         # (3, 384)
+# doc[0] and doc[2] are semantically close despite no shared words
+print(round(float(emb[0] @ emb[2]), 3), round(float(emb[0] @ emb[1]), 3))</code></pre>
+
+<div class="callout warn"><span class="t">Asymmetric models need prefixes</span> Many retrieval models (BGE, E5, GTE) were trained with instruction prefixes — e.g. embed queries as <code>"query: ..."</code> and documents as <code>"passage: ..."</code>. Skipping the prefix quietly degrades recall. Always read your model card.</div>
+
+<h2>3. ANN Indexes: Flat, IVF, HNSW</h2>
+
+<p>Exact nearest-neighbour search ("Flat") compares the query against <em>every</em> vector — O(N·d) per query. Perfect recall, but linear cost. <strong>Approximate</strong> indexes trade a sliver of recall for orders-of-magnitude speed. The three archetypes below cover almost every real system.</p>
+
+<table>
+<tr><th>Index</th><th>How it searches</th><th>Build cost</th><th>Query speed</th><th>Recall</th><th>Memory</th><th>Best for</th></tr>
+<tr><td><strong>Flat</strong> (brute force)</td><td>Compare to all N</td><td>None</td><td>Slow (linear)</td><td>100% exact</td><td>Low (raw vectors)</td><td>&lt; ~100k vectors; a correctness baseline</td></tr>
+<tr><td><strong>IVF</strong> (inverted file)</td><td>Cluster, probe nearest cells</td><td>Needs training</td><td>Fast</td><td>Tunable (nprobe)</td><td>Medium</td><td>Millions, static-ish data</td></tr>
+<tr><td><strong>HNSW</strong> (graph)</td><td>Greedy walk on a layered graph</td><td>Higher</td><td>Very fast</td><td>High, tunable (ef)</td><td>High (graph links)</td><td>Low-latency, high-recall, incremental inserts</td></tr>
+</table>
+
+<h3>IVF — partition the space, search a few partitions</h3>
+<p>IVF runs k-means to carve the space into <code>nlist</code> cells (Voronoi regions). Each vector is filed under its nearest centroid. At query time you only scan the <code>nprobe</code> cells nearest the query — not all N. Higher <code>nprobe</code> = more cells scanned = better recall, slower query.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 700 280" width="700" height="280">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <!-- IVF cells -->
+  <rect x="20" y="20" width="320" height="240" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="180" y="40" text-anchor="middle" font-size="12" fill="#64748b">IVF: space split into nlist cells</text>
+  <line x1="150" y1="55" x2="130" y2="245" stroke="#cbd5e1"/>
+  <line x1="60" y1="150" x2="330" y2="130" stroke="#cbd5e1"/>
+  <circle cx="90" cy="90" r="5" fill="#1e3a8a"/><text x="98" y="86" font-size="10" fill="#1e3a8a">c1</text>
+  <circle cx="240" cy="90" r="5" fill="#1e3a8a"/><text x="248" y="86" font-size="10" fill="#1e3a8a">c2</text>
+  <circle cx="100" cy="200" r="5" fill="#1e3a8a"/><text x="108" y="196" font-size="10" fill="#1e3a8a">c3</text>
+  <circle cx="250" cy="200" r="5" fill="#1e3a8a"/><text x="258" y="196" font-size="10" fill="#1e3a8a">c4</text>
+  <!-- points -->
+  <circle cx="235" cy="105" r="3" fill="#2563eb"/><circle cx="250" cy="80" r="3" fill="#2563eb"/><circle cx="228" cy="78" r="3" fill="#2563eb"/>
+  <circle cx="85" cy="95" r="3" fill="#2563eb"/><circle cx="100" cy="80" r="3" fill="#2563eb"/>
+  <circle cx="255" cy="210" r="3" fill="#2563eb"/><circle cx="240" cy="190" r="3" fill="#2563eb"/>
+  <!-- query -->
+  <circle cx="245" cy="120" r="7" fill="#059669"/><text x="245" y="140" text-anchor="middle" font-size="10" fill="#059669">q</text>
+  <text x="150" y="258" text-anchor="middle" font-size="11" fill="#b45309">nprobe=1 scans only cell c2</text>
+
+  <!-- HNSW graph -->
+  <rect x="370" y="20" width="310" height="240" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="525" y="40" text-anchor="middle" font-size="12" fill="#64748b">HNSW: layered proximity graph</text>
+  <text x="390" y="70" font-size="10" fill="#64748b">L2 (sparse)</text>
+  <circle cx="430" cy="80" r="6" fill="#1e3a8a"/><circle cx="620" cy="80" r="6" fill="#1e3a8a"/>
+  <line x1="430" y1="80" x2="620" y2="80" stroke="#94a3b8"/>
+  <text x="390" y="140" font-size="10" fill="#64748b">L1</text>
+  <circle cx="430" cy="150" r="5" fill="#2563eb"/><circle cx="520" cy="130" r="5" fill="#2563eb"/><circle cx="620" cy="150" r="5" fill="#2563eb"/>
+  <line x1="430" y1="150" x2="520" y2="130" stroke="#94a3b8"/><line x1="520" y1="130" x2="620" y2="150" stroke="#94a3b8"/>
+  <text x="390" y="210" font-size="10" fill="#64748b">L0 (dense)</text>
+  <circle cx="420" cy="220" r="4" fill="#2563eb"/><circle cx="470" cy="205" r="4" fill="#2563eb"/><circle cx="520" cy="220" r="4" fill="#2563eb"/><circle cx="570" cy="205" r="4" fill="#2563eb"/><circle cx="620" cy="220" r="4" fill="#2563eb"/>
+  <line x1="420" y1="220" x2="470" y2="205" stroke="#94a3b8"/><line x1="470" y1="205" x2="520" y2="220" stroke="#94a3b8"/><line x1="520" y1="220" x2="570" y2="205" stroke="#94a3b8"/><line x1="570" y1="205" x2="620" y2="220" stroke="#94a3b8"/>
+  <line x1="430" y1="80" x2="520" y2="130" stroke="#059669" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <line x1="520" y1="130" x2="520" y2="220" stroke="#059669" stroke-width="1.5" marker-end="url(#ah2)"/>
+  <text x="525" y="253" text-anchor="middle" font-size="11" fill="#059669">zoom in: top layer -&gt; down to L0</text>
+</svg>
+<div class="cap">Fig 2 — IVF (left) scans only the nprobe nearest cells; HNSW (right) descends layers, hopping greedily toward the query's neighbourhood.</div>
+</div>
+
+<h3>HNSW — Hierarchical Navigable Small World</h3>
+<p>HNSW builds a multi-layer graph. The top layer has few nodes with long-range links; lower layers get denser. Search starts at the top, greedily hops to the closest neighbour, then drops a layer and repeats — like zooming in on a map. Two knobs dominate: <code>M</code> (links per node, affects graph quality and memory) at build, and <code>ef_search</code> (candidate list size) at query — raise it for recall, lower it for speed.</p>
+
+<div class="callout tip"><span class="t">Default pick</span> If unsure, start with <strong>HNSW</strong>: excellent recall/latency, supports incremental inserts (no training step), and is the backbone of most modern vector DBs. Reach for IVF (often <code>IVF+PQ</code>) when memory for billions of vectors is the binding constraint.</div>
+
+<h3>Compression: Product Quantization (PQ)</h3>
+<p>Raw <code>float32</code> vectors are heavy: 1M × 768-dim ≈ 3 GB. <strong>Product Quantization</strong> splits each vector into m sub-vectors and replaces each with a 1-byte codebook id, shrinking storage ~10–50×. It is lossy — pair it with a reranking pass over exact vectors when precision matters. In FAISS this is the <code>IVF…,PQ</code> family (e.g. <code>IVF4096,PQ64</code>).</p>
+
+<div class="diagram">
+<svg viewBox="0 0 700 200" width="700" height="200">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+  </defs>
+  <!-- original vector -->
+  <text x="20" y="40" font-size="12" fill="#64748b">Original vector (d = 8 floats = 32 bytes)</text>
+  <g>
+    <rect x="20" y="50" width="40" height="30" fill="#eff4ff" stroke="#2563eb"/><rect x="60" y="50" width="40" height="30" fill="#eff4ff" stroke="#2563eb"/>
+    <rect x="100" y="50" width="40" height="30" fill="#ecfdf5" stroke="#059669"/><rect x="140" y="50" width="40" height="30" fill="#ecfdf5" stroke="#059669"/>
+    <rect x="180" y="50" width="40" height="30" fill="#fff7ed" stroke="#b45309"/><rect x="220" y="50" width="40" height="30" fill="#fff7ed" stroke="#b45309"/>
+    <rect x="260" y="50" width="40" height="30" fill="#ecfeff" stroke="#0891b2"/><rect x="300" y="50" width="40" height="30" fill="#ecfeff" stroke="#0891b2"/>
+  </g>
+  <text x="60" y="100" text-anchor="middle" font-size="11" fill="#2563eb">sub-vec 1</text>
+  <text x="140" y="100" text-anchor="middle" font-size="11" fill="#059669">sub-vec 2</text>
+  <text x="220" y="100" text-anchor="middle" font-size="11" fill="#b45309">sub-vec 3</text>
+  <text x="300" y="100" text-anchor="middle" font-size="11" fill="#0891b2">sub-vec 4</text>
+
+  <line x1="360" y1="65" x2="430" y2="65" stroke="#b45309" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="395" y="55" text-anchor="middle" font-size="10" fill="#b45309">quantize</text>
+
+  <!-- PQ codes -->
+  <text x="450" y="40" font-size="12" fill="#64748b">PQ code (4 bytes)</text>
+  <rect x="450" y="50" width="35" height="30" fill="#eff4ff" stroke="#2563eb"/><text x="467" y="70" text-anchor="middle" font-size="12" fill="#1a2233">17</text>
+  <rect x="485" y="50" width="35" height="30" fill="#ecfdf5" stroke="#059669"/><text x="502" y="70" text-anchor="middle" font-size="12" fill="#1a2233">4</text>
+  <rect x="520" y="50" width="35" height="30" fill="#fff7ed" stroke="#b45309"/><text x="537" y="70" text-anchor="middle" font-size="12" fill="#1a2233">92</text>
+  <rect x="555" y="50" width="35" height="30" fill="#ecfeff" stroke="#0891b2"/><text x="572" y="70" text-anchor="middle" font-size="12" fill="#1a2233">8</text>
+  <text x="520" y="100" text-anchor="middle" font-size="11" fill="#64748b">each = nearest centroid id in that sub-space's codebook</text>
+
+  <text x="20" y="150" font-size="12" fill="#1a2233">Each sub-vector is replaced by the id of its nearest centroid in a per-subspace codebook (256 centroids = 1 byte).</text>
+  <text x="20" y="172" font-size="12" fill="#059669">Result: 32 bytes -&gt; 4 bytes (8x smaller). Distances are approximated from precomputed centroid tables.</text>
+</svg>
+<div class="cap">Fig 3 — Product Quantization: split the vector, map each slice to a codebook id. Storage collapses; distances become fast table lookups (lossy).</div>
+</div>
+
+<h2>4. FAISS: the In-Process Speed Engine</h2>
+
+<p>FAISS (Facebook AI Similarity Search) is a C++ library with Python bindings. It is <em>not</em> a database — no persistence API beyond file read/write, no metadata filtering, no server. It is a blazing-fast index you embed in your own process. You own IDs, metadata, and storage.</p>
+
+<pre><code class="language-bash">pip install faiss-cpu            # CPU build (most common)
+# pip install faiss-gpu-cu12    # CUDA build for GPU search, if you have the hardware</code></pre>
+
+<h3>Flat index — exact baseline</h3>
+<pre><code class="language-python">import faiss, numpy as np
+
+d = 384                                   # embedding dimension
+rng = np.random.default_rng(0)
+xb = rng.random((10_000, d)).astype("float32")   # database vectors
+faiss.normalize_L2(xb)                    # in-place; now inner product == cosine
+
+index = faiss.IndexFlatIP(d)              # IP = inner product (cosine on unit vectors)
+index.add(xb)                             # no training needed for Flat
+print(index.ntotal)                       # 10000
+
+xq = rng.random((5, d)).astype("float32")
+faiss.normalize_L2(xq)
+D, I = index.search(xq, k=3)              # D=similarities, I=neighbour ids
+print(I[0])                               # ids of the 3 nearest for query 0
+print(D[0])                               # their cosine similarities (desc)</code></pre>
+
+<div class="callout note"><span class="t">IP vs L2</span> <code>IndexFlatIP</code> returns <em>higher = better</em> (inner product). <code>IndexFlatL2</code> returns <em>lower = better</em> (squared Euclidean). Pick IP + normalised vectors for cosine-style retrieval.</div>
+
+<h3>IVF index — trained, scalable</h3>
+<pre><code class="language-python">nlist = 100                               # number of Voronoi cells
+quantizer = faiss.IndexFlatIP(d)          # assigns vectors to cells
+index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_INNER_PRODUCT)
+
+assert not index.is_trained
+index.train(xb)                           # k-means over a representative sample
+index.add(xb)
+
+index.nprobe = 10                         # scan 10 of 100 cells (recall vs speed)
+D, I = index.search(xq, k=3)
+# Rule of thumb: train on >= ~30-256 * nlist vectors for stable centroids.</code></pre>
+
+<h3>HNSW index — graph, no training</h3>
+<pre><code class="language-python">index = faiss.IndexHNSWFlat(d, 32)        # M = 32 links per node
+index.hnsw.efConstruction = 200           # build-time quality
+index.add(xb)                             # incremental; no train() required
+index.hnsw.efSearch = 64                  # query-time recall knob
+D, I = index.search(xq, k=3)</code></pre>
+
+<h3>Keeping IDs and persisting</h3>
+<p>FAISS stores only vectors by position. To attach your own ids, wrap with <code>IndexIDMap</code>; keep metadata in a side dict/DB keyed by that id. Persist with <code>write_index</code> / <code>read_index</code>.</p>
+
+<pre><code class="language-python">index = faiss.IndexIDMap(faiss.IndexFlatIP(d))
+ids = np.array([1001, 1002, 1003], dtype="int64")
+index.add_with_ids(xb[:3], ids)           # now search returns YOUR ids
+
+faiss.write_index(index, "my.index")      # persist to disk
+index2 = faiss.read_index("my.index")     # reload later
+
+# Metadata lives beside the index — you manage it:
+meta = {1001: {"title": "Brakes guide", "lang": "en"}, 1002: {...}, 1003: {...}}</code></pre>
+
+<div class="callout warn"><span class="t">No native filtering</span> FAISS cannot do "nearest vectors <em>where lang=en</em>" in one call. Options: build separate indexes per filter value, over-fetch then filter in Python (cheap, approximate), or use an <code>IDSelector</code> (newer FAISS) to restrict the search set. If filtering is central, prefer ChromaDB or a server DB.</div>
+
+<h2>5. ChromaDB: the Batteries-Included Store</h2>
+
+<p>ChromaDB is an open-source vector <em>database</em>: it bundles the index (HNSW under the hood), a metadata store, optional on-disk persistence, and can even call an embedding function for you. You add raw documents; Chroma embeds, indexes, and lets you filter by metadata — far less glue code than FAISS.</p>
+
+<pre><code class="language-bash">pip install chromadb</code></pre>
+
+<pre><code class="language-python">import chromadb
+
+# Persistent client: data survives restarts under ./chroma_store
+client = chromadb.PersistentClient(path="./chroma_store")
+# client = chromadb.Client()          # ephemeral, in-memory (tests)
+
+collection = client.get_or_create_collection(
+    name="support_docs",
+    metadata={"hnsw:space": "cosine"}, # distance: cosine | l2 | ip
+)
+
+# Chroma embeds documents for you with a default model (or supply your own)
+collection.add(
+    ids=["d1", "d2", "d3"],
+    documents=["The engine won't crank",
+               "Payment receipt attached",
+               "My car fails to start"],
+    metadatas=[{"topic": "engine", "lang": "en"},
+               {"topic": "billing", "lang": "en"},
+               {"topic": "engine", "lang": "en"}],
+)
+
+res = collection.query(
+    query_texts=["car won't turn over"],
+    n_results=2,
+    where={"topic": "engine"},         # metadata filter, applied natively
+)
+print(res["ids"], res["distances"])    # d3 / d1 — the engine docs</code></pre>
+
+<h3>Bring your own embeddings</h3>
+<p>Decouple embedding from storage when you want a specific model or precomputed vectors — pass <code>embeddings=</code> on add and <code>query_embeddings=</code> on query. Keep the <em>same</em> model for both or results are garbage.</p>
+
+<pre><code class="language-python">from chromadb.utils import embedding_functions
+
+ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+    model_name="BAAI/bge-small-en-v1.5")
+col = client.get_or_create_collection("docs", embedding_function=ef)
+
+# Or supply vectors directly (no embedding_function needed):
+col.add(ids=["x"], embeddings=[[0.1, 0.2, 0.3]], metadatas=[{"k": 1}])
+col.query(query_embeddings=[[0.1, 0.2, 0.25]], n_results=5)</code></pre>
+
+<h3>Metadata filtering — <code>where</code> and <code>where_document</code></h3>
+<p>Chroma filters structured metadata with Mongo-style operators and does full-text contains on the document body. Filtering happens <em>during</em> the vector search, so you get the k nearest <em>that also match</em>.</p>
+
+<pre><code class="language-python">collection.query(
+    query_texts=["refund status"],
+    n_results=5,
+    where={                                  # boolean metadata predicate
+        "$and": [
+            {"lang": {"$eq": "en"}},
+            {"priority": {"$gte": 3}},
+        ]
+    },
+    where_document={"$contains": "invoice"}, # must contain this substring
+)
+# Operators: $eq $ne $gt $gte $lt $lte $in $nin $and $or</code></pre>
+
+<div class="callout tip"><span class="t">CRUD you'll actually use</span> <code>collection.get(ids=[...])</code> fetches by id; <code>collection.update(...)</code> / <code>upsert(...)</code> change vectors or metadata; <code>collection.delete(ids=[...] | where=...)</code> removes. <code>upsert</code> is idempotent — re-ingest safely without duplicates.</div>
+
+<h2>6. A Worked Mini-Example: Semantic FAQ Search</h2>
+
+<p>End to end: embed a small FAQ, index it, answer a free-text question. Shown in both engines so the contrast is concrete.</p>
+
+<pre><code class="language-python"># ---- Shared: the knowledge base ----
+faq = [
+    ("How do I reset my password?",        "account"),
+    ("Where can I download my invoice?",   "billing"),
+    ("My card was charged twice",          "billing"),
+    ("The app crashes on startup",         "bug"),
+]
+texts = [q for q, _ in faq]
+tags  = [t for _, t in faq]
+
+from sentence_transformers import SentenceTransformer
+m = SentenceTransformer("BAAI/bge-small-en-v1.5")
+vecs = m.encode(texts, normalize_embeddings=True).astype("float32")
+q = m.encode(["I need a copy of my bill"], normalize_embeddings=True).astype("float32")</code></pre>
+
+<pre><code class="language-python"># ---- Option A: FAISS (fast, you manage metadata) ----
+import faiss, numpy as np
+index = faiss.IndexFlatIP(vecs.shape[1])
+index.add(vecs)
+D, I = index.search(q, k=2)
+for rank, (idx, score) in enumerate(zip(I[0], D[0]), 1):
+    print(rank, texts[idx], f"({tags[idx]}, sim={score:.3f})")
+# 1 Where can I download my invoice? (billing, sim=0.72)</code></pre>
+
+<pre><code class="language-python"># ---- Option B: ChromaDB (filtering + persistence built in) ----
+import chromadb
+col = chromadb.Client().create_collection("faq", metadata={"hnsw:space": "cosine"})
+col.add(ids=[str(i) for i in range(len(texts))],
+        embeddings=vecs.tolist(),
+        documents=texts,
+        metadatas=[{"tag": t} for t in tags])
+
+res = col.query(query_embeddings=q.tolist(), n_results=2,
+                where={"tag": "billing"})     # restrict to billing FAQs
+print(res["documents"][0])                     # ['Where can I download my invoice?', ...]</code></pre>
+
+<h2>7. Cheat-Sheet and Engine Comparison</h2>
+
+<h3>FAISS quick reference</h3>
+<table>
+<tr><th>Task</th><th>Call</th></tr>
+<tr><td>Exact cosine index</td><td><code>faiss.IndexFlatIP(d)</code> + <code>faiss.normalize_L2(x)</code></td></tr>
+<tr><td>Exact Euclidean index</td><td><code>faiss.IndexFlatL2(d)</code></td></tr>
+<tr><td>IVF (scalable)</td><td><code>faiss.IndexIVFFlat(quant, d, nlist, metric)</code> + <code>train()</code></td></tr>
+<tr><td>HNSW (graph)</td><td><code>faiss.IndexHNSWFlat(d, M)</code>, set <code>efSearch</code></td></tr>
+<tr><td>Compressed (billions)</td><td><code>faiss.index_factory(d, "IVF4096,PQ64")</code></td></tr>
+<tr><td>Custom ids</td><td><code>faiss.IndexIDMap(base)</code> + <code>add_with_ids()</code></td></tr>
+<tr><td>Save / load</td><td><code>faiss.write_index(ix, p)</code> / <code>faiss.read_index(p)</code></td></tr>
+<tr><td>Search</td><td><code>D, I = index.search(xq, k)</code></td></tr>
+</table>
+
+<h3>ChromaDB quick reference</h3>
+<table>
+<tr><th>Task</th><th>Call</th></tr>
+<tr><td>Persistent client</td><td><code>chromadb.PersistentClient(path="...")</code></td></tr>
+<tr><td>Create / fetch collection</td><td><code>client.get_or_create_collection(name, metadata={"hnsw:space":"cosine"})</code></td></tr>
+<tr><td>Insert</td><td><code>col.add(ids, documents|embeddings, metadatas)</code></td></tr>
+<tr><td>Idempotent insert</td><td><code>col.upsert(...)</code></td></tr>
+<tr><td>Query</td><td><code>col.query(query_texts|query_embeddings, n_results, where, where_document)</code></td></tr>
+<tr><td>Fetch by id</td><td><code>col.get(ids=[...], include=["metadatas","documents"])</code></td></tr>
+<tr><td>Delete</td><td><code>col.delete(ids=[...] | where={...})</code></td></tr>
+<tr><td>Count</td><td><code>col.count()</code></td></tr>
+</table>
+
+<h3>When to use which</h3>
+<table>
+<tr><th>Dimension</th><th>FAISS</th><th>ChromaDB</th><th>Server DB (Qdrant / Weaviate / Milvus / pgvector)</th></tr>
+<tr><td>Type</td><td>Library (in-process)</td><td>Embedded DB (+ server mode)</td><td>Standalone service</td></tr>
+<tr><td>Metadata filtering</td><td>Manual / limited</td><td>Native, rich</td><td>Native, rich</td></tr>
+<tr><td>Persistence</td><td>Manual file I/O</td><td>Built-in</td><td>Built-in, durable</td></tr>
+<tr><td>Embeds for you</td><td>No</td><td>Yes (optional)</td><td>Sometimes</td></tr>
+<tr><td>Max scale</td><td>Billions (with PQ/GPU)</td><td>Millions comfortably</td><td>Billions, sharded/replicated</td></tr>
+<tr><td>Concurrency / multi-node</td><td>You build it</td><td>Single-node focus</td><td>Clustering, HA</td></tr>
+<tr><td>Sweet spot</td><td>Max control + raw speed, research, embedding in an app</td><td>Prototypes to mid prod, RAG with filters</td><td>Large-scale production with SLAs</td></tr>
+</table>
+
+<h2>8. Persistence and Scaling</h2>
+
+<div class="pipeline">
+  <span class="step">Embed</span><span class="arrow">-&gt;</span>
+  <span class="step">Index (train)</span><span class="arrow">-&gt;</span>
+  <span class="step">Persist</span><span class="arrow">-&gt;</span>
+  <span class="step">Shard / replicate</span><span class="arrow">-&gt;</span>
+  <span class="step">Serve + rerank</span>
+</div>
+
+<div class="grid c2">
+  <div class="card"><h4>Persistence</h4>FAISS: <code>write_index</code>/<code>read_index</code> — one file, you handle metadata separately and keep them in sync. Chroma: <code>PersistentClient(path=...)</code> flushes a SQLite + index store automatically. Always snapshot vectors <em>and</em> metadata together.</div>
+  <div class="card"><h4>Memory budget</h4>float32 bytes ≈ N × d × 4. 10M × 768 ≈ 30 GB raw. HNSW adds graph links (~M × 8 bytes/node). If it won't fit RAM, switch to IVF+PQ or a disk-backed/sharded server DB.</div>
+  <div class="card"><h4>Sharding</h4>Split vectors across shards, query all, merge top-k. Horizontal scale for both throughput and dataset size. Server DBs (Milvus, Qdrant) automate this; with FAISS you orchestrate it.</div>
+  <div class="card"><h4>Freshness</h4>HNSW supports live inserts; IVF benefits from periodic retraining as the distribution drifts. Rebuild/compact on a schedule, and version your index so you can roll back.</div>
+</div>
+
+<div class="callout tip"><span class="t">Two-stage retrieval</span> For top quality, retrieve a wide candidate set (e.g. k=100) from the ANN index, then <strong>rerank</strong> with a slower cross-encoder for the final k=5. The ANN layer gives recall; the reranker gives precision. This also hides small ANN recall losses from compression.</div>
+
+<div class="diagram">
+<svg viewBox="0 0 700 190" width="700" height="190">
+  <defs>
+    <marker id="ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="75" width="110" height="44" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="75" y="95" text-anchor="middle" font-size="12" fill="#1a2233">Query</text>
+  <text x="75" y="111" text-anchor="middle" font-size="11" fill="#64748b">embed</text>
+
+  <rect x="180" y="60" width="150" height="74" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="255" y="86" text-anchor="middle" font-size="12" fill="#1a2233">Stage 1: ANN</text>
+  <text x="255" y="104" text-anchor="middle" font-size="11" fill="#64748b">HNSW / IVF</text>
+  <text x="255" y="120" text-anchor="middle" font-size="11" fill="#64748b">fast, high recall</text>
+
+  <rect x="400" y="60" width="150" height="74" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="475" y="86" text-anchor="middle" font-size="12" fill="#1a2233">Stage 2: Rerank</text>
+  <text x="475" y="104" text-anchor="middle" font-size="11" fill="#64748b">cross-encoder</text>
+  <text x="475" y="120" text-anchor="middle" font-size="11" fill="#64748b">slow, precise</text>
+
+  <rect x="610" y="75" width="70" height="44" rx="8" fill="#1e3a8a" stroke="#1e3a8a"/>
+  <text x="645" y="95" text-anchor="middle" font-size="12" fill="#fff">Top 5</text>
+  <text x="645" y="111" text-anchor="middle" font-size="10" fill="#cbd5e1">to LLM</text>
+
+  <line x1="130" y1="97" x2="180" y2="97" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="330" y1="97" x2="400" y2="97" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="550" y1="97" x2="610" y2="97" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="365" y="88" text-anchor="middle" font-size="10" fill="#b45309">k=100</text>
+  <text x="580" y="88" text-anchor="middle" font-size="10" fill="#b45309">k=5</text>
+  <text x="350" y="165" text-anchor="middle" font-size="11" fill="#64748b">Wide, cheap recall first; expensive precision only on the shortlist.</text>
+</svg>
+<div class="cap">Fig 4 — Two-stage retrieval: a fast ANN index proposes many candidates; a precise reranker trims them to the final answer set.</div>
+</div>
+
+<h2>9. Best Practices</h2>
+
+<div class="callout ok"><span class="t">Do</span> Normalise vectors and set the index metric to match how the embedding model was trained. Use the <em>same</em> model (and prefix convention) for indexing and querying. Store a stable external id and keep metadata beside vectors.</div>
+<div class="callout ok"><span class="t">Do</span> Measure recall against a Flat baseline on a held-out query set before trusting an ANN config. Tune <code>nprobe</code> / <code>efSearch</code> to a target recall, then freeze it.</div>
+<div class="callout tip"><span class="t">Chunk deliberately</span> For documents, embed coherent chunks (sentences/paragraphs with slight overlap), not whole files. Chunk size is a bigger lever on retrieval quality than index choice.</div>
+
+<h2>10. Common Pitfalls</h2>
+
+<div class="callout danger"><span class="t">Metric mismatch</span> Indexing with L2 while the model expects cosine (or forgetting to normalise) silently tanks relevance — no error, just bad results. Verify with a known query/answer pair.</div>
+<div class="callout warn"><span class="t">Dimension drift</span> Mixing embeddings from two different models (or model versions) in one index is meaningless geometry. Re-embed everything when you change models.</div>
+<div class="callout warn"><span class="t">Forgetting to train IVF</span> Calling <code>add()</code> before <code>train()</code> on an IVF index throws; training on too few / unrepresentative vectors gives lopsided cells and poor recall.</div>
+<div class="callout warn"><span class="t">Treating FAISS as a database</span> No durability guarantees, no concurrent writers, no filtering, no auth. If you need those, use a real vector DB. FAISS is an index, not a service.</div>
+<div class="callout danger"><span class="t">Curse of dimensionality illusions</span> In high dimensions distances concentrate; a "nearest" neighbour at cosine 0.3 may be noise. Always inspect score distributions and set a relevance threshold.</div>
+
+<h2>11. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is an embedding, and why does it enable semantic search?</div><div class="a">A dense vector produced by a model so that semantically similar inputs map to nearby points in R^d. Because meaning becomes geometry, "find similar items" reduces to nearest-neighbour search — matching on concept rather than exact tokens.</div></div>
+
+<div class="qa"><div class="q">Cosine vs dot product vs Euclidean — when does the choice matter?</div><div class="a">On L2-normalised vectors all three rank results identically, so the choice is purely performance/convenience. It matters when vectors are not normalised: dot product then rewards magnitude, cosine ignores it, and L2 mixes both. Match the metric to how the model was trained.</div></div>
+
+<div class="qa"><div class="q">Explain Flat vs IVF vs HNSW and their trade-offs.</div><div class="a">Flat is exact brute force: perfect recall, linear cost — good below ~100k. IVF clusters the space and scans only the nprobe nearest cells: fast and memory-moderate but needs training and tuning, best for large static-ish sets. HNSW is a layered proximity graph giving high recall at very low latency with incremental inserts, at higher memory cost — the usual default.</div></div>
+
+<div class="qa"><div class="q">How does HNSW search actually work?</div><div class="a">It keeps a hierarchy of graphs: sparse long-range links on top, dense links at the bottom. Search starts at an entry node in the top layer, greedily moves to the neighbour closest to the query, then descends a layer and repeats, expanding a candidate list of size ef_search at the base. More ef = more recall, more work.</div></div>
+
+<div class="qa"><div class="q">What do nprobe and efSearch control, and how do you tune them?</div><div class="a">Both trade recall for latency at query time. nprobe = how many IVF cells to scan; efSearch = HNSW candidate-list width. Tune by sweeping values against a Flat baseline on a held-out query set, pick the smallest value hitting your recall target, then freeze it.</div></div>
+
+<div class="qa"><div class="q">What is Product Quantization and when would you use it?</div><div class="a">PQ splits each vector into m sub-vectors and encodes each with a 1-byte codebook id, cutting memory ~10-50x. It's lossy, so you use it when billions of vectors won't fit in RAM, usually as IVF+PQ, and add an exact-vector reranking pass to recover precision.</div></div>
+
+<div class="qa"><div class="q">FAISS vs ChromaDB — when do you choose each?</div><div class="a">FAISS is a library: maximum speed and control, but you build persistence, ids, metadata, and filtering yourself. ChromaDB is an embedded database: HNSW index plus metadata filtering, persistence, and optional embedding built in. Choose FAISS for raw performance or embedding inside an app; Chroma for prototypes-to-mid-prod RAG where filtering and persistence save real work.</div></div>
+
+<div class="qa"><div class="q">How do you filter by metadata ("nearest where lang=en")?</div><div class="a">In Chroma/Qdrant/Weaviate it's native via a where predicate applied during search. FAISS has no native filter: use per-filter indexes, an IDSelector to restrict the search set, or over-fetch and filter in Python. If filtering is central to your query pattern, prefer a real vector DB.</div></div>
+
+<div class="qa"><div class="q">How would you measure and guarantee retrieval quality?</div><div class="a">Build a labelled query/relevant-doc set and compute recall@k / MRR / nDCG. Benchmark the ANN config against a Flat (exact) baseline, tune knobs to a recall target, and monitor score distributions in production. Add a cross-encoder reranker when precision at the top matters.</div></div>
+
+<div class="qa"><div class="q">How do you scale a vector store to hundreds of millions of vectors?</div><div class="a">Reduce per-vector cost (IVF+PQ, lower dimension, or quantisation), shard across nodes and merge top-k, replicate for throughput/HA, and move to a server DB (Milvus/Qdrant/Weaviate) that automates sharding, persistence, and failover. Keep an eye on the RAM budget: N x d x 4 bytes for float32.</div></div>
+
+<div class="qa"><div class="q">Why might two near-identical queries return different neighbours after re-indexing?</div><div class="a">ANN indexes are approximate and often non-deterministic across rebuilds — centroid initialisation (IVF) or insertion order (HNSW) changes the graph/cells. Recall is statistical, not exact. If you need reproducibility, fix seeds, freeze the index, and validate against a Flat baseline.</div></div>
+
+<div class="qa"><div class="q">What is a hybrid search and why combine dense with sparse (BM25)?</div><div class="a">Dense vectors capture semantics but can miss exact terms (names, SKUs, error codes); sparse keyword search nails exact matches but misses paraphrase. Hybrid search runs both and fuses scores (e.g. reciprocal rank fusion), getting the recall of semantics plus the precision of lexical matching.</div></div>
+
+<h2>12. Further Learning</h2>
+<ul>
+  <li><strong>Benchmark it yourself</strong>: build Flat, IVF, and HNSW over the same 1M vectors and plot recall@10 vs queries/second — the trade-offs become intuition.</li>
+  <li><strong>Read the papers</strong>: the HNSW paper (Malkov &amp; Yashunin) and the original IVF/PQ work (Jégou et al.) — short and clarifying.</li>
+  <li><strong>FAISS wiki</strong>: the <code>index_factory</code> guide and "Guidelines to choose an index" page.</li>
+  <li><strong>Explore server DBs</strong>: Qdrant, Weaviate, Milvus, and <code>pgvector</code> — each adds filtering, persistence, and clustering on top of the same ANN ideas.</li>
+  <li><strong>Add a reranker</strong>: wire a cross-encoder (e.g. <code>bge-reranker</code>) as a second stage and measure the precision lift.</li>
+  <li><strong>Go multimodal</strong>: index CLIP image embeddings and query with text — the exact same geometry, new modality.</li>
+</ul>

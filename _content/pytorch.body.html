@@ -1,0 +1,479 @@
+<h2>What PyTorch Is &amp; Why It Matters</h2>
+<p class="lead">PyTorch is an open-source tensor and automatic-differentiation library that has become the dominant framework for deep-learning research and, increasingly, production. It feels like NumPy with GPU acceleration and a built-in gradient engine — you write ordinary Python, and PyTorch records what you do so it can differentiate it.</p>
+
+<p>Its killer feature is the <strong>define-by-run</strong> (dynamic) computation graph: the graph is built on the fly as your code executes, so control flow, loops, and conditionals are just normal Python. This is why nearly every modern model — Transformers, diffusion models, LLMs — ships a PyTorch reference implementation first.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Tensors</h4>N-dimensional arrays with GPU support and a NumPy-like API.</div>
+  <div class="card"><h4>Autograd</h4>Automatic reverse-mode differentiation over any tensor computation.</div>
+  <div class="card"><h4>nn &amp; optim</h4>Composable layers, loss functions, and gradient-based optimizers.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="30" width="140" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Data</text>
+  <text x="90" y="74" font-size="11" text-anchor="middle" fill="#1a2233">Dataset / DataLoader</text>
+
+  <rect x="200" y="30" width="140" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="270" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Model</text>
+  <text x="270" y="74" font-size="11" text-anchor="middle" fill="#1a2233">nn.Module (forward)</text>
+
+  <rect x="380" y="30" width="140" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="450" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Loss</text>
+  <text x="450" y="74" font-size="11" text-anchor="middle" fill="#1a2233">criterion(out, y)</text>
+
+  <rect x="560" y="30" width="140" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="630" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Autograd</text>
+  <text x="630" y="74" font-size="11" text-anchor="middle" fill="#1a2233">loss.backward()</text>
+
+  <rect x="380" y="170" width="140" height="60" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="450" y="196" font-size="13" text-anchor="middle" fill="#1a2233">Optimizer</text>
+  <text x="450" y="214" font-size="11" text-anchor="middle" fill="#1a2233">optim.step()</text>
+
+  <rect x="200" y="170" width="140" height="60" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="270" y="196" font-size="13" text-anchor="middle" fill="#1a2233">Updated weights</text>
+  <text x="270" y="214" font-size="11" text-anchor="middle" fill="#1a2233">param -= lr * grad</text>
+
+  <line x1="160" y1="60" x2="196" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="340" y1="60" x2="376" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="520" y1="60" x2="556" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="630" y1="90" x2="630" y2="150" stroke="#2563eb" stroke-width="2"/>
+  <line x1="630" y1="150" x2="522" y2="195" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="380" y1="200" x2="342" y2="200" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="270" y1="170" x2="270" y2="92" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4" marker-end="url(#ah)"/>
+  <text x="300" y="135" font-size="11" fill="#b45309">next iteration</text>
+</svg><div class="cap">Fig 1. The canonical PyTorch training loop as a data flow.</div></div>
+
+<div class="callout note"><span class="t">Mental model</span> A tensor is data + metadata (shape, dtype, device). When <code>requires_grad=True</code>, every operation also records a node in a graph so gradients can flow backward later.</div>
+
+<h2>Setup &amp; Getting Started</h2>
+<p>Install the build matched to your hardware. The official selector at pytorch.org emits the exact command for your CUDA/ROCm/CPU target.</p>
+
+<pre><code class="language-bash"># CPU-only
+pip install torch torchvision torchaudio
+
+# CUDA 12.4 build (NVIDIA GPU)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# Verify
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"</code></pre>
+
+<pre><code class="language-python">import torch
+
+# Pick the best available device (CUDA &gt; Apple MPS &gt; CPU)
+device = (
+    "cuda" if torch.cuda.is_available()
+    else "mps" if torch.backends.mps.is_available()
+    else "cpu"
+)
+print(f"Using {device}")</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Pin versions in production. PyTorch, torchvision, and the CUDA build must agree — mismatches are the single most common install failure.</div>
+
+<h2>Tensors: The Core Data Structure</h2>
+<p>Everything in PyTorch is a <code>torch.Tensor</code>. The API deliberately mirrors NumPy, so most intuition transfers directly.</p>
+
+<pre><code class="language-python">import torch
+
+# Creation
+a = torch.tensor([[1., 2.], [3., 4.]])   # from data
+z = torch.zeros(2, 3)                      # shape (2,3) of zeros
+o = torch.ones_like(a)                     # same shape/dtype as a
+r = torch.randn(2, 3)                      # standard normal
+rng = torch.arange(0, 10, 2)               # [0,2,4,6,8]
+
+# Attributes
+print(a.shape, a.dtype, a.device)          # torch.Size([2,2]) torch.float32 cpu
+
+# Reshaping (view shares memory; reshape may copy)
+x = torch.arange(12)
+x2 = x.view(3, 4)
+x3 = x.reshape(2, 6)
+x4 = x2.unsqueeze(0)                        # add a batch dim -&gt; (1,3,4)
+x5 = x4.squeeze(0)                          # remove size-1 dims
+
+# Indexing &amp; slicing (NumPy-style)
+print(a[0])        # first row
+print(a[:, 1])     # second column
+print(a[a &gt; 2])    # boolean mask</code></pre>
+
+<h3>Broadcasting &amp; Elementwise Math</h3>
+<pre><code class="language-python">m = torch.ones(3, 4)
+bias = torch.tensor([1., 2., 3., 4.])
+print((m + bias).shape)      # (3,4): bias broadcast across rows
+
+# Matrix multiply: @ or matmul; * is elementwise
+A = torch.randn(2, 3)
+B = torch.randn(3, 5)
+C = A @ B                    # (2,5)
+
+# Reductions along axes
+t = torch.randn(4, 6)
+print(t.sum(dim=0).shape)    # (6,) sum over rows
+print(t.mean(dim=1).shape)   # (4,) mean over columns
+print(t.argmax(dim=1))       # index of max per row</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 680 190" width="680" height="190">
+  <text x="20" y="24" font-size="13" fill="#1a2233">Tensor memory layout (contiguous, row-major)</text>
+  <rect x="20" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="40" y="65" font-size="12" text-anchor="middle">0</text>
+  <rect x="60" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="80" y="65" font-size="12" text-anchor="middle">1</text>
+  <rect x="100" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="120" y="65" font-size="12" text-anchor="middle">2</text>
+  <rect x="140" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="160" y="65" font-size="12" text-anchor="middle">3</text>
+  <rect x="180" y="40" width="40" height="40" fill="#ecfdf5" stroke="#059669"/><text x="200" y="65" font-size="12" text-anchor="middle">4</text>
+  <rect x="220" y="40" width="40" height="40" fill="#ecfdf5" stroke="#059669"/><text x="240" y="65" font-size="12" text-anchor="middle">5</text>
+  <text x="20" y="110" font-size="12" fill="#1a2233">Underlying 1D storage, stride (3,1) interprets it as shape (2,3):</text>
+  <rect x="20" y="125" width="120" height="30" fill="#eff4ff" stroke="#2563eb"/><text x="80" y="145" font-size="12" text-anchor="middle">row 0: [0,1,2]</text>
+  <rect x="140" y="125" width="120" height="30" fill="#ecfdf5" stroke="#059669"/><text x="200" y="145" font-size="12" text-anchor="middle">row 1: [3,4,5]</text>
+  <text x="300" y="145" font-size="12" fill="#b45309">.view() just changes strides — no copy</text>
+</svg><div class="cap">Fig 2. A tensor is a 1D storage buffer plus shape/stride metadata; views reinterpret the same bytes.</div></div>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>view()</code> requires contiguous memory. After operations like <code>transpose()</code> you may need <code>.contiguous()</code> first, or use <code>reshape()</code> which copies when needed.</div>
+
+<h2>Autograd: Automatic Differentiation</h2>
+<p>Autograd is the engine that makes training possible. Set <code>requires_grad=True</code> on a tensor and PyTorch records every operation into a dynamic graph. Calling <code>.backward()</code> walks that graph in reverse, applying the chain rule to populate each leaf's <code>.grad</code>.</p>
+
+<pre><code class="language-python">x = torch.tensor(2.0, requires_grad=True)
+y = x ** 3 + 2 * x          # y = x^3 + 2x
+y.backward()                 # dy/dx = 3x^2 + 2 = 14 at x=2
+print(x.grad)                # tensor(14.)
+
+# Vector case: provide a gradient (upstream) or reduce to a scalar
+w = torch.randn(3, requires_grad=True)
+loss = (w ** 2).sum()
+loss.backward()
+print(w.grad)                # 2*w</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 680 220" width="680" height="220">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker></defs>
+  <text x="20" y="22" font-size="13" fill="#2563eb">Forward (build graph) →</text>
+  <text x="400" y="22" font-size="13" fill="#b45309">← Backward (chain rule)</text>
+  <rect x="20" y="50" width="90" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="65" y="78" font-size="12" text-anchor="middle">x (leaf)</text>
+  <rect x="160" y="50" width="90" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="205" y="78" font-size="12" text-anchor="middle">pow(3)</text>
+  <rect x="300" y="50" width="90" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="345" y="78" font-size="12" text-anchor="middle">add</text>
+  <rect x="440" y="50" width="90" height="46" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="485" y="78" font-size="12" text-anchor="middle">y (loss)</text>
+  <line x1="110" y1="73" x2="156" y2="73" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="250" y1="73" x2="296" y2="73" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="390" y1="73" x2="436" y2="73" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="436" y1="150" x2="390" y2="150" stroke="#b45309" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="296" y1="150" x2="250" y2="150" stroke="#b45309" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="156" y1="150" x2="110" y2="150" stroke="#b45309" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="40" y="155" font-size="11" fill="#b45309">x.grad</text>
+  <text x="170" y="140" font-size="11" fill="#b45309">grad_fn</text>
+  <text x="310" y="140" font-size="11" fill="#b45309">grad_fn</text>
+  <text x="450" y="140" font-size="11" fill="#b45309">dy/dy=1</text>
+</svg><div class="cap">Fig 3. Autograd records each op's <code>grad_fn</code> during the forward pass, then applies the chain rule in reverse.</div></div>
+
+<h3>Controlling the Graph</h3>
+<pre><code class="language-python"># Disable tracking for inference / updates (saves memory, speeds up)
+with torch.no_grad():
+    preds = model(x)
+
+# Detach a tensor from the graph (stop gradient)
+frozen = tensor.detach()
+
+# Zero grads each step — gradients ACCUMULATE by default!
+optimizer.zero_grad()        # or model.zero_grad(set_to_none=True)</code></pre>
+
+<div class="callout danger"><span class="t">Gotcha</span> Gradients accumulate across <code>.backward()</code> calls. Forgetting <code>zero_grad()</code> is the #1 silent training bug — your updates become sums of stale gradients.</div>
+
+<h2>Building Models with nn.Module</h2>
+<p><code>nn.Module</code> is the base class for all models and layers. You declare submodules in <code>__init__</code> and define the computation in <code>forward</code>. PyTorch automatically tracks parameters for you.</p>
+
+<pre><code class="language-python">import torch.nn as nn
+import torch.nn.functional as F
+
+class MLP(nn.Module):
+    def __init__(self, in_dim, hidden, out_dim):
+        super().__init__()
+        self.fc1 = nn.Linear(in_dim, hidden)
+        self.fc2 = nn.Linear(hidden, out_dim)
+        self.dropout = nn.Dropout(0.2)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        return self.fc2(x)          # logits (no softmax here)
+
+model = MLP(784, 256, 10)
+print(sum(p.numel() for p in model.parameters()))  # param count
+print(model)                                         # pretty structure</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>Common layers</h4><code>Linear</code>, <code>Conv2d</code>, <code>LSTM</code>, <code>MultiheadAttention</code>, <code>Embedding</code>, <code>BatchNorm2d</code>, <code>LayerNorm</code>, <code>Dropout</code>.</div>
+  <div class="card"><h4>Containers</h4><code>nn.Sequential</code> for linear stacks, <code>nn.ModuleList</code> / <code>nn.ModuleDict</code> when you need Python control flow over submodules.</div>
+</div>
+
+<pre><code class="language-python"># Quick stacks with Sequential
+net = nn.Sequential(
+    nn.Linear(784, 256), nn.ReLU(),
+    nn.Linear(256, 10),
+)
+
+# train() vs eval() changes Dropout / BatchNorm behaviour
+model.train()   # dropout active, BN uses batch stats
+model.eval()    # dropout off, BN uses running stats</code></pre>
+
+<div class="callout warn"><span class="t">Don't forget</span> <code>model.eval()</code> before validation/inference, and <code>model.train()</code> before training. Mixing them up produces wrong metrics and unstable BatchNorm.</div>
+
+<h2>Loss Functions &amp; Optimizers</h2>
+<pre><code class="language-python">import torch.optim as optim
+
+criterion = nn.CrossEntropyLoss()        # expects raw logits + int class labels
+# criterion = nn.MSELoss()               # regression
+# criterion = nn.BCEWithLogitsLoss()     # binary, numerically stable
+
+optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-2)
+# optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
+
+# Learning-rate schedule
+scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50)</code></pre>
+
+<table>
+<tr><th>Optimizer</th><th>When to use</th><th>Notes</th></tr>
+<tr><td>SGD + momentum</td><td>CNNs, when you can tune LR</td><td>Often best final accuracy; needs schedule</td></tr>
+<tr><td>Adam</td><td>Fast prototyping, sparse grads</td><td>Robust defaults, adaptive per-param LR</td></tr>
+<tr><td>AdamW</td><td>Transformers / modern default</td><td>Decoupled weight decay — prefer over Adam</td></tr>
+<tr><td>RMSprop</td><td>RNNs, RL</td><td>Non-stationary objectives</td></tr>
+</table>
+
+<h2>Datasets &amp; DataLoader</h2>
+<p>A <code>Dataset</code> maps indices to samples; a <code>DataLoader</code> wraps it to provide batching, shuffling, and parallel loading.</p>
+
+<pre><code class="language-python">from torch.utils.data import Dataset, DataLoader
+
+class CSVDataset(Dataset):
+    def __init__(self, X, y):
+        self.X = torch.as_tensor(X, dtype=torch.float32)
+        self.y = torch.as_tensor(y, dtype=torch.long)
+
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, idx):
+        return self.X[idx], self.y[idx]
+
+train_ds = CSVDataset(X_train, y_train)
+train_loader = DataLoader(
+    train_ds, batch_size=64, shuffle=True,
+    num_workers=4,          # parallel CPU workers
+    pin_memory=True,        # faster host-&gt;GPU transfer
+    drop_last=True,
+)</code></pre>
+
+<div class="callout tip"><span class="t">Throughput tip</span> Combine <code>num_workers&gt;0</code>, <code>pin_memory=True</code>, and <code>non_blocking=True</code> on <code>.to(device)</code> to overlap data transfer with compute. On Windows, guard the entry point with <code>if __name__ == "__main__":</code> when using workers.</div>
+
+<h2>The Training Loop</h2>
+<p>PyTorch does not hide the loop — you write it. The five steps are always the same: forward, loss, zero grads, backward, step.</p>
+
+<pre><code class="language-python">model.to(device)
+
+for epoch in range(num_epochs):
+    model.train()
+    running = 0.0
+    for xb, yb in train_loader:
+        xb = xb.to(device, non_blocking=True)
+        yb = yb.to(device, non_blocking=True)
+
+        optimizer.zero_grad(set_to_none=True)   # 1. clear old grads
+        logits = model(xb)                       # 2. forward
+        loss = criterion(logits, yb)             # 3. compute loss
+        loss.backward()                          # 4. backprop
+        optimizer.step()                         # 5. update weights
+
+        running += loss.item() * xb.size(0)
+    scheduler.step()
+
+    # ---- validation ----
+    model.eval()
+    correct = total = 0
+    with torch.no_grad():
+        for xb, yb in val_loader:
+            xb, yb = xb.to(device), yb.to(device)
+            pred = model(xb).argmax(dim=1)
+            correct += (pred == yb).sum().item()
+            total += yb.size(0)
+    print(f"epoch {epoch}: loss={running/len(train_ds):.4f} acc={correct/total:.3f}")</code></pre>
+
+<div class="pipeline">
+  <span class="step">zero_grad</span><span class="arrow">-&gt;</span>
+  <span class="step">forward</span><span class="arrow">-&gt;</span>
+  <span class="step">loss</span><span class="arrow">-&gt;</span>
+  <span class="step">backward</span><span class="arrow">-&gt;</span>
+  <span class="step">step</span>
+</div>
+
+<h3>Mixed Precision (AMP)</h3>
+<pre><code class="language-python">from torch.amp import autocast, GradScaler
+
+scaler = GradScaler("cuda")
+for xb, yb in train_loader:
+    xb, yb = xb.to(device), yb.to(device)
+    optimizer.zero_grad(set_to_none=True)
+    with autocast("cuda", dtype=torch.float16):   # or bfloat16
+        loss = criterion(model(xb), yb)
+    scaler.scale(loss).backward()      # scale to avoid fp16 underflow
+    scaler.step(optimizer)
+    scaler.update()</code></pre>
+<div class="callout ok"><span class="t">Why</span> AMP runs most ops in fp16/bf16 for ~2x speed and ~half the memory on modern GPUs, keeping a fp32 master copy for stability.</div>
+
+<h2>GPU, CUDA &amp; Devices</h2>
+<pre><code class="language-python"># Move model and data to GPU — BOTH must be on the same device
+model = model.to("cuda")
+x = x.to("cuda")
+
+# Device-agnostic code
+x = x.to(device)
+
+# Inspect / manage memory
+print(torch.cuda.memory_allocated() / 1e9, "GB")
+torch.cuda.empty_cache()           # return cached blocks to the driver
+
+# Multi-GPU (single node, simplest): DataParallel is legacy;
+# prefer DistributedDataParallel (DDP) for real workloads
+# torchrun --nproc_per_node=4 train.py</code></pre>
+
+<table>
+<tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+<tr><td>RuntimeError: Expected all tensors on same device</td><td>Model on GPU, data on CPU (or vice versa)</td><td><code>.to(device)</code> both</td></tr>
+<tr><td>CUDA out of memory</td><td>Batch too large / grads retained</td><td>Smaller batch, AMP, <code>no_grad</code>, grad accumulation</td></tr>
+<tr><td>Slow GPU utilization</td><td>Data loading bottleneck</td><td>More workers, <code>pin_memory</code>, prefetch</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">OOM tip</span> <code>loss.item()</code> or <code>float(loss)</code> detaches the scalar. Accumulating <code>running += loss</code> (the tensor, not <code>.item()</code>) keeps the whole graph alive and leaks memory across the epoch.</div>
+
+<h2>Saving &amp; Loading Checkpoints</h2>
+<p>Save the <code>state_dict</code> (a dict of tensors), not the whole model object — it is portable and version-robust.</p>
+
+<pre><code class="language-python"># Save a full training checkpoint
+torch.save({
+    "epoch": epoch,
+    "model_state": model.state_dict(),
+    "optim_state": optimizer.state_dict(),
+    "scheduler_state": scheduler.state_dict(),
+    "best_acc": best_acc,
+}, "checkpoint.pt")
+
+# Restore
+ckpt = torch.load("checkpoint.pt", map_location=device, weights_only=True)
+model.load_state_dict(ckpt["model_state"])
+optimizer.load_state_dict(ckpt["optim_state"])
+start_epoch = ckpt["epoch"] + 1</code></pre>
+
+<div class="callout danger"><span class="t">Security</span> As of recent PyTorch, pass <code>weights_only=True</code> to <code>torch.load</code> for untrusted files — the default was flipped to <code>True</code> to block arbitrary-code execution via pickle. Only disable it for files you fully trust.</div>
+
+<h2>torch.compile &amp; Faster Inference</h2>
+<p>Introduced in PyTorch 2.0, <code>torch.compile</code> JIT-compiles your model into fused, optimized kernels via TorchInductor — often a large speedup with a one-line change and no code rewrite.</p>
+
+<pre><code class="language-python">model = torch.compile(model)          # default mode
+# model = torch.compile(model, mode="max-autotune")  # longer warmup, faster steady-state
+
+# First call traces &amp; compiles (slow); subsequent calls are fast.</code></pre>
+
+<h3>Inference-time checklist</h3>
+<pre><code class="language-python">model.eval()
+with torch.inference_mode():           # like no_grad but faster (no view tracking)
+    out = model(x.to(device))
+    probs = torch.softmax(out, dim=1)
+    pred = probs.argmax(dim=1)</code></pre>
+
+<div class="grid c3">
+  <div class="card"><h4>TorchScript</h4><code>torch.jit.script/trace</code> → serialized, Python-free deployment.</div>
+  <div class="card"><h4>ONNX</h4><code>torch.onnx.export</code> → run in other runtimes (TensorRT, ORT).</div>
+  <div class="card"><h4>Quantization</h4>int8 weights/activations shrink models and speed up CPU inference.</div>
+</div>
+
+<h2>Worked Mini-Example: XOR in 30 Lines</h2>
+<details><summary>Show the full runnable example</summary><div class="body">
+<pre><code class="language-python">import torch, torch.nn as nn, torch.optim as optim
+
+X = torch.tensor([[0.,0.],[0.,1.],[1.,0.],[1.,1.]])
+y = torch.tensor([[0.],[1.],[1.],[0.]])
+
+model = nn.Sequential(
+    nn.Linear(2, 8), nn.Tanh(),
+    nn.Linear(8, 1),
+)
+criterion = nn.BCEWithLogitsLoss()
+opt = optim.Adam(model.parameters(), lr=0.05)
+
+for step in range(2000):
+    opt.zero_grad()
+    loss = criterion(model(X), y)
+    loss.backward()
+    opt.step()
+
+model.eval()
+with torch.inference_mode():
+    preds = (torch.sigmoid(model(X)) &gt; 0.5).float()
+print(preds.squeeze().tolist())   # [0.0, 1.0, 1.0, 0.0]</code></pre>
+</div></details>
+
+<h2>Cheat-Sheet Reference</h2>
+<table>
+<tr><th>Task</th><th>Code</th></tr>
+<tr><td>To GPU</td><td><code>t.to("cuda")</code> / <code>t.cuda()</code></td></tr>
+<tr><td>NumPy ↔ Tensor</td><td><code>torch.from_numpy(a)</code> / <code>t.numpy()</code></td></tr>
+<tr><td>No-grad block</td><td><code>with torch.no_grad():</code></td></tr>
+<tr><td>Add/remove dim</td><td><code>t.unsqueeze(0)</code> / <code>t.squeeze()</code></td></tr>
+<tr><td>Concatenate</td><td><code>torch.cat([a,b], dim=0)</code></td></tr>
+<tr><td>Stack new axis</td><td><code>torch.stack([a,b])</code></td></tr>
+<tr><td>Scalar out</td><td><code>t.item()</code></td></tr>
+<tr><td>Clip grads</td><td><code>nn.utils.clip_grad_norm_(params, 1.0)</code></td></tr>
+<tr><td>Count params</td><td><code>sum(p.numel() for p in m.parameters())</code></td></tr>
+<tr><td>Seed everything</td><td><code>torch.manual_seed(0)</code></td></tr>
+</table>
+
+<h3>PyTorch vs NumPy vs TensorFlow</h3>
+<table>
+<tr><th>Aspect</th><th>PyTorch</th><th>NumPy</th><th>TensorFlow</th></tr>
+<tr><td>GPU</td><td>Yes</td><td>No</td><td>Yes</td></tr>
+<tr><td>Autodiff</td><td>Yes (dynamic)</td><td>No</td><td>Yes (eager + graph)</td></tr>
+<tr><td>Graph</td><td>Define-by-run</td><td>—</td><td>Eager default, tf.function</td></tr>
+<tr><td>Research share</td><td>Dominant</td><td>—</td><td>Declining</td></tr>
+</table>
+
+<h2>Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Use <code>zero_grad(set_to_none=True)</code>, pass logits to <code>CrossEntropyLoss</code> (never pre-softmax), seed RNGs for reproducibility, and move the model to the device <em>before</em> constructing the optimizer.</div>
+<div class="callout tip"><span class="t">Do</span> Profile with <code>torch.profiler</code> and prefer <code>AdamW</code> + a cosine schedule as a strong modern default. Checkpoint every epoch and keep the best-by-validation copy.</div>
+<div class="callout warn"><span class="t">Avoid</span> Calling <code>.cuda()</code> on data but not the model (device mismatch); accumulating loss tensors instead of <code>.item()</code>; forgetting <code>eval()</code>; applying softmax before <code>CrossEntropyLoss</code>.</div>
+<div class="callout danger"><span class="t">Never</span> Load untrusted checkpoints with <code>weights_only=False</code>, and never leave <code>requires_grad=True</code> on inputs during inference — it silently builds graphs and wastes memory.</div>
+
+<h2>Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between a dynamic and a static computation graph, and which does PyTorch use?</div><div class="a">PyTorch builds a <strong>dynamic</strong> (define-by-run) graph: the graph is constructed as the forward pass executes, so Python control flow works naturally and debugging is easy. Static-graph frameworks define the whole graph first, then execute it — faster to optimize but harder to debug. <code>torch.compile</code> now gives PyTorch much of the static-graph performance while keeping the eager programming model.</div></div>
+
+<div class="qa"><div class="q">Why must you call optimizer.zero_grad() each iteration?</div><div class="a">Because <code>.backward()</code> <em>accumulates</em> gradients into <code>.grad</code> rather than overwriting them. Without zeroing, each step uses the sum of all previous gradients, corrupting training. (Accumulation is intentional — it lets you simulate larger batches by delaying the <code>step</code>.)</div></div>
+
+<div class="qa"><div class="q">What does requires_grad do, and what is a leaf tensor?</div><div class="a"><code>requires_grad=True</code> tells autograd to track operations on that tensor so gradients can be computed. A <strong>leaf</strong> is a tensor created directly by the user (e.g. model parameters) rather than as the result of an op; only leaves with <code>requires_grad</code> accumulate <code>.grad</code> after <code>backward()</code>.</div></div>
+
+<div class="qa"><div class="q">When would you use torch.no_grad() vs detach() vs torch.inference_mode()?</div><div class="a"><code>no_grad()</code> is a context that disables graph tracking for everything inside — used during validation. <code>detach()</code> returns a single tensor cut off from the graph. <code>inference_mode()</code> is like <code>no_grad</code> but even faster because it also skips view/version tracking; use it for pure forward-only inference.</div></div>
+
+<div class="qa"><div class="q">Why pass raw logits to CrossEntropyLoss instead of softmax probabilities?</div><div class="a"><code>nn.CrossEntropyLoss</code> fuses <code>LogSoftmax</code> + <code>NLLLoss</code> internally for numerical stability (the log-sum-exp trick avoids overflow/underflow). Applying softmax yourself first double-counts the normalization and produces wrong, unstable gradients.</div></div>
+
+<div class="qa"><div class="q">What is the difference between model.train() and model.eval()?</div><div class="a">They toggle layer behaviour. In <code>train()</code>, Dropout randomly zeros activations and BatchNorm uses per-batch statistics while updating running estimates. In <code>eval()</code>, Dropout is a no-op and BatchNorm uses the stored running mean/variance. They do <em>not</em> disable gradients — pair <code>eval()</code> with <code>no_grad()</code>.</div></div>
+
+<div class="qa"><div class="q">How do view() and reshape() differ?</div><div class="a"><code>view()</code> returns a tensor sharing the same storage and requires the data to be contiguous — it only changes strides. <code>reshape()</code> returns a view when possible but silently copies when the layout prevents a view. Use <code>view()</code> when you want to guarantee no copy, <code>reshape()</code> when you just want the shape.</div></div>
+
+<div class="qa"><div class="q">What causes a CUDA out-of-memory error and how do you reduce memory?</div><div class="a">Common causes: batch size too large, holding onto tensors still attached to the graph (e.g. accumulating <code>loss</code> instead of <code>loss.item()</code>), or retaining the graph with <code>retain_graph=True</code>. Fixes: lower batch size, use AMP, gradient accumulation, <code>torch.no_grad()</code> for eval, gradient checkpointing, and free references so Python can garbage-collect.</div></div>
+
+<div class="qa"><div class="q">Why save state_dict() rather than the whole model?</div><div class="a">A <code>state_dict</code> is just an <code>OrderedDict</code> of tensors — it is portable, inspectable, and does not pickle your class definitions or file paths. Saving the whole model via pickle breaks if you refactor the class or move modules, and is a code-execution security risk on load.</div></div>
+
+<div class="qa"><div class="q">What does torch.compile do and when should you use it?</div><div class="a">It traces your model with TorchDynamo and compiles fused kernels via TorchInductor, typically giving a sizeable speedup with one line and no rewrite. Use it once your model is correct and stable; expect a slow first iteration (compilation) and watch for recompilations caused by changing input shapes (control with <code>dynamic=True</code>).</div></div>
+
+<div class="qa"><div class="q">How does DistributedDataParallel differ from DataParallel?</div><div class="a"><code>DataParallel</code> runs on one process, splitting a batch across GPUs with a single Python GIL — simple but slow and now discouraged. <code>DistributedDataParallel</code> runs one process per GPU, each with its own data shard, syncing gradients via all-reduce. DDP scales far better across GPUs and nodes and is the recommended approach.</div></div>
+
+<div class="qa"><div class="q">What is gradient accumulation and why is it useful?</div><div class="a">Instead of calling <code>optimizer.step()</code> every batch, you run <code>backward()</code> on several small batches (letting grads accumulate) and step once every N batches, dividing loss by N. This simulates a batch N times larger than fits in memory — crucial for training big models on limited GPUs.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+  <li><strong>Official tutorials</strong> — the "Deep Learning with PyTorch: A 60 Minute Blitz" and "Learn the Basics" tracks at pytorch.org/tutorials.</li>
+  <li><strong>Autograd mechanics</strong> — read the official autograd docs to understand the graph, hooks, and custom <code>autograd.Function</code>.</li>
+  <li><strong>Ecosystem</strong> — <em>torchvision</em>, <em>torchaudio</em>, <em>Hugging Face Transformers</em>, and <em>PyTorch Lightning</em> for less boilerplate.</li>
+  <li><strong>Scaling</strong> — DistributedDataParallel, FSDP (Fully Sharded Data Parallel), and <em>torchrun</em> for multi-GPU/multi-node training.</li>
+  <li><strong>Performance</strong> — <code>torch.profiler</code>, <code>torch.compile</code> modes, CUDA graphs, and quantization/pruning for deployment.</li>
+  <li><strong>Build something</strong> — reimplement a small Transformer or ResNet from scratch; nothing cements the API like writing the training loop yourself.</li>
+</ul>

@@ -1,0 +1,700 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keras — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">AI/ML Frameworks</div>
+  <h1>Keras</h1>
+  <div class="subtitle">Build, train, and ship neural networks fast with Keras 3's multi-backend API — from Sequential stacks to CNNs, RNNs, callbacks, and deployment.</div>
+  <div class="tags"><span>keras</span><span>deep-learning</span><span>neural-networks</span><span>keras-3</span><span>cnn</span><span>rnn</span><span>model-training</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~13 min read &middot; 2,887 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#1-what-keras-is-and-why-it-matters">1. What Keras Is and Why It Matters</a></li><li><a href="#2-setup-and-getting-started">2. Setup and Getting Started</a></li><li><a href="#3-the-three-ways-to-build-a-model">3. The Three Ways to Build a Model</a></li><li><a href="#4-layers-the-building-blocks">4. Layers: The Building Blocks</a></li><li><a href="#5-compile-fit-evaluate-predict">5. Compile, Fit, Evaluate, Predict</a></li><li><a href="#6-callbacks-hooks-into-training">6. Callbacks: Hooks Into Training</a></li><li><a href="#7-common-architectures">7. Common Architectures</a></li><li><a href="#8-regularization-fighting-overfitting">8. Regularization: Fighting Overfitting</a></li><li><a href="#9-saving-loading-and-deployment">9. Saving, Loading, and Deployment</a></li><li><a href="#10-worked-mini-example-mnist-end-to-end">10. Worked Mini-Example: MNIST End-to-End</a></li><li><a href="#11-cheat-sheet">11. Cheat Sheet</a></li><li><a href="#12-best-practices-and-common-pitfalls">12. Best Practices and Common Pitfalls</a></li><li><a href="#13-interview-questions-amp-answers">13. Interview Questions &amp; Answers</a></li><li><a href="#14-further-learning">14. Further Learning</a></li></ol></nav>
+<p class="lead">Keras is the high-level deep-learning API that lets you go from an idea to a trained neural network in a handful of readable lines. With Keras 3 it became truly <strong>multi-backend</strong> — the same model code runs on TensorFlow, JAX, or PyTorch — so you write once and choose the engine that best fits your deployment, hardware, or team. It is the fastest way to be productive in deep learning while staying close enough to the metal for serious research.</p>
+
+<h2 id="1-what-keras-is-and-why-it-matters">1. What Keras Is and Why It Matters</h2>
+
+<p>Keras is a <strong>declarative, layer-oriented API</strong> for building and training neural networks. You compose <em>layers</em> into a <em>model</em>, attach an optimizer, loss, and metrics with <code>compile()</code>, then drive the training loop with <code>fit()</code>. The library handles autodifferentiation, batching, device placement, and the gradient-descent loop so you focus on architecture and data.</p>
+
+<p>Keras 3 (the current major line, GA since late 2023 and the default <code>keras</code> package on PyPI in 2024-2026) is a rewrite on top of a thin <span class="badge">backend abstraction</span>. The <em>same</em> <code>keras.layers</code> and <code>Model</code> code is executed by whichever backend you select — <span class="badge g">TensorFlow</span>, <span class="badge o">JAX</span>, or <span class="badge">PyTorch</span>. This decouples your model definition from the numerical engine.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Readable</h4>Models read like the diagrams on the whiteboard. Stacking layers is a list; branching is a function call.</div>
+  <div class="card"><h4>Portable</h4>One backend switch (an env var) moves training between TF, JAX, and PyTorch with no model rewrite.</div>
+  <div class="card"><h4>Batteries-included</h4>Optimizers, losses, metrics, callbacks, preprocessing layers, and saving are all first-class.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 760 250" width="760" height="250">
+  <defs>
+    <marker id="ka" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="95" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="122" text-anchor="middle" font-size="13" fill="#1a2233">Your model code</text>
+  <text x="95" y="140" text-anchor="middle" font-size="12" fill="#1a2233">keras.layers / Model</text>
+
+  <rect x="235" y="95" width="150" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="310" y="122" text-anchor="middle" font-size="13" fill="#1a2233">keras.ops</text>
+  <text x="310" y="140" text-anchor="middle" font-size="12" fill="#1a2233">backend abstraction</text>
+
+  <rect x="470" y="20" width="140" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="540" y="48" text-anchor="middle" font-size="13" fill="#1a2233">TensorFlow</text>
+  <rect x="470" y="102" width="140" height="46" rx="8" fill="#eff4ff" stroke="#b45309"/>
+  <text x="540" y="130" text-anchor="middle" font-size="13" fill="#1a2233">JAX</text>
+  <rect x="470" y="184" width="140" height="46" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="540" y="212" text-anchor="middle" font-size="13" fill="#1a2233">PyTorch</text>
+
+  <rect x="660" y="102" width="80" height="46" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="700" y="130" text-anchor="middle" font-size="13" fill="#fff">GPU/TPU</text>
+
+  <line x1="170" y1="125" x2="235" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#ka)"/>
+  <line x1="385" y1="120" x2="470" y2="48" stroke="#94a3b8" stroke-width="2" marker-end="url(#ka)"/>
+  <line x1="385" y1="125" x2="470" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#ka)"/>
+  <line x1="385" y1="130" x2="470" y2="205" stroke="#94a3b8" stroke-width="2" marker-end="url(#ka)"/>
+  <line x1="610" y1="125" x2="660" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#ka)"/>
+</svg>
+<div class="cap">Fig 1 — Keras 3 architecture: one model definition, three interchangeable numerical backends.</div>
+</div>
+
+<div class="callout note"><span class="t">Keras vs tf.keras</span> Historically Keras lived inside TensorFlow as <code>tf.keras</code>. Keras 3 is a standalone <code>pip install keras</code> package that sits <em>above</em> the backends. New code should <code>import keras</code> directly and select a backend, rather than relying on <code>tensorflow.keras</code>.</div>
+
+<h2 id="2-setup-and-getting-started">2. Setup and Getting Started</h2>
+
+<p>Install Keras 3 plus at least one backend. The backend is chosen at import time via the <code>KERAS_BACKEND</code> environment variable (default is <code>tensorflow</code>).</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Install Keras 3 and the backends you want</span>
+pip install --upgrade keras
+
+<span class="hljs-comment"># Pick ONE (or more) backend engine:</span>
+pip install tensorflow        <span class="hljs-comment"># TensorFlow backend (default)</span>
+pip install <span class="hljs-string">&quot;jax[cpu]&quot;</span>        <span class="hljs-comment"># JAX backend (or jax[cuda12] for GPU)</span>
+pip install torch             <span class="hljs-comment"># PyTorch backend</span>
+
+<span class="hljs-comment"># Select the backend BEFORE importing keras:</span>
+<span class="hljs-built_in">export</span> KERAS_BACKEND=jax      <span class="hljs-comment"># or &quot;tensorflow&quot; / &quot;torch&quot;</span>
+python train.py</code></pre>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># You can also set the backend in code, but it MUST come before `import keras`.</span>
+<span class="hljs-keyword">import</span> os
+os.environ[<span class="hljs-string">&quot;KERAS_BACKEND&quot;</span>] = <span class="hljs-string">&quot;jax&quot;</span>
+
+<span class="hljs-keyword">import</span> keras
+<span class="hljs-built_in">print</span>(keras.__version__)        <span class="hljs-comment"># e.g. 3.x</span>
+<span class="hljs-built_in">print</span>(keras.backend.backend())  <span class="hljs-comment"># &quot;jax&quot;</span></code></pre>
+
+<div class="callout tip"><span class="t">Reproducibility</span> Call <code>keras.utils.set_random_seed(42)</code> once at the top of your script to seed Python, NumPy, and the active backend together.</div>
+
+<h2 id="3-the-three-ways-to-build-a-model">3. The Three Ways to Build a Model</h2>
+
+<p>Keras offers three model-building styles, ordered from simplest to most flexible. Pick the lowest-ceremony option that your architecture allows.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Sequential</h4>A linear stack of layers. One input, one output, no branching. Great for MLPs and simple CNNs.</div>
+  <div class="card"><h4>Functional</h4>Layers called like functions on tensors. Supports multiple inputs/outputs, branches, and shared layers — the workhorse for most research.</div>
+  <div class="card"><h4>Subclassing</h4>Write a <code>Model</code> subclass with an imperative <code>call()</code>. Maximum flexibility for dynamic control flow and custom training.</div>
+</div>
+
+<h3>3.1 Sequential API</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> keras
+<span class="hljs-keyword">from</span> keras <span class="hljs-keyword">import</span> layers
+
+model = keras.Sequential([
+    layers.Input(shape=(<span class="hljs-number">784</span>,)),      <span class="hljs-comment"># explicit input shape (28x28 flattened)</span>
+    layers.Dense(<span class="hljs-number">256</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>),
+    layers.Dropout(<span class="hljs-number">0.3</span>),
+    layers.Dense(<span class="hljs-number">10</span>, activation=<span class="hljs-string">&quot;softmax&quot;</span>),  <span class="hljs-comment"># 10-class classifier</span>
+])
+
+model.summary()  <span class="hljs-comment"># prints layer table, output shapes, and parameter counts</span></code></pre>
+
+<h3>3.2 Functional API</h3>
+
+<p>The functional API treats layers as callables on symbolic <span class="badge">KerasTensor</span> objects. You explicitly wire the dataflow graph, which makes branches, residual connections, and multi-input models natural.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> keras <span class="hljs-keyword">import</span> layers, Model
+
+inputs = keras.Input(shape=(<span class="hljs-number">784</span>,))
+x = layers.Dense(<span class="hljs-number">256</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>)(inputs)
+x = layers.Dropout(<span class="hljs-number">0.3</span>)(x)
+
+<span class="hljs-comment"># A residual-style branch: add a skip connection</span>
+skip = layers.Dense(<span class="hljs-number">64</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>)(x)
+x = layers.Dense(<span class="hljs-number">64</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>)(skip)
+x = layers.add([x, skip])                       <span class="hljs-comment"># element-wise merge</span>
+
+outputs = layers.Dense(<span class="hljs-number">10</span>, activation=<span class="hljs-string">&quot;softmax&quot;</span>)(x)
+model = Model(inputs=inputs, outputs=outputs, name=<span class="hljs-string">&quot;mlp_with_skip&quot;</span>)</code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 740 180" width="740" height="180">
+  <defs>
+    <marker id="kb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="10" y="70" width="90" height="44" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="55" y="97" text-anchor="middle" font-size="12" fill="#1a2233">Input 784</text>
+  <rect x="130" y="70" width="100" height="44" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="180" y="97" text-anchor="middle" font-size="12" fill="#1a2233">Dense 256</text>
+  <rect x="260" y="70" width="100" height="44" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="310" y="97" text-anchor="middle" font-size="12" fill="#1a2233">skip 64</text>
+  <rect x="390" y="20" width="100" height="44" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="440" y="47" text-anchor="middle" font-size="12" fill="#1a2233">Dense 64</text>
+  <rect x="520" y="70" width="80" height="44" rx="6" fill="#fff" stroke="#b45309"/>
+  <text x="560" y="97" text-anchor="middle" font-size="12" fill="#1a2233">add</text>
+  <rect x="630" y="70" width="100" height="44" rx="6" fill="#059669" stroke="#1e3a8a"/>
+  <text x="680" y="97" text-anchor="middle" font-size="12" fill="#fff">Softmax 10</text>
+
+  <line x1="100" y1="92" x2="130" y2="92" stroke="#94a3b8" stroke-width="2" marker-end="url(#kb)"/>
+  <line x1="230" y1="92" x2="260" y2="92" stroke="#94a3b8" stroke-width="2" marker-end="url(#kb)"/>
+  <line x1="360" y1="85" x2="390" y2="55" stroke="#94a3b8" stroke-width="2" marker-end="url(#kb)"/>
+  <line x1="490" y1="45" x2="560" y2="68" stroke="#94a3b8" stroke-width="2" marker-end="url(#kb)"/>
+  <line x1="360" y1="98" x2="520" y2="98" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#kb)"/>
+  <line x1="600" y1="92" x2="630" y2="92" stroke="#94a3b8" stroke-width="2" marker-end="url(#kb)"/>
+</svg>
+<div class="cap">Fig 2 — Functional dataflow graph with a skip connection (dashed) merged by an <code>add</code> layer.</div>
+</div>
+
+<h3>3.3 Model Subclassing</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MLP</span>(keras.Model):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, units=<span class="hljs-number">256</span>, classes=<span class="hljs-number">10</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.d1 = layers.Dense(units, activation=<span class="hljs-string">&quot;relu&quot;</span>)
+        <span class="hljs-variable language_">self</span>.drop = layers.Dropout(<span class="hljs-number">0.3</span>)
+        <span class="hljs-variable language_">self</span>.out = layers.Dense(classes, activation=<span class="hljs-string">&quot;softmax&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">call</span>(<span class="hljs-params">self, x, training=<span class="hljs-literal">False</span></span>):
+        x = <span class="hljs-variable language_">self</span>.d1(x)
+        x = <span class="hljs-variable language_">self</span>.drop(x, training=training)   <span class="hljs-comment"># dropout only active in training</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.out(x)
+
+model = MLP()</code></pre>
+
+<div class="callout warn"><span class="t">Pass training through</span> In subclassed models you must thread the <code>training</code> flag into layers like Dropout and BatchNormalization yourself, or they will behave the same in train and inference. The Sequential and Functional APIs handle this automatically.</div>
+
+<h2 id="4-layers-the-building-blocks">4. Layers: The Building Blocks</h2>
+
+<p>Every layer is a callable object with trainable <em>weights</em> and a <code>call()</code> that transforms tensors. Weights are created lazily the first time the layer sees an input shape (or eagerly if you pass <code>Input</code>).</p>
+
+<table>
+<tr><th>Layer</th><th>Purpose</th><th>Key arguments</th></tr>
+<tr><td><code>Dense</code></td><td>Fully-connected / linear</td><td><code>units</code>, <code>activation</code></td></tr>
+<tr><td><code>Conv2D</code></td><td>2D convolution (images)</td><td><code>filters</code>, <code>kernel_size</code>, <code>strides</code>, <code>padding</code></td></tr>
+<tr><td><code>MaxPooling2D</code></td><td>Spatial downsampling</td><td><code>pool_size</code></td></tr>
+<tr><td><code>LSTM</code> / <code>GRU</code></td><td>Recurrent sequence modeling</td><td><code>units</code>, <code>return_sequences</code></td></tr>
+<tr><td><code>Embedding</code></td><td>Integer tokens to dense vectors</td><td><code>input_dim</code>, <code>output_dim</code></td></tr>
+<tr><td><code>BatchNormalization</code></td><td>Normalize activations</td><td><code>axis</code>, <code>momentum</code></td></tr>
+<tr><td><code>Dropout</code></td><td>Stochastic regularization</td><td><code>rate</code></td></tr>
+<tr><td><code>MultiHeadAttention</code></td><td>Transformer attention</td><td><code>num_heads</code>, <code>key_dim</code></td></tr>
+</table>
+
+<h3>4.1 Preprocessing layers</h3>
+
+<p>Keras ships preprocessing layers (<code>Normalization</code>, <code>Rescaling</code>, <code>TextVectorization</code>, image augmentation) that become <em>part of the model</em>. This means preprocessing travels with the saved model — no train/serve skew.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Adapt a Normalization layer to your data&#x27;s mean/variance, then bake it in.</span>
+norm = layers.Normalization()
+norm.adapt(x_train)              <span class="hljs-comment"># computes mean &amp; variance from data</span>
+
+inputs = keras.Input(shape=(<span class="hljs-number">10</span>,))
+x = norm(inputs)                 <span class="hljs-comment"># normalization is now inside the model</span>
+outputs = layers.Dense(<span class="hljs-number">1</span>)(x)
+model = keras.Model(inputs, outputs)</code></pre>
+
+<h2 id="5-compile-fit-evaluate-predict">5. Compile, Fit, Evaluate, Predict</h2>
+
+<p>The training lifecycle is four verbs. <code>compile()</code> configures <em>how</em> to learn, <code>fit()</code> runs the loop, <code>evaluate()</code> scores held-out data, and <code>predict()</code> produces outputs.</p>
+
+<div class="pipeline"><span class="step">compile()</span><span class="arrow">-&gt;</span><span class="step">fit()</span><span class="arrow">-&gt;</span><span class="step">evaluate()</span><span class="arrow">-&gt;</span><span class="step">predict()</span></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">model.<span class="hljs-built_in">compile</span>(
+    optimizer=keras.optimizers.Adam(learning_rate=<span class="hljs-number">1e-3</span>),
+    loss=<span class="hljs-string">&quot;sparse_categorical_crossentropy&quot;</span>,   <span class="hljs-comment"># integer labels, multiclass</span>
+    metrics=[<span class="hljs-string">&quot;accuracy&quot;</span>],
+)
+
+history = model.fit(
+    x_train, y_train,
+    validation_split=<span class="hljs-number">0.1</span>,     <span class="hljs-comment"># hold out 10% for validation each epoch</span>
+    epochs=<span class="hljs-number">20</span>,
+    batch_size=<span class="hljs-number">128</span>,
+    verbose=<span class="hljs-number">2</span>,
+)
+
+test_loss, test_acc = model.evaluate(x_test, y_test)
+probs = model.predict(x_test[:<span class="hljs-number">5</span>])    <span class="hljs-comment"># shape (5, 10) class probabilities</span></code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 720 210" width="720" height="210">
+  <defs>
+    <marker id="kc" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="30" y="80" width="110" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="85" y="108" text-anchor="middle" font-size="12" fill="#1a2233">Batch of data</text>
+  <rect x="180" y="80" width="110" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="235" y="102" text-anchor="middle" font-size="12" fill="#1a2233">Forward pass</text>
+  <text x="235" y="118" text-anchor="middle" font-size="11" fill="#1a2233">predictions</text>
+  <rect x="330" y="80" width="110" height="46" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="385" y="108" text-anchor="middle" font-size="12" fill="#1a2233">Loss</text>
+  <rect x="480" y="80" width="110" height="46" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="535" y="102" text-anchor="middle" font-size="12" fill="#1a2233">Backprop</text>
+  <text x="535" y="118" text-anchor="middle" font-size="11" fill="#1a2233">gradients</text>
+  <rect x="620" y="80" width="80" height="46" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="660" y="108" text-anchor="middle" font-size="12" fill="#fff">Optimizer</text>
+
+  <line x1="140" y1="103" x2="180" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#kc)"/>
+  <line x1="290" y1="103" x2="330" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#kc)"/>
+  <line x1="440" y1="103" x2="480" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#kc)"/>
+  <line x1="590" y1="103" x2="620" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#kc)"/>
+  <path d="M660 126 L660 170 L85 170 L85 126" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#kc)"/>
+  <text x="370" y="188" text-anchor="middle" font-size="12" fill="#1a2233">update weights, repeat for every batch × epoch</text>
+</svg>
+<div class="cap">Fig 3 — One training step inside <code>fit()</code>: forward pass, loss, backprop, weight update.</div>
+</div>
+
+<h3>5.1 Choosing a loss</h3>
+
+<table>
+<tr><th>Task</th><th>Output layer</th><th>Loss</th></tr>
+<tr><td>Binary classification</td><td><code>Dense(1, "sigmoid")</code></td><td><code>binary_crossentropy</code></td></tr>
+<tr><td>Multiclass (integer labels)</td><td><code>Dense(k, "softmax")</code></td><td><code>sparse_categorical_crossentropy</code></td></tr>
+<tr><td>Multiclass (one-hot labels)</td><td><code>Dense(k, "softmax")</code></td><td><code>categorical_crossentropy</code></td></tr>
+<tr><td>Regression</td><td><code>Dense(1)</code> (linear)</td><td><code>mse</code> / <code>mae</code> / <code>huber</code></td></tr>
+</table>
+
+<h2 id="6-callbacks-hooks-into-training">6. Callbacks: Hooks Into Training</h2>
+
+<p>Callbacks are objects passed to <code>fit()</code> that fire at defined points (epoch start/end, batch end). They power early stopping, checkpointing, learning-rate schedules, and logging without touching your model code.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">callbacks = [
+    keras.callbacks.EarlyStopping(
+        monitor=<span class="hljs-string">&quot;val_loss&quot;</span>, patience=<span class="hljs-number">5</span>, restore_best_weights=<span class="hljs-literal">True</span>),
+    keras.callbacks.ModelCheckpoint(
+        <span class="hljs-string">&quot;best.keras&quot;</span>, monitor=<span class="hljs-string">&quot;val_loss&quot;</span>, save_best_only=<span class="hljs-literal">True</span>),
+    keras.callbacks.ReduceLROnPlateau(
+        monitor=<span class="hljs-string">&quot;val_loss&quot;</span>, factor=<span class="hljs-number">0.5</span>, patience=<span class="hljs-number">3</span>),
+    keras.callbacks.TensorBoard(log_dir=<span class="hljs-string">&quot;./logs&quot;</span>),
+]
+
+model.fit(x_train, y_train, validation_split=<span class="hljs-number">0.1</span>,
+          epochs=<span class="hljs-number">100</span>, callbacks=callbacks)</code></pre>
+
+<div class="callout tip"><span class="t">EarlyStopping + restore_best_weights</span> This pair is the single most useful default: train "too long," stop when validation stops improving, and roll weights back to the best epoch automatically.</div>
+
+<details><summary>Writing a custom callback</summary><div class="body">
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">LRLogger</span>(keras.callbacks.Callback):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">on_epoch_end</span>(<span class="hljs-params">self, epoch, logs=<span class="hljs-literal">None</span></span>):
+        lr = <span class="hljs-built_in">float</span>(<span class="hljs-variable language_">self</span>.model.optimizer.learning_rate)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;epoch <span class="hljs-subst">{epoch}</span>: lr=<span class="hljs-subst">{lr:<span class="hljs-number">.2</span>e}</span> val_loss=<span class="hljs-subst">{logs[<span class="hljs-string">&#x27;val_loss&#x27;</span>]:<span class="hljs-number">.4</span>f}</span>&quot;</span>)</code></pre>
+</div></details>
+
+<h2 id="7-common-architectures">7. Common Architectures</h2>
+
+<h3>7.1 MLP (tabular / flattened)</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">mlp = keras.Sequential([
+    layers.Input(shape=(n_features,)),
+    layers.Dense(<span class="hljs-number">128</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>),
+    layers.BatchNormalization(),
+    layers.Dropout(<span class="hljs-number">0.3</span>),
+    layers.Dense(<span class="hljs-number">1</span>, activation=<span class="hljs-string">&quot;sigmoid&quot;</span>),   <span class="hljs-comment"># binary output</span>
+])</code></pre>
+
+<h3>7.2 CNN (images)</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">cnn = keras.Sequential([
+    layers.Input(shape=(<span class="hljs-number">28</span>, <span class="hljs-number">28</span>, <span class="hljs-number">1</span>)),
+    layers.Conv2D(<span class="hljs-number">32</span>, <span class="hljs-number">3</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>, padding=<span class="hljs-string">&quot;same&quot;</span>),
+    layers.MaxPooling2D(),                   <span class="hljs-comment"># 28x28 -&gt; 14x14</span>
+    layers.Conv2D(<span class="hljs-number">64</span>, <span class="hljs-number">3</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>, padding=<span class="hljs-string">&quot;same&quot;</span>),
+    layers.MaxPooling2D(),                   <span class="hljs-comment"># 14x14 -&gt; 7x7</span>
+    layers.GlobalAveragePooling2D(),         <span class="hljs-comment"># 7x7x64 -&gt; 64</span>
+    layers.Dense(<span class="hljs-number">10</span>, activation=<span class="hljs-string">&quot;softmax&quot;</span>),
+])</code></pre>
+
+<h3>7.3 RNN (sequences / text)</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">rnn = keras.Sequential([
+    layers.Input(shape=(maxlen,)),           <span class="hljs-comment"># integer token ids</span>
+    layers.Embedding(input_dim=vocab, output_dim=<span class="hljs-number">128</span>),
+    layers.Bidirectional(layers.LSTM(<span class="hljs-number">64</span>)),   <span class="hljs-comment"># reads forward + backward</span>
+    layers.Dense(<span class="hljs-number">1</span>, activation=<span class="hljs-string">&quot;sigmoid&quot;</span>),   <span class="hljs-comment"># sentiment</span>
+])</code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 700 200" width="700" height="200">
+  <defs>
+    <marker id="kd" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="80" width="90" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="65" y="105" text-anchor="middle" font-size="12" fill="#1a2233">28×28×1</text>
+  <rect x="140" y="80" width="100" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="190" y="100" text-anchor="middle" font-size="11" fill="#1a2233">Conv 32</text>
+  <text x="190" y="114" text-anchor="middle" font-size="11" fill="#1a2233">+ pool</text>
+  <rect x="270" y="80" width="100" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="320" y="100" text-anchor="middle" font-size="11" fill="#1a2233">Conv 64</text>
+  <text x="320" y="114" text-anchor="middle" font-size="11" fill="#1a2233">+ pool</text>
+  <rect x="400" y="80" width="110" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="455" y="98" text-anchor="middle" font-size="11" fill="#1a2233">Global</text>
+  <text x="455" y="112" text-anchor="middle" font-size="11" fill="#1a2233">AvgPool → 64</text>
+  <rect x="540" y="80" width="130" height="40" rx="6" fill="#059669" stroke="#1e3a8a"/>
+  <text x="605" y="105" text-anchor="middle" font-size="12" fill="#fff">Softmax 10</text>
+
+  <line x1="110" y1="100" x2="140" y2="100" stroke="#94a3b8" stroke-width="2" marker-end="url(#kd)"/>
+  <line x1="240" y1="100" x2="270" y2="100" stroke="#94a3b8" stroke-width="2" marker-end="url(#kd)"/>
+  <line x1="370" y1="100" x2="400" y2="100" stroke="#94a3b8" stroke-width="2" marker-end="url(#kd)"/>
+  <line x1="510" y1="100" x2="540" y2="100" stroke="#94a3b8" stroke-width="2" marker-end="url(#kd)"/>
+  <text x="345" y="160" text-anchor="middle" font-size="12" fill="#1a2233">spatial dims shrink, channel depth grows, then collapse to class scores</text>
+</svg>
+<div class="cap">Fig 4 — A typical CNN: convolution + pooling blocks reduce spatial resolution while increasing feature depth.</div>
+</div>
+
+<h2 id="8-regularization-fighting-overfitting">8. Regularization: Fighting Overfitting</h2>
+
+<p>Deep nets memorize. Regularization constrains capacity so the model generalizes. Keras offers several complementary tools you can stack.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Dropout</h4><code>layers.Dropout(0.3)</code> randomly zeros activations during training, forcing redundancy.</div>
+  <div class="card"><h4>Weight decay (L2)</h4><code>Dense(64, kernel_regularizer=keras.regularizers.l2(1e-4))</code> penalizes large weights.</div>
+  <div class="card"><h4>BatchNorm</h4><code>layers.BatchNormalization()</code> stabilizes and mildly regularizes by normalizing activations.</div>
+  <div class="card"><h4>Early stopping</h4>Stop before the model overfits — the cheapest regularizer of all.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> keras <span class="hljs-keyword">import</span> regularizers
+
+layer = layers.Dense(
+    <span class="hljs-number">128</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>,
+    kernel_regularizer=regularizers.l2(<span class="hljs-number">1e-4</span>),  <span class="hljs-comment"># L2 weight penalty</span>
+)
+<span class="hljs-comment"># Data augmentation (images) is regularization too:</span>
+aug = keras.Sequential([
+    layers.RandomFlip(<span class="hljs-string">&quot;horizontal&quot;</span>),
+    layers.RandomRotation(<span class="hljs-number">0.1</span>),
+])</code></pre>
+
+<div class="callout warn"><span class="t">Don't stack blindly</span> BatchNorm and Dropout can interact badly if ordered carelessly. A common safe recipe is Dense → BatchNorm → Activation → Dropout. Validate on held-out data rather than trusting a formula.</div>
+
+<h2 id="9-saving-loading-and-deployment">9. Saving, Loading, and Deployment</h2>
+
+<p>Keras 3's native format is a single <code>.keras</code> zip archive containing architecture, weights, and optimizer state. Prefer it over the legacy HDF5 (<code>.h5</code>) and the raw TF SavedModel directory for most workflows.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Save the full model (architecture + weights + optimizer state)</span>
+model.save(<span class="hljs-string">&quot;model.keras&quot;</span>)
+restored = keras.models.load_model(<span class="hljs-string">&quot;model.keras&quot;</span>)
+
+<span class="hljs-comment"># Save ONLY weights (needs matching architecture to load)</span>
+model.save_weights(<span class="hljs-string">&quot;weights.weights.h5&quot;</span>)
+model.load_weights(<span class="hljs-string">&quot;weights.weights.h5&quot;</span>)
+
+<span class="hljs-comment"># Export a backend-native inference artifact (e.g. TF SavedModel) for serving</span>
+model.export(<span class="hljs-string">&quot;saved_model_dir&quot;</span>)   <span class="hljs-comment"># inference-only, no training state</span></code></pre>
+
+<table>
+<tr><th>Format</th><th>Call</th><th>Use when</th></tr>
+<tr><td><code>.keras</code></td><td><code>model.save()</code></td><td>Default: resume training or reload exactly</td></tr>
+<tr><td>Weights <code>.weights.h5</code></td><td><code>save_weights()</code></td><td>Transfer weights into a known architecture</td></tr>
+<tr><td>Exported artifact</td><td><code>model.export()</code></td><td>Production serving / TF Serving / TFLite</td></tr>
+</table>
+
+<h2 id="10-worked-mini-example-mnist-end-to-end">10. Worked Mini-Example: MNIST End-to-End</h2>
+
+<p>A complete, runnable classifier that ties the lifecycle together — load data, build, compile, train with callbacks, evaluate, and save.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> keras
+<span class="hljs-keyword">from</span> keras <span class="hljs-keyword">import</span> layers
+
+keras.utils.set_random_seed(<span class="hljs-number">42</span>)
+
+<span class="hljs-comment"># 1) Data: 60k training, 10k test grayscale digits</span>
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+x_train = x_train.astype(<span class="hljs-string">&quot;float32&quot;</span>) / <span class="hljs-number">255.0</span>   <span class="hljs-comment"># scale to [0, 1]</span>
+x_test = x_test.astype(<span class="hljs-string">&quot;float32&quot;</span>) / <span class="hljs-number">255.0</span>
+x_train = x_train[..., <span class="hljs-literal">None</span>]                  <span class="hljs-comment"># add channel dim -&gt; (N,28,28,1)</span>
+x_test = x_test[..., <span class="hljs-literal">None</span>]
+
+<span class="hljs-comment"># 2) Model: small CNN</span>
+model = keras.Sequential([
+    layers.Input(shape=(<span class="hljs-number">28</span>, <span class="hljs-number">28</span>, <span class="hljs-number">1</span>)),
+    layers.Conv2D(<span class="hljs-number">32</span>, <span class="hljs-number">3</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>),
+    layers.MaxPooling2D(),
+    layers.Conv2D(<span class="hljs-number">64</span>, <span class="hljs-number">3</span>, activation=<span class="hljs-string">&quot;relu&quot;</span>),
+    layers.GlobalAveragePooling2D(),
+    layers.Dropout(<span class="hljs-number">0.3</span>),
+    layers.Dense(<span class="hljs-number">10</span>, activation=<span class="hljs-string">&quot;softmax&quot;</span>),
+])
+
+<span class="hljs-comment"># 3) Compile</span>
+model.<span class="hljs-built_in">compile</span>(optimizer=<span class="hljs-string">&quot;adam&quot;</span>,
+              loss=<span class="hljs-string">&quot;sparse_categorical_crossentropy&quot;</span>,
+              metrics=[<span class="hljs-string">&quot;accuracy&quot;</span>])
+
+<span class="hljs-comment"># 4) Train with early stopping</span>
+model.fit(x_train, y_train, validation_split=<span class="hljs-number">0.1</span>, epochs=<span class="hljs-number">15</span>, batch_size=<span class="hljs-number">128</span>,
+          callbacks=[keras.callbacks.EarlyStopping(patience=<span class="hljs-number">3</span>,
+                                                    restore_best_weights=<span class="hljs-literal">True</span>)])
+
+<span class="hljs-comment"># 5) Evaluate and save</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;test accuracy:&quot;</span>, model.evaluate(x_test, y_test)[<span class="hljs-number">1</span>])
+model.save(<span class="hljs-string">&quot;mnist_cnn.keras&quot;</span>)</code></pre>
+
+<h2 id="11-cheat-sheet">11. Cheat Sheet</h2>
+
+<table>
+<tr><th>Need</th><th>Code</th></tr>
+<tr><td>Inspect model</td><td><code>model.summary()</code></td></tr>
+<tr><td>Count params</td><td><code>model.count_params()</code></td></tr>
+<tr><td>Freeze a layer</td><td><code>layer.trainable = False</code></td></tr>
+<tr><td>Custom metric</td><td><code>metrics=[keras.metrics.AUC()]</code></td></tr>
+<tr><td>Class imbalance</td><td><code>fit(..., class_weight={0:1., 1:5.})</code></td></tr>
+<tr><td>LR schedule</td><td><code>optimizers.Adam(CosineDecay(...))</code></td></tr>
+<tr><td>Mixed precision</td><td><code>keras.mixed_precision.set_global_policy("mixed_float16")</code></td></tr>
+<tr><td>Switch backend</td><td><code>export KERAS_BACKEND=jax</code></td></tr>
+<tr><td>Reload model</td><td><code>keras.models.load_model("m.keras")</code></td></tr>
+<tr><td>Plot training</td><td><code>history.history["val_loss"]</code></td></tr>
+</table>
+
+<h3>Keras 3 vs legacy tf.keras</h3>
+
+<table>
+<tr><th>Aspect</th><th>Keras 3 (<code>import keras</code>)</th><th>Legacy <code>tf.keras</code></th></tr>
+<tr><td>Backends</td><td>TensorFlow, JAX, PyTorch</td><td>TensorFlow only</td></tr>
+<tr><td>Save format</td><td><code>.keras</code> (default)</td><td><code>.h5</code> / SavedModel</td></tr>
+<tr><td>Low-level ops</td><td><code>keras.ops.*</code> (backend-agnostic)</td><td><code>tf.*</code></td></tr>
+<tr><td>Status</td><td>Actively developed</td><td>Maintenance / compatibility</td></tr>
+</table>
+
+<h2 id="12-best-practices-and-common-pitfalls">12. Best Practices and Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Start with the simplest API that fits (Sequential before Functional before subclassing). Scale inputs to a sane range. Always keep a validation split and use <code>EarlyStopping</code>. Save in <code>.keras</code> format.</div>
+
+<div class="callout tip"><span class="t">Do</span> Bake preprocessing (Normalization, Rescaling, TextVectorization) into the model so training and serving use identical transforms. Use <code>keras.utils.set_random_seed()</code> for reproducible runs.</div>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>sparse_categorical_crossentropy</code> expects integer labels; <code>categorical_crossentropy</code> expects one-hot. Mixing them silently trains a broken model. Match the loss to your label format.</div>
+
+<div class="callout danger"><span class="t">Avoid</span> Forgetting to pass the <code>training</code> flag in a subclassed <code>call()</code> — Dropout/BatchNorm then misbehave at inference. Also avoid setting <code>KERAS_BACKEND</code> <em>after</em> <code>import keras</code>; the backend locks at import time.</div>
+
+<h2 id="13-interview-questions-amp-answers">13. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between the Sequential and Functional APIs?</div><div class="a">Sequential is a strictly linear stack with one input and one output — you cannot express branches, skip connections, or multiple inputs. The Functional API treats layers as callables on symbolic tensors, letting you wire arbitrary directed acyclic graphs: multi-input/output models, shared layers, and residual connections. Use Sequential for simple stacks and Functional for anything with topology.</div></div>
+
+<div class="qa"><div class="q">What does <code>compile()</code> actually do?</div><div class="a">It configures the training process without running it: it attaches the optimizer, the loss function, and the metrics, and prepares the (backend-specific) train step. No weights change and no data flows until <code>fit()</code> is called.</div></div>
+
+<div class="qa"><div class="q">When would you choose <code>sparse_categorical_crossentropy</code> over <code>categorical_crossentropy</code>?</div><div class="a">Both are for multiclass classification with a softmax output. Use the sparse version when labels are integer class indices (e.g. <code>3</code>); use the plain version when labels are one-hot vectors (e.g. <code>[0,0,0,1,...]</code>). The sparse form avoids materializing one-hot vectors and is the common default.</div></div>
+
+<div class="qa"><div class="q">How does Dropout behave differently in training vs inference?</div><div class="a">During training it randomly zeros a fraction <code>rate</code> of activations and scales the rest up by <code>1/(1-rate)</code> (inverted dropout) so expected magnitude is preserved. At inference it is a no-op — all units pass through. Keras switches modes via the <code>training</code> flag, handled automatically in Sequential/Functional models.</div></div>
+
+<div class="qa"><div class="q">What is the role of callbacks, and name three important ones.</div><div class="a">Callbacks hook into the training loop at defined events to add behavior without changing model code. <code>EarlyStopping</code> halts when a monitored metric stops improving; <code>ModelCheckpoint</code> saves the best model to disk; <code>ReduceLROnPlateau</code> lowers the learning rate when progress stalls. Others include <code>TensorBoard</code> and <code>LearningRateScheduler</code>.</div></div>
+
+<div class="qa"><div class="q">Explain the multi-backend feature of Keras 3.</div><div class="a">Keras 3 defines layers and models against an internal backend-agnostic operations layer (<code>keras.ops</code>). The actual tensor math runs on TensorFlow, JAX, or PyTorch, selected by the <code>KERAS_BACKEND</code> env var at import time. The same model code trains and runs on any of the three, letting teams pick a backend for performance, ecosystem, or deployment reasons without rewriting models.</div></div>
+
+<div class="qa"><div class="q">Why bake preprocessing layers into the model instead of transforming data beforehand?</div><div class="a">Because the saved model then contains the exact transform, eliminating train/serve skew — the production system cannot accidentally use a different scaling or vocabulary. It also simplifies deployment since clients send raw inputs. <code>Normalization.adapt()</code> computes statistics from training data and freezes them into the layer.</div></div>
+
+<div class="qa"><div class="q">How do you prevent overfitting in a Keras model?</div><div class="a">Combine techniques: add Dropout and/or L2 weight regularization, use BatchNormalization, apply data augmentation for images, reduce model capacity, gather more data, and use EarlyStopping with a validation split. Monitor the gap between training and validation loss to confirm the fix.</div></div>
+
+<div class="qa"><div class="q">What is the difference between <code>model.save()</code>, <code>save_weights()</code>, and <code>export()</code>?</div><div class="a"><code>save()</code> writes a <code>.keras</code> archive with architecture, weights, and optimizer state — you can resume training. <code>save_weights()</code> stores only tensors, requiring you to rebuild the architecture before loading. <code>export()</code> produces a backend-native inference-only artifact (like a TF SavedModel) suitable for serving, with no training state.</div></div>
+
+<div class="qa"><div class="q">What does <code>return_sequences=True</code> do in an LSTM layer?</div><div class="a">By default an LSTM returns only its final hidden state (shape <code>(batch, units)</code>). With <code>return_sequences=True</code> it returns the output at every timestep (shape <code>(batch, timesteps, units)</code>), which is required when stacking recurrent layers or feeding a per-timestep output layer (e.g. sequence labeling).</div></div>
+
+<div class="qa"><div class="q">How are a layer's weights created — eagerly or lazily?</div><div class="a">Lazily by default. A layer builds its weights the first time it is called on real input (or when it can infer the input shape, e.g. via a preceding <code>Input</code>). This is why <code>model.summary()</code> may report an unbuilt model until it sees an input shape. Passing <code>keras.Input(shape=...)</code> triggers eager building.</div></div>
+
+<div class="qa"><div class="q">What is <code>GlobalAveragePooling2D</code> and why use it instead of <code>Flatten</code>?</div><div class="a">It averages each feature map down to a single value, turning a <code>(H,W,C)</code> tensor into <code>(C,)</code>. Compared to <code>Flatten</code> + Dense, it drastically reduces parameters (no giant dense weight matrix), acts as a structural regularizer, and makes the network tolerant to input size — common in modern CNN classifier heads.</div></div>
+
+<h2 id="14-further-learning">14. Further Learning</h2>
+
+<ul>
+  <li>Official Keras 3 guides and API docs at <code>keras.io</code> — especially the "Functional API" and "Making new layers &amp; models via subclassing" guides.</li>
+  <li>KerasCV and KerasHub (formerly KerasNLP) for prebuilt vision and transformer/LLM models with pretrained weights.</li>
+  <li>Write a custom training loop with <code>train_step()</code> override, then compare across backends (GradientTape on TF, functional grads on JAX).</li>
+  <li>Learn mixed-precision and multi-GPU/TPU distribution with <code>keras.distribution</code>.</li>
+  <li>Deep-dive the companion guides in this series: TensorFlow, deep learning foundations, and MLOps for serving Keras models in production.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

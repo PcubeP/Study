@@ -1,0 +1,794 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flutter — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Web & App Development</div>
+  <h1>Flutter</h1>
+  <div class="subtitle">Build beautiful, natively compiled apps for mobile, web, and desktop from a single Dart codebase.</div>
+  <div class="tags"><span>flutter</span><span>dart</span><span>widgets</span><span>state-management</span><span>cross-platform</span><span>mobile</span><span>ui</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~18 min read &middot; 3,891 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-flutter-is-amp-why-it-matters">What Flutter Is &amp; Why It Matters</a></li><li><a href="#setup-amp-getting-started">Setup &amp; Getting Started</a></li><li><a href="#dart-essentials">Dart Essentials</a></li><li><a href="#everything-is-a-widget">Everything Is a Widget</a></li><li><a href="#layout-rows-columns-and-constraints">Layout: Rows, Columns, and Constraints</a></li><li><a href="#material-widgets-amp-theming">Material Widgets &amp; Theming</a></li><li><a href="#navigation-amp-routing">Navigation &amp; Routing</a></li><li><a href="#async-futures-amp-streams">Async, Futures &amp; Streams</a></li><li><a href="#calling-rest-apis">Calling REST APIs</a></li><li><a href="#state-management-overview">State Management Overview</a></li><li><a href="#worked-mini-example-a-posts-screen">Worked Mini-Example: A Posts Screen</a></li><li><a href="#cheat-sheet-amp-comparison">Cheat Sheet &amp; Comparison</a></li><li><a href="#best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-flutter-is-amp-why-it-matters">What Flutter Is &amp; Why It Matters</h2>
+<p class="lead">Flutter is Google's open-source UI toolkit for building natively compiled applications for mobile (iOS/Android), web, desktop (Windows/macOS/Linux), and embedded devices — all from a single <span class="badge">Dart</span> codebase.</p>
+
+<p>Unlike older cross-platform frameworks that wrap native widgets or run inside a webview, Flutter ships its own high-performance rendering engine (Impeller, which replaced Skia as the default). Flutter <em>draws every pixel itself</em> onto a canvas. The consequence is pixel-identical UI across platforms, 60/120fps animations, and no dependency on the OS widget library.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Single codebase</h4>One Dart project targets 6 platforms. Share business logic and UI.</div>
+  <div class="card"><h4>Hot reload</h4>Inject code changes into the running app in under a second while preserving state.</div>
+  <div class="card"><h4>Everything is a widget</h4>Layout, styling, padding, gestures, animation — all composed from immutable widget objects.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="680" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="46" text-anchor="middle" font-size="15" fill="#1e3a8a" font-weight="bold">Your App (Dart) — Widgets, business logic</text>
+  <text x="360" y="66" text-anchor="middle" font-size="12" fill="#1a2233">StatelessWidget / StatefulWidget trees</text>
+
+  <rect x="20" y="110" width="680" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="360" y="136" text-anchor="middle" font-size="15" fill="#059669" font-weight="bold">Flutter Framework (Dart)</text>
+  <text x="360" y="156" text-anchor="middle" font-size="12" fill="#1a2233">Material / Cupertino · Widgets · Rendering · Animation · Gestures</text>
+
+  <rect x="20" y="200" width="680" height="55" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="360" y="224" text-anchor="middle" font-size="15" fill="#b45309" font-weight="bold">Engine (C/C++) — Impeller renderer, Dart runtime, text layout</text>
+  <text x="360" y="244" text-anchor="middle" font-size="12" fill="#1a2233">Compiles to native ARM/x64 machine code (AOT) in release builds</text>
+
+  <line x1="360" y1="80" x2="360" y2="108" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="360" y1="170" x2="360" y2="198" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+</svg><div class="cap">Fig 1. The Flutter architecture: your widgets sit on the framework, which sits on the native engine.</div></div>
+
+<div class="callout note"><span class="t">Mental model</span> A Flutter UI is a <strong>function of state</strong>: <code>UI = f(state)</code>. You never imperatively mutate widgets ("set this label's text"). Instead you change state and let the framework rebuild the affected part of the tree.</div>
+
+<h2 id="setup-amp-getting-started">Setup &amp; Getting Started</h2>
+<p>Install the Flutter SDK, then verify your toolchain with <code>flutter doctor</code>, which checks for Android Studio, Xcode, and connected devices.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Verify the install and all platform toolchains</span>
+flutter doctor -v
+
+<span class="hljs-comment"># Create a new app (package name uses reverse-DNS)</span>
+flutter create --org com.example my_app
+<span class="hljs-built_in">cd</span> my_app
+
+<span class="hljs-comment"># List connected devices / emulators</span>
+flutter devices
+
+<span class="hljs-comment"># Run on a chosen device (hot reload enabled by default in debug)</span>
+flutter run -d chrome          <span class="hljs-comment"># web</span>
+flutter run -d emulator-5554   <span class="hljs-comment"># Android emulator</span>
+
+<span class="hljs-comment"># Add a dependency from pub.dev</span>
+flutter pub add http
+flutter pub get
+
+<span class="hljs-comment"># Build release artifacts</span>
+flutter build apk --release
+flutter build ipa                <span class="hljs-comment"># iOS (needs macOS + Xcode)</span>
+flutter build web --release</code></pre>
+
+<div class="callout tip"><span class="t">Hot reload vs hot restart</span> Press <span class="kbd">r</span> in the terminal for hot reload (keeps state), <span class="kbd">R</span> for hot restart (resets state), and <span class="kbd">q</span> to quit. Hot reload cannot pick up changes to <code>main()</code>, global initializers, or <code>enum</code>/type changes — use hot restart there.</div>
+
+<h3>Project layout</h3>
+<table>
+  <tr><th>Path</th><th>Purpose</th></tr>
+  <tr><td><code>lib/main.dart</code></td><td>Entry point; contains <code>main()</code> and the root widget.</td></tr>
+  <tr><td><code>pubspec.yaml</code></td><td>Dependencies, assets, fonts, SDK constraints.</td></tr>
+  <tr><td><code>test/</code></td><td>Unit &amp; widget tests.</td></tr>
+  <tr><td><code>android/ ios/ web/ ...</code></td><td>Per-platform host projects (native config).</td></tr>
+</table>
+
+<h2 id="dart-essentials">Dart Essentials</h2>
+<p>Dart is a type-safe, null-safe, object-oriented language with a C-style syntax. You cannot write Flutter without it, so master these fundamentals first.</p>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-comment">// Variables: `var` infers, explicit types are optional but recommended for APIs.</span>
+<span class="hljs-keyword">var</span> name = <span class="hljs-string">&#x27;Ada&#x27;</span>;            <span class="hljs-comment">// String (inferred)</span>
+<span class="hljs-keyword">final</span> year = <span class="hljs-number">1815</span>;           <span class="hljs-comment">// runtime constant, set once</span>
+<span class="hljs-keyword">const</span> pi = <span class="hljs-number">3.14159</span>;          <span class="hljs-comment">// compile-time constant</span>
+<span class="hljs-built_in">int?</span> maybeNull;              <span class="hljs-comment">// nullable — null safety is on by default</span>
+
+<span class="hljs-comment">// String interpolation</span>
+<span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;Hello <span class="hljs-subst">$name</span>, born in <span class="hljs-subst">$year</span>. Next year: <span class="hljs-subst">${year + <span class="hljs-number">1</span>}</span>&#x27;</span>);
+
+<span class="hljs-comment">// Collections with literals + spread + collection-if</span>
+<span class="hljs-keyword">final</span> nums = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>];
+<span class="hljs-keyword">final</span> more = [<span class="hljs-number">0</span>, ...nums, <span class="hljs-keyword">if</span> (nums.length &gt; <span class="hljs-number">2</span>) <span class="hljs-number">99</span>];  <span class="hljs-comment">// [0,1,2,3,99]</span>
+<span class="hljs-keyword">final</span> <span class="hljs-keyword">set</span> = {<span class="hljs-string">&#x27;a&#x27;</span>, <span class="hljs-string">&#x27;b&#x27;</span>};
+<span class="hljs-keyword">final</span> map = {<span class="hljs-string">&#x27;one&#x27;</span>: <span class="hljs-number">1</span>, <span class="hljs-string">&#x27;two&#x27;</span>: <span class="hljs-number">2</span>};
+
+<span class="hljs-comment">// Functions: arrow syntax, named + optional params with defaults</span>
+<span class="hljs-built_in">int</span> <span class="hljs-title function_">add</span>(<span class="hljs-built_in">int</span> a, <span class="hljs-built_in">int</span> b) =&gt; a + b;
+<span class="hljs-title class_">String</span> <span class="hljs-title function_">greet</span>(<span class="hljs-title class_">String</span> who, {<span class="hljs-title class_">String</span> greeting = <span class="hljs-string">&#x27;Hi&#x27;</span>}) =&gt; <span class="hljs-string">&#x27;<span class="hljs-subst">$greeting</span>, <span class="hljs-subst">$who</span>&#x27;</span>;
+<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Sam&#x27;</span>);                       <span class="hljs-comment">// &quot;Hi, Sam&quot;</span>
+<span class="hljs-title function_">greet</span>(<span class="hljs-string">&#x27;Sam&#x27;</span>, greeting: <span class="hljs-string">&#x27;Hello&#x27;</span>);    <span class="hljs-comment">// named argument</span>
+
+<span class="hljs-comment">// Null-aware operators</span>
+<span class="hljs-title class_">String</span> <span class="hljs-title function_">display</span>(<span class="hljs-title class_">String</span>? s) =&gt; s ?? <span class="hljs-string">&#x27;unknown&#x27;</span>;   <span class="hljs-comment">// ?? default</span>
+<span class="hljs-built_in">int?</span> len = maybeNull?.length;                   <span class="hljs-comment">// ?. safe navigation</span></code></pre>
+
+<h3>Classes, immutability, and records</h3>
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">User</span> </span>{
+  <span class="hljs-keyword">final</span> <span class="hljs-title class_">String</span> name;
+  <span class="hljs-keyword">final</span> <span class="hljs-built_in">int</span> age;
+  <span class="hljs-comment">// Named constructor params with `required`</span>
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">User</span>({<span class="hljs-keyword">required</span> <span class="hljs-keyword">this</span>.name, <span class="hljs-keyword">required</span> <span class="hljs-keyword">this</span>.age});
+
+  <span class="hljs-comment">// Named constructor</span>
+  <span class="hljs-title class_">User</span>.<span class="hljs-title function_">guest</span>() : name = <span class="hljs-string">&#x27;Guest&#x27;</span>, age = <span class="hljs-number">0</span>;
+
+  <span class="hljs-built_in">bool</span> <span class="hljs-keyword">get</span> isAdult =&gt; age &gt;= <span class="hljs-number">18</span>;              <span class="hljs-comment">// getter</span>
+  <span class="hljs-title class_">User</span> <span class="hljs-title function_">copyWith</span>({<span class="hljs-title class_">String</span>? name, <span class="hljs-built_in">int?</span> age}) =&gt;  <span class="hljs-comment">// common immutable pattern</span>
+      <span class="hljs-title class_">User</span>(name: name ?? <span class="hljs-keyword">this</span>.name, age: age ?? <span class="hljs-keyword">this</span>.age);
+}
+
+<span class="hljs-comment">// Records (Dart 3+): lightweight anonymous tuples</span>
+(<span class="hljs-title class_">String</span>, <span class="hljs-built_in">int</span>) <span class="hljs-title function_">parse</span>() =&gt; (<span class="hljs-string">&#x27;ok&#x27;</span>, <span class="hljs-number">200</span>);
+<span class="hljs-keyword">final</span> (label, code) = <span class="hljs-title function_">parse</span>();   <span class="hljs-comment">// destructuring</span>
+
+<span class="hljs-comment">// Pattern matching / switch expressions (Dart 3+)</span>
+<span class="hljs-title class_">String</span> <span class="hljs-title function_">classify</span>(<span class="hljs-built_in">int</span> n) =&gt; <span class="hljs-keyword">switch</span> (n) {
+  <span class="hljs-number">0</span> =&gt; <span class="hljs-string">&#x27;zero&#x27;</span>,
+  &lt; <span class="hljs-number">0</span> =&gt; <span class="hljs-string">&#x27;negative&#x27;</span>,
+  _ =&gt; <span class="hljs-string">&#x27;positive&#x27;</span>,
+};</code></pre>
+
+<div class="callout note"><span class="t">Why immutability matters</span> Widgets are immutable. The <code>copyWith</code> pattern above is everywhere in Flutter — it is how you produce a modified copy of state objects without mutation, which keeps rebuilds predictable.</div>
+
+<h2 id="everything-is-a-widget">Everything Is a Widget</h2>
+<p class="lead">Widgets are immutable descriptions of part of the UI. Flutter builds three parallel trees to turn them into pixels.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <rect x="30" y="30" width="190" height="70" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="125" y="60" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Widget tree</text>
+  <text x="125" y="80" text-anchor="middle" font-size="11" fill="#1a2233">immutable config</text>
+
+  <rect x="265" y="30" width="190" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="360" y="60" text-anchor="middle" font-size="14" fill="#059669" font-weight="bold">Element tree</text>
+  <text x="360" y="80" text-anchor="middle" font-size="11" fill="#1a2233">lifecycle + state</text>
+
+  <rect x="500" y="30" width="190" height="70" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="595" y="60" text-anchor="middle" font-size="14" fill="#b45309" font-weight="bold">Render tree</text>
+  <text x="595" y="80" text-anchor="middle" font-size="11" fill="#1a2233">layout + paint</text>
+
+  <line x1="220" y1="65" x2="263" y2="65" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="455" y1="65" x2="498" y2="65" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+
+  <text x="360" y="150" text-anchor="middle" font-size="12" fill="#1a2233">On rebuild Flutter diffs the new widget tree against the element tree and</text>
+  <text x="360" y="170" text-anchor="middle" font-size="12" fill="#1a2233">updates only the render objects that actually changed (efficient reconciliation).</text>
+
+  <rect x="200" y="200" width="320" height="40" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="360" y="225" text-anchor="middle" font-size="12" fill="#1a2233">Cheap to recreate widgets · expensive render objects are reused</text>
+</svg><div class="cap">Fig 2. Three trees. Widgets are throwaway blueprints; Elements and RenderObjects persist across rebuilds.</div></div>
+
+<h3>StatelessWidget</h3>
+<p>Use when the UI depends only on its configuration and never changes on its own.</p>
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;package:flutter/material.dart&#x27;</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Greeting</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatelessWidget</span> </span>{
+  <span class="hljs-keyword">final</span> <span class="hljs-title class_">String</span> name;
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Greeting</span>({<span class="hljs-keyword">super</span>.key, <span class="hljs-keyword">required</span> <span class="hljs-keyword">this</span>.name});
+
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Hello, <span class="hljs-subst">$name</span>!&#x27;</span>, style: <span class="hljs-title class_">Theme</span>.<span class="hljs-title function_">of</span>(context).textTheme.headlineSmall);
+  }
+}</code></pre>
+
+<h3>StatefulWidget</h3>
+<p>Use when the widget holds mutable state that changes over its lifetime (counters, form input, toggles, animations).</p>
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatefulWidget</span> </span>{
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Counter</span>({<span class="hljs-keyword">super</span>.key});
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">State</span>&lt;<span class="hljs-title class_">Counter</span>&gt; <span class="hljs-title function_">createState</span>() =&gt; <span class="hljs-title class_">_CounterState</span>();
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">_CounterState</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">State</span>&lt;<span class="hljs-title">Counter</span>&gt; </span>{
+  <span class="hljs-built_in">int</span> _count = <span class="hljs-number">0</span>;
+
+  <span class="hljs-keyword">void</span> <span class="hljs-title function_">_increment</span>() {
+    <span class="hljs-comment">// setState tells the framework this State is dirty and must rebuild.</span>
+    <span class="hljs-title function_">setState</span>(() =&gt; _count++);
+  }
+
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Column</span>(
+      mainAxisSize: <span class="hljs-title class_">MainAxisSize</span>.min,
+      children: [
+        <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Count: <span class="hljs-subst">$_count</span>&#x27;</span>, style: <span class="hljs-keyword">const</span> <span class="hljs-title class_">TextStyle</span>(fontSize: <span class="hljs-number">24</span>)),
+        <span class="hljs-title class_">ElevatedButton</span>(onPressed: _increment, child: <span class="hljs-keyword">const</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Add&#x27;</span>)),
+      ],
+    );
+  }
+}</code></pre>
+
+<div class="callout warn"><span class="t">setState gotcha</span> Never call <code>setState</code> inside <code>build()</code>, inside a loop, or after the widget is disposed. It only schedules a rebuild of <em>this</em> State — it does not update parents or siblings.</div>
+
+<h3>State lifecycle</h3>
+<div class="pipeline"><span class="step">createState</span><span class="arrow">-&gt;</span><span class="step">initState</span><span class="arrow">-&gt;</span><span class="step">didChangeDependencies</span><span class="arrow">-&gt;</span><span class="step">build</span><span class="arrow">-&gt;</span><span class="step">setState / didUpdateWidget</span><span class="arrow">-&gt;</span><span class="step">dispose</span></div>
+
+<table>
+  <tr><th>Method</th><th>When</th><th>Typical use</th></tr>
+  <tr><td><code>initState()</code></td><td>Once, before first build</td><td>Subscribe to streams, init controllers.</td></tr>
+  <tr><td><code>build()</code></td><td>Every rebuild</td><td>Return the widget subtree. Keep it pure &amp; fast.</td></tr>
+  <tr><td><code>didUpdateWidget()</code></td><td>Parent rebuilds with new config</td><td>React to changed widget fields.</td></tr>
+  <tr><td><code>dispose()</code></td><td>Once, on removal</td><td>Cancel timers/subscriptions, dispose controllers.</td></tr>
+</table>
+
+<div class="callout danger"><span class="t">Memory leaks</span> Any <code>AnimationController</code>, <code>TextEditingController</code>, <code>ScrollController</code>, <code>StreamSubscription</code>, or <code>Timer</code> you create in <code>initState</code> MUST be released in <code>dispose</code>. Forgetting this is the #1 source of leaks and "setState called after dispose" errors.</div>
+
+<h2 id="layout-rows-columns-and-constraints">Layout: Rows, Columns, and Constraints</h2>
+<p>Flutter layout follows one sentence: <strong>constraints go down, sizes go up, parent sets position</strong>. A parent passes constraints (min/max width &amp; height) to each child; the child chooses its size within them; the parent positions it.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 240" width="700" height="240">
+  <defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  <marker id="ah3b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs>
+  <rect x="280" y="20" width="140" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="350" y="45" text-anchor="middle" font-size="13" fill="#1e3a8a">Parent</text>
+  <rect x="280" y="170" width="140" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="350" y="195" text-anchor="middle" font-size="13" fill="#059669">Child</text>
+  <line x1="320" y1="60" x2="320" y2="168" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="250" y="118" text-anchor="end" font-size="12" fill="#2563eb">1. constraints down</text>
+  <line x1="380" y1="168" x2="380" y2="62" stroke="#059669" stroke-width="2" marker-end="url(#ah3b)"/>
+  <text x="450" y="118" text-anchor="start" font-size="12" fill="#059669">2. size up</text>
+  <text x="350" y="232" text-anchor="middle" font-size="12" fill="#1a2233">3. parent then positions the child within itself</text>
+</svg><div class="cap">Fig 3. The constraint-propagation layout algorithm — the key to debugging overflow errors.</div></div>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-title class_">Column</span>(
+  crossAxisAlignment: <span class="hljs-title class_">CrossAxisAlignment</span>.start, <span class="hljs-comment">// horizontal in a Column</span>
+  mainAxisAlignment: <span class="hljs-title class_">MainAxisAlignment</span>.spaceBetween, <span class="hljs-comment">// vertical</span>
+  children: [
+    <span class="hljs-keyword">const</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Title&#x27;</span>),
+    <span class="hljs-title class_">Row</span>(children: [
+      <span class="hljs-keyword">const</span> <span class="hljs-title class_">Icon</span>(<span class="hljs-title class_">Icons</span>.star),
+      <span class="hljs-keyword">const</span> <span class="hljs-title class_">SizedBox</span>(width: <span class="hljs-number">8</span>),            <span class="hljs-comment">// fixed-size spacer</span>
+      <span class="hljs-title class_">Expanded</span>(                            <span class="hljs-comment">// takes remaining horizontal space</span>
+        child: <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Subtitle&#x27;</span>, overflow: <span class="hljs-title class_">TextOverflow</span>.ellipsis),
+      ),
+    ]),
+    <span class="hljs-title class_">Padding</span>(
+      padding: <span class="hljs-keyword">const</span> <span class="hljs-title class_">EdgeInsets</span>.<span class="hljs-title function_">all</span>(<span class="hljs-number">16</span>),
+      child: <span class="hljs-title class_">Container</span>(
+        decoration: <span class="hljs-title class_">BoxDecoration</span>(
+          color: <span class="hljs-title class_">Colors</span>.blue.shade50,
+          borderRadius: <span class="hljs-title class_">BorderRadius</span>.<span class="hljs-title function_">circular</span>(<span class="hljs-number">12</span>),
+        ),
+        child: <span class="hljs-keyword">const</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Boxed&#x27;</span>),
+      ),
+    ),
+  ],
+)</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>Expanded / Flexible</h4>Divide leftover space along the main axis of a Row/Column. Use <code>flex:</code> to weight.</div>
+  <div class="card"><h4>Stack / Positioned</h4>Overlap children; <code>Positioned</code> pins to edges for badges, FABs, overlays.</div>
+  <div class="card"><h4>SizedBox / Padding</h4>Spacing and fixed dimensions without a heavyweight <code>Container</code>.</div>
+  <div class="card"><h4>LayoutBuilder</h4>Build differently based on the incoming constraints — the basis of responsive design.</div>
+</div>
+
+<div class="callout warn"><span class="t">"RenderFlex overflowed"</span> This yellow-and-black striped error means a child wanted more space than the constraint allowed (e.g. a long <code>Text</code> in a <code>Row</code>). Fix it by wrapping the child in <code>Expanded</code>/<code>Flexible</code>, or making the content scrollable.</div>
+
+<h2 id="material-widgets-amp-theming">Material Widgets &amp; Theming</h2>
+<p>Flutter ships <span class="badge">Material 3</span> (Google) and <span class="badge g">Cupertino</span> (iOS) design systems. <code>MaterialApp</code> provides navigation, theming, and localization scaffolding.</p>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span>() =&gt; <span class="hljs-title function_">runApp</span>(<span class="hljs-keyword">const</span> <span class="hljs-title class_">MyApp</span>());
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyApp</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatelessWidget</span> </span>{
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">MyApp</span>({<span class="hljs-keyword">super</span>.key});
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">MaterialApp</span>(
+      title: <span class="hljs-string">&#x27;Demo&#x27;</span>,
+      theme: <span class="hljs-title class_">ThemeData</span>(
+        useMaterial3: <span class="hljs-keyword">true</span>,
+        colorScheme: <span class="hljs-title class_">ColorScheme</span>.<span class="hljs-title function_">fromSeed</span>(seedColor: <span class="hljs-title class_">Colors</span>.indigo),
+      ),
+      home: <span class="hljs-keyword">const</span> <span class="hljs-title class_">HomePage</span>(),
+    );
+  }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HomePage</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatelessWidget</span> </span>{
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">HomePage</span>({<span class="hljs-keyword">super</span>.key});
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Scaffold</span>(
+      appBar: <span class="hljs-title class_">AppBar</span>(title: <span class="hljs-keyword">const</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Home&#x27;</span>)),
+      body: <span class="hljs-keyword">const</span> <span class="hljs-title class_">Center</span>(child: <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Body content&#x27;</span>)),
+      floatingActionButton: <span class="hljs-title class_">FloatingActionButton</span>(
+        onPressed: () {},
+        child: <span class="hljs-keyword">const</span> <span class="hljs-title class_">Icon</span>(<span class="hljs-title class_">Icons</span>.add),
+      ),
+    );
+  }
+}</code></pre>
+
+<table>
+  <tr><th>Widget</th><th>Role</th></tr>
+  <tr><td><code>Scaffold</code></td><td>Page skeleton: app bar, body, FAB, drawer, bottom nav.</td></tr>
+  <tr><td><code>AppBar</code></td><td>Top bar with title, actions, leading icon.</td></tr>
+  <tr><td><code>ListView / ListView.builder</code></td><td>Scrolling list; <code>.builder</code> lazily builds only visible items.</td></tr>
+  <tr><td><code>Card / ListTile</code></td><td>Elevated surface and a standard row (leading/title/subtitle/trailing).</td></tr>
+  <tr><td><code>TextField / Form</code></td><td>Input with validation via <code>TextFormField</code> + <code>GlobalKey&lt;FormState&gt;</code>.</td></tr>
+  <tr><td><code>showDialog / SnackBar / BottomSheet</code></td><td>Transient overlays and feedback.</td></tr>
+</table>
+
+<h2 id="navigation-amp-routing">Navigation &amp; Routing</h2>
+<p>Flutter models navigation as a stack of routes. The imperative <code>Navigator</code> API is fine for simple apps; <code>go_router</code> is the recommended package for deep links, web URLs, and nested navigation.</p>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-comment">// Imperative: push a new screen and await a result</span>
+<span class="hljs-keyword">final</span> result = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Navigator</span>.<span class="hljs-title function_">push</span>(
+  context,
+  <span class="hljs-title class_">MaterialPageRoute</span>(builder: (_) =&gt; <span class="hljs-keyword">const</span> <span class="hljs-title class_">DetailPage</span>(id: <span class="hljs-number">42</span>)),
+);
+
+<span class="hljs-comment">// Return a value from the pushed screen</span>
+<span class="hljs-title class_">Navigator</span>.<span class="hljs-title function_">pop</span>(context, <span class="hljs-string">&#x27;selected-value&#x27;</span>);
+
+<span class="hljs-comment">// Declarative with go_router (add: flutter pub add go_router)</span>
+<span class="hljs-keyword">final</span> router = <span class="hljs-title class_">GoRouter</span>(routes: [
+  <span class="hljs-title class_">GoRoute</span>(path: <span class="hljs-string">&#x27;/&#x27;</span>, builder: (ctx, st) =&gt; <span class="hljs-keyword">const</span> <span class="hljs-title class_">HomePage</span>()),
+  <span class="hljs-title class_">GoRoute</span>(
+    path: <span class="hljs-string">&#x27;/user/:id&#x27;</span>,
+    builder: (ctx, st) =&gt; <span class="hljs-title class_">UserPage</span>(id: st.pathParameters[<span class="hljs-string">&#x27;id&#x27;</span>]!),
+  ),
+]);
+<span class="hljs-comment">// MaterialApp.router(routerConfig: router);</span>
+context.<span class="hljs-title function_">go</span>(<span class="hljs-string">&#x27;/user/42&#x27;</span>);   <span class="hljs-comment">// navigate by URL</span></code></pre>
+
+<div class="callout tip"><span class="t">When to use go_router</span> Choose <code>go_router</code> when you need browser-friendly URLs, deep linking from notifications, or route guards (redirects for auth). Stick with raw <code>Navigator</code> for a quick two-screen prototype.</div>
+
+<h2 id="async-futures-amp-streams">Async, Futures &amp; Streams</h2>
+<p class="lead">Dart is single-threaded with an event loop. <code>Future</code> represents one eventual value; <code>Stream</code> represents many values over time. <code>async/await</code> makes both read like synchronous code.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 210" width="700" height="210">
+  <defs><marker id="ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker></defs>
+  <circle cx="130" cy="90" r="55" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="130" y="85" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Event</text>
+  <text x="130" y="103" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">loop</text>
+  <rect x="300" y="30" width="170" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="385" y="55" text-anchor="middle" font-size="12" fill="#059669">Microtask queue</text>
+  <rect x="300" y="110" width="170" height="40" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="385" y="135" text-anchor="middle" font-size="12" fill="#b45309">Event queue (I/O, timers)</text>
+  <line x1="185" y1="70" x2="298" y2="52" stroke="#059669" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="185" y1="110" x2="298" y2="128" stroke="#b45309" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="560" y="55" text-anchor="middle" font-size="11" fill="#1a2233">drained first,</text>
+  <text x="560" y="72" text-anchor="middle" font-size="11" fill="#1a2233">fully, each tick</text>
+  <text x="560" y="130" text-anchor="middle" font-size="11" fill="#1a2233">one per tick</text>
+  <text x="350" y="190" text-anchor="middle" font-size="12" fill="#1a2233">await never blocks the UI thread — it yields back to the loop until the Future completes.</text>
+</svg><div class="cap">Fig 4. Dart's event loop processes all microtasks before the next event, keeping the UI responsive.</div></div>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-title class_">Future</span>&lt;<span class="hljs-built_in">int</span>&gt; <span class="hljs-title function_">fetchCount</span>() <span class="hljs-keyword">async</span> {
+  <span class="hljs-keyword">await</span> <span class="hljs-title class_">Future</span>.<span class="hljs-title function_">delayed</span>(<span class="hljs-keyword">const</span> <span class="hljs-title class_">Duration</span>(seconds: <span class="hljs-number">1</span>)); <span class="hljs-comment">// simulate I/O</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-number">42</span>;
+}
+
+<span class="hljs-title class_">Future</span>&lt;<span class="hljs-keyword">void</span>&gt; <span class="hljs-title function_">load</span>() <span class="hljs-keyword">async</span> {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">final</span> count = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchCount</span>();       <span class="hljs-comment">// suspends, UI stays responsive</span>
+    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;Got <span class="hljs-subst">$count</span>&#x27;</span>);
+  } <span class="hljs-keyword">on</span> <span class="hljs-title class_">TimeoutException</span> {
+    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;timed out&#x27;</span>);
+  } <span class="hljs-keyword">catch</span> (e) {
+    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;failed: <span class="hljs-subst">$e</span>&#x27;</span>);
+  } <span class="hljs-keyword">finally</span> {
+    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;done&#x27;</span>);
+  }
+}
+
+<span class="hljs-comment">// Run many in parallel and wait for all</span>
+<span class="hljs-keyword">final</span> results = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Future</span>.<span class="hljs-title function_">wait</span>([<span class="hljs-title function_">fetchCount</span>(), <span class="hljs-title function_">fetchCount</span>()]);
+
+<span class="hljs-comment">// Streams: react to many values</span>
+<span class="hljs-title class_">Stream</span>&lt;<span class="hljs-built_in">int</span>&gt; <span class="hljs-title function_">ticks</span>() <span class="hljs-keyword">async</span>* {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">1</span>; i &lt;= <span class="hljs-number">3</span>; i++) {
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Future</span>.<span class="hljs-title function_">delayed</span>(<span class="hljs-keyword">const</span> <span class="hljs-title class_">Duration</span>(seconds: <span class="hljs-number">1</span>));
+    <span class="hljs-keyword">yield</span> i;                                <span class="hljs-comment">// emit a value</span>
+  }
+}
+<span class="hljs-keyword">await</span> <span class="hljs-keyword">for</span> (<span class="hljs-keyword">final</span> t <span class="hljs-keyword">in</span> <span class="hljs-title function_">ticks</span>()) { <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;tick <span class="hljs-subst">$t</span>&#x27;</span>); }</code></pre>
+
+<h3>FutureBuilder: async data in the UI</h3>
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-title class_">FutureBuilder</span>&lt;<span class="hljs-built_in">int</span>&gt;(
+  future: <span class="hljs-title function_">fetchCount</span>(),
+  builder: (context, snapshot) {
+    <span class="hljs-keyword">if</span> (snapshot.connectionState != <span class="hljs-title class_">ConnectionState</span>.done) {
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">CircularProgressIndicator</span>();
+    }
+    <span class="hljs-keyword">if</span> (snapshot.hasError) <span class="hljs-keyword">return</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Error: <span class="hljs-subst">${snapshot.error}</span>&#x27;</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Count: <span class="hljs-subst">${snapshot.data}</span>&#x27;</span>);
+  },
+)</code></pre>
+
+<div class="callout warn"><span class="t">FutureBuilder trap</span> Do not create the future inline in <code>build()</code> (<code>future: fetchCount()</code> as above is for illustration). Every rebuild would restart the request. Store the future in a field assigned in <code>initState</code>.</div>
+
+<h2 id="calling-rest-apis">Calling REST APIs</h2>
+<p>The <code>http</code> package covers most needs; <code>dio</code> adds interceptors, retries, and cancellation for larger apps.</p>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;dart:convert&#x27;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">&#x27;package:http/http.dart&#x27;</span> <span class="hljs-keyword">as</span> http;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span> </span>{
+  <span class="hljs-keyword">final</span> <span class="hljs-built_in">int</span> id;
+  <span class="hljs-keyword">final</span> <span class="hljs-title class_">String</span> title;
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">Post</span>({<span class="hljs-keyword">required</span> <span class="hljs-keyword">this</span>.id, <span class="hljs-keyword">required</span> <span class="hljs-keyword">this</span>.title});
+
+  <span class="hljs-comment">// Parse JSON defensively — never trust the shape blindly.</span>
+  <span class="hljs-keyword">factory</span> <span class="hljs-title class_">Post</span>.<span class="hljs-title function_">fromJson</span>(<span class="hljs-title class_">Map</span>&lt;<span class="hljs-title class_">String</span>, <span class="hljs-built_in">dynamic</span>&gt; json) =&gt; <span class="hljs-title class_">Post</span>(
+        id: json[<span class="hljs-string">&#x27;id&#x27;</span>] <span class="hljs-keyword">as</span> <span class="hljs-built_in">int</span>,
+        title: json[<span class="hljs-string">&#x27;title&#x27;</span>] <span class="hljs-keyword">as</span> <span class="hljs-title class_">String</span>,
+      );
+}
+
+<span class="hljs-title class_">Future</span>&lt;<span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">Post</span>&gt;&gt; <span class="hljs-title function_">fetchPosts</span>() <span class="hljs-keyword">async</span> {
+  <span class="hljs-keyword">final</span> uri = <span class="hljs-title class_">Uri</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-string">&#x27;https://jsonplaceholder.typicode.com/posts&#x27;</span>);
+  <span class="hljs-keyword">final</span> res = <span class="hljs-keyword">await</span> http.<span class="hljs-title function_">get</span>(uri, headers: {<span class="hljs-string">&#x27;Accept&#x27;</span>: <span class="hljs-string">&#x27;application/json&#x27;</span>})
+      .<span class="hljs-title function_">timeout</span>(<span class="hljs-keyword">const</span> <span class="hljs-title class_">Duration</span>(seconds: <span class="hljs-number">10</span>));
+
+  <span class="hljs-keyword">if</span> (res.statusCode != <span class="hljs-number">200</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-title class_">Exception</span>(<span class="hljs-string">&#x27;HTTP <span class="hljs-subst">${res.statusCode}</span>: <span class="hljs-subst">${res.reasonPhrase}</span>&#x27;</span>);
+  }
+  <span class="hljs-keyword">final</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-built_in">dynamic</span>&gt; data = <span class="hljs-title function_">jsonDecode</span>(res.body) <span class="hljs-keyword">as</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-built_in">dynamic</span>&gt;;
+  <span class="hljs-keyword">return</span> data
+      .<span class="hljs-title function_">map</span>((e) =&gt; <span class="hljs-title class_">Post</span>.<span class="hljs-title function_">fromJson</span>(e <span class="hljs-keyword">as</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-title class_">String</span>, <span class="hljs-built_in">dynamic</span>&gt;))
+      .<span class="hljs-title function_">toList</span>();
+}
+
+<span class="hljs-comment">// POST with a JSON body</span>
+<span class="hljs-title class_">Future</span>&lt;<span class="hljs-keyword">void</span>&gt; <span class="hljs-title function_">createPost</span>(<span class="hljs-title class_">String</span> title) <span class="hljs-keyword">async</span> {
+  <span class="hljs-keyword">final</span> res = <span class="hljs-keyword">await</span> http.<span class="hljs-title function_">post</span>(
+    <span class="hljs-title class_">Uri</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-string">&#x27;https://jsonplaceholder.typicode.com/posts&#x27;</span>),
+    headers: {<span class="hljs-string">&#x27;Content-Type&#x27;</span>: <span class="hljs-string">&#x27;application/json&#x27;</span>},
+    body: <span class="hljs-title function_">jsonEncode</span>({<span class="hljs-string">&#x27;title&#x27;</span>: title, <span class="hljs-string">&#x27;userId&#x27;</span>: <span class="hljs-number">1</span>}),
+  );
+  <span class="hljs-keyword">if</span> (res.statusCode != <span class="hljs-number">201</span>) <span class="hljs-keyword">throw</span> <span class="hljs-title class_">Exception</span>(<span class="hljs-string">&#x27;create failed&#x27;</span>);
+}</code></pre>
+
+<div class="callout tip"><span class="t">Decode off the UI thread</span> For large JSON payloads, parse inside <code>compute()</code> (which runs the function in a background isolate) so decoding doesn't drop frames.</div>
+
+<h2 id="state-management-overview">State Management Overview</h2>
+<p>Beyond a single widget's <code>setState</code>, apps need to share and react to state across the tree. There is no single "right" answer — pick by app size.</p>
+
+<table>
+  <tr><th>Approach</th><th>Best for</th><th>Notes</th></tr>
+  <tr><td><code>setState</code></td><td>Local, ephemeral UI state</td><td>Built in; scope limited to one widget.</td></tr>
+  <tr><td><code>InheritedWidget</code> / <code>Provider</code></td><td>Sharing values down the tree</td><td>Provider wraps InheritedWidget ergonomically.</td></tr>
+  <tr><td><span class="badge g">Riverpod</span></td><td>Most new apps</td><td>Compile-safe, testable, no BuildContext needed; successor to Provider.</td></tr>
+  <tr><td>BLoC / Cubit</td><td>Large teams, event-driven</td><td>Streams of events to states; very structured.</td></tr>
+  <tr><td>GetX / MobX / signals</td><td>Reactive preferences</td><td>Observable-based; concise but opinionated.</td></tr>
+</table>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-comment">// Riverpod sketch (flutter pub add flutter_riverpod)</span>
+<span class="hljs-keyword">final</span> counterProvider = <span class="hljs-title class_">StateProvider</span>&lt;<span class="hljs-built_in">int</span>&gt;((ref) =&gt; <span class="hljs-number">0</span>);
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CounterText</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ConsumerWidget</span> </span>{
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">CounterText</span>({<span class="hljs-keyword">super</span>.key});
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context, <span class="hljs-title class_">WidgetRef</span> ref) {
+    <span class="hljs-keyword">final</span> count = ref.<span class="hljs-title function_">watch</span>(counterProvider);         <span class="hljs-comment">// rebuilds on change</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">GestureDetector</span>(
+      onTap: () =&gt; ref.<span class="hljs-title function_">read</span>(counterProvider.notifier).state++,
+      child: <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Tapped <span class="hljs-subst">$count</span> times&#x27;</span>),
+    );
+  }
+}
+<span class="hljs-comment">// Wrap the app once in ProviderScope(child: MyApp()).</span></code></pre>
+
+<div class="callout note"><span class="t">Recommendation (2026)</span> For a fresh codebase, start with <code>setState</code> for local widgets and <strong>Riverpod</strong> for shared/app-wide state. Reach for BLoC only when the team already standardizes on it.</div>
+
+<h2 id="worked-mini-example-a-posts-screen">Worked Mini-Example: A Posts Screen</h2>
+<p>Putting it together — fetch from a REST API, show a spinner, handle errors, and render a lazy list.</p>
+
+<div class="code-label">DART</div><pre><code class="hljs"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PostsPage</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">StatefulWidget</span> </span>{
+  <span class="hljs-keyword">const</span> <span class="hljs-title class_">PostsPage</span>({<span class="hljs-keyword">super</span>.key});
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">State</span>&lt;<span class="hljs-title class_">PostsPage</span>&gt; <span class="hljs-title function_">createState</span>() =&gt; <span class="hljs-title class_">_PostsPageState</span>();
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">_PostsPageState</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">State</span>&lt;<span class="hljs-title">PostsPage</span>&gt; </span>{
+  <span class="hljs-keyword">late</span> <span class="hljs-title class_">Future</span>&lt;<span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">Post</span>&gt;&gt; _future;
+
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-keyword">void</span> <span class="hljs-title function_">initState</span>() {
+    <span class="hljs-keyword">super</span>.<span class="hljs-title function_">initState</span>();
+    _future = <span class="hljs-title function_">fetchPosts</span>();        <span class="hljs-comment">// created once, not on every build</span>
+  }
+
+  <span class="hljs-title class_">Future</span>&lt;<span class="hljs-keyword">void</span>&gt; <span class="hljs-title function_">_refresh</span>() <span class="hljs-keyword">async</span> {
+    <span class="hljs-title function_">setState</span>(() =&gt; _future = <span class="hljs-title function_">fetchPosts</span>());
+    <span class="hljs-keyword">await</span> _future;
+  }
+
+  <span class="hljs-meta">@override</span>
+  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context) {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Scaffold</span>(
+      appBar: <span class="hljs-title class_">AppBar</span>(title: <span class="hljs-keyword">const</span> <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Posts&#x27;</span>)),
+      body: <span class="hljs-title class_">RefreshIndicator</span>(
+        onRefresh: _refresh,
+        child: <span class="hljs-title class_">FutureBuilder</span>&lt;<span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">Post</span>&gt;&gt;(
+          future: _future,
+          builder: (context, snap) {
+            <span class="hljs-keyword">if</span> (snap.connectionState == <span class="hljs-title class_">ConnectionState</span>.waiting) {
+              <span class="hljs-keyword">return</span> <span class="hljs-keyword">const</span> <span class="hljs-title class_">Center</span>(child: <span class="hljs-title class_">CircularProgressIndicator</span>());
+            }
+            <span class="hljs-keyword">if</span> (snap.hasError) {
+              <span class="hljs-keyword">return</span> <span class="hljs-title class_">Center</span>(child: <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;Failed: <span class="hljs-subst">${snap.error}</span>&#x27;</span>));
+            }
+            <span class="hljs-keyword">final</span> posts = snap.data!;
+            <span class="hljs-keyword">return</span> <span class="hljs-title class_">ListView</span>.<span class="hljs-title function_">builder</span>(
+              itemCount: posts.length,
+              itemBuilder: (_, i) =&gt; <span class="hljs-title class_">ListTile</span>(
+                leading: <span class="hljs-title class_">CircleAvatar</span>(child: <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;<span class="hljs-subst">${posts[i].id}</span>&#x27;</span>)),
+                title: <span class="hljs-title class_">Text</span>(posts[i].title),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}</code></pre>
+
+<h2 id="cheat-sheet-amp-comparison">Cheat Sheet &amp; Comparison</h2>
+<table>
+  <tr><th>Task</th><th>Snippet</th></tr>
+  <tr><td>New app</td><td><code>flutter create app</code></td></tr>
+  <tr><td>Add package</td><td><code>flutter pub add http</code></td></tr>
+  <tr><td>Run &amp; hot reload</td><td><code>flutter run</code> then <span class="kbd">r</span></td></tr>
+  <tr><td>Spacer</td><td><code>SizedBox(height: 16)</code></td></tr>
+  <tr><td>Fill remaining space</td><td><code>Expanded(child: ...)</code></td></tr>
+  <tr><td>Navigate</td><td><code>Navigator.push(context, MaterialPageRoute(...))</code></td></tr>
+  <tr><td>Theme color</td><td><code>Theme.of(context).colorScheme.primary</code></td></tr>
+  <tr><td>Rebuild state</td><td><code>setState(() =&gt; x = y)</code></td></tr>
+  <tr><td>Run tests</td><td><code>flutter test</code></td></tr>
+</table>
+
+<h3>Flutter vs React Native</h3>
+<table>
+  <tr><th>Dimension</th><th>Flutter</th><th>React Native</th></tr>
+  <tr><td>Language</td><td>Dart</td><td>JavaScript / TypeScript</td></tr>
+  <tr><td>Rendering</td><td>Own engine (Impeller) draws every pixel</td><td>Bridges to native OS widgets</td></tr>
+  <tr><td>UI consistency</td><td>Identical across platforms</td><td>Follows each platform's native look</td></tr>
+  <tr><td>Performance</td><td>AOT-compiled to native code</td><td>JS runtime + bridge (New Architecture improves this)</td></tr>
+  <tr><td>Hot reload</td><td>Yes, stateful</td><td>Fast Refresh</td></tr>
+</table>
+
+<h2 id="best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Prefer <code>const</code> constructors everywhere possible — const widgets are cached and skipped during rebuilds. Keep <code>build()</code> methods pure and cheap. Extract subtrees into named widgets rather than helper methods returning widgets, so Flutter can rebuild them independently.</div>
+
+<div class="callout tip"><span class="t">Do</span> Use <code>ListView.builder</code> (not a <code>Column</code> in a <code>SingleChildScrollView</code>) for long/infinite lists so items are built lazily. Dispose every controller. Use keys (<code>ValueKey</code>) when reordering or inserting into lists.</div>
+
+<div class="callout warn"><span class="t">Avoid</span> Doing heavy work (JSON parsing, crypto, image decoding) on the UI isolate — offload to <code>compute()</code>. Avoid giant widgets; split them up. Avoid rebuilding the whole screen for a tiny change.</div>
+
+<div class="callout danger"><span class="t">Never</span> Call <code>setState</code> after <code>dispose</code> (guard with <code>if (mounted)</code> after an await). Never create expensive objects (controllers, futures) inside <code>build()</code>. Never block the main isolate with synchronous I/O.</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between StatelessWidget and StatefulWidget?</div><div class="a">A <code>StatelessWidget</code> is fully described by its constructor arguments and never changes once built — it has no mutable state. A <code>StatefulWidget</code> pairs an immutable widget object with a separate, long-lived <code>State</code> object that can hold mutable data and trigger rebuilds via <code>setState</code>. Choose stateful only when something must change over the widget's lifetime.</div></div>
+
+<div class="qa"><div class="q">Why are there three trees (Widget, Element, Render)?</div><div class="a">Widgets are cheap, immutable configuration recreated on every build. Elements are the persistent instantiation that holds state and position in the tree. Render objects do the expensive layout and painting. Separating them lets Flutter rebuild widgets freely while reusing the costly render objects, diffing to update only what changed.</div></div>
+
+<div class="qa"><div class="q">Explain Flutter's layout algorithm.</div><div class="a">"Constraints go down, sizes go up, parent sets position." A parent passes box constraints (min/max width &amp; height) to each child. Each child picks a size within those constraints and reports it up. The parent then positions the child. This single pass makes layout fast but also explains overflow errors — a child wanted more than the constraint allowed.</div></div>
+
+<div class="qa"><div class="q">What does the <code>key</code> parameter do?</div><div class="a">Keys preserve widget state when the position in the tree changes — for example reordering list items or swapping between two widgets of the same type. Without a key, Flutter matches elements by type and position and may attach the wrong state. Use <code>ValueKey</code>/<code>ObjectKey</code> for lists and <code>GlobalKey</code> to access state or context across the tree (sparingly).</div></div>
+
+<div class="qa"><div class="q">What is the difference between a Future and a Stream?</div><div class="a">A <code>Future</code> yields a single asynchronous value (or error) exactly once. A <code>Stream</code> yields a sequence of values over time, like websocket messages or sensor events. You <code>await</code> a Future and <code>await for</code> (or <code>.listen</code>) a Stream. In the UI, use <code>FutureBuilder</code> for one-shot data and <code>StreamBuilder</code> for continuous updates.</div></div>
+
+<div class="qa"><div class="q">How does async work given Dart is single-threaded?</div><div class="a">Dart uses an event loop with a microtask queue and an event queue. <code>await</code> does not block the thread; it registers a continuation and yields back to the loop, which keeps rendering the UI. When the awaited Future completes, its continuation is scheduled. For true parallelism (CPU-bound work) you spawn an <code>Isolate</code> — isolates have separate memory and communicate via message passing.</div></div>
+
+<div class="qa"><div class="q">When would you lift state up or use a state-management library?</div><div class="a">Lift state to the nearest common ancestor when two sibling widgets need the same data. When passing it through many layers becomes unwieldy ("prop drilling") or many widgets must react to shared state, reach for Provider/Riverpod/BLoC so state lives outside the widget tree and widgets subscribe to just the slices they need.</div></div>
+
+<div class="qa"><div class="q">What is <code>BuildContext</code>?</div><div class="a">It is a handle to the location of a widget in the element tree. You use it to look up inherited data (<code>Theme.of(context)</code>, <code>MediaQuery.of(context)</code>), to navigate (<code>Navigator.of(context)</code>), and to find ancestors. A context is only valid for its widget's position — using a stale or wrong-level context is a common bug.</div></div>
+
+<div class="qa"><div class="q">How do you optimize a janky Flutter list?</div><div class="a">Use <code>ListView.builder</code> for lazy construction, mark static subtrees <code>const</code>, add <code>cacheExtent</code> tuning if needed, avoid rebuilding the whole list on each change (use <code>Selector</code>/granular providers), keep <code>itemBuilder</code> cheap, and move heavy computation to <code>compute()</code>. Use the DevTools performance overlay to find the slow frames.</div></div>
+
+<div class="qa"><div class="q">What is the difference between hot reload and hot restart?</div><div class="a">Hot reload injects changed Dart source into the running Dart VM and rebuilds the widget tree, <em>preserving</em> app state — ideal for UI tweaks. Hot restart recompiles and restarts the app, discarding state — needed for changes to <code>main()</code>, global state, enums, or static initializers. Release (AOT) builds have neither.</div></div>
+
+<div class="qa"><div class="q">How do you handle errors from a REST call cleanly?</div><div class="a">Wrap the call in try/catch, apply a <code>.timeout()</code>, check <code>statusCode</code> explicitly, parse JSON through typed <code>fromJson</code> factories, and surface failure states in the UI (via a sealed result type or <code>snapshot.hasError</code>). Centralize this in a repository layer so widgets only see domain objects or well-typed errors.</div></div>
+
+<div class="qa"><div class="q">What is an Isolate and when do you need one?</div><div class="a">An isolate is Dart's unit of concurrency — an independent worker with its own memory and event loop. Because isolates share nothing, there are no data races; they communicate via ports/messages. Use one (often via the <code>compute()</code> helper) for CPU-heavy work like parsing large JSON, image processing, or encryption so the UI isolate keeps a smooth 60/120fps.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li><strong>Official docs &amp; codelabs</strong> — flutter.dev and the "Write your first Flutter app" codelab.</li>
+  <li><strong>Dart language tour</strong> — dart.dev; master records, patterns, and sealed classes (Dart 3+).</li>
+  <li><strong>State management</strong> — go deep on Riverpod, then compare with BLoC/Cubit.</li>
+  <li><strong>Navigation</strong> — the <code>go_router</code> package for declarative, deep-linkable routing.</li>
+  <li><strong>Testing</strong> — unit, <code>flutter_test</code> widget tests, and <code>integration_test</code> for end-to-end.</li>
+  <li><strong>Performance</strong> — Flutter DevTools (timeline, memory, widget inspector) and the Impeller renderer.</li>
+  <li><strong>Architecture</strong> — layered app design (presentation / domain / data) and the repository pattern.</li>
+  <li><strong>Platform integration</strong> — platform channels and FFI for calling native code and C libraries.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

@@ -1,0 +1,2737 @@
+<h2>Why TypeScript, and When Plain JS Is Fine</h2>
+<p class="lead">TypeScript is JavaScript with a static type system bolted on at build time and erased at run time. That single sentence explains both its enormous value and every frustrating thing about it. As a Forward Deployed Engineer you will meet TypeScript in three places — the customer's frontend, their Node services, and the glue code you write to integrate with their APIs — and in all three, the types are the fastest way to understand a codebase you have never seen.</p>
+
+<div class="facts">
+  <div class="f"><b>0</b><span>TYPES SURVIVE TO RUNTIME</span></div>
+  <div class="f"><b>~15%</b><span>OF BUGS CAUGHT BY TYPES ALONE (ROUGH, DEBATED)</span></div>
+  <div class="f"><b>#1</b><span>REASON TEAMS ADOPT IT: REFACTORING CONFIDENCE</span></div>
+  <div class="f"><b>strict</b><span>THE ONE SETTING THAT DECIDES EVERYTHING</span></div>
+</div>
+
+<h3>What you actually get</h3>
+<div class="grid c3">
+  <div class="card"><h4>Refactoring without fear</h4><p>Rename a field on a widely used object and the compiler lists every place that must change. In a 200-file JavaScript codebase that same rename is a grep and a prayer. This is the benefit teams cite most, and it is the one that compounds.</p></div>
+  <div class="card"><h4>Documentation that cannot rot</h4><p>A function signature tells you what it needs and returns, and the compiler enforces that the signature is true. Comments lie after six months; types cannot, because the build fails.</p></div>
+  <div class="card"><h4>Editor intelligence</h4><p>Autocomplete that knows your domain, inline errors as you type, go-to-definition that works across packages. On an unfamiliar codebase this is how you orient in hours instead of days.</p></div>
+</div>
+
+<h3>What you do not get</h3>
+<div class="callout danger"><span class="t">Types do not exist at runtime</span>TypeScript compiles to JavaScript by deleting the types. A value that arrives from <code>fetch</code>, <code>JSON.parse</code>, <code>process.env</code>, a form, or a database driver is typed by your <i>assertion</i>, not by any check. If the API returns <code>{"id": "42"}</code> and you declared <code>id: number</code>, TypeScript is perfectly happy and your arithmetic silently produces <code>"421"</code>. Every boundary where data enters your program needs runtime validation — usually Zod. This is the single most important thing to understand about TypeScript and the most common cause of production bugs in "fully typed" codebases.</div>
+
+<h3>When plain JavaScript is the right call</h3>
+<table>
+<tr><th>Situation</th><th>Verdict</th></tr>
+<tr><td>A 60-line build script or one-off migration</td><td>Plain JS. The setup costs more than the bugs it prevents.</td></tr>
+<tr><td>A throwaway prototype you will delete in a week</td><td>Plain JS, or TS with <code>strict: false</code> if the team already has a template.</td></tr>
+<tr><td>A team with no TS experience and a two-week deadline</td><td>Plain JS. Learning curve plus deadline is how you ship nothing.</td></tr>
+<tr><td>Anything multi-person and longer than a month</td><td>TypeScript.</td></tr>
+<tr><td>A library other people will consume</td><td>TypeScript, absolutely — your types are your API documentation.</td></tr>
+<tr><td>A codebase you will hand over and never see again</td><td>TypeScript. The types are the handover document.</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">The middle path most people forget</span>You can get a large fraction of the benefit without renaming a single file: add <code>// @ts-check</code> at the top of a <code>.js</code> file, or set <code>checkJs: true</code> in <code>tsconfig.json</code>, and write types in JSDoc comments. The editor and <code>tsc</code> will check them. This is an excellent option when the customer's team is nervous about a migration, because it is reversible and requires no build change at all.</div>
+
+<pre><code class="language-javascript">// @ts-check
+/**
+ * @param {string} customerId
+ * @param {{ from: Date, to: Date, limit?: number }} options
+ * @returns {Promise&lt;Array&lt;{ id: string, amount: number }&gt;&gt;}
+ */
+async function fetchOrders(customerId, options) {
+  const limit = options.limit ?? 50;
+  // The editor now autocompletes options.from and errors on options.form
+  return api.get(`/customers/${customerId}/orders`, { ...options, limit });
+}</code></pre>
+
+<h2>Setup: tsc, tsconfig and Bundlers</h2>
+<p class="lead">Most people's first painful day with TypeScript is a configuration problem, not a type problem. The compiler has roughly a hundred flags, about ten of which matter, and getting module resolution wrong produces errors that look like type errors but are not. Learn the ten flags and you will never fight the toolchain again.</p>
+
+<h3>Getting started</h3>
+<pre><code class="language-bash"># A Node project
+npm init -y
+npm i -D typescript @types/node tsx
+npx tsc --init                      # generates a heavily commented tsconfig.json
+
+# Compile, type-check, and run
+npx tsc                             # emit JS per tsconfig
+npx tsc --noEmit                    # type-check only - what you run in CI
+npx tsc --watch                     # incremental, on save
+npx tsx src/index.ts                # run TS directly, no build step
+npx tsx watch src/index.ts          # dev server style reload
+
+# Node 22+ can strip types natively for simple cases
+node --experimental-strip-types src/index.ts</code></pre>
+
+<h3>The tsconfig options that actually matter</h3>
+<pre><code class="language-json">{
+  "compilerOptions": {
+    /* Language and environment */
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* Strictness - turn it ALL on */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    /* Interop */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    /* Emit */
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}</code></pre>
+
+<table>
+<tr><th>Option</th><th>What it does</th><th>Why it matters</th></tr>
+<tr><td><code>strict</code></td><td>Enables eight other flags including <code>strictNullChecks</code> and <code>noImplicitAny</code></td><td>Without it TypeScript is a linter with a nice editor. With it, it is a type system. Non-negotiable on new code.</td></tr>
+<tr><td><code>strictNullChecks</code></td><td><code>null</code> and <code>undefined</code> are not assignable to other types</td><td>The entire value proposition. Eliminates the <code>cannot read property of undefined</code> class of bug.</td></tr>
+<tr><td><code>noUncheckedIndexedAccess</code></td><td><code>arr[0]</code> is <code>T | undefined</code>, not <code>T</code></td><td>Honest about the fact that indexing can miss. Noisy at first; catches real bugs.</td></tr>
+<tr><td><code>exactOptionalPropertyTypes</code></td><td><code>{ a?: string }</code> does not accept <code>{ a: undefined }</code></td><td>Distinguishes "absent" from "present but undefined" — matters for JSON and spread merges.</td></tr>
+<tr><td><code>isolatedModules</code></td><td>Each file must be transpilable independently</td><td>Required by esbuild/SWC/Babel. Forces <code>export type</code> for type-only re-exports.</td></tr>
+<tr><td><code>verbatimModuleSyntax</code></td><td>Import/export statements are emitted exactly as written</td><td>Removes a whole class of "the import disappeared and broke a side effect" confusion.</td></tr>
+<tr><td><code>skipLibCheck</code></td><td>Do not type-check <code>.d.ts</code> files in <code>node_modules</code></td><td>Large build-time win; avoids errors inside dependencies you cannot fix.</td></tr>
+<tr><td><code>moduleResolution</code></td><td>How import specifiers map to files</td><td>The single most common source of baffling setup errors. See below.</td></tr>
+</table>
+
+<h3>Module resolution, explained once</h3>
+<div class="callout warn"><span class="t">The error that wastes an afternoon</span><code>Cannot find module './utils' or its corresponding type declarations.</code> The file is right there. The cause is almost always a mismatch between <code>module</code>/<code>moduleResolution</code> and how your runtime or bundler resolves. Learn the four combinations and the error becomes trivial.</div>
+
+<table>
+<tr><th><code>module</code> / <code>moduleResolution</code></th><th>Use for</th><th>Import must look like</th></tr>
+<tr><td><code>NodeNext</code> / <code>NodeNext</code></td><td>Node, respecting <code>"type"</code> in package.json</td><td><code>./utils.js</code> — yes, <code>.js</code>, even though the file is <code>.ts</code></td></tr>
+<tr><td><code>ESNext</code> / <code>Bundler</code></td><td>Vite, esbuild, webpack, Next.js</td><td><code>./utils</code> — extensionless is fine; the bundler resolves</td></tr>
+<tr><td><code>CommonJS</code> / <code>Node10</code></td><td>Legacy Node projects</td><td><code>./utils</code></td></tr>
+<tr><td><code>Preserve</code> / <code>Bundler</code></td><td>Modern "TS checks, bundler builds" setups</td><td><code>./utils</code></td></tr>
+</table>
+
+<pre><code class="language-typescript">// With module: NodeNext and "type": "module" in package.json,
+// relative imports need the OUTPUT extension, not the source extension.
+import { formatMoney } from "./utils.js";      // correct, even though utils.ts
+import type { Order } from "./types.js";
+
+// With moduleResolution: Bundler (Vite, Next.js), this is correct instead:
+import { formatMoney } from "./utils";
+import type { Order } from "./types";</code></pre>
+
+<h3>Path aliases</h3>
+<pre><code class="language-json">{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@domain/*": ["src/domain/*"],
+      "@test-utils": ["test/utils/index.ts"]
+    }
+  }
+}</code></pre>
+
+<div class="callout danger"><span class="t">tsconfig paths do not rewrite your output</span><code>tsc</code> type-checks <code>@/domain/order</code> correctly and then emits <code>require("@/domain/order")</code>, which Node cannot resolve at runtime. The compiler does not rewrite the specifier. You need a bundler that understands the alias (Vite, webpack, tsup, esbuild with a plugin), or <code>tsc-alias</code> as a post-build step, or Node's own <code>imports</code> field with <code>#</code>-prefixed subpath imports. Teams lose hours to this because the type-check passes and only the runtime fails.</div>
+
+<pre><code class="language-json">{
+  "name": "my-app",
+  "type": "module",
+  "imports": {
+    "#domain/*": "./dist/domain/*.js",
+    "#lib/*": "./dist/lib/*.js"
+  }
+}</code></pre>
+
+<h3>Bundlers and runners</h3>
+<table>
+<tr><th>Tool</th><th>Type-checks?</th><th>Use for</th></tr>
+<tr><td><b>tsc</b></td><td>Yes</td><td>The source of truth for type checking. Run <code>tsc --noEmit</code> in CI regardless of what builds your code.</td></tr>
+<tr><td><b>esbuild</b></td><td>No — strips types</td><td>Extremely fast builds. Pair with a separate <code>tsc --noEmit</code>.</td></tr>
+<tr><td><b>SWC</b></td><td>No</td><td>Same role as esbuild; used by Next.js and Jest transforms.</td></tr>
+<tr><td><b>Vite</b></td><td>No (esbuild/Rollup under the hood)</td><td>Frontend dev server and build. Add <code>vite-plugin-checker</code> if you want in-editor type errors in the overlay.</td></tr>
+<tr><td><b>tsup</b></td><td>Optional (<code>--dts</code>)</td><td>Building a library: ESM + CJS + <code>.d.ts</code> in one command.</td></tr>
+<tr><td><b>tsx</b></td><td>No</td><td>Running a <code>.ts</code> file directly in development. Replaces ts-node for most uses.</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">The modern split that confuses newcomers</span>Transpiling and type-checking are now separate jobs. Your bundler strips types in milliseconds and never checks them; <code>tsc --noEmit</code> checks them and emits nothing. That means <b>your dev server will happily run code with type errors</b>. This is a feature — fast feedback — but it means CI must run <code>tsc --noEmit</code> as a separate step or type errors will reach main.</div>
+
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit &amp;&amp; vite build",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest run"
+  }
+}</code></pre>
+
+<h2>Primitives, Literals, Arrays, Tuples and the Three Special Types</h2>
+<p class="lead">The base of the type system is small, and three of its members — <code>any</code>, <code>unknown</code> and <code>never</code> — carry almost all the subtlety. Getting those three right separates people who write TypeScript from people who write JavaScript with annotations.</p>
+
+<h3>Primitives and inference</h3>
+<pre><code class="language-typescript">// Let inference do the work. Explicit annotations here add noise, not safety.
+const name = "Pranit";          // type: "Pranit"  (literal, because const)
+let city = "Pune";              // type: string    (widened, because let)
+const count = 42;               // type: 42
+const active = true;            // type: true
+const nothing = null;           // type: null
+const missing = undefined;      // type: undefined
+const big = 9007199254740993n;  // type: bigint
+const sym = Symbol("key");      // type: symbol
+
+// Annotate where inference cannot help: function parameters and empty containers
+function greet(who: string): string {
+  return `Hello, ${who}`;
+}
+const ids: string[] = [];       // without this it is never[], and push fails</code></pre>
+
+<h3>Literal types and widening</h3>
+<pre><code class="language-typescript">type Status = "draft" | "published" | "archived";
+
+let s1 = "draft";               // string - widened
+const s2 = "draft";             // "draft" - not widened
+
+function publish(status: Status) { /* ... */ }
+publish(s2);                    // OK
+publish(s1);                    // ERROR: string is not assignable to Status
+
+// Three ways to stop widening
+const config1 = { status: "draft" as const };        // status: "draft"
+const config2 = { status: "draft" } as const;        // whole object deeply readonly
+const config3: { status: Status } = { status: "draft" };
+
+// as const is the idiomatic way to build a lookup table AND its union type
+const ROLES = ["admin", "editor", "viewer"] as const;
+type Role = typeof ROLES[number];                    // "admin" | "editor" | "viewer"
+
+const HTTP_STATUS = {
+  OK: 200,
+  NOT_FOUND: 404,
+  SERVER_ERROR: 500,
+} as const;
+type StatusCode = typeof HTTP_STATUS[keyof typeof HTTP_STATUS];   // 200 | 404 | 500</code></pre>
+
+<h3>Arrays, readonly arrays and tuples</h3>
+<pre><code class="language-typescript">const names: string[] = ["a", "b"];
+const nums: Array&lt;number&gt; = [1, 2];               // identical; style preference
+
+// readonly prevents mutation through this reference
+const frozen: readonly string[] = ["a", "b"];
+// frozen.push("c");                               // ERROR
+const frozen2: ReadonlyArray&lt;string&gt; = ["a"];      // same thing
+
+// Tuples: fixed length, position-specific types
+type Point = [x: number, y: number];               // named elements are docs only
+type Entry = [key: string, value: unknown];
+type Range = [min: number, max: number, inclusive?: boolean];
+
+const p: Point = [10, 20];
+const [x, y] = p;                                  // x: number, y: number
+
+// Variadic tuples
+type Head&lt;T extends readonly unknown[]&gt; = T extends readonly [infer H, ...unknown[]] ? H : never;
+type Tail&lt;T extends readonly unknown[]&gt; = T extends readonly [unknown, ...infer R] ? R : never;
+
+type A = Head&lt;[1, 2, 3]&gt;;                          // 1
+type B = Tail&lt;[1, 2, 3]&gt;;                          // [2, 3]
+
+// This is how useState gets its type
+function useLocal&lt;T&gt;(initial: T): [T, (next: T) =&gt; void] {
+  let value = initial;
+  return [value, (next) =&gt; { value = next; }];
+}</code></pre>
+
+<div class="callout warn"><span class="t"><code>noUncheckedIndexedAccess</code> changes array access</span>With the flag on, <code>names[0]</code> has type <code>string | undefined</code>, because TypeScript cannot know the array is non-empty. This is <i>correct</i> and initially annoying. Handle it with a guard, <code>at()</code> plus a check, or destructuring with a default. The flag catches a real bug class — iterating to <code>length</code> and off-by-one indexing — and is worth the noise on new code. Enabling it on a large existing codebase will produce hundreds of errors, so do that incrementally.</div>
+
+<h3>Enums vs union literals</h3>
+<pre><code class="language-typescript">// Numeric enum - avoid. Values are numbers, reverse-mapped, and it emits runtime code.
+enum Direction { Up, Down, Left, Right }       // Up === 0
+
+// String enum - acceptable, still emits an object
+enum Status { Draft = "draft", Published = "published" }
+
+// const enum - inlined, no runtime object, but breaks with isolatedModules
+const enum Level { Low = 1, High = 2 }
+
+// Union of literals - the idiomatic modern choice
+type Status2 = "draft" | "published" | "archived";
+
+// With a const object when you need the values at runtime
+const Status3 = {
+  Draft: "draft",
+  Published: "published",
+  Archived: "archived",
+} as const;
+type Status3 = (typeof Status3)[keyof typeof Status3];</code></pre>
+
+<table>
+<tr><th></th><th>String enum</th><th>Union of literals</th></tr>
+<tr><td>Runtime footprint</td><td>Emits a JS object</td><td>Zero</td></tr>
+<tr><td>Works with <code>isolatedModules</code></td><td>Yes (not <code>const enum</code>)</td><td>Yes</td></tr>
+<tr><td>Accepts a raw string</td><td>No — must use <code>Status.Draft</code></td><td>Yes — <code>"draft"</code> works directly</td></tr>
+<tr><td>Serialises naturally to JSON</td><td>Yes for string enums</td><td>Yes</td></tr>
+<tr><td>Iterate all values</td><td><code>Object.values(Status)</code></td><td>Needs an <code>as const</code> array</td></tr>
+<tr><td>Nominal-ish (not interchangeable with string)</td><td>Yes</td><td>No</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Practical guidance</span>Default to union literals plus an <code>as const</code> object when you need the values at runtime. Use a string enum when you genuinely want the nominal behaviour — stopping someone passing an arbitrary string — and the team already uses them. Never use numeric enums in new code: <code>Direction.Up === 0</code> means <code>if (dir)</code> is false for <code>Up</code>, which is a real bug that has shipped many times.</div>
+
+<h3><code>any</code>, <code>unknown</code> and <code>never</code></h3>
+<table>
+<tr><th></th><th><code>any</code></th><th><code>unknown</code></th><th><code>never</code></th></tr>
+<tr><td>Meaning</td><td>"Stop checking this"</td><td>"Could be anything; prove it first"</td><td>"This cannot happen"</td></tr>
+<tr><td>Assign anything <i>to</i> it</td><td>Yes</td><td>Yes</td><td>No (nothing is assignable to never)</td></tr>
+<tr><td>Assign it <i>to</i> anything</td><td>Yes</td><td>No — must narrow first</td><td>Yes (never is assignable to everything)</td></tr>
+<tr><td>Access properties</td><td>Yes, unchecked</td><td>No, until narrowed</td><td>N/A</td></tr>
+<tr><td>Use for</td><td>Escape hatch during migration, marked with a TODO</td><td>Anything from <code>JSON.parse</code>, <code>catch</code>, a network boundary</td><td>Exhaustiveness checks, functions that never return</td></tr>
+</table>
+
+<pre><code class="language-typescript">// any is contagious - it disables checking everywhere it flows
+const data: any = JSON.parse(raw);
+data.user.profile.name.toUpperCase();     // compiles. Crashes at runtime.
+const n: number = data.anything;          // compiles. Probably wrong.
+
+// unknown forces you to prove the shape
+const safe: unknown = JSON.parse(raw);
+// safe.user;                              // ERROR - good
+if (typeof safe === "object" &amp;&amp; safe !== null &amp;&amp; "user" in safe) {
+  // narrowed enough to access .user, though you still need validation for depth
+}
+
+// never: the exhaustiveness check that makes unions safe to extend
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "square"; side: number }
+  | { kind: "rect"; w: number; h: number };
+
+function area(s: Shape): number {
+  switch (s.kind) {
+    case "circle": return Math.PI * s.radius ** 2;
+    case "square": return s.side ** 2;
+    case "rect":   return s.w * s.h;
+    default: {
+      // If someone adds a new member to Shape, s is no longer never
+      // and THIS LINE fails to compile. That is the whole point.
+      const exhaustive: never = s;
+      throw new Error(`Unhandled shape: ${JSON.stringify(exhaustive)}`);
+    }
+  }
+}
+
+// never as a return type: this function does not return normally
+function fail(message: string): never {
+  throw new Error(message);
+}
+
+// never in a union disappears
+type T = string | never;                   // string</code></pre>
+
+<div class="callout ok"><span class="t">The exhaustiveness pattern is the highest-value idiom in TypeScript</span>Add a case to a union — a new payment method, a new event type, a new error code — and every <code>switch</code> that handles it exhaustively fails to compile, pointing you at exactly the code that needs updating. This is the refactoring superpower that justifies the whole language. Write the <code>const exhaustive: never</code> default in every switch over a union.</div>
+
+<h2>Interfaces vs Type Aliases</h2>
+<p class="lead">This is the most-asked beginner question and the answer is less dramatic than the debate suggests: they overlap heavily, each can do a couple of things the other cannot, and consistency within a codebase matters more than the choice. Knowing the two genuine differences is enough.</p>
+
+<h3>The overlap</h3>
+<pre><code class="language-typescript">interface User {
+  id: string;
+  name: string;
+  email?: string;              // optional
+  readonly createdAt: Date;    // cannot be reassigned after construction
+}
+
+type UserT = {
+  id: string;
+  name: string;
+  email?: string;
+  readonly createdAt: Date;
+};
+
+// Both work for objects, both support generics, both support extension.
+interface Admin extends User { permissions: string[]; }
+type AdminT = UserT &amp; { permissions: string[] };</code></pre>
+
+<h3>The two real differences</h3>
+<table>
+<tr><th>Capability</th><th><code>interface</code></th><th><code>type</code></th></tr>
+<tr><td>Describe an object or class shape</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Union types</td><td><b>No</b></td><td>Yes</td></tr>
+<tr><td>Primitives, tuples, mapped, conditional, template literal types</td><td><b>No</b></td><td>Yes</td></tr>
+<tr><td>Declaration merging (reopen and add members)</td><td>Yes</td><td><b>No</b></td></tr>
+<tr><td><code>implements</code> on a class</td><td>Yes</td><td>Yes (if it is an object type)</td></tr>
+<tr><td>Error messages</td><td>Usually show the interface name</td><td>Sometimes expand to the full structure</td></tr>
+<tr><td>Performance on very large shapes</td><td>Marginally better (cached)</td><td>Marginally worse (recomputed intersections)</td></tr>
+</table>
+
+<pre><code class="language-typescript">// Only `type` can do these
+type Id = string | number;
+type Coords = [number, number];
+type Keys&lt;T&gt; = keyof T;
+type Getter&lt;T&gt; = { [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K] };
+
+// Only `interface` can do this - declaration merging
+interface Window { myAppVersion: string; }
+interface Window { myAppFlags: Record&lt;string, boolean&gt;; }
+// Window now has both. This is how you extend global/third-party types.</code></pre>
+
+<div class="callout tip"><span class="t">A rule you can defend in review</span>Use <code>interface</code> for object shapes that are part of a public API or that someone might need to augment (React props, config objects, library surfaces). Use <code>type</code> for everything else — unions, function types, mapped and conditional types, and anything derived. If the team already has a convention, follow it; this is not worth a debate.</div>
+
+<h3>Index signatures and Record</h3>
+<pre><code class="language-typescript">// Index signature: arbitrary string keys
+interface Headers {
+  [header: string]: string;
+}
+
+// Record is usually clearer and composes better
+type Headers2 = Record&lt;string, string&gt;;
+type RoleFlags = Record&lt;"admin" | "editor" | "viewer", boolean&gt;;
+// { admin: boolean; editor: boolean; viewer: boolean } - exhaustive, checked
+
+// Mixing an index signature with known keys requires compatibility
+interface Config {
+  name: string;
+  version: number;
+  [key: string]: string | number;      // must include the types of known keys
+}
+
+// Partial Record for lookups that may miss
+type Cache = Partial&lt;Record&lt;string, User&gt;&gt;;
+const cache: Cache = {};
+const u = cache["abc"];                 // User | undefined - correct</code></pre>
+
+<div class="callout warn"><span class="t">Index signatures lie by default</span><code>Record&lt;string, User&gt;</code> says every string key yields a <code>User</code>, which is false — most keys yield <code>undefined</code>. Either enable <code>noUncheckedIndexedAccess</code>, which makes the lookup <code>User | undefined</code> globally, or use <code>Partial&lt;Record&lt;string, User&gt;&gt;</code> explicitly. Code that indexes a map and immediately dereferences the result is one of the most common runtime crashes in "type-safe" codebases.</div>
+
+<h3>Structural typing</h3>
+<p>TypeScript compares types by <b>shape</b>, not by name. Two types with identical members are interchangeable even if they are unrelated and declared in different files. This is usually convenient and occasionally dangerous.</p>
+
+<pre><code class="language-typescript">interface Dog { name: string; legs: number }
+interface Table { name: string; legs: number }
+
+function walk(d: Dog) { /* ... */ }
+const t: Table = { name: "kitchen", legs: 4 };
+walk(t);                                 // compiles. Structurally identical.
+
+// Branded types give you nominal behaviour when it matters
+declare const brand: unique symbol;
+type Brand&lt;T, B extends string&gt; = T &amp; { readonly [brand]: B };
+
+type UserId  = Brand&lt;string, "UserId"&gt;;
+type OrderId = Brand&lt;string, "OrderId"&gt;;
+
+function asUserId(s: string): UserId { return s as UserId; }
+function getUser(id: UserId) { /* ... */ }
+
+const oid = "ord_123" as OrderId;
+// getUser(oid);                          // ERROR - exactly what you want
+getUser(asUserId("usr_123"));             // OK</code></pre>
+
+<div class="callout ok"><span class="t">Where branding earns its keep</span>Any codebase with several kinds of string identifier — <code>userId</code>, <code>orderId</code>, <code>tenantId</code>, <code>sessionToken</code> — will eventually pass the wrong one, and the bug is invisible because they are all strings. Branding costs five lines and turns that into a compile error. Also excellent for units (<code>Minutes</code> vs <code>Seconds</code>), currency amounts (<code>Cents</code> vs <code>Rupees</code>), and validated-vs-raw strings (<code>SafeHtml</code> vs <code>string</code>).</div>
+
+<h2>Unions, Intersections and Discriminated Unions</h2>
+<p class="lead">Unions are how TypeScript models "one of these", and the discriminated union is the single most useful modelling pattern in the language. Most "TypeScript is awkward here" complaints come from trying to model with optional properties what should be a discriminated union.</p>
+
+<h3>Unions and intersections</h3>
+<pre><code class="language-typescript">type Id = string | number;                       // either
+type Timestamped = { createdAt: Date };
+type Authored = { authorId: string };
+type Post = Timestamped &amp; Authored &amp; { title: string };   // all of them
+
+// On a union you can only access members present on EVERY member
+type A = { kind: "a"; value: string; extra: boolean };
+type B = { kind: "b"; value: number };
+declare const ab: A | B;
+ab.kind;                                          // OK - on both
+ab.value;                                         // OK - string | number
+// ab.extra;                                      // ERROR - only on A
+
+// Intersections of primitives collapse to never
+type Impossible = string &amp; number;                // never</code></pre>
+
+<h3>The optional-property anti-pattern</h3>
+<pre><code class="language-typescript">// BAD: everything optional, no invariants expressed, every access needs a check
+interface RequestState {
+  loading?: boolean;
+  data?: User[];
+  error?: Error;
+}
+// Nothing stops { loading: true, data: [...], error: new Error() } - a nonsense state.
+// Every consumer writes defensive checks and they all disagree.
+
+// GOOD: a discriminated union. Illegal states are unrepresentable.
+type RequestState2 =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success"; data: User[]; fetchedAt: Date }
+  | { status: "error"; error: Error; retryable: boolean };
+
+function render(state: RequestState2) {
+  switch (state.status) {
+    case "idle":    return "Click to load";
+    case "loading": return "Loading...";
+    case "success": return `${state.data.length} users`;   // data is guaranteed here
+    case "error":   return state.retryable ? "Retry?" : state.error.message;
+    default: {
+      const _never: never = state;
+      return _never;
+    }
+  }
+}</code></pre>
+
+<div class="callout ok"><span class="t">Make illegal states unrepresentable</span>This is the sentence to remember. If your type permits a combination that cannot occur in reality, you have pushed work onto every consumer and invited bugs. A discriminated union with a literal <code>kind</code>/<code>status</code>/<code>type</code> field is almost always the fix, and TypeScript's narrowing then gives you perfectly typed access inside each branch with no casts.</div>
+
+<h3>Discriminated unions in anger</h3>
+<pre><code class="language-typescript">// Domain events - the shape most backend TS codebases converge on
+type DomainEvent =
+  | { type: "order.created";   orderId: string; customerId: string; total: number }
+  | { type: "order.paid";      orderId: string; paymentId: string; paidAt: Date }
+  | { type: "order.shipped";   orderId: string; carrier: string; tracking: string }
+  | { type: "order.cancelled"; orderId: string; reason: string; refunded: boolean };
+
+type EventType = DomainEvent["type"];              // the union of all type strings
+
+// Extract one member by its discriminant - extremely useful
+type EventOf&lt;T extends EventType&gt; = Extract&lt;DomainEvent, { type: T }&gt;;
+type PaidEvent = EventOf&lt;"order.paid"&gt;;            // { type: "order.paid"; orderId: ...; }
+
+// A fully typed handler map: every event must be handled, with the right payload
+type Handlers = {
+  [K in EventType]: (event: EventOf&lt;K&gt;) =&gt; Promise&lt;void&gt;;
+};
+
+const handlers: Handlers = {
+  "order.created":   async (e) =&gt; { await notify(e.customerId, e.total); },
+  "order.paid":      async (e) =&gt; { await receipt(e.paymentId, e.paidAt); },
+  "order.shipped":   async (e) =&gt; { await track(e.carrier, e.tracking); },
+  "order.cancelled": async (e) =&gt; { if (e.refunded) await refund(e.orderId); },
+};
+
+async function dispatch(event: DomainEvent): Promise&lt;void&gt; {
+  // The cast is needed because TS cannot prove the correlation across the index,
+  // but the DECLARATION of `handlers` above is fully checked, which is what matters.
+  const handler = handlers[event.type] as (e: DomainEvent) =&gt; Promise&lt;void&gt;;
+  await handler(event);
+}</code></pre>
+
+<h3>Result types instead of thrown exceptions</h3>
+<pre><code class="language-typescript">type Ok&lt;T&gt;  = { ok: true;  value: T };
+type Err&lt;E&gt; = { ok: false; error: E };
+type Result&lt;T, E = Error&gt; = Ok&lt;T&gt; | Err&lt;E&gt;;
+
+const ok  = &lt;T,&gt;(value: T): Ok&lt;T&gt;  =&gt; ({ ok: true,  value });
+const err = &lt;E,&gt;(error: E): Err&lt;E&gt; =&gt; ({ ok: false, error });
+
+type ParseError =
+  | { kind: "empty" }
+  | { kind: "not_json"; raw: string }
+  | { kind: "wrong_shape"; issues: string[] };
+
+function parseConfig(raw: string): Result&lt;Config, ParseError&gt; {
+  if (!raw.trim()) return err({ kind: "empty" });
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return err({ kind: "not_json", raw: raw.slice(0, 80) });
+  }
+  const check = ConfigSchema.safeParse(parsed);
+  if (!check.success) {
+    return err({ kind: "wrong_shape", issues: check.error.issues.map((i) =&gt; i.message) });
+  }
+  return ok(check.data);
+}
+
+// The caller CANNOT forget to handle the failure - the compiler sees to it
+const result = parseConfig(fileContents);
+if (!result.ok) {
+  switch (result.error.kind) {
+    case "empty":       return useDefaults();
+    case "not_json":    return fatal(`Config is not JSON: ${result.error.raw}`);
+    case "wrong_shape": return fatal(result.error.issues.join("; "));
+  }
+}
+startServer(result.value);              // narrowed to Config here</code></pre>
+
+<div class="callout note"><span class="t">Result types versus exceptions</span>TypeScript cannot type what a function throws — there is no <code>throws</code> clause, and <code>catch (e)</code> gives you <code>unknown</code>. So exceptions are invisible to the type system, which means the compiler cannot help you handle them. A <code>Result</code> type makes failure part of the signature and therefore impossible to ignore. The cost is verbosity and interop friction with libraries that throw. The pragmatic split most teams land on: <code>Result</code> for <i>expected</i> failures (validation, not-found, business rule violations) and exceptions for <i>unexpected</i> ones (programmer errors, infrastructure failure), with one top-level handler.</div>
+
+<h2>Narrowing and Control-Flow Analysis</h2>
+<p class="lead">Narrowing is TypeScript watching your code and tracking what a value could be at each point. It is the feature that makes unions pleasant to use rather than a constant source of casts. Knowing exactly which constructs narrow — and the two or three that silently stop narrowing — removes most of the friction people feel with the language.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="760" height="280" fill="#ffffff"/>
+  <text x="16" y="20" font-size="11" fill="#1e3a8a" font-family="sans-serif">CONTROL-FLOW NARROWING</text>
+
+  <rect x="250" y="36" width="260" height="34" rx="4" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="380" y="58" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">value: string | number | null</text>
+
+  <line x1="380" y1="70" x2="380" y2="92" stroke="#6b7688"/>
+  <rect x="268" y="92" width="224" height="26" rx="3" fill="#e3e8ef" stroke="#1e3a8a"/>
+  <text x="380" y="110" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">if (value === null) return;</text>
+
+  <line x1="380" y1="118" x2="380" y2="138" stroke="#6b7688"/>
+  <rect x="268" y="138" width="224" height="26" rx="3" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="380" y="156" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">here: string | number</text>
+
+  <line x1="380" y1="164" x2="380" y2="182" stroke="#6b7688"/>
+  <rect x="250" y="182" width="260" height="26" rx="3" fill="#e3e8ef" stroke="#1e3a8a"/>
+  <text x="380" y="200" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">if (typeof value === "string") { ... }</text>
+
+  <line x1="300" y1="208" x2="190" y2="232" stroke="#2563eb"/>
+  <line x1="460" y1="208" x2="570" y2="232" stroke="#2563eb"/>
+
+  <rect x="100" y="232" width="180" height="26" rx="3" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="190" y="250" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">true branch: string</text>
+
+  <rect x="480" y="232" width="180" height="26" rx="3" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="570" y="250" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">false branch: number</text>
+
+  <text x="16" y="120" font-size="9" fill="#6b7688" font-family="sans-serif">NARROWS:</text>
+  <text x="16" y="136" font-size="9" fill="#6b7688" font-family="sans-serif">typeof</text>
+  <text x="16" y="150" font-size="9" fill="#6b7688" font-family="sans-serif">instanceof</text>
+  <text x="16" y="164" font-size="9" fill="#6b7688" font-family="sans-serif">in</text>
+  <text x="16" y="178" font-size="9" fill="#6b7688" font-family="sans-serif">=== literal</text>
+  <text x="16" y="192" font-size="9" fill="#6b7688" font-family="sans-serif">truthiness</text>
+  <text x="16" y="206" font-size="9" fill="#6b7688" font-family="sans-serif">Array.isArray</text>
+  <text x="16" y="220" font-size="9" fill="#6b7688" font-family="sans-serif">type predicates</text>
+  <text x="16" y="234" font-size="9" fill="#6b7688" font-family="sans-serif">assertion fns</text>
+
+  <text x="640" y="120" font-size="9" fill="#1e3a8a" font-family="sans-serif">RESETS NARROWING:</text>
+  <text x="640" y="136" font-size="9" fill="#6b7688" font-family="sans-serif">any function call</text>
+  <text x="640" y="150" font-size="9" fill="#6b7688" font-family="sans-serif">(on mutable `let`</text>
+  <text x="640" y="164" font-size="9" fill="#6b7688" font-family="sans-serif">and object props)</text>
+  <text x="640" y="184" font-size="9" fill="#6b7688" font-family="sans-serif">closures capturing</text>
+  <text x="640" y="198" font-size="9" fill="#6b7688" font-family="sans-serif">a mutable binding</text>
+  <text x="640" y="218" font-size="9" fill="#6b7688" font-family="sans-serif">reassignment</text>
+</svg>
+<div class="cap">The compiler tracks a narrowed type per code path. Mutation and function calls can invalidate it.</div>
+</div>
+
+<h3>The narrowing constructs</h3>
+<pre><code class="language-typescript">function process(value: string | number | string[] | null | undefined) {
+  // 1. typeof - for primitives
+  if (typeof value === "string") {
+    value.toUpperCase();                 // string
+  }
+
+  // 2. Array.isArray - special-cased by the compiler
+  if (Array.isArray(value)) {
+    value.map((s) =&gt; s.trim());          // string[]
+  }
+
+  // 3. Truthiness - but beware: "" and 0 are falsy
+  if (value) {
+    // string | number | string[]  - note that "" and 0 are EXCLUDED
+  }
+
+  // 4. Explicit null check - usually what you actually meant
+  if (value != null) {                   // != null catches both null and undefined
+    // string | number | string[]  - "" and 0 are INCLUDED
+  }
+}
+
+// 5. instanceof - for classes
+class HttpError extends Error { constructor(public status: number) { super(); } }
+class TimeoutError extends Error {}
+
+function handle(e: unknown) {
+  if (e instanceof HttpError)    return `HTTP ${e.status}`;
+  if (e instanceof TimeoutError) return "timed out";
+  if (e instanceof Error)        return e.message;
+  return String(e);
+}
+
+// 6. The `in` operator - for objects without a discriminant
+type Cat = { meow(): void };
+type Dog = { bark(): void };
+function speak(pet: Cat | Dog) {
+  if ("meow" in pet) pet.meow();
+  else pet.bark();
+}
+
+// 7. Discriminant equality - the best one
+type Shape = { kind: "circle"; r: number } | { kind: "square"; s: number };
+function area(sh: Shape) {
+  if (sh.kind === "circle") return Math.PI * sh.r ** 2;
+  return sh.s ** 2;
+}</code></pre>
+
+<h3>Type predicates (user-defined type guards)</h3>
+<pre><code class="language-typescript">// The return type `x is T` tells the compiler what a true result proves.
+function isString(x: unknown): x is string {
+  return typeof x === "string";
+}
+
+function isNonEmpty&lt;T&gt;(arr: T[]): arr is [T, ...T[]] {
+  return arr.length &gt; 0;
+}
+
+// Filtering out null - the classic case the compiler cannot infer alone
+function isDefined&lt;T&gt;(x: T | null | undefined): x is T {
+  return x != null;
+}
+
+const maybe: (User | null)[] = [user1, null, user2];
+const users1 = maybe.filter((u) =&gt; u !== null);     // (User | null)[] in older TS
+const users2 = maybe.filter(isDefined);             // User[] - correct
+
+// TypeScript 5.5+ infers predicates for simple arrow functions:
+const users3 = maybe.filter((u) =&gt; u !== null);     // User[] in TS 5.5+
+
+// A domain-level guard over unknown data
+interface ApiError { code: string; message: string; details?: unknown }
+
+function isApiError(x: unknown): x is ApiError {
+  return (
+    typeof x === "object" &amp;&amp; x !== null &amp;&amp;
+    "code" in x &amp;&amp; typeof (x as Record&lt;string, unknown&gt;).code === "string" &amp;&amp;
+    "message" in x &amp;&amp; typeof (x as Record&lt;string, unknown&gt;).message === "string"
+  );
+}</code></pre>
+
+<div class="callout danger"><span class="t">A type predicate is a promise the compiler cannot verify</span>Nothing stops you writing <code>function isUser(x: unknown): x is User { return true; }</code>. The compiler trusts you completely. A wrong predicate is as dangerous as an <code>as</code> cast and more insidious because it looks like a check. For data crossing a trust boundary, derive the guard from a schema (Zod's <code>safeParse</code>) rather than hand-writing it, so the check and the type cannot drift apart.</div>
+
+<h3>Assertion functions</h3>
+<pre><code class="language-typescript">// `asserts x is T` narrows for the REST of the enclosing scope, not just a block.
+function assertIsDefined&lt;T&gt;(x: T, name = "value"): asserts x is NonNullable&lt;T&gt; {
+  if (x == null) throw new Error(`${name} is required but was ${x}`);
+}
+
+function assertNever(x: never, context = "value"): never {
+  throw new Error(`Unexpected ${context}: ${JSON.stringify(x)}`);
+}
+
+function handler(req: Request) {
+  const userId = req.headers.get("x-user-id");    // string | null
+  assertIsDefined(userId, "x-user-id header");
+  userId.toUpperCase();                           // string, for the rest of the function
+}</code></pre>
+
+<div class="callout warn"><span class="t">Assertion functions need an explicit type annotation</span>You cannot write <code>const assertIsDefined = (x) =&gt; { ... }</code> and have the assertion work — TypeScript requires the assertion signature to be explicitly declared on an identifier whose type is known at the call site. Use a <code>function</code> declaration, or annotate the const explicitly. The error message when you get this wrong (<i>"Assertions require every name in the call target to be declared with an explicit type annotation"</i>) is one of the less obvious ones.</div>
+
+<h3>Where narrowing silently stops</h3>
+<pre><code class="language-typescript">class Container {
+  value: string | null = null;
+
+  bad() {
+    if (this.value !== null) {
+      doSomething();                 // this call could reassign this.value...
+      // this.value.length;          // ERROR in some configurations - narrowing lost
+    }
+  }
+
+  good() {
+    const v = this.value;            // capture into a const FIRST
+    if (v !== null) {
+      doSomething();
+      v.length;                      // still string - a const cannot change
+    }
+  }
+}
+
+// Closures over a mutable binding also lose narrowing
+function example(x: string | undefined) {
+  if (x === undefined) return;
+  // x is string here
+  const later = () =&gt; x.toUpperCase();     // OK - x is a parameter, never reassigned
+}
+
+function example2(x: string | undefined) {
+  if (x === undefined) x = "default";      // reassignment inside the function
+  const later = () =&gt; x.toUpperCase();     // OK in modern TS, but fragile
+}
+
+// Destructuring a discriminated union BREAKS the correlation before TS 4.6
+type Action = { type: "add"; n: number } | { type: "reset" };
+function reduce(action: Action) {
+  const { type, ...rest } = action;
+  // `type` and `rest` are now independent; narrowing on `type` does not narrow `rest`.
+  // Narrow on the object FIRST, then destructure inside the branch.
+  if (action.type === "add") {
+    const { n } = action;                  // n: number - correct
+  }
+}</code></pre>
+
+<div class="callout tip"><span class="t">The habit that avoids most narrowing pain</span>Copy the value into a <code>const</code> at the top of the function, narrow the <code>const</code>, and work with that. Mutable bindings and object properties are the only things that lose narrowing, and a <code>const</code> local is neither. This single habit eliminates the large majority of "but I already checked that!" moments.</div>
+
+<h2>Functions: Overloads, Generics and <code>satisfies</code></h2>
+<p class="lead">Function typing is where TypeScript's inference does the most work for you, and where a few specific tools — overloads, generic parameters, and the <code>satisfies</code> operator — let you express APIs that would otherwise require casts at every call site.</p>
+
+<h3>Basics and inference</h3>
+<pre><code class="language-typescript">// Annotate parameters, let the return type infer unless you want it enforced
+function add(a: number, b: number) {
+  return a + b;                                  // inferred: number
+}
+
+// Optional and default parameters
+function greet(name: string, greeting = "Hello", punctuation?: string): string {
+  return `${greeting}, ${name}${punctuation ?? "!"}`;
+}
+
+// Rest parameters
+function sum(...nums: number[]): number {
+  return nums.reduce((a, b) =&gt; a + b, 0);
+}
+
+// Function types
+type Comparator&lt;T&gt; = (a: T, b: T) =&gt; number;
+type AsyncHandler = (req: Request) =&gt; Promise&lt;Response&gt;;
+type Predicate&lt;T&gt; = (value: T, index: number) =&gt; boolean;
+
+// Contextual typing: the parameter types flow IN from the expected type
+const byAge: Comparator&lt;User&gt; = (a, b) =&gt; a.age - b.age;   // a and b are User, inferred
+
+// void return means "I ignore whatever you return" - this is why forEach accepts anything
+const log: (msg: string) =&gt; void = (msg) =&gt; msg.length;    // allowed</code></pre>
+
+<h3>Overloads</h3>
+<pre><code class="language-typescript">// Overload signatures: what callers see. Implementation signature: not callable.
+function parse(input: string): object;
+function parse(input: string, reviver: (k: string, v: unknown) =&gt; unknown): object;
+function parse(input: Buffer, encoding?: BufferEncoding): object;
+function parse(input: string | Buffer, second?: unknown): object {
+  const text = typeof input === "string" ? input : input.toString(second as BufferEncoding);
+  return JSON.parse(text, typeof second === "function" ? (second as never) : undefined);
+}
+
+// The classic DOM example - return type depends on the literal argument
+function createElement(tag: "a"): HTMLAnchorElement;
+function createElement(tag: "canvas"): HTMLCanvasElement;
+function createElement(tag: "input"): HTMLInputElement;
+function createElement(tag: string): HTMLElement;
+function createElement(tag: string): HTMLElement {
+  return document.createElement(tag);
+}
+
+const anchor = createElement("a");       // HTMLAnchorElement - .href is available</code></pre>
+
+<div class="callout warn"><span class="t">Prefer a union or a generic to an overload</span>Overloads do not compose well: you cannot spread arguments into them easily, the implementation signature is unchecked against the overloads in some cases, and error messages degrade to "No overload matches this call", which tells the caller nothing about <i>why</i>. Reach for a union parameter type or a generic first. Overloads earn their place mainly when the return type genuinely depends on a literal argument, as above.</div>
+
+<h3>Generic functions</h3>
+<pre><code class="language-typescript">// The type parameter links input to output
+function identity&lt;T&gt;(x: T): T { return x; }
+
+function first&lt;T&gt;(arr: readonly T[]): T | undefined { return arr[0]; }
+
+// Constraints: T must have the shape you depend on
+function longest&lt;T extends { length: number }&gt;(a: T, b: T): T {
+  return a.length &gt;= b.length ? a : b;
+}
+longest("hello", "hi");            // string
+longest([1, 2], [1, 2, 3]);        // number[]
+// longest(10, 20);                // ERROR - number has no length
+
+// keyof constraint: the classic typed property getter
+function pluck&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
+  return obj[key];
+}
+const user = { id: "1", name: "Asha", age: 31 };
+const n = pluck(user, "name");     // string
+// pluck(user, "nope");            // ERROR - "nope" is not keyof typeof user
+
+// Multiple keys
+function pick&lt;T, K extends keyof T&gt;(obj: T, keys: readonly K[]): Pick&lt;T, K&gt; {
+  const out = {} as Pick&lt;T, K&gt;;
+  for (const k of keys) out[k] = obj[k];
+  return out;
+}
+const slim = pick(user, ["id", "name"]);     // { id: string; name: string }
+
+// Default type parameters
+interface Paginated&lt;T, M = { total: number; page: number }&gt; {
+  items: T[];
+  meta: M;
+}</code></pre>
+
+<div class="callout tip"><span class="t">The generic smell test</span>A type parameter is only useful if it appears <b>at least twice</b> — typically once in the parameters and once in the return type, or twice in the parameters to force them to match. If <code>T</code> appears exactly once, you almost certainly wanted a constraint or a union instead. <code>function log&lt;T&gt;(x: T): void</code> is just <code>function log(x: unknown): void</code> with extra ceremony.</div>
+
+<h3><code>satisfies</code></h3>
+<pre><code class="language-typescript">type Config = Record&lt;string, string | number | boolean&gt;;
+
+// Annotation: checked, but the specific types are LOST
+const a: Config = { host: "localhost", port: 5432, tls: false };
+// a.port is string | number | boolean - you cannot do a.port + 1
+
+// `as const`: specific types kept, but NOT checked against Config
+const b = { host: "localhost", port: 5432, tls: false } as const;
+// no error if you typo a key or use a disallowed value type
+
+// `satisfies`: checked AND specific. This is what you wanted all along.
+const c = {
+  host: "localhost",
+  port: 5432,
+  tls: false,
+} satisfies Config;
+c.port.toFixed(0);                 // port is number
+// c.bad = Symbol();               // would have errored at declaration
+
+// The most common real use: a route or colour map
+const routes = {
+  home:    "/",
+  user:    "/users/:id",
+  orders:  "/users/:id/orders",
+} satisfies Record&lt;string, `/${string}`&gt;;
+
+type RouteName = keyof typeof routes;        // "home" | "user" | "orders" - preserved
+const path = routes.user;                    // "/users/:id" - the literal, not string
+
+// Combine with as const for deep readonly plus checking
+const theme = {
+  colors: { primary: "#2563eb", danger: "#dc2626" },
+  spacing: [0, 4, 8, 16, 32],
+} as const satisfies { colors: Record&lt;string, string&gt;; spacing: readonly number[] };</code></pre>
+
+<h3><code>this</code> typing</h3>
+<pre><code class="language-typescript">// Declare what `this` must be - the compiler checks the call site
+interface Button { label: string; onClick(this: Button, e: MouseEvent): void }
+
+// Arrow functions capture `this` lexically and cannot have a this parameter
+class Counter {
+  count = 0;
+  // Class property arrow function: `this` is bound, safe to pass as a callback
+  increment = () =&gt; { this.count++; };
+  // Method: `this` depends on the call site, breaks when detached
+  decrement() { this.count--; }
+}
+
+const c2 = new Counter();
+const inc = c2.increment;  inc();            // works
+const dec = c2.decrement;  // dec();         // runtime TypeError: this is undefined
+// Enable "strictBindCallApply" and TS catches many of these at compile time.</code></pre>
+
+<h2>Generics in Depth</h2>
+<p class="lead">Everything beyond basic generics — conditional types, <code>infer</code>, mapped types, template literal types — forms a small functional programming language that runs at compile time. You do not need to write it often, but you absolutely need to read it, because every library you depend on is full of it, and because the error messages are unintelligible otherwise.</p>
+
+<h3>Conditional types</h3>
+<pre><code class="language-typescript">// T extends U ? X : Y - a ternary over types
+type IsString&lt;T&gt; = T extends string ? true : false;
+type A = IsString&lt;"hello"&gt;;        // true
+type B = IsString&lt;42&gt;;             // false
+
+type NonNull&lt;T&gt; = T extends null | undefined ? never : T;
+type C = NonNull&lt;string | null&gt;;   // string
+
+// DISTRIBUTIVE: when T is a naked type parameter and the input is a union,
+// the conditional distributes over each member and the results are unioned.
+type ToArray&lt;T&gt; = T extends unknown ? T[] : never;
+type D = ToArray&lt;string | number&gt;;       // string[] | number[]   (distributed)
+
+// Wrap in a tuple to DISABLE distribution
+type ToArrayNoDist&lt;T&gt; = [T] extends [unknown] ? T[] : never;
+type E = ToArrayNoDist&lt;string | number&gt;; // (string | number)[]
+
+// This is exactly how Exclude and Extract work
+type MyExclude&lt;T, U&gt; = T extends U ? never : T;
+type MyExtract&lt;T, U&gt; = T extends U ? T : never;
+type F = MyExclude&lt;"a" | "b" | "c", "a"&gt;;        // "b" | "c"</code></pre>
+
+<div class="callout warn"><span class="t">Distribution surprises everyone once</span><code>ToArray&lt;string | number&gt;</code> giving <code>string[] | number[]</code> rather than <code>(string | number)[]</code> is the most common conditional-type confusion. The rule: distribution happens only when the checked type is a <i>bare</i> type parameter. Wrapping both sides in a one-element tuple (<code>[T] extends [U]</code>) turns it off, which is what you want for "is this whole union assignable to that".</div>
+
+<h3><code>infer</code></h3>
+<pre><code class="language-typescript">// infer introduces a type variable inside a conditional's extends clause
+type ElementOf&lt;T&gt; = T extends readonly (infer E)[] ? E : never;
+type A = ElementOf&lt;string[]&gt;;                    // string
+type B = ElementOf&lt;readonly [1, "x", true]&gt;;     // 1 | "x" | true
+
+type ReturnOf&lt;T&gt; = T extends (...args: never[]) =&gt; infer R ? R : never;
+type C = ReturnOf&lt;() =&gt; Promise&lt;User&gt;&gt;;          // Promise&lt;User&gt;
+
+type ParamsOf&lt;T&gt; = T extends (...args: infer P) =&gt; unknown ? P : never;
+type D = ParamsOf&lt;(a: string, b: number) =&gt; void&gt;;   // [a: string, b: number]
+
+// Recursive unwrapping - this is essentially the built-in Awaited
+type Unwrap&lt;T&gt; = T extends Promise&lt;infer U&gt; ? Unwrap&lt;U&gt; : T;
+type E = Unwrap&lt;Promise&lt;Promise&lt;string&gt;&gt;&gt;;       // string
+
+// Constrained infer
+type FirstString&lt;T&gt; = T extends [infer H extends string, ...unknown[]] ? H : never;
+type F = FirstString&lt;["a", 1, true]&gt;;            // "a"
+
+// Practical: extract the payload type from a Zod-style schema
+type InferSchema&lt;S&gt; = S extends { _output: infer O } ? O : never;</code></pre>
+
+<h3>Mapped types</h3>
+<pre><code class="language-typescript">// Iterate the keys of T and transform each
+type Mutable&lt;T&gt; = { -readonly [K in keyof T]: T[K] };     // remove readonly
+type Required2&lt;T&gt; = { [K in keyof T]-?: T[K] };           // remove optional
+type Nullable&lt;T&gt; = { [K in keyof T]: T[K] | null };
+type Stringify&lt;T&gt; = { [K in keyof T]: string };
+
+// Key remapping with `as` (TS 4.1+) - this is where it gets powerful
+type Getters&lt;T&gt; = {
+  [K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K]
+};
+interface Person { name: string; age: number }
+type PersonGetters = Getters&lt;Person&gt;;
+// { getName: () =&gt; string; getAge: () =&gt; number }
+
+// Filter keys by mapping unwanted ones to never
+type OnlyFunctions&lt;T&gt; = {
+  [K in keyof T as T[K] extends (...a: never[]) =&gt; unknown ? K : never]: T[K]
+};
+type NonFunctionKeys&lt;T&gt; = {
+  [K in keyof T]: T[K] extends (...a: never[]) =&gt; unknown ? never : K
+}[keyof T];
+
+// Deep variants - note the recursion and the array handling
+type DeepPartial&lt;T&gt; = T extends (infer U)[]
+  ? DeepPartial&lt;U&gt;[]
+  : T extends object
+    ? { [K in keyof T]?: DeepPartial&lt;T[K]&gt; }
+    : T;
+
+type DeepReadonly&lt;T&gt; = T extends (infer U)[]
+  ? readonly DeepReadonly&lt;U&gt;[]
+  : T extends object
+    ? { readonly [K in keyof T]: DeepReadonly&lt;T[K]&gt; }
+    : T;</code></pre>
+
+<h3>Template literal types</h3>
+<pre><code class="language-typescript">type Protocol = "http" | "https";
+type Url = `${Protocol}://${string}`;
+const good: Url = "https://example.com";          // OK
+// const bad: Url = "ftp://example.com";          // ERROR
+
+// Combinatorial expansion
+type Size = "sm" | "md" | "lg";
+type Variant = "primary" | "secondary";
+type ButtonClass = `btn-${Variant}-${Size}`;      // 6 literal members
+
+// Built-in string manipulation types
+type U = Uppercase&lt;"hello"&gt;;                      // "HELLO"
+type L = Lowercase&lt;"HELLO"&gt;;                      // "hello"
+type C = Capitalize&lt;"hello"&gt;;                     // "Hello"
+type Un = Uncapitalize&lt;"Hello"&gt;;                  // "hello"
+
+// Parse a route and extract its parameters - the pattern behind typed routers
+type PathParams&lt;P extends string&gt; =
+  P extends `${string}:${infer Param}/${infer Rest}`
+    ? Param | PathParams&lt;`/${Rest}`&gt;
+    : P extends `${string}:${infer Param}`
+      ? Param
+      : never;
+
+type Params = PathParams&lt;"/users/:userId/orders/:orderId"&gt;;   // "userId" | "orderId"
+
+function buildPath&lt;P extends string&gt;(
+  pattern: P,
+  params: Record&lt;PathParams&lt;P&gt;, string&gt;
+): string {
+  return pattern.replace(/:(\w+)/g, (_, k: string) =&gt;
+    (params as Record&lt;string, string&gt;)[k]);
+}
+
+buildPath("/users/:userId/orders/:orderId", { userId: "1", orderId: "9" });
+// buildPath("/users/:userId", { wrong: "1" });   // ERROR - caught at compile time
+
+// Typed event names
+type EventName = `on${Capitalize&lt;"click" | "focus" | "blur"&gt;}`;  // "onClick" | ...
+type Handlers = { [E in EventName]?: (e: Event) =&gt; void };</code></pre>
+
+<div class="callout danger"><span class="t">Template literal types explode combinatorially</span><code>`${A}-${B}-${C}`</code> where each union has 50 members produces 125,000 types. The compiler has a hard limit (around 100,000 union members) and will error with <i>"Expression produces a union type that is too complex to represent"</i>. Worse, before hitting the limit it will make your editor sluggish for everyone on the team. Keep template literal unions to small, bounded sets.</div>
+
+<h3>Recursive types</h3>
+<pre><code class="language-typescript">// JSON - the canonical recursive type
+type Json =
+  | string | number | boolean | null
+  | Json[]
+  | { [key: string]: Json };
+
+// A tree
+type TreeNode&lt;T&gt; = { value: T; children: TreeNode&lt;T&gt;[] };
+
+// Dot-notation paths into a nested object - useful for typed config/i18n lookups
+type Paths&lt;T, Depth extends readonly unknown[] = []&gt; =
+  Depth["length"] extends 5                      // depth guard: stop at 5 levels
+    ? never
+    : T extends object
+      ? { [K in keyof T &amp; string]:
+            T[K] extends object ? K | `${K}.${Paths&lt;T[K], [...Depth, 1]&gt;}` : K
+        }[keyof T &amp; string]
+      : never;
+
+interface Settings {
+  app: { name: string; theme: { mode: "light" | "dark"; accent: string } };
+  limits: { maxUsers: number };
+}
+type SettingPath = Paths&lt;Settings&gt;;
+// "app" | "app.name" | "app.theme" | "app.theme.mode" | "app.theme.accent"
+// | "limits" | "limits.maxUsers"</code></pre>
+
+<div class="callout tip"><span class="t">Always put a depth guard on a recursive type</span>Without the <code>Depth</code> tuple accumulator above, a cyclic type (a parent that references a child that references the parent) sends the compiler into infinite recursion and you get <i>"Type instantiation is excessively deep and possibly infinite"</i>. The tuple-length trick is the standard counter in type-level code: push a dummy element each recursion and check <code>["length"]</code>.</div>
+
+<h2>Utility Types</h2>
+<p class="lead">TypeScript ships about twenty built-in type helpers that compose into most of what you need. Knowing them cold means you stop re-declaring variants of the same interface, and it makes you much faster at reading library types.</p>
+
+<h3>The ones you will use weekly</h3>
+<pre><code class="language-typescript">interface User {
+  id: string;
+  name: string;
+  email: string;
+  age?: number;
+  readonly createdAt: Date;
+}
+
+type A  = Partial&lt;User&gt;;                   // every property optional
+type B  = Required&lt;User&gt;;                  // every property required
+type C  = Readonly&lt;User&gt;;                  // every property readonly
+type D  = Pick&lt;User, "id" | "name"&gt;;       // { id: string; name: string }
+type E  = Omit&lt;User, "createdAt"&gt;;         // everything except createdAt
+type F  = Record&lt;"a" | "b", number&gt;;       // { a: number; b: number }
+type G  = Exclude&lt;"a" | "b" | "c", "a"&gt;;   // "b" | "c"
+type H  = Extract&lt;"a" | "b", "a" | "z"&gt;;   // "a"
+type I  = NonNullable&lt;string | null&gt;;      // string
+type J  = ReturnType&lt;typeof fetchUser&gt;;    // whatever fetchUser returns
+type K  = Parameters&lt;typeof fetchUser&gt;;    // tuple of its parameter types
+type L  = Awaited&lt;Promise&lt;User&gt;&gt;;          // User (recursively unwraps)
+type M  = ConstructorParameters&lt;typeof Error&gt;;
+type N  = InstanceType&lt;typeof Error&gt;;      // Error
+type O  = Uppercase&lt;"abc"&gt;;                // "ABC"
+type P  = NoInfer&lt;string&gt;;                 // blocks inference at this position (TS 5.4+)</code></pre>
+
+<h3>Composing them</h3>
+<pre><code class="language-typescript">// The input to a create endpoint: no server-generated fields, no id
+type CreateUserInput = Omit&lt;User, "id" | "createdAt"&gt;;
+
+// The input to an update: everything optional except the id
+type UpdateUserInput = Partial&lt;Omit&lt;User, "id" | "createdAt"&gt;&gt; &amp; Pick&lt;User, "id"&gt;;
+
+// The shape your API returns - dates become strings over JSON
+type Serialized&lt;T&gt; = {
+  [K in keyof T]: T[K] extends Date ? string
+                : T[K] extends object ? Serialized&lt;T[K]&gt;
+                : T[K]
+};
+type UserResponse = Serialized&lt;User&gt;;      // createdAt: string
+
+// Awaited + ReturnType: the resolved type of an async function
+async function fetchUser(id: string): Promise&lt;User&gt; { /* ... */ }
+type FetchedUser = Awaited&lt;ReturnType&lt;typeof fetchUser&gt;&gt;;   // User</code></pre>
+
+<div class="callout warn"><span class="t"><code>Omit</code> does not check its keys</span><code>Omit&lt;User, "emial"&gt;</code> compiles happily and silently omits nothing, because <code>Omit</code>'s second parameter is <code>keyof any</code>, not <code>keyof T</code>. A typo in an <code>Omit</code> is invisible. Define a strict version and use it instead — this catches real bugs during refactors where a field was renamed.</div>
+
+<pre><code class="language-typescript">type StrictOmit&lt;T, K extends keyof T&gt; = Omit&lt;T, K&gt;;
+// type Bad = StrictOmit&lt;User, "emial"&gt;;      // ERROR - good
+
+// Similarly, Exclude silently does nothing if U does not overlap T
+type StrictExclude&lt;T, U extends T&gt; = Exclude&lt;T, U&gt;;</code></pre>
+
+<h3>Utility types worth writing yourself</h3>
+<pre><code class="language-typescript">// 1. Prettify - forces the editor to show the resolved shape instead of
+//    "Omit&lt;User, 'id'&gt; &amp; Partial&lt;...&gt;". Enormously improves error messages.
+type Prettify&lt;T&gt; = { [K in keyof T]: T[K] } &amp; {};
+
+// 2. At least one of these keys must be present
+type RequireAtLeastOne&lt;T, K extends keyof T = keyof T&gt; =
+  Omit&lt;T, K&gt; &amp; { [P in K]-?: Required&lt;Pick&lt;T, P&gt;&gt; &amp; Partial&lt;Omit&lt;T, P&gt;&gt; }[K];
+
+type Contact = RequireAtLeastOne&lt;{ email?: string; phone?: string; name: string }&gt;;
+const ok1: Contact = { name: "A", email: "a@b.com" };    // OK
+// const bad: Contact = { name: "A" };                   // ERROR - good
+
+// 3. Exactly one of these keys (a poor man's tagged union)
+type ExactlyOne&lt;T, K extends keyof T = keyof T&gt; =
+  { [P in K]: Required&lt;Pick&lt;T, P&gt;&gt; &amp; Partial&lt;Record&lt;Exclude&lt;K, P&gt;, never&gt;&gt; }[K];
+
+// 4. Make specific keys optional / required
+type PartialBy&lt;T, K extends keyof T&gt;  = Omit&lt;T, K&gt; &amp; Partial&lt;Pick&lt;T, K&gt;&gt;;
+type RequiredBy&lt;T, K extends keyof T&gt; = Omit&lt;T, K&gt; &amp; Required&lt;Pick&lt;T, K&gt;&gt;;
+
+// 5. Union to intersection (used inside many library types)
+type UnionToIntersection&lt;U&gt; =
+  (U extends unknown ? (x: U) =&gt; void : never) extends (x: infer I) =&gt; void ? I : never;
+
+// 6. Deep readonly / deep partial (defined in the previous section)
+
+// 7. Opaque/branded id, as used earlier
+type Brand&lt;T, B extends string&gt; = T &amp; { readonly __brand: B };
+
+// 8. Entries of an object, typed
+type Entries&lt;T&gt; = { [K in keyof T]: [K, T[K]] }[keyof T][];
+function entries&lt;T extends object&gt;(obj: T): Entries&lt;T&gt; {
+  return Object.entries(obj) as Entries&lt;T&gt;;
+}</code></pre>
+
+<div class="callout tip"><span class="t"><code>Prettify</code> is the single most useful helper you can add</span>TypeScript error messages and hover tooltips often show a tangle like <code>Omit&lt;User, "id" | "createdAt"&gt; &amp; Partial&lt;Pick&lt;User, "age"&gt;&gt;</code>. Wrapping the type in <code>Prettify&lt;...&gt;</code> forces it to resolve to a flat object literal in the tooltip. Put it in your shared types file on day one; your whole team's debugging gets faster.</div>
+
+<h3><code>keyof</code>, <code>typeof</code> and indexed access</h3>
+<pre><code class="language-typescript">const config = {
+  host: "localhost",
+  port: 5432,
+  features: { auth: true, billing: false },
+} as const;
+
+type Config = typeof config;                       // the inferred shape
+type ConfigKey = keyof Config;                     // "host" | "port" | "features"
+type Port = Config["port"];                        // 5432
+type FeatureKey = keyof Config["features"];        // "auth" | "billing"
+type AnyValue = Config[keyof Config];              // "localhost" | 5432 | {...}
+
+// Indexed access on arrays
+const roles = ["admin", "editor"] as const;
+type Role = (typeof roles)[number];                // "admin" | "editor"
+
+// typeof on a function gives its signature
+declare function handler(req: Request, res: Response): void;
+type Handler = typeof handler;                     // (req: Request, res: Response) =&gt; void
+
+// typeof on a class gives the CONSTRUCTOR type, not the instance type
+class Service {}
+type ServiceClass = typeof Service;                // new () =&gt; Service
+type ServiceInstance = Service;                    // the instance
+type Also = InstanceType&lt;typeof Service&gt;;          // Service</code></pre>
+
+<h2>Modules, Declaration Files and Typing Third-Party JS</h2>
+<p class="lead">At a customer you will constantly meet JavaScript libraries with no types, internal packages with broken types, and global objects injected by some script tag in 2017. Knowing how declaration files work turns each of these from a blocker into a ten-minute fix.</p>
+
+<h3>Import and export syntax that matters</h3>
+<pre><code class="language-typescript">// Value imports
+import { createUser, type User } from "./users.js";      // inline type modifier
+import type { Order, LineItem } from "./orders.js";      // type-only import
+import defaultExport, { named } from "./mixed.js";
+import * as utils from "./utils.js";
+
+// Type-only exports - required under isolatedModules when re-exporting types
+export type { User, Order };
+export { createUser };
+export * from "./shared.js";
+export * as validators from "./validators.js";
+
+// With verbatimModuleSyntax, `import type` is ERASED entirely and
+// `import` is emitted verbatim. That makes side-effect imports explicit:
+import "./polyfills.js";                                  // kept, runs for effect</code></pre>
+
+<div class="callout warn"><span class="t">Why <code>import type</code> is not just style</span>Under <code>isolatedModules</code> — which every esbuild/SWC/Vite setup uses — a transpiler sees one file at a time and cannot tell whether <code>import { Foo }</code> refers to a type or a value. If it keeps the import and <code>Foo</code> was a type, the emitted JS imports a non-existent binding and crashes at runtime. If it drops it and <code>Foo</code> was a value, you lose the import. <code>import type</code> removes the ambiguity. Turn on <code>verbatimModuleSyntax</code> and the compiler will tell you where you need it.</div>
+
+<h3>Declaration files</h3>
+<pre><code class="language-typescript">// types/legacy-chart.d.ts
+// Describing an untyped library you must use.
+
+declare module "legacy-chart" {
+  export interface ChartOptions {
+    width?: number;
+    height?: number;
+    type: "line" | "bar" | "pie";
+    data: Array&lt;{ label: string; value: number }&gt;;
+    onClick?: (label: string, value: number) =&gt; void;
+  }
+
+  export class Chart {
+    constructor(element: HTMLElement, options: ChartOptions);
+    update(data: ChartOptions["data"]): void;
+    destroy(): void;
+  }
+
+  export default function createChart(
+    selector: string,
+    options: ChartOptions
+  ): Chart;
+}</code></pre>
+
+<pre><code class="language-typescript">// types/globals.d.ts
+// Ambient declarations: things that exist at runtime but have no import.
+
+// A script-tag global
+declare const APP_VERSION: string;
+declare function trackEvent(name: string, props?: Record&lt;string, unknown&gt;): void;
+
+// Augment the global Window - this REQUIRES interface declaration merging
+declare global {
+  interface Window {
+    dataLayer: Array&lt;Record&lt;string, unknown&gt;&gt;;
+    __APP_CONFIG__: { apiUrl: string; env: "dev" | "prod" };
+  }
+
+  // Typed environment variables - a genuinely high-value five minutes
+  namespace NodeJS {
+    interface ProcessEnv {
+      NODE_ENV: "development" | "production" | "test";
+      DATABASE_URL: string;
+      API_KEY: string;
+      PORT?: string;
+    }
+  }
+}
+
+// Non-code imports your bundler handles
+declare module "*.svg" {
+  const content: string;
+  export default content;
+}
+declare module "*.css";
+declare module "*.json" {
+  const value: unknown;
+  export default value;
+}
+
+export {};    // makes this file a MODULE; required for `declare global` to work</code></pre>
+
+<div class="callout danger"><span class="t">The <code>export {}</code> that makes it work</span>A <code>.d.ts</code> file with no top-level import or export is treated as a <i>script</i>, and its declarations go straight into the global scope — in which case <code>declare global</code> is both unnecessary and an error. Add <code>export {}</code> to make it a module, and then <code>declare global</code> is both valid and required. Getting this backwards produces the error <i>"Augmentations for the global scope can only be directly nested in external modules"</i>, which is one of TypeScript's less helpful messages.</div>
+
+<h3>Module augmentation</h3>
+<pre><code class="language-typescript">// Adding a property to an existing library's types - e.g. Express's Request
+import "express";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: { id: string; email: string; roles: string[] };
+    requestId: string;
+  }
+}
+
+// Now this type-checks everywhere, with no casts:
+app.get("/me", (req, res) =&gt; {
+  if (!req.user) return res.status(401).end();
+  res.json({ id: req.user.id, requestId: req.requestId });
+});</code></pre>
+
+<h3>DefinitelyTyped and bundled types</h3>
+<table>
+<tr><th>Situation</th><th>What to do</th></tr>
+<tr><td>Library ships its own types (<code>"types"</code> in package.json)</td><td>Nothing. It just works.</td></tr>
+<tr><td>Types exist on DefinitelyTyped</td><td><code>npm i -D @types/&lt;name&gt;</code></td></tr>
+<tr><td>No types anywhere, small surface</td><td>Write a minimal <code>.d.ts</code> covering only what you use</td></tr>
+<tr><td>No types, huge surface, low risk</td><td><code>declare module "lib";</code> — the whole module becomes <code>any</code>. Pragmatic, mark with a TODO.</td></tr>
+<tr><td>Bundled types are wrong or outdated</td><td>Module augmentation, or a <code>paths</code> override pointing at your own <code>.d.ts</code></td></tr>
+<tr><td>Types conflict between two <code>@types</code> packages</td><td>Usually a version mismatch (classic with <code>@types/react</code>); pin with an <code>overrides</code>/<code>resolutions</code> field</td></tr>
+</table>
+
+<pre><code class="language-bash"># Find out whether types exist before you write any
+npm view some-lib types typings
+npm view @types/some-lib version
+
+# Check what the installed types actually say
+cat node_modules/some-lib/dist/index.d.ts
+
+# When versions clash (very common with React 18 vs 19 types)
+# package.json:
+#   "overrides": { "@types/react": "18.3.12" }     (npm)
+#   "resolutions": { "@types/react": "18.3.12" }   (yarn)</code></pre>
+
+<h3>Publishing types for a library</h3>
+<pre><code class="language-json">{
+  "name": "@customer/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./schemas": {
+      "types": "./dist/schemas.d.ts",
+      "import": "./dist/schemas.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts src/schemas.ts --format esm,cjs --dts --clean",
+    "check-exports": "attw --pack ."
+  }
+}</code></pre>
+
+<div class="callout tip"><span class="t">Put <code>"types"</code> first in every exports condition</span>Export conditions are matched in declaration order, so if <code>"import"</code> comes before <code>"types"</code>, some resolvers never reach the types and your consumers get <code>any</code>. Run <code>attw</code> (<code>@arethetypeswrong/cli</code>) against your package before publishing — it catches this and about eight other packaging mistakes that are otherwise only discovered by a frustrated consumer.</div>
+
+<h2>Async Code: Promises, fetch and Error Typing</h2>
+<p class="lead">Asynchronous code is where TypeScript's limits are most visible: it can track what a promise resolves to, but it knows nothing about what it rejects with. Understanding that asymmetry — and designing around it — is most of what you need.</p>
+
+<h3>Promise basics</h3>
+<pre><code class="language-typescript">// An async function always returns a Promise; the annotation is the RESOLVED type
+async function getUser(id: string): Promise&lt;User&gt; {
+  const res = await fetch(`/api/users/${id}`);
+  return res.json() as Promise&lt;User&gt;;      // a LIE - see the next section
+}
+
+// Awaited unwraps nesting
+type R = Awaited&lt;Promise&lt;Promise&lt;User&gt;&gt;&gt;;         // User
+
+// Promise.all preserves the tuple positions - this is genuinely clever typing
+const [user, orders, settings] = await Promise.all([
+  getUser("1"),                       // Promise&lt;User&gt;
+  getOrders("1"),                     // Promise&lt;Order[]&gt;
+  getSettings("1"),                   // Promise&lt;Settings&gt;
+]);                                   // [User, Order[], Settings]
+
+// Promise.allSettled gives you a discriminated union per result
+const results = await Promise.allSettled([getUser("1"), getUser("2")]);
+for (const r of results) {
+  if (r.status === "fulfilled") console.log(r.value.name);   // narrowed to User
+  else console.error(r.reason);                              // unknown
+}
+
+// Typing a concurrency-limited map
+async function mapLimit&lt;T, R&gt;(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T, index: number) =&gt; Promise&lt;R&gt;
+): Promise&lt;R[]&gt; {
+  const out: R[] = new Array(items.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () =&gt; {
+    while (cursor &lt; items.length) {
+      const i = cursor++;
+      out[i] = await fn(items[i]!, i);
+    }
+  });
+  await Promise.all(workers);
+  return out;
+}</code></pre>
+
+<h3>Error typing: the honest situation</h3>
+<pre><code class="language-typescript">// catch gives you `unknown` under strict mode (useUnknownInCatchVariables).
+// This is correct: JavaScript can throw anything - a string, a number, null.
+try {
+  await risky();
+} catch (e) {
+  // e.message;                        // ERROR - e is unknown
+  if (e instanceof Error) {
+    console.error(e.message, e.stack);
+  } else {
+    console.error("Non-Error thrown:", e);
+  }
+}
+
+// A reusable normaliser - put this in every codebase
+function toError(e: unknown): Error {
+  if (e instanceof Error) return e;
+  if (typeof e === "string") return new Error(e);
+  try { return new Error(JSON.stringify(e)); }
+  catch { return new Error(String(e)); }
+}
+
+// Typed error hierarchy with discriminants so you can switch on them
+abstract class AppError extends Error {
+  abstract readonly code: string;
+  abstract readonly httpStatus: number;
+  constructor(message: string, readonly cause?: unknown) {
+    super(message);
+    this.name = new.target.name;         // so stack traces say "NotFoundError"
+  }
+}
+
+class NotFoundError extends AppError {
+  readonly code = "not_found" as const;
+  readonly httpStatus = 404;
+  constructor(readonly resource: string, readonly id: string) {
+    super(`${resource} ${id} not found`);
+  }
+}
+
+class ValidationError extends AppError {
+  readonly code = "validation_failed" as const;
+  readonly httpStatus = 422;
+  constructor(readonly issues: Array&lt;{ path: string; message: string }&gt;) {
+    super(`Validation failed: ${issues.length} issue(s)`);
+  }
+}
+
+class UpstreamError extends AppError {
+  readonly code = "upstream_failed" as const;
+  readonly httpStatus = 502;
+  constructor(readonly service: string, cause: unknown) {
+    super(`Upstream ${service} failed`, cause);
+  }
+}
+
+function toHttpResponse(e: unknown) {
+  if (e instanceof AppError) {
+    switch (e.code) {
+      case "not_found":         return { status: 404, body: { error: e.code, resource: e.resource } };
+      case "validation_failed": return { status: 422, body: { error: e.code, issues: e.issues } };
+      case "upstream_failed":   return { status: 502, body: { error: e.code, service: e.service } };
+    }
+  }
+  return { status: 500, body: { error: "internal" } };
+}</code></pre>
+
+<div class="callout warn"><span class="t">There is no <code>throws</code> clause and there never will be</span>TypeScript deliberately does not track thrown types, because JavaScript's <code>throw</code> is unconstrained and checked exceptions have a poor track record. The practical consequences: you cannot know from a signature what a function might throw; the compiler will never remind you to handle a failure; and a refactor that introduces a new throw is invisible. If a failure is part of your domain — not found, invalid input, business rule violated — model it in the return type with a <code>Result</code>, and reserve <code>throw</code> for genuinely exceptional conditions handled by one top-level boundary.</div>
+
+<h3>Typed fetch and the cast that lies</h3>
+<pre><code class="language-typescript">// WRONG - extremely common, and it is a runtime bug waiting to happen.
+// res.json() returns Promise&lt;any&gt;. The cast asserts a shape nobody checked.
+async function getUserBad(id: string): Promise&lt;User&gt; {
+  const res = await fetch(`/api/users/${id}`);
+  return (await res.json()) as User;
+}
+// If the API returns { id: 1 } instead of { id: "1" }, or omits `name`,
+// nothing fails here. It fails three function calls away, in a component,
+// with "Cannot read properties of undefined (reading 'toUpperCase')".
+
+// RIGHT - validate at the boundary, then the types are TRUE for the rest of the program.
+import { z } from "zod";
+
+const UserSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+  email: z.string().email(),
+  age: z.number().int().positive().optional(),
+  createdAt: z.coerce.date(),                // parses the ISO string into a Date
+});
+type User = z.infer&lt;typeof UserSchema&gt;;      // the type is DERIVED from the schema
+
+async function getUser(id: string): Promise&lt;User&gt; {
+  const res = await fetch(`/api/users/${encodeURIComponent(id)}`);
+  if (!res.ok) throw new UpstreamError("users-api", `HTTP ${res.status}`);
+  const json: unknown = await res.json();
+  return UserSchema.parse(json);             // throws ZodError with a precise path
+}</code></pre>
+
+<h3>AbortController and timeouts</h3>
+<pre><code class="language-typescript">async function fetchWithTimeout(
+  url: string,
+  init: RequestInit = {},
+  timeoutMs = 10_000
+): Promise&lt;Response&gt; {
+  const controller = new AbortController();
+  const timer = setTimeout(() =&gt; controller.abort(new Error("timeout")), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (e) {
+    if (e instanceof DOMException &amp;&amp; e.name === "AbortError") {
+      throw new UpstreamError(url, `timed out after ${timeoutMs}ms`);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Composing an external signal (e.g. React cleanup) with a timeout
+function withTimeout(signal: AbortSignal | undefined, ms: number): AbortSignal {
+  const signals = [AbortSignal.timeout(ms)];
+  if (signal) signals.push(signal);
+  return AbortSignal.any(signals);
+}</code></pre>
+
+<h2>Runtime Validation with Zod</h2>
+<p class="lead">Types are a compile-time fiction. Validation is the runtime reality. The crucial insight is that you should write the <b>schema</b> and derive the <b>type</b> from it — never the other way round — so that the thing you check and the thing you declare can never diverge. This section is the most practically important one in the guide.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="760" height="270" fill="#ffffff"/>
+  <text x="16" y="20" font-size="11" fill="#1e3a8a" font-family="sans-serif">WHERE TYPES ARE TRUE AND WHERE THEY ARE A PROMISE</text>
+
+  <rect x="16" y="40" width="150" height="150" rx="5" fill="#ffffff" stroke="#6b7688"/>
+  <text x="91" y="60" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">UNTRUSTED</text>
+  <text x="30" y="82" font-size="9" fill="#6b7688" font-family="sans-serif">HTTP responses</text>
+  <text x="30" y="100" font-size="9" fill="#6b7688" font-family="sans-serif">request bodies</text>
+  <text x="30" y="118" font-size="9" fill="#6b7688" font-family="sans-serif">JSON.parse</text>
+  <text x="30" y="136" font-size="9" fill="#6b7688" font-family="sans-serif">process.env</text>
+  <text x="30" y="154" font-size="9" fill="#6b7688" font-family="sans-serif">localStorage</text>
+  <text x="30" y="172" font-size="9" fill="#6b7688" font-family="sans-serif">DB driver rows</text>
+
+  <line x1="166" y1="115" x2="214" y2="115" stroke="#2563eb" stroke-width="2"/>
+  <text x="190" y="107" font-size="12" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="214" y="70" width="180" height="90" rx="5" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="304" y="94" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">VALIDATION BOUNDARY</text>
+  <text x="304" y="114" font-size="9" fill="#6b7688" text-anchor="middle" font-family="sans-serif">Schema.parse(unknown)</text>
+  <text x="304" y="132" font-size="9" fill="#6b7688" text-anchor="middle" font-family="sans-serif">throws or returns T</text>
+  <text x="304" y="150" font-size="9" fill="#0891b2" text-anchor="middle" font-family="sans-serif">the ONLY place to cast</text>
+
+  <line x1="394" y1="115" x2="442" y2="115" stroke="#2563eb" stroke-width="2"/>
+  <text x="418" y="107" font-size="12" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="442" y="40" width="302" height="150" rx="5" fill="#e3e8ef" stroke="#1e3a8a"/>
+  <text x="593" y="60" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">TRUSTED CORE</text>
+  <text x="458" y="82" font-size="9" fill="#6b7688" font-family="sans-serif">Types here are GUARANTEED true at runtime.</text>
+  <text x="458" y="102" font-size="9" fill="#6b7688" font-family="sans-serif">No defensive checks needed.</text>
+  <text x="458" y="122" font-size="9" fill="#6b7688" font-family="sans-serif">No optional chaining out of fear.</text>
+  <text x="458" y="142" font-size="9" fill="#6b7688" font-family="sans-serif">Business logic reads cleanly.</text>
+  <text x="458" y="168" font-size="9" fill="#2563eb" font-family="sans-serif">type User = z.infer&lt;typeof UserSchema&gt;</text>
+
+  <text x="16" y="222" font-size="9" fill="#1e3a8a" font-family="sans-serif">Every `as SomeType` on data from outside is a bug you have not hit yet.</text>
+  <text x="16" y="242" font-size="9" fill="#6b7688" font-family="sans-serif">Push validation to the edge; keep the inside clean. One schema, one source of truth.</text>
+</svg>
+<div class="cap">Validate once at the edge. Everything inside can then trust its types completely.</div>
+</div>
+
+<h3>Zod essentials</h3>
+<pre><code class="language-typescript">import { z } from "zod";
+
+const AddressSchema = z.object({
+  line1: z.string().min(1, "Address line 1 is required"),
+  line2: z.string().optional(),
+  city: z.string().min(1),
+  postcode: z.string().regex(/^\d{6}$/, "Must be a 6-digit PIN code"),
+  country: z.string().length(2).default("IN"),
+});
+
+const OrderSchema = z.object({
+  id: z.string().uuid(),
+  customerId: z.string().uuid(),
+  status: z.enum(["draft", "paid", "shipped", "cancelled"]),
+  lines: z.array(z.object({
+    sku: z.string(),
+    quantity: z.number().int().positive(),
+    unitPriceMinor: z.number().int().nonnegative(),   // store money as integer minor units
+  })).min(1, "An order needs at least one line"),
+  shipping: AddressSchema,
+  placedAt: z.coerce.date(),
+  notes: z.string().max(500).nullable(),
+  metadata: z.record(z.string(), z.string()).default({}),
+})
+.refine(
+  (o) =&gt; o.status !== "shipped" || o.lines.length &gt; 0,
+  { message: "A shipped order must have lines", path: ["lines"] }
+);
+
+type Order = z.infer&lt;typeof OrderSchema&gt;;     // THE type. Never hand-write it.
+type OrderInput = z.input&lt;typeof OrderSchema&gt;; // before defaults/coercion
+type OrderOutput = z.output&lt;typeof OrderSchema&gt;; // after - same as z.infer</code></pre>
+
+<h3>parse vs safeParse</h3>
+<pre><code class="language-typescript">// parse: throws ZodError on failure. Use where a throw is handled upstream.
+const order = OrderSchema.parse(json);        // Order, guaranteed
+
+// safeParse: returns a discriminated union. Use where you must handle it inline.
+const result = OrderSchema.safeParse(json);
+if (!result.success) {
+  // result.error.issues is an array with path, code and message per problem
+  const problems = result.error.issues.map((i) =&gt; ({
+    field: i.path.join("."),
+    message: i.message,
+    code: i.code,
+  }));
+  return { status: 422, body: { error: "validation_failed", problems } };
+}
+const order2 = result.data;                   // Order, narrowed
+
+// Formatting for a form UI
+const flat = result.success ? null : z.flattenError(result.error);
+// { formErrors: string[], fieldErrors: { [k: string]: string[] } }</code></pre>
+
+<h3>Discriminated unions in Zod</h3>
+<pre><code class="language-typescript">const EventSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("order.created"),
+    orderId: z.string().uuid(),
+    totalMinor: z.number().int(),
+  }),
+  z.object({
+    type: z.literal("order.paid"),
+    orderId: z.string().uuid(),
+    paymentId: z.string(),
+    paidAt: z.coerce.date(),
+  }),
+  z.object({
+    type: z.literal("order.cancelled"),
+    orderId: z.string().uuid(),
+    reason: z.string().min(1),
+  }),
+]);
+
+type DomainEvent = z.infer&lt;typeof EventSchema&gt;;
+
+// The inferred type IS a discriminated union, so switch narrowing works perfectly.
+function handle(raw: unknown) {
+  const event = EventSchema.parse(raw);
+  switch (event.type) {
+    case "order.created":   return onCreated(event.totalMinor);
+    case "order.paid":      return onPaid(event.paymentId, event.paidAt);
+    case "order.cancelled": return onCancelled(event.reason);
+    default: {
+      const _never: never = event;
+      throw new Error(`Unhandled event: ${JSON.stringify(_never)}`);
+    }
+  }
+}</code></pre>
+
+<h3>Validating environment variables</h3>
+<pre><code class="language-typescript">// src/env.ts - import this ONCE at startup. Fails fast with a readable message.
+import { z } from "zod";
+
+const EnvSchema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  DATABASE_URL: z.string().url(),
+  REDIS_URL: z.string().url().optional(),
+  JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+  FEATURE_FLAGS: z.string()
+    .transform((s) =&gt; new Set(s.split(",").map((f) =&gt; f.trim()).filter(Boolean)))
+    .default(""),
+});
+
+const parsed = EnvSchema.safeParse(process.env);
+if (!parsed.success) {
+  console.error("Invalid environment configuration:");
+  for (const issue of parsed.error.issues) {
+    console.error(`  ${issue.path.join(".")}: ${issue.message}`);
+  }
+  process.exit(1);
+}
+
+export const env = parsed.data;
+export type Env = typeof env;</code></pre>
+
+<div class="callout ok"><span class="t">This is a twenty-minute change with outsized value</span>Every team has been woken at 3 a.m. by a service that started fine and then failed on the first request because <code>DATABASE_URL</code> was missing or <code>PORT</code> was the string <code>"3000"</code>. Validating the environment at startup converts that into a container that refuses to start with a message naming the exact variable. On a customer engagement this is one of those small things that visibly improves their platform and takes no negotiation to introduce.</div>
+
+<h3>An end-to-end typed API client</h3>
+<pre><code class="language-typescript">// src/api/client.ts
+import { z } from "zod";
+
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly url: string,
+    readonly body: unknown,
+  ) {
+    super(`API ${status} on ${url}`);
+    this.name = "ApiError";
+  }
+}
+
+export class ApiValidationError extends Error {
+  constructor(readonly url: string, readonly issues: z.ZodIssue[]) {
+    super(`Response from ${url} did not match the expected schema`);
+    this.name = "ApiValidationError";
+  }
+}
+
+interface RequestOptions&lt;TBody&gt; {
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  body?: TBody;
+  query?: Record&lt;string, string | number | boolean | undefined&gt;;
+  signal?: AbortSignal;
+  timeoutMs?: number;
+}
+
+export class ApiClient {
+  constructor(
+    private readonly baseUrl: string,
+    private readonly getToken: () =&gt; string | null = () =&gt; null,
+  ) {}
+
+  async request&lt;TResponse, TBody = never&gt;(
+    path: string,
+    schema: z.ZodType&lt;TResponse&gt;,
+    options: RequestOptions&lt;TBody&gt; = {},
+  ): Promise&lt;TResponse&gt; {
+    const { method = "GET", body, query, signal, timeoutMs = 15_000 } = options;
+
+    const url = new URL(path, this.baseUrl);
+    for (const [k, v] of Object.entries(query ?? {})) {
+      if (v !== undefined) url.searchParams.set(k, String(v));
+    }
+
+    const token = this.getToken();
+    const headers: Record&lt;string, string&gt; = { Accept: "application/json" };
+    if (body !== undefined) headers["Content-Type"] = "application/json";
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const signals = [AbortSignal.timeout(timeoutMs)];
+    if (signal) signals.push(signal);
+
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.any(signals),
+    });
+
+    const text = await res.text();
+    const json: unknown = text ? JSON.parse(text) : null;
+
+    if (!res.ok) throw new ApiError(res.status, url.pathname, json);
+
+    const parsed = schema.safeParse(json);
+    if (!parsed.success) {
+      // Log the full issue list - this is how you find API drift in minutes
+      console.error("Schema mismatch", url.pathname, parsed.error.issues);
+      throw new ApiValidationError(url.pathname, parsed.error.issues);
+    }
+    return parsed.data;
+  }
+}</code></pre>
+
+<pre><code class="language-typescript">// src/api/users.ts - one module per resource. Schema and function together.
+import { z } from "zod";
+import { ApiClient } from "./client.js";
+
+export const UserSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  email: z.string().email(),
+  role: z.enum(["admin", "editor", "viewer"]),
+  createdAt: z.coerce.date(),
+});
+export type User = z.infer&lt;typeof UserSchema&gt;;
+
+export const PageSchema = &lt;T extends z.ZodTypeAny&gt;(item: T) =&gt;
+  z.object({
+    items: z.array(item),
+    total: z.number().int().nonnegative(),
+    page: z.number().int().positive(),
+    pageSize: z.number().int().positive(),
+  });
+
+export const CreateUserSchema = UserSchema.omit({ id: true, createdAt: true });
+export type CreateUserInput = z.infer&lt;typeof CreateUserSchema&gt;;
+
+export function usersApi(client: ApiClient) {
+  return {
+    get: (id: string) =&gt;
+      client.request(`/users/${encodeURIComponent(id)}`, UserSchema),
+
+    list: (page = 1, pageSize = 25) =&gt;
+      client.request("/users", PageSchema(UserSchema), { query: { page, pageSize } }),
+
+    create: (input: CreateUserInput) =&gt;
+      client.request("/users", UserSchema, {
+        method: "POST",
+        body: CreateUserSchema.parse(input),      // validate OUTBOUND too
+      }),
+
+    remove: (id: string) =&gt;
+      client.request(`/users/${encodeURIComponent(id)}`, z.object({ deleted: z.literal(true) }), {
+        method: "DELETE",
+      }),
+  };
+}
+
+// Usage - fully typed, and TRUE at runtime
+const api = usersApi(new ApiClient("https://api.customer.com/v1", () =&gt; session.token));
+const page = await api.list(1, 50);
+page.items[0]?.createdAt.getFullYear();          // a real Date, because of z.coerce.date()</code></pre>
+
+<div class="callout tip"><span class="t">Validating responses catches API drift the day it happens</span>When the customer's backend team renames a field or changes a type, your client throws a precise error naming the field, in staging, on the first request — instead of producing <code>undefined</code> that surfaces as a blank screen three screens later. The small cost is a schema per endpoint; the payoff is that integration bugs become self-diagnosing. If performance matters on a hot path, validate in non-production environments only via an env flag.</div>
+
+<h3>Zod alternatives</h3>
+<table>
+<tr><th>Library</th><th>Strength</th><th>Trade-off</th></tr>
+<tr><td><b>Zod</b></td><td>Best ergonomics, huge ecosystem, excellent inference, great error messages</td><td>Larger bundle; slower than compiled validators</td></tr>
+<tr><td><b>Valibot</b></td><td>Modular, tree-shakes to a fraction of Zod's size</td><td>Smaller ecosystem; different API shape</td></tr>
+<tr><td><b>ArkType</b></td><td>Very fast, type-syntax-like definitions</td><td>Newer; fewer integrations</td></tr>
+<tr><td><b>TypeBox</b></td><td>Produces real JSON Schema — ideal if you also need OpenAPI</td><td>More verbose</td></tr>
+<tr><td><b>io-ts</b></td><td>Functional, composable, fp-ts ecosystem</td><td>Steep learning curve for most teams</td></tr>
+</table>
+
+<h2>Typing React Properly</h2>
+<p class="lead">React is where most TypeScript is written, and where most of it is written badly — <code>React.FC</code> everywhere, <code>any</code> on every event handler, props typed as <code>object</code>. The correct patterns are not hard and they make component APIs self-documenting, which matters enormously when you are handing a codebase to a customer's team.</p>
+
+<h3>Props</h3>
+<pre><code class="language-typescript">// Plain function with a typed props object. Do NOT use React.FC.
+interface ButtonProps {
+  label: string;
+  onClick: () =&gt; void;
+  variant?: "primary" | "secondary" | "danger";
+  disabled?: boolean;
+  children?: React.ReactNode;
+}
+
+function Button({ label, onClick, variant = "primary", disabled = false }: ButtonProps) {
+  return (
+    &lt;button className={`btn btn-${variant}`} onClick={onClick} disabled={disabled}&gt;
+      {label}
+    &lt;/button&gt;
+  );
+}
+
+// Extending native element props - the pattern for any wrapper component
+interface InputProps extends React.ComponentPropsWithoutRef&lt;"input"&gt; {
+  label: string;
+  error?: string;
+}
+
+function Input({ label, error, id, ...rest }: InputProps) {
+  const inputId = id ?? React.useId();
+  return (
+    &lt;div&gt;
+      &lt;label htmlFor={inputId}&gt;{label}&lt;/label&gt;
+      &lt;input id={inputId} aria-invalid={!!error} {...rest} /&gt;
+      {error &amp;&amp; &lt;span role="alert"&gt;{error}&lt;/span&gt;}
+    &lt;/div&gt;
+  );
+}
+
+// Forwarding a ref with the right element type
+const FancyInput = React.forwardRef&lt;HTMLInputElement, InputProps&gt;(
+  function FancyInput({ label, error, ...rest }, ref) {
+    return &lt;input ref={ref} aria-label={label} {...rest} /&gt;;
+  }
+);
+
+// React 19: ref is just another prop, no forwardRef needed
+interface Input19Props extends React.ComponentPropsWithRef&lt;"input"&gt; {
+  label: string;
+}
+function Input19({ label, ref, ...rest }: Input19Props) {
+  return &lt;input ref={ref} aria-label={label} {...rest} /&gt;;
+}</code></pre>
+
+<div class="callout warn"><span class="t">Why not <code>React.FC</code></span>Historically <code>React.FC</code> implicitly added <code>children</code> to every component, which meant a component that should not accept children silently did. React 18's types removed the implicit children, which was a breaking change for everyone relying on it. It also complicates generic components, since you cannot easily write a generic <code>React.FC</code>. A plain function with a typed props parameter has none of these problems, infers the return type correctly, and is what the React team recommends. Declare <code>children: React.ReactNode</code> explicitly when you want it.</div>
+
+<h3>Discriminated union props</h3>
+<pre><code class="language-typescript">// Express mutually exclusive prop combinations in the type, not in a runtime check.
+type AlertProps =
+  | { severity: "info" | "success"; message: string }
+  | { severity: "error"; message: string; onRetry: () =&gt; void; errorCode: string };
+
+function Alert(props: AlertProps) {
+  return (
+    &lt;div role="alert" className={`alert alert-${props.severity}`}&gt;
+      {props.message}
+      {props.severity === "error" &amp;&amp; (
+        &lt;button onClick={props.onRetry}&gt;Retry ({props.errorCode})&lt;/button&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+
+// &lt;Alert severity="error" message="Boom" /&gt;   // ERROR: onRetry and errorCode required
+// &lt;Alert severity="info" message="Hi" onRetry={fn} /&gt;  // ERROR: onRetry not allowed</code></pre>
+
+<h3>Hooks</h3>
+<pre><code class="language-typescript">// useState: inference is usually right; annotate when the initial value is narrower
+const [count, setCount] = React.useState(0);                      // number
+const [user, setUser] = React.useState&lt;User | null&gt;(null);        // needs the annotation
+const [items, setItems] = React.useState&lt;string[]&gt;([]);           // otherwise never[]
+
+// useReducer: type the state and the action union
+type State = { count: number; step: number };
+type Action =
+  | { type: "increment" }
+  | { type: "decrement" }
+  | { type: "setStep"; step: number }
+  | { type: "reset" };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "increment": return { ...state, count: state.count + state.step };
+    case "decrement": return { ...state, count: state.count - state.step };
+    case "setStep":   return { ...state, step: action.step };
+    case "reset":     return { count: 0, step: 1 };
+    default: {
+      const _never: never = action;
+      return state;
+    }
+  }
+}
+const [state, dispatch] = React.useReducer(reducer, { count: 0, step: 1 });
+
+// useRef: three distinct forms, and people get them confused
+const inputRef = React.useRef&lt;HTMLInputElement&gt;(null);     // for a DOM ref (readonly .current)
+const timerRef = React.useRef&lt;number | undefined&gt;(undefined); // mutable box
+const latest = React.useRef(props.value);                  // inferred from initial
+
+// useCallback and useMemo infer correctly from the function you pass
+const handleSelect = React.useCallback((id: string) =&gt; setSelected(id), []);
+const total = React.useMemo(() =&gt; items.reduce((a, b) =&gt; a + b.price, 0), [items]);
+
+// A custom hook: return `as const` so the tuple keeps its positions
+function useToggle(initial = false) {
+  const [on, setOn] = React.useState(initial);
+  const toggle = React.useCallback(() =&gt; setOn((v) =&gt; !v), []);
+  return [on, toggle, setOn] as const;      // [boolean, () =&gt; void, Dispatch&lt;...&gt;]
+}</code></pre>
+
+<h3>Events</h3>
+<pre><code class="language-typescript">function Form() {
+  // Annotate the event with the element it comes from
+  const onSubmit = (e: React.FormEvent&lt;HTMLFormElement&gt;) =&gt; {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);      // currentTarget is typed
+    const name = data.get("name");                   // FormDataEntryValue | null
+  };
+
+  const onChange = (e: React.ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {
+    setValue(e.target.value);                        // string
+  };
+
+  const onClick = (e: React.MouseEvent&lt;HTMLButtonElement&gt;) =&gt; { /* ... */ };
+  const onKeyDown = (e: React.KeyboardEvent&lt;HTMLInputElement&gt;) =&gt; {
+    if (e.key === "Enter" &amp;&amp; !e.shiftKey) submit();
+  };
+
+  // Inline handlers are contextually typed - no annotation needed
+  return &lt;input onChange={(e) =&gt; setValue(e.target.value)} /&gt;;
+}</code></pre>
+
+<div class="callout tip"><span class="t"><code>target</code> vs <code>currentTarget</code></span><code>currentTarget</code> is the element the handler is attached to and is precisely typed. <code>target</code> is whatever was actually clicked, which could be a child, so React types it as <code>EventTarget</code> for most events. For <code>ChangeEvent</code> React specially types <code>target</code> as the element, which is why <code>e.target.value</code> works there and not on <code>MouseEvent</code>. When you need the form in a submit handler, always use <code>currentTarget</code>.</div>
+
+<h3>Generic components</h3>
+<pre><code class="language-typescript">interface SelectProps&lt;T&gt; {
+  items: readonly T[];
+  value: T | null;
+  onChange: (value: T) =&gt; void;
+  getKey: (item: T) =&gt; string;
+  renderItem: (item: T) =&gt; React.ReactNode;
+  placeholder?: string;
+}
+
+function Select&lt;T&gt;({ items, value, onChange, getKey, renderItem, placeholder }: SelectProps&lt;T&gt;) {
+  return (
+    &lt;ul role="listbox"&gt;
+      {placeholder &amp;&amp; !value &amp;&amp; &lt;li className="placeholder"&gt;{placeholder}&lt;/li&gt;}
+      {items.map((item) =&gt; (
+        &lt;li
+          key={getKey(item)}
+          role="option"
+          aria-selected={value !== null &amp;&amp; getKey(value) === getKey(item)}
+          onClick={() =&gt; onChange(item)}
+        &gt;
+          {renderItem(item)}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}
+
+// T is inferred from `items`; onChange receives a User, checked.
+&lt;Select
+  items={users}
+  value={selectedUser}
+  onChange={setSelectedUser}
+  getKey={(u) =&gt; u.id}
+  renderItem={(u) =&gt; &lt;span&gt;{u.name}&lt;/span&gt;}
+/&gt;;
+
+// A generic table with typed column accessors
+interface Column&lt;T&gt; {
+  header: string;
+  accessor: keyof T | ((row: T) =&gt; React.ReactNode);
+  width?: string;
+}
+
+function DataTable&lt;T extends { id: string }&gt;({ rows, columns }: {
+  rows: readonly T[];
+  columns: ReadonlyArray&lt;Column&lt;T&gt;&gt;;
+}) {
+  return (
+    &lt;table&gt;
+      &lt;thead&gt;&lt;tr&gt;{columns.map((c) =&gt; &lt;th key={c.header}&gt;{c.header}&lt;/th&gt;)}&lt;/tr&gt;&lt;/thead&gt;
+      &lt;tbody&gt;
+        {rows.map((row) =&gt; (
+          &lt;tr key={row.id}&gt;
+            {columns.map((c) =&gt; (
+              &lt;td key={c.header}&gt;
+                {typeof c.accessor === "function"
+                  ? c.accessor(row)
+                  : String(row[c.accessor])}
+              &lt;/td&gt;
+            ))}
+          &lt;/tr&gt;
+        ))}
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  );
+}</code></pre>
+
+<div class="callout warn"><span class="t">Generic arrow components in <code>.tsx</code> files</span><code>const Select = &lt;T&gt;(props: Props&lt;T&gt;) =&gt; ...</code> fails to parse in a <code>.tsx</code> file because <code>&lt;T&gt;</code> looks like a JSX tag. Workarounds: use a <code>function</code> declaration (cleanest), write <code>&lt;T,&gt;</code> with a trailing comma, or write <code>&lt;T extends unknown&gt;</code>. A plain function declaration avoids the question entirely and reads better.</div>
+
+<h3>Context</h3>
+<pre><code class="language-typescript">interface AuthContextValue {
+  user: User | null;
+  login: (email: string, password: string) =&gt; Promise&lt;void&gt;;
+  logout: () =&gt; void;
+  isLoading: boolean;
+}
+
+// Default of null plus a hook that throws - removes `| null` from every consumer
+const AuthContext = React.createContext&lt;AuthContextValue | null&gt;(null);
+
+export function useAuth(): AuthContextValue {
+  const ctx = React.useContext(AuthContext);
+  if (ctx === null) {
+    throw new Error("useAuth must be used inside &lt;AuthProvider&gt;");
+  }
+  return ctx;                                  // AuthContextValue, never null
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = React.useState&lt;User | null&gt;(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const value = React.useMemo&lt;AuthContextValue&gt;(() =&gt; ({
+    user,
+    isLoading,
+    login: async (email, password) =&gt; {
+      setIsLoading(true);
+      try { setUser(await api.login(email, password)); }
+      finally { setIsLoading(false); }
+    },
+    logout: () =&gt; setUser(null),
+  }), [user, isLoading]);
+
+  return &lt;AuthContext.Provider value={value}&gt;{children}&lt;/AuthContext.Provider&gt;;
+}</code></pre>
+
+<h2>Typing a Node Backend</h2>
+<p class="lead">Server-side TypeScript is where the validation story matters most, because every input is hostile and every output is a contract. The patterns below apply whether the customer runs Express, Fastify, Hono or NestJS — the framework changes, the shape of the solution does not.</p>
+
+<h3>Express with validated handlers</h3>
+<pre><code class="language-typescript">import express, { type NextFunction, type Request, type Response } from "express";
+import { z } from "zod";
+
+// Augment Request once, in a .d.ts, so middleware-set properties are typed everywhere.
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: { id: string; roles: readonly string[] };
+    requestId: string;
+  }
+}
+
+// A generic wrapper that validates params, query and body, then hands you typed data.
+function validated&lt;
+  P extends z.ZodTypeAny,
+  Q extends z.ZodTypeAny,
+  B extends z.ZodTypeAny,
+  R,
+&gt;(
+  schemas: { params?: P; query?: Q; body?: B },
+  handler: (
+    input: { params: z.infer&lt;P&gt;; query: z.infer&lt;Q&gt;; body: z.infer&lt;B&gt; },
+    req: Request,
+    res: Response,
+  ) =&gt; Promise&lt;R&gt;,
+) {
+  return async (req: Request, res: Response, next: NextFunction) =&gt; {
+    try {
+      const params = schemas.params ? schemas.params.parse(req.params) : undefined;
+      const query  = schemas.query  ? schemas.query.parse(req.query)   : undefined;
+      const body   = schemas.body   ? schemas.body.parse(req.body)     : undefined;
+      const result = await handler({ params, query, body } as never, req, res);
+      if (!res.headersSent) res.json(result);
+    } catch (e) {
+      next(e);                                 // one error handler, defined once
+    }
+  };
+}
+
+const app = express();
+app.use(express.json({ limit: "1mb" }));
+
+const CreateOrderBody = z.object({
+  customerId: z.string().uuid(),
+  lines: z.array(z.object({
+    sku: z.string().min(1),
+    quantity: z.number().int().positive().max(999),
+  })).min(1),
+  note: z.string().max(500).optional(),
+});
+
+const ListQuery = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(25),
+  status: z.enum(["draft", "paid", "shipped", "cancelled"]).optional(),
+});
+
+app.post("/orders", validated({ body: CreateOrderBody }, async ({ body }, req) =&gt; {
+  // body is fully typed AND validated. No casts, no optional chaining out of fear.
+  return orderService.create(body, req.user?.id);
+}));
+
+app.get("/orders", validated({ query: ListQuery }, async ({ query }) =&gt; {
+  return orderService.list(query);            // query.page is a number, defaulted
+}));
+
+// Single error handler - the only place that maps domain errors to HTTP
+app.use((err: unknown, req: Request, res: Response, _next: NextFunction) =&gt; {
+  if (err instanceof z.ZodError) {
+    return res.status(422).json({
+      error: "validation_failed",
+      requestId: req.requestId,
+      issues: err.issues.map((i) =&gt; ({ path: i.path.join("."), message: i.message })),
+    });
+  }
+  if (err instanceof AppError) {
+    return res.status(err.httpStatus).json({ error: err.code, message: err.message });
+  }
+  console.error({ requestId: req.requestId, err });
+  res.status(500).json({ error: "internal", requestId: req.requestId });
+});</code></pre>
+
+<h3>A typed service and repository layer</h3>
+<pre><code class="language-typescript">// Domain types live in one place and are derived from schemas.
+export const OrderSchema = z.object({
+  id: z.string().uuid(),
+  customerId: z.string().uuid(),
+  status: z.enum(["draft", "paid", "shipped", "cancelled"]),
+  totalMinor: z.number().int().nonnegative(),
+  createdAt: z.coerce.date(),
+});
+export type Order = z.infer&lt;typeof OrderSchema&gt;;
+
+// The repository interface is what the service depends on - not the driver.
+export interface OrderRepository {
+  findById(id: string): Promise&lt;Order | null&gt;;
+  findByCustomer(customerId: string, page: number, size: number): Promise&lt;Order[]&gt;;
+  insert(order: Omit&lt;Order, "createdAt"&gt;): Promise&lt;Order&gt;;
+  updateStatus(id: string, status: Order["status"]): Promise&lt;Order&gt;;
+}
+
+// Implementation validates rows coming OUT of the database too. Drivers return `any`.
+export class PgOrderRepository implements OrderRepository {
+  constructor(private readonly db: Pool) {}
+
+  async findById(id: string): Promise&lt;Order | null&gt; {
+    const { rows } = await this.db.query("select * from orders where id = $1", [id]);
+    if (rows.length === 0) return null;
+    return OrderSchema.parse(rows[0]);        // catches a migration you forgot about
+  }
+
+  async insert(order: Omit&lt;Order, "createdAt"&gt;): Promise&lt;Order&gt; {
+    const { rows } = await this.db.query(
+      `insert into orders (id, customer_id, status, total_minor)
+       values ($1, $2, $3, $4) returning *`,
+      [order.id, order.customerId, order.status, order.totalMinor],
+    );
+    return OrderSchema.parse(rows[0]);
+  }
+  // ...
+}
+
+// The service is pure logic over the interface - trivially unit-testable with a fake.
+export class OrderService {
+  constructor(
+    private readonly repo: OrderRepository,
+    private readonly payments: PaymentGateway,
+  ) {}
+
+  async markPaid(id: string, paymentId: string): Promise&lt;Order&gt; {
+    const order = await this.repo.findById(id);
+    if (!order) throw new NotFoundError("Order", id);
+    if (order.status !== "draft") {
+      throw new ConflictError(`Order ${id} is ${order.status}, cannot be paid`);
+    }
+    await this.payments.capture(paymentId, order.totalMinor);
+    return this.repo.updateStatus(id, "paid");
+  }
+}</code></pre>
+
+<div class="callout warn"><span class="t">Database drivers return <code>any</code>, which poisons everything downstream</span><code>pg</code>, <code>mysql2</code> and <code>mongodb</code> all hand you loosely typed rows. Writing <code>rows[0] as Order</code> is exactly the lie described earlier: a column renamed in a migration, a <code>numeric</code> that arrives as a string, a nullable column you forgot — none of them produce an error until something far away breaks. Parse rows through the schema, or use a query builder that generates types from the real schema (Drizzle, Kysely, Prisma). The parse costs microseconds and turns a class of silent corruption into a loud, located error.</div>
+
+<h3>Fastify and Hono: schema-first by design</h3>
+<pre><code class="language-typescript">// Fastify with a type provider infers handler types from the schema automatically.
+import Fastify from "fastify";
+import { type ZodTypeProvider, serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
+
+const app = Fastify().withTypeProvider&lt;ZodTypeProvider&gt;();
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
+
+app.route({
+  method: "POST",
+  url: "/orders",
+  schema: {
+    body: CreateOrderBody,
+    response: { 201: OrderSchema },
+  },
+  handler: async (req, reply) =&gt; {
+    // req.body is typed from the schema, no manual parse call
+    const order = await orderService.create(req.body);
+    return reply.code(201).send(order);       // the response is validated too
+  },
+});</code></pre>
+
+<pre><code class="language-typescript">// Hono with zod-validator - and the client gets types for free via hc&lt;AppType&gt;
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+
+const api = new Hono()
+  .post("/orders", zValidator("json", CreateOrderBody), async (c) =&gt; {
+    const body = c.req.valid("json");          // typed
+    return c.json(await orderService.create(body), 201);
+  })
+  .get("/orders/:id", async (c) =&gt; {
+    const order = await orderService.get(c.req.param("id"));
+    return c.json(order);
+  });
+
+export type AppType = typeof api;
+
+// In the frontend package:
+// import { hc } from "hono/client";
+// const client = hc&lt;AppType&gt;("https://api.customer.com");
+// const res = await client.orders.$post({ json: { customerId, lines } });
+// End-to-end types with no code generation step.</code></pre>
+
+<h2>Errors You Will Hit and How to Read Them</h2>
+<p class="lead">TypeScript error messages are famously long, and the skill is knowing which part to read. This section covers the half-dozen errors that account for most of the confusion, plus a method for decoding a forty-line message in under a minute.</p>
+
+<h3>Reading a long error</h3>
+<div class="callout tip"><span class="t">Read the LAST line first, then the first</span>TypeScript errors are structured as a chain: "A is not assignable to B" at the top, then progressively more specific "because X is not assignable to Y" lines, ending with the actual mismatch. The final line names the concrete incompatibility — <code>Type 'string' is not assignable to type 'number'</code>. Read that, then look at the first line to find which argument or property it was about, and ignore the middle entirely. In the editor, hovering the squiggle and collapsing the message gives the same effect.</div>
+
+<h3>Excess property checking</h3>
+<pre><code class="language-typescript">interface Options { width: number; height?: number }
+
+function render(o: Options) {}
+
+render({ width: 10, heigth: 20 });
+// ERROR: Object literal may only specify known properties,
+//        and 'heigth' does not exist in type 'Options'. Did you mean 'height'?
+
+// But this compiles:
+const opts = { width: 10, heigth: 20 };
+render(opts);                               // no error - structurally compatible
+
+// Why: excess property checking applies ONLY to FRESH object literals assigned
+// directly. Once the literal is in a variable, its "freshness" is gone and
+// normal structural compatibility applies (extra props are allowed).
+
+// If you want the check on a variable, use satisfies:
+const opts2 = { width: 10, heigth: 20 } satisfies Options;   // ERROR - good</code></pre>
+
+<h3>Variance: why callbacks behave oddly</h3>
+<pre><code class="language-typescript">// Arrays are covariant in TypeScript, which is UNSOUND but pragmatic.
+class Animal { name = "" }
+class Dog extends Animal { breed = "" }
+
+const dogs: Dog[] = [new Dog()];
+const animals: Animal[] = dogs;             // allowed
+animals.push(new Animal());                 // compiles - but dogs now contains a non-Dog!
+// dogs[1].breed;                           // undefined at runtime. TypeScript chose
+//                                          // convenience over soundness here.
+
+// readonly arrays avoid the problem
+const safe: readonly Animal[] = dogs;       // cannot push
+
+// Function PARAMETERS are bivariant for method syntax, contravariant for
+// property syntax under strictFunctionTypes. This is the real-world difference:
+interface Handler1 { handle(e: Animal): void }      // method - bivariant (lenient)
+interface Handler2 { handle: (e: Animal) =&gt; void }  // property - contravariant (strict)
+
+const h1: Handler1 = { handle: (d: Dog) =&gt; {} };    // allowed (bivariance)
+// const h2: Handler2 = { handle: (d: Dog) =&gt; {} }; // ERROR under strictFunctionTypes
+
+// Rule of thumb: declare callbacks as properties, not methods, if you want
+// the compiler to catch a handler that demands more than it will receive.</code></pre>
+
+<h3>Type widening surprises</h3>
+<pre><code class="language-typescript">// 1. Object literal properties widen even inside a const
+const config = { mode: "dark" };            // mode: string, NOT "dark"
+setTheme(config);                           // ERROR if setTheme wants { mode: "dark" | "light" }
+const config2 = { mode: "dark" } as const;  // mode: "dark"
+
+// 2. Arrays widen to the union element type
+const pair = [1, "a"];                      // (string | number)[], not [number, string]
+const tuple = [1, "a"] as const;            // readonly [1, "a"]
+
+// 3. Return type of a function returning an object literal widens
+function makeConfig() { return { mode: "dark" }; }   // { mode: string }
+function makeConfig2() { return { mode: "dark" } as const; }   // { readonly mode: "dark" }
+
+// 4. let vs const
+let a = "x";                                // string
+const b = "x";                              // "x"
+let c: "x" = "x";                           // "x" - annotate to keep it narrow</code></pre>
+
+<h3>Declaration merging gotchas</h3>
+<pre><code class="language-typescript">// Merging works for interfaces, namespaces and enums - but silently.
+interface Config { a: string }
+interface Config { b: number }               // merged: { a: string; b: number }
+// interface Config { a: number }            // ERROR - conflicting member
+
+// A common confusion: you add a property to a library interface, it works
+// locally, then fails in CI because the .d.ts file was not in `include`.
+// Ambient augmentations must be inside tsconfig's include/files or typeRoots.
+
+// Classes merge with namespaces (used for static-like members on a class)
+class Album {}
+namespace Album {
+  export const DEFAULT_TRACKS = 10;
+}
+Album.DEFAULT_TRACKS;                        // 10</code></pre>
+
+<h3>The errors you will actually see, decoded</h3>
+<table>
+<tr><th>Error</th><th>What it usually means</th><th>Fix</th></tr>
+<tr><td><code>Object is possibly 'undefined'</code></td><td>Optional property, array index with <code>noUncheckedIndexedAccess</code>, or a map lookup</td><td>Guard, <code>??</code>, optional chaining, or a non-null assertion <i>only</i> when you can prove it</td></tr>
+<tr><td><code>Type 'X' is not assignable to type 'Y'</code> (long chain)</td><td>A nested property mismatch</td><td>Read the last line of the chain; it names the actual pair</td></tr>
+<tr><td><code>Property 'x' does not exist on type 'A | B'</code></td><td>You are on a union and <code>x</code> is only on one member</td><td>Narrow with a discriminant first</td></tr>
+<tr><td><code>Argument of type 'unknown'…</code></td><td>Data from <code>catch</code>, <code>JSON.parse</code> or an API</td><td>Validate or narrow — do not cast</td></tr>
+<tr><td><code>No overload matches this call</code></td><td>Any argument is wrong, in an overloaded function</td><td>Check each argument individually; expand the "Overload 1 of N" detail</td></tr>
+<tr><td><code>Type instantiation is excessively deep</code></td><td>Recursive type with no depth guard</td><td>Add a depth counter tuple, or simplify</td></tr>
+<tr><td><code>Cannot find module './x' or its type declarations</code></td><td>Module resolution mismatch</td><td>Check <code>moduleResolution</code>; add <code>.js</code> under NodeNext</td></tr>
+<tr><td><code>Cannot redeclare block-scoped variable</code></td><td>A global <code>.d.ts</code> script file colliding</td><td>Add <code>export {}</code> to make it a module</td></tr>
+<tr><td><code>This expression is not callable. Type 'never' has no call signatures</code></td><td>Indexing a union of object types with a dynamic key</td><td>Narrow first, or cast the lookup at the single point of access</td></tr>
+<tr><td><code>Excessive stack depth comparing types</code></td><td>Two large recursive types being compared</td><td>Introduce an interface boundary to break the recursion</td></tr>
+</table>
+
+<h3>Escape hatches, ranked by how much they should worry you</h3>
+<pre><code class="language-typescript">// 1. satisfies - no risk. Checks without widening.
+const x = { a: 1 } satisfies Record&lt;string, number&gt;;
+
+// 2. Type predicate / assertion function - risk is contained to one function
+function isUser(v: unknown): v is User { return UserSchema.safeParse(v).success; }
+
+// 3. Non-null assertion - you are claiming knowledge the compiler lacks
+const el = document.getElementById("root")!;        // crashes if wrong
+// Prefer: const el = document.getElementById("root"); if (!el) throw ...
+
+// 4. `as` cast - the compiler stops checking this assignment
+const u = raw as User;                              // a lie if raw is not a User
+
+// 5. `as unknown as T` - double cast, defeats even the "sufficiently overlapping" check
+const weird = thing as unknown as Completely Different;   // almost always wrong
+
+// 6. `any` - contagious, disables checking downstream
+let whatever: any = getThing();
+
+// 7. @ts-ignore - suppresses the NEXT line, including errors you did not intend
+// @ts-ignore
+brokenThing.doStuff();
+
+// 8. @ts-expect-error - better than ts-ignore: it ERRORS if the line stops failing,
+//    so it cannot rot silently. Always prefer this, and always add a reason.
+// @ts-expect-error library types are wrong, see https://github.com/x/y/issues/123
+legacy.doStuff();</code></pre>
+
+<div class="callout ok"><span class="t">Use <code>@ts-expect-error</code>, never <code>@ts-ignore</code></span>They look equivalent but behave oppositely when the underlying problem is fixed. <code>@ts-ignore</code> keeps suppressing forever and nobody ever removes it. <code>@ts-expect-error</code> becomes an error itself once the line compiles cleanly — so when the library ships correct types, your build tells you to delete the comment. Enforce it with the ESLint rule <code>@typescript-eslint/ban-ts-comment</code> configured to allow <code>expect-error</code> with a description and ban the rest.</div>
+
+<h2>Migrating a JavaScript Codebase</h2>
+<p class="lead">You will be asked to do this at a customer, often with a team that is nervous about it. The project fails when it is attempted as a big-bang rewrite with <code>strict</code> on from day one, and succeeds when it is incremental, reversible and visibly delivering value within the first week.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="760" height="250" fill="#ffffff"/>
+  <text x="16" y="20" font-size="11" fill="#1e3a8a" font-family="sans-serif">INCREMENTAL MIGRATION: EACH STAGE IS SHIPPABLE</text>
+
+  <rect x="16" y="40" width="130" height="66" rx="4" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="81" y="60" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">1. allowJs</text>
+  <text x="81" y="76" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">TS build, 0 TS files</text>
+  <text x="81" y="90" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">nothing breaks</text>
+
+  <text x="156" y="78" font-size="12" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="168" y="40" width="130" height="66" rx="4" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="233" y="60" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">2. checkJs + JSDoc</text>
+  <text x="233" y="76" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">types in comments</text>
+  <text x="233" y="90" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">no renames yet</text>
+
+  <text x="308" y="78" font-size="12" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="320" y="40" width="130" height="66" rx="4" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="385" y="60" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">3. rename leaves</text>
+  <text x="385" y="76" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">utils, types, consts</text>
+  <text x="385" y="90" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">no dependents</text>
+
+  <text x="460" y="78" font-size="12" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="472" y="40" width="130" height="66" rx="4" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="537" y="60" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">4. up the graph</text>
+  <text x="537" y="76" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">services, then</text>
+  <text x="537" y="90" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">routes/components</text>
+
+  <text x="612" y="78" font-size="12" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="624" y="40" width="120" height="66" rx="4" fill="#e3e8ef" stroke="#1e3a8a"/>
+  <text x="684" y="60" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">5. strict on</text>
+  <text x="684" y="76" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">flag by flag</text>
+  <text x="684" y="90" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">dir by dir</text>
+
+  <rect x="16" y="130" width="728" height="40" rx="4" fill="#ffffff" stroke="#6b7688"/>
+  <text x="30" y="148" font-size="9" fill="#1e3a8a" font-family="sans-serif">RATCHET: a CI check that counts `any` / @ts-expect-error / unchecked files and fails if the number goes UP.</text>
+  <text x="30" y="163" font-size="9" fill="#6b7688" font-family="sans-serif">You do not need to finish the migration. You need to guarantee it never goes backwards.</text>
+
+  <text x="16" y="200" font-size="9" fill="#2563eb" font-family="sans-serif">Anti-pattern: a six-month "TypeScript migration branch" that diverges from main and is eventually abandoned.</text>
+  <text x="16" y="220" font-size="9" fill="#6b7688" font-family="sans-serif">Every stage above merges to main the same week. Feature work never stops.</text>
+</svg>
+<div class="cap">Five stages, each independently valuable, each shippable within days.</div>
+</div>
+
+<h3>Stage by stage</h3>
+<ol class="steps">
+  <li><b>Add TypeScript without converting anything.</b> Install <code>typescript</code>, add a <code>tsconfig.json</code> with <code>allowJs: true</code>, <code>checkJs: false</code>, <code>strict: false</code>, <code>noEmit: true</code>. Wire <code>tsc --noEmit</code> into CI. At this point it passes trivially — that is the point. The build is proven and nobody's workflow changed.</li>
+  <li><b>Turn on <code>checkJs</code> for one directory</b> using a second tsconfig or <code>// @ts-check</code> pragmas. Fix what it finds — usually real bugs: typos in property names, functions called with the wrong arity, unhandled undefined. Ship those fixes as bug fixes, because that is what they are, and the team sees value before any migration cost.</li>
+  <li><b>Install <code>@types</code> for every dependency</b> that has them. This alone transforms the editor experience and costs nothing.</li>
+  <li><b>Rename leaf files first.</b> Start with modules nothing imports <i>from</i> — constants, pure utilities, type definitions. Renaming <code>.js</code> to <code>.ts</code> there cannot break anything above it. Work up the dependency graph. Use <code>madge</code> or <code>dependency-cruiser</code> to find the leaves.</li>
+  <li><b>Define the domain types once</b> and reuse them. This is where the real benefit appears: a single <code>Order</code> type that every module agrees on, derived from a Zod schema at the API boundary.</li>
+  <li><b>Enable strict flags one at a time</b>, in this order: <code>noImplicitAny</code>, <code>strictNullChecks</code> (the big one — budget real time), <code>strictFunctionTypes</code>, <code>strictBindCallApply</code>, <code>noImplicitThis</code>, then the rest. Each flag is a separate pull request.</li>
+  <li><b>Add the ratchet.</b> A CI script that counts remaining <code>any</code>s, <code>@ts-expect-error</code>s and unchecked files and fails if the count increases. This is what makes the migration irreversible without requiring it to be finished.</li>
+</ol>
+
+<pre><code class="language-json">// tsconfig.migration.json - a permissive starting config
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "noImplicitAny": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"]
+}</code></pre>
+
+<pre><code class="language-bash">#!/usr/bin/env bash
+# scripts/type-ratchet.sh - fail CI if type debt increases
+set -euo pipefail
+
+BASELINE_FILE=".type-baseline.json"
+
+ANY_COUNT=$(grep -rE ':\s*any\b|&lt;any&gt;|as any' src --include='*.ts' --include='*.tsx' | wc -l)
+IGNORE_COUNT=$(grep -rE '@ts-(ignore|expect-error|nocheck)' src | wc -l)
+JS_COUNT=$(find src -name '*.js' -o -name '*.jsx' | wc -l)
+
+BASE_ANY=$(jq -r '.any' "$BASELINE_FILE")
+BASE_IGNORE=$(jq -r '.ignores' "$BASELINE_FILE")
+BASE_JS=$(jq -r '.jsFiles' "$BASELINE_FILE")
+
+fail=0
+[ "$ANY_COUNT"    -gt "$BASE_ANY" ]    &amp;&amp; { echo "any:    $ANY_COUNT &gt; $BASE_ANY";       fail=1; }
+[ "$IGNORE_COUNT" -gt "$BASE_IGNORE" ] &amp;&amp; { echo "ignore: $IGNORE_COUNT &gt; $BASE_IGNORE"; fail=1; }
+[ "$JS_COUNT"     -gt "$BASE_JS" ]     &amp;&amp; { echo "js:     $JS_COUNT &gt; $BASE_JS";         fail=1; }
+
+if [ "$fail" -eq 1 ]; then
+  echo "Type debt increased. Fix it, or update $BASELINE_FILE with a justification."
+  exit 1
+fi
+
+# Ratchet DOWN automatically when the numbers improve
+jq -n --argjson a "$ANY_COUNT" --argjson i "$IGNORE_COUNT" --argjson j "$JS_COUNT" \
+   '{any:$a, ignores:$i, jsFiles:$j}' &gt; "$BASELINE_FILE"
+echo "Type debt: any=$ANY_COUNT ignores=$IGNORE_COUNT js=$JS_COUNT"</code></pre>
+
+<div class="callout danger"><span class="t">The migration that fails</span>A long-lived <code>feature/typescript-migration</code> branch. It diverges from main, rebases become agony, feature work keeps landing on main, and after four months someone quietly closes it. Every single stage above merges within days. If a change cannot be merged this week, it is too big — split it. The second failure mode is turning on <code>strict</code> globally on day one, producing 4,000 errors, and demoralising the team into giving up.</div>
+
+<h3>Useful tools</h3>
+<table>
+<tr><th>Tool</th><th>What it does</th></tr>
+<tr><td><code>ts-migrate</code> (Airbnb)</td><td>Bulk-renames files and inserts <code>@ts-expect-error</code> where needed, giving you a compiling baseline to work down from</td></tr>
+<tr><td><code>typescript-strict-plugin</code></td><td>Lets you mark individual files as strict with a comment, so you can go strict file by file</td></tr>
+<tr><td><code>type-coverage</code></td><td>Reports the percentage of expressions with a non-<code>any</code> type — a single number to track on a dashboard</td></tr>
+<tr><td><code>madge</code> / <code>dependency-cruiser</code></td><td>Finds leaf modules and circular dependencies so you can order the work</td></tr>
+<tr><td><code>@typescript-eslint</code></td><td>Rules like <code>no-explicit-any</code>, <code>no-unsafe-assignment</code>, <code>ban-ts-comment</code> to hold the line</td></tr>
+<tr><td><code>quicktype</code> / <code>json-to-zod</code></td><td>Generate types or Zod schemas from a sample JSON payload — fast way to type an undocumented API</td></tr>
+</table>
+
+<h2>Performance and Scale</h2>
+<p class="lead">On a small project TypeScript is instant. On a 3,000-file monorepo with heavy generic libraries, a cold type-check can take minutes and the editor can lag on every keystroke, which destroys the productivity you adopted it for. The causes are well understood and the fixes are mechanical.</p>
+
+<h3>Measuring before optimising</h3>
+<pre><code class="language-bash"># Where is the time going?
+npx tsc --noEmit --diagnostics
+# Files, Lines, Nodes, Identifiers, Symbols, Types, Instantiations,
+# Memory used, Parse/Bind/Check/Emit time.
+# "Instantiations" in the millions means heavy generic/conditional type work.
+
+# Which files and types are expensive?
+npx tsc --noEmit --generateTrace ./trace
+npx @typescript/analyze-trace ./trace
+# Prints the slowest files and the specific type instantiations responsible.
+
+# Is the editor slow for the same reason?
+# VS Code: "TypeScript: Open TS Server log" and check for long requests.</code></pre>
+
+<h3>The usual culprits</h3>
+<table>
+<tr><th>Cause</th><th>Symptom</th><th>Fix</th></tr>
+<tr><td><code>skipLibCheck</code> off</td><td>Slow cold builds; errors inside <code>node_modules</code></td><td>Turn it on. Almost always correct.</td></tr>
+<tr><td>Large union types (hundreds of members)</td><td>Slow assignability checks everywhere they appear</td><td>Use a branded string or an interface instead of an exhaustive literal union</td></tr>
+<tr><td>Deep conditional/recursive types</td><td>Huge instantiation counts; "excessively deep" errors</td><td>Add depth guards; simplify; cache intermediate results in named types</td></tr>
+<tr><td>Intersections of big object types</td><td>Slow, and terrible error messages</td><td>Use <code>interface extends</code> instead of <code>&amp;</code> — interfaces are cached</td></tr>
+<tr><td>No <code>incremental</code> / no project references</td><td>Every build is a full build</td><td>Enable <code>incremental</code>; split into projects</td></tr>
+<tr><td>Barrel files (<code>index.ts</code> re-exporting everything)</td><td>Importing one symbol pulls in the whole graph</td><td>Import from the specific module; avoid deep barrel chains</td></tr>
+<tr><td>Heavily generic libraries used naively</td><td>Per-call-site instantiation explosions</td><td>Annotate the result type explicitly to stop inference work</td></tr>
+</table>
+
+<h3>Project references</h3>
+<pre><code class="language-json">// tsconfig.json at the repo root - orchestrates, builds nothing itself
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/api" },
+    { "path": "./packages/web" }
+  ]
+}</code></pre>
+
+<pre><code class="language-json">// packages/shared/tsconfig.json
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,              // REQUIRED for a referenced project
+    "declaration": true,
+    "declarationMap": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": ["src/**/*"]
+}
+
+// packages/api/tsconfig.json
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "composite": true, "rootDir": "src", "outDir": "dist" },
+  "references": [{ "path": "../shared" }],
+  "include": ["src/**/*"]
+}</code></pre>
+
+<pre><code class="language-bash">tsc --build                       # builds only what changed, in dependency order
+tsc --build --watch               # incremental watch across the whole graph
+tsc --build --clean               # remove outputs and build info
+tsc --build --force               # full rebuild when you suspect stale state</code></pre>
+
+<div class="callout tip"><span class="t">What project references buy you</span>Each package is type-checked once and its <code>.d.ts</code> output is consumed by dependents, so changing a leaf package does not re-check the entire monorepo. On a large repo this routinely turns a 90-second check into 8 seconds. It also enforces the dependency graph — package A cannot secretly import from package B unless the reference exists, which is a genuine architectural benefit beyond speed. The cost is more configuration and the need to build before some editor features work across package boundaries.</div>
+
+<h3><code>isolatedModules</code> and why bundlers need it</h3>
+<pre><code class="language-typescript">// With isolatedModules, each file must be transpilable ALONE.
+// These are errors because a single-file transpiler cannot know the answer:
+
+// 1. Re-exporting a type without the `type` keyword
+export { SomeType } from "./types.js";          // ERROR
+export type { SomeType } from "./types.js";     // correct
+
+// 2. const enum (no cross-file inlining possible)
+// const enum Direction { Up }                  // ERROR under isolatedModules
+
+// 3. A file with no imports or exports is a script, not a module
+// (add `export {}`)
+
+// The upside: esbuild/SWC can transpile 1000 files in parallel with no
+// type information at all, which is why modern builds are so fast.</code></pre>
+
+<h3>Keeping types fast as the codebase grows</h3>
+<ul class="checklist">
+  <li><code>skipLibCheck: true</code> and <code>incremental: true</code> from day one.</li>
+  <li>Prefer <code>interface X extends Y</code> over <code>type X = Y &amp; Z</code> for object composition.</li>
+  <li>Give intermediate type computations names; the compiler caches named types.</li>
+  <li>Annotate exported function return types explicitly — it stops the compiler re-inferring them at every call site and improves <code>.d.ts</code> emit.</li>
+  <li>Avoid barrel <code>index.ts</code> files in large packages; import from the concrete module.</li>
+  <li>Cap template-literal unions; do not generate thousands of members.</li>
+  <li>Put a depth guard on every recursive type.</li>
+  <li>Run <code>--generateTrace</code> when a check gets slow rather than guessing.</li>
+  <li>Split into project references once a single <code>tsc --noEmit</code> exceeds ~30 seconds.</li>
+</ul>
+
+<h2>Interview Questions</h2>
+
+<div class="qa">
+  <div class="q">What is the difference between <code>any</code> and <code>unknown</code>, and when would you use each?</div>
+  <div class="a">Both can hold any value, but they differ in what you are allowed to do with them. With <code>any</code>, the compiler stops checking entirely: you can access any property, call it, and assign it to anything, and the <code>any</code> spreads to every expression it touches, which is why one <code>any</code> can silently disable checking across a whole module. With <code>unknown</code>, you can assign anything <i>into</i> it but you cannot do anything <i>with</i> it until you narrow it — no property access, and it is not assignable to any other type. That makes <code>unknown</code> the correct type for data crossing a trust boundary: the result of <code>JSON.parse</code>, a <code>fetch</code> response body, a caught exception, or <code>process.env</code> values. You then prove the shape with a type guard or, better, a schema parse. I use <code>any</code> only as a deliberate temporary escape hatch during a migration, with a comment explaining why, and I configure the <code>no-explicit-any</code> lint rule so each one is a conscious decision rather than a habit.</div>
+</div>
+
+<div class="qa">
+  <div class="q">TypeScript types do not exist at runtime. What are the practical consequences?</div>
+  <div class="a">The main one is that no data entering your program is actually validated by the type system — it is validated by your assertion, which may be wrong. Writing <code>const user = await res.json() as User</code> tells the compiler to trust you, and if the API returns a number where you declared a string, or omits a field, nothing fails at that line. The failure surfaces much later, somewhere unrelated, as "cannot read properties of undefined", and the stack trace points at the victim rather than the cause. The consequence for design is that you need runtime validation at every boundary: HTTP responses, request bodies, environment variables, localStorage, message queue payloads, and database rows, since drivers return loosely typed objects. The pattern I use is to define a Zod schema and derive the type with <code>z.infer</code>, so there is exactly one definition and the check and the type cannot drift. Secondary consequences: you cannot do <code>if (x instanceof MyInterface)</code>, you cannot reflect over types to generate a form or an ORM mapping without a build step, and generics are erased so you cannot branch on <code>T</code> at runtime.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Explain discriminated unions and why they are better than optional properties.</div>
+  <div class="a">A discriminated union is a union of object types that all share a literal-typed field — <code>kind</code>, <code>type</code>, <code>status</code> — with a different value in each member. TypeScript uses that field to narrow: inside <code>if (state.status === "success")</code> the compiler knows exactly which member you have and gives you its specific fields with no cast. The alternative people reach for is one interface with everything optional — <code>loading?</code>, <code>data?</code>, <code>error?</code> — and that is worse for two reasons. First, it permits nonsense states like loading and error being simultaneously true, which means every consumer has to write defensive logic and they will not all agree on the precedence. Second, every access needs a null check even in branches where the value is logically guaranteed, so the code is noisier and the compiler helps less. The phrase I use is "make illegal states unrepresentable". The additional payoff is exhaustiveness: with a <code>default</code> branch that assigns the value to <code>never</code>, adding a new member to the union causes every switch that does not handle it to fail compilation, which turns a scary refactor into a to-do list from the compiler.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What does <code>strict</code> actually turn on, and which flag matters most?</div>
+  <div class="a"><code>strict</code> is an umbrella for about eight flags: <code>noImplicitAny</code>, <code>strictNullChecks</code>, <code>strictFunctionTypes</code>, <code>strictBindCallApply</code>, <code>strictPropertyInitialization</code>, <code>noImplicitThis</code>, <code>useUnknownInCatchVariables</code> and <code>alwaysStrict</code>. By far the most important is <code>strictNullChecks</code>. Without it, <code>null</code> and <code>undefined</code> are assignable to every type, which means the single largest category of JavaScript runtime errors — reading a property of undefined — is completely invisible to the type system. With it on, a value that might be absent has type <code>T | null</code> and the compiler forces you to handle it before use. The others matter too: <code>noImplicitAny</code> stops untyped parameters silently becoming <code>any</code>; <code>useUnknownInCatchVariables</code> types caught errors as <code>unknown</code>, which is correct since JavaScript can throw anything. Beyond <code>strict</code> I also enable <code>noUncheckedIndexedAccess</code>, which makes array and record access return <code>T | undefined</code> — initially noisy, but it catches a real class of off-by-one and missing-key bugs. On a legacy codebase I would enable these one flag at a time, each as its own pull request, rather than all at once.</div>
+</div>
+
+<div class="qa">
+  <div class="q">When would you use <code>interface</code> versus <code>type</code>?</div>
+  <div class="a">They overlap for object shapes, so the honest answer is that consistency matters more than the choice, but there are two real differences. Only <code>type</code> can express unions, intersections of non-objects, tuples, primitives, mapped types, conditional types and template literal types — so anything derived or computed must be a <code>type</code>. Only <code>interface</code> supports declaration merging, where you reopen it in another file and add members; that is essential for augmenting third-party or global types, such as adding a <code>user</code> property to Express's <code>Request</code> or a field to <code>Window</code>. There are also minor practical differences: interfaces tend to produce better error messages because the name is preserved rather than the structure expanded, and they are marginally faster for the compiler on very large shapes because the resolved members are cached. My convention is <code>interface</code> for object shapes that form a public API or might need augmenting, and <code>type</code> for everything else. I would not re-litigate an existing codebase's convention over this.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do generics work and when should you reach for one?</div>
+  <div class="a">A generic introduces a type parameter that is filled in at the call site, letting you express a relationship between types rather than fixing them. The classic example is <code>function first&lt;T&gt;(arr: T[]): T | undefined</code>, where the return type is tied to the element type of the input, so calling it with a <code>User[]</code> gives you <code>User | undefined</code> with no cast. Constraints restrict what the parameter can be — <code>T extends { length: number }</code> lets you access <code>.length</code> inside — and <code>K extends keyof T</code> is the pattern behind typed property access and <code>Pick</code>. The test I apply before adding a type parameter is whether it appears at least twice, typically once in the parameters and once in the return type, or twice in the parameters to force two arguments to agree. If <code>T</code> appears exactly once, the generic is doing nothing that <code>unknown</code> or a constraint would not do, and it just makes the signature harder to read. Beyond that there is a second tier — conditional types, <code>infer</code>, mapped types — which you rarely need to write but constantly need to read, because that is what library types are made of.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How would you migrate a large JavaScript codebase to TypeScript?</div>
+  <div class="a">Incrementally, with every stage merged to main within days, because the long-lived migration branch is the way these projects die. First I add TypeScript with <code>allowJs</code>, <code>checkJs: false</code>, <code>strict: false</code> and <code>noEmit</code>, and wire <code>tsc --noEmit</code> into CI — it passes trivially, which proves the pipeline works and changes nobody's workflow. Then I install <code>@types</code> packages for dependencies, which immediately improves the editor for the whole team at zero cost. Then I enable <code>checkJs</code> on one directory, or add <code>// @ts-check</code> pragmas with JSDoc types, and fix what it finds — which is usually genuine bugs like misspelled properties and wrong arity, shipped as bug fixes so the team sees value before paying migration cost. Only then do I start renaming files, beginning with leaves that nothing imports from and working up the dependency graph. Finally I enable strict flags one at a time, <code>noImplicitAny</code> first and <code>strictNullChecks</code> as its own substantial piece of work. Throughout, I add a CI ratchet that counts remaining <code>any</code>s, <code>ts-expect-error</code>s and <code>.js</code> files and fails if any count increases, because you do not need to finish the migration — you need to guarantee it cannot go backwards.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is <code>satisfies</code> and what problem does it solve?</div>
+  <div class="a">It checks a value against a type without widening the value to that type. Before <code>satisfies</code>, you had two bad options. Annotating — <code>const config: Config = {...}</code> — validates the shape but throws away the specific literal types, so <code>config.port</code> becomes <code>string | number | boolean</code> and you cannot call a number method on it. Using <code>as const</code> keeps the literal types but performs no validation at all, so a typo in a key or a disallowed value type goes unnoticed. <code>satisfies</code> gives you both: the expression is checked against the type and any excess or wrong property is an error at the declaration, but the inferred type remains the specific literal shape. The most common real use is a lookup table — a route map, a theme, a config object — where you want <code>keyof typeof routes</code> to be the exact union of keys and the values to be the exact literal strings, while still guaranteeing every value matches a constraint like <code>`/${string}`</code>. You can also combine it with <code>as const</code> for a deeply readonly, checked, literal-typed object.</div>
+</div>
+
+<div class="qa">
+  <div class="q">A colleague writes <code>const user = await res.json() as User</code>. What is wrong with it?</div>
+  <div class="a">It is an unverified assertion dressed up as a type. <code>res.json()</code> returns <code>Promise&lt;any&gt;</code>, and the cast tells the compiler to stop asking questions — no check happens at runtime. If the API returns <code>{"id": 1}</code> where <code>id</code> is declared as a string, or renames <code>name</code> to <code>fullName</code>, or returns <code>null</code> for a field declared non-nullable, this line succeeds and the program continues with a value that violates its own type. The failure then appears somewhere else entirely, often in a UI component, as "cannot read properties of undefined", and debugging starts at the wrong end of the call chain. The fix is to type the parsed JSON as <code>unknown</code> and run it through a schema: <code>const user = UserSchema.parse(await res.json())</code>, with <code>type User = z.infer&lt;typeof UserSchema&gt;</code> so the schema is the single source of truth. That throws immediately, at the boundary, with a message naming the exact field and the exact problem. The broader principle is that every <code>as</code> on data from outside your program is a bug you have not encountered yet, and the whole point of validating at the edge is that everything inside can then trust its types completely.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you type errors in TypeScript?</div>
+  <div class="a">You cannot type what a function throws — there is no <code>throws</code> clause and the language deliberately does not track it, because JavaScript's <code>throw</code> is unconstrained. Under <code>strict</code>, <code>catch (e)</code> gives you <code>unknown</code>, which is correct since any value can be thrown, so the first thing in any catch block is narrowing: <code>if (e instanceof Error)</code>, or a normaliser function that converts anything into an <code>Error</code>. Beyond that I use two complementary approaches. For unexpected failures — programmer errors, infrastructure problems — I use a class hierarchy with a literal <code>code</code> field on each subclass, which makes them a discriminated union so a single top-level handler can switch on the code and map to an HTTP status exhaustively. For expected, domain-level failures — not found, validation failed, a business rule violated — I prefer returning a <code>Result</code> type, a union of <code>{ ok: true, value }</code> and <code>{ ok: false, error }</code>, because that puts the failure in the signature where the compiler forces the caller to handle it. The trade-off is verbosity and friction with libraries that throw, so I draw the line at "is this part of the domain or is it exceptional".</div>
+</div>
+
+<div class="qa">
+  <div class="q">Your team's <code>tsc --noEmit</code> takes four minutes and the editor lags. How do you diagnose it?</div>
+  <div class="a">I start with <code>tsc --noEmit --diagnostics</code> to see the basic shape: file count, type count, and especially instantiation count, since instantiations in the millions point at heavy generic or conditional type work rather than simply having a lot of code. Then <code>--generateTrace</code> with <code>@typescript/analyze-trace</code>, which names the specific files and type instantiations consuming the time. The usual findings, in rough order of frequency: <code>skipLibCheck</code> is off so the compiler is checking every <code>.d.ts</code> in <code>node_modules</code>; a recursive or deeply conditional utility type with no depth guard; large intersections of big object types, which are recomputed rather than cached — switching to <code>interface extends</code> often helps measurably; enormous union types, sometimes generated accidentally by a template literal type; and barrel <code>index.ts</code> files that drag the entire module graph into every import. Structural fixes are enabling <code>incremental</code> and splitting the repo into project references, which type-checks each package once and reuses its declaration output, commonly taking a ninety-second check down to under ten seconds. I would measure before and after each change rather than applying all of them blind.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What are the downsides of TypeScript, honestly?</div>
+  <div class="a">Several, and being able to name them is a sign you actually use it. Build complexity: you now have a compile step, a tsconfig with options that interact in non-obvious ways, and module resolution that can produce errors that look like type errors but are configuration problems. Error messages: a mismatch deep inside a generic produces a forty-line message that is genuinely hard to read until you learn to read the last line first. The false sense of safety is the most dangerous one — a fully typed codebase that casts at every boundary has all the ceremony and none of the protection, and teams routinely believe they are safe when they are not. There is a real learning curve past the basics; conditional types and <code>infer</code> are a second language. Type-level code can get clever to the point of being unmaintainable, and a sufficiently baroque utility type is worse than an <code>any</code> with a comment. Compile times on large repos need active management. And some patterns are genuinely more awkward than in plain JavaScript, particularly highly dynamic code and some metaprogramming. On balance I think it is clearly worth it for anything multi-person and long-lived, but I would not use it for a sixty-line script, and I would not pretend the costs are zero.</div>
+</div>
+
+<h2>Checklist and Practice Plan</h2>
+<p class="lead">TypeScript is learned by hitting errors and understanding why, not by reading about types. The exercises below are ordered so each one forces a specific concept, and the checklists are what to apply on a real codebase.</p>
+
+<h3>Practice plan — eight focused exercises</h3>
+<ol class="steps">
+  <li><b>Model a state machine.</b> Take a request lifecycle — idle, loading, success, error, retrying — and model it as a discriminated union. Write a render function with an exhaustive switch and a <code>never</code> default. Then add a sixth state and watch exactly which code fails to compile. This is the single most important exercise.</li>
+  <li><b>Build a typed API client.</b> Pick any public API. Write Zod schemas for three endpoints, derive the types with <code>z.infer</code>, and build a generic <code>request&lt;T&gt;(path, schema)</code> function. Then deliberately change a schema to the wrong type and confirm you get a precise error naming the field.</li>
+  <li><b>Write five utility types from scratch</b> without looking them up: <code>MyPartial</code>, <code>MyPick</code>, <code>MyOmit</code>, <code>MyReturnType</code>, <code>MyAwaited</code>. Then write <code>DeepPartial</code> and <code>Paths</code> with a depth guard. This is the fastest way to internalise mapped and conditional types.</li>
+  <li><b>Brand your identifiers.</b> In an existing project, convert <code>userId</code>, <code>orderId</code> and one more identifier to branded types. Count how many places the compiler finds where the wrong one was being passed. There is usually at least one.</li>
+  <li><b>Type a generic React component.</b> Build a <code>&lt;DataTable&gt;</code> where column accessors are constrained to <code>keyof T</code> or a render function, and prove that a typo in a column key is a compile error.</li>
+  <li><b>Fix a real error chain.</b> Find a forty-line "not assignable" error in a codebase and work out the mismatch from the last line alone, without reading the middle. Repeat until it takes under a minute.</li>
+  <li><b>Migrate a small JS project.</b> Take a 20-file JavaScript project through all five migration stages in one sitting. Note which stage produced the most real bugs — it is almost always <code>checkJs</code> with JSDoc, before any renaming.</li>
+  <li><b>Profile a slow build.</b> Run <code>--generateTrace</code> on any non-trivial project, read the analysis, and find the single most expensive type. Then make it cheaper and measure the difference.</li>
+</ol>
+
+<h3>Checklist: starting a new TypeScript project</h3>
+<ul class="checklist">
+  <li><code>strict: true</code>, plus <code>noUncheckedIndexedAccess</code> and <code>exactOptionalPropertyTypes</code>.</li>
+  <li><code>skipLibCheck: true</code>, <code>incremental: true</code>, <code>isolatedModules: true</code>, <code>verbatimModuleSyntax: true</code>.</li>
+  <li><code>module</code>/<code>moduleResolution</code> matched to the runtime or bundler, and verified by actually running the output.</li>
+  <li><code>tsc --noEmit</code> as a separate CI step, because your bundler does not type-check.</li>
+  <li>ESLint with <code>@typescript-eslint</code>: <code>no-explicit-any</code>, <code>no-floating-promises</code>, <code>no-misused-promises</code>, <code>ban-ts-comment</code> allowing only <code>expect-error</code> with a description.</li>
+  <li>A validation library at every boundary, with types derived from schemas.</li>
+  <li>Environment variables validated at startup; the process exits with a readable message if they are wrong.</li>
+  <li>A <code>Prettify</code> helper in the shared types file.</li>
+  <li>Path aliases wired in <i>both</i> tsconfig and the bundler/runtime, with the output verified.</li>
+</ul>
+
+<h3>Checklist: code review</h3>
+<ul class="checklist">
+  <li>Any <code>as</code> on data from outside the program — should be a schema parse.</li>
+  <li>Any <code>any</code> without a comment explaining why and a plan to remove it.</li>
+  <li><code>@ts-ignore</code> anywhere — should be <code>@ts-expect-error</code> with a reason and a link.</li>
+  <li>Non-null assertions (<code>!</code>) where a guard would be clearer and safer.</li>
+  <li>A union being handled without an exhaustive <code>never</code> default.</li>
+  <li>Optional properties used where a discriminated union expresses the real invariants.</li>
+  <li>A type parameter that appears only once — it wants to be a constraint or <code>unknown</code>.</li>
+  <li>Object literals typed by annotation where <code>satisfies</code> would preserve the literals.</li>
+  <li>Database rows or API responses cast rather than parsed.</li>
+  <li>A recursive type without a depth guard.</li>
+  <li>Exported functions without explicit return types in a large codebase.</li>
+</ul>
+
+<h3>Checklist: handing a TypeScript codebase to a customer's team</h3>
+<ul class="checklist">
+  <li>Domain types defined once, derived from schemas, in a single shared module.</li>
+  <li>Every external boundary validated; no casts on untrusted data anywhere.</li>
+  <li><code>tsc --noEmit</code> and lint both green, enforced in CI, with no skipped checks.</li>
+  <li>A type ratchet in place so the debt cannot grow after you leave.</li>
+  <li>A README that states the module resolution setup and how to run the type check locally.</li>
+  <li>No <code>any</code> in the public surface of any shared package.</li>
+  <li><code>attw</code> clean if you are publishing a package.</li>
+  <li>Build time measured and documented, with project references in place if it exceeds about thirty seconds.</li>
+</ul>

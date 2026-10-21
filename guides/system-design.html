@@ -1,0 +1,1138 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>System Design (Interview Prep) — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Interview Prep</div>
+  <h1>System Design (Interview Prep)</h1>
+  <div class="subtitle">A visual, framework-driven playbook for designing scalable systems and acing the system design interview — from estimation and building blocks to CAP, API design, and ML/LLM architectures.</div>
+  <div class="tags"><span>system-design</span><span>scalability</span><span>distributed-systems</span><span>caching</span><span>databases</span><span>interview-prep</span><span>architecture</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~26 min read &middot; 5,754 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#the-interview-framework">The Interview Framework</a></li><li><a href="#back-of-envelope-estimation">Back-of-Envelope Estimation</a></li><li><a href="#load-balancers">Load Balancers</a></li><li><a href="#caching">Caching</a></li><li><a href="#databases-sql-nosql-and-the-cap-theorem">Databases: SQL, NoSQL, and the CAP Theorem</a></li><li><a href="#message-queues-amp-event-streaming">Message Queues &amp; Event Streaming</a></li><li><a href="#cdn-amp-rate-limiting">CDN &amp; Rate Limiting</a></li><li><a href="#api-design">API Design</a></li><li><a href="#consistency-models">Consistency Models</a></li><li><a href="#scalability-patterns">Scalability Patterns</a></li><li><a href="#worked-example-url-shortener">Worked Example: URL Shortener</a></li><li><a href="#ml-llm-system-design">ML/LLM System Design</a></li><li><a href="#building-blocks-cheat-sheet">Building Blocks Cheat Sheet</a></li><li><a href="#trade-offs-reference">Trade-offs Reference</a></li><li><a href="#q-amp-a-practice">Q&amp;A Practice</a></li><li><a href="#how-to-communicate-your-design">How to Communicate Your Design</a></li></ol></nav>
+<h2 id="the-interview-framework">The Interview Framework</h2>
+<p class="lead">Every system design interview follows the same skeleton. Internalise this six-step arc and you will never lose the thread — even under pressure.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 780 110" width="780" height="110">
+  <!-- Step boxes -->
+  <rect x="10"  y="25" width="108" height="60" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="64"  y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">1. Clarify</text>
+  <text x="64"  y="68" text-anchor="middle" font-size="10" fill="#2563eb">requirements</text>
+
+  <rect x="138" y="25" width="108" height="60" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="192" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">2. Estimate</text>
+  <text x="192" y="68" text-anchor="middle" font-size="10" fill="#2563eb">scale &amp; load</text>
+
+  <rect x="266" y="25" width="108" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="320" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">3. High-Level</text>
+  <text x="320" y="68" text-anchor="middle" font-size="10" fill="#059669">sketch diagram</text>
+
+  <rect x="394" y="25" width="108" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="448" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">4. Deep-Dive</text>
+  <text x="448" y="68" text-anchor="middle" font-size="10" fill="#059669">critical paths</text>
+
+  <rect x="522" y="25" width="108" height="60" rx="8" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="576" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">5. Trade-offs</text>
+  <text x="576" y="68" text-anchor="middle" font-size="10" fill="#b45309">justify choices</text>
+
+  <rect x="650" y="25" width="108" height="60" rx="8" fill="#f0fdfa" stroke="#0891b2" stroke-width="2"/>
+  <text x="704" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#164e63">6. Wrap-Up</text>
+  <text x="704" y="68" text-anchor="middle" font-size="10" fill="#0891b2">bottlenecks &amp; next</text>
+
+  <!-- Arrows -->
+  <line x1="118" y1="55" x2="138" y2="55" stroke="#1a2233" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="246" y1="55" x2="266" y2="55" stroke="#1a2233" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="374" y1="55" x2="394" y2="55" stroke="#1a2233" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="502" y1="55" x2="522" y2="55" stroke="#1a2233" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="630" y1="55" x2="650" y2="55" stroke="#1a2233" stroke-width="2" marker-end="url(#arr)"/>
+
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#1a2233"/>
+    </marker>
+  </defs>
+</svg>
+<div class="cap">The six-step interview framework — work left to right, narrate each transition aloud.</div>
+</div>
+
+<h3>Step 1 — Clarify Requirements</h3>
+<p>Never design until you ask. Spend 3–5 minutes surfacing functional and non-functional requirements. A missed assumption wastes 20 minutes of deep-dive on the wrong component.</p>
+<div class="grid c2">
+  <div class="card">
+    <h4>Functional</h4>
+    <p>What does the system <em>do</em>? Core user actions (write URL → get short URL; post tweet → timeline appears). Scope: read vs write flows, admin flows, mobile clients?</p>
+  </div>
+  <div class="card">
+    <h4>Non-Functional</h4>
+    <p>Latency targets (p99 &lt; 100 ms?), availability SLA (99.9% or 99.99%?), consistency model (strong vs eventual), geo distribution, security, compliance (GDPR?), cost sensitivity.</p>
+  </div>
+</div>
+
+<h3>Step 2 — Estimate Scale</h3>
+<p>Back-of-envelope numbers anchor every architectural decision. Compute QPS, storage, and bandwidth before drawing a single box.</p>
+
+<h3>Step 3 — High-Level Design</h3>
+<p>Draw 5–8 components: clients, API gateway/LB, app servers, primary store, cache, async queue, CDN. Show data flow with arrows. Name the components clearly. Check in with the interviewer before going deep.</p>
+
+<h3>Step 4 — Deep-Dive</h3>
+<p>The interviewer will guide you to the hardest sub-problems: DB schema, consistency protocol, write path, failure handling. Lead with the most critical path. Speak complexity aloud.</p>
+
+<h3>Step 5 — Trade-offs</h3>
+<p>Every choice has a cost. SQL → strong consistency but limited horizontal scale. Kafka → high throughput but eventual delivery. Say "I chose X because Y, accepting Z." Interviewers reward trade-off reasoning over memorised answers.</p>
+
+<h3>Step 6 — Wrap-Up</h3>
+<p>Name 2–3 bottlenecks you haven't addressed (hot partitions, cache stampede, single-region fail). Suggest what to solve next. This signals engineering maturity.</p>
+
+<div class="callout tip"><span class="t">Pro tip</span> Draw on paper/whiteboard while narrating. An interviewer following your diagram retains it 3× better than one just listening.</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="back-of-envelope-estimation">Back-of-Envelope Estimation</h2>
+<p class="lead">Capacity math separates candidates who can design real systems from those who memorise patterns. Practise until the numbers feel intuitive.</p>
+
+<h3>Key Numbers to Memorise</h3>
+<table>
+  <tr><th>Metric</th><th>Rule of Thumb</th><th>Notes</th></tr>
+  <tr><td>1 million users, active 10%</td><td>100 K DAU</td><td>Adjust for peak vs avg</td></tr>
+  <tr><td>1 request/user/day</td><td>~1.2 QPS</td><td>100 K req / 86 400 s</td></tr>
+  <tr><td>1 KB per record</td><td>1 M records = 1 GB</td><td>Simple maths</td></tr>
+  <tr><td>Twitter-scale writes</td><td>~6 000 tweets/s peak</td><td>500 M tweets/day</td></tr>
+  <tr><td>SSD read latency</td><td>~100 µs</td><td>vs HDD 10 ms</td></tr>
+  <tr><td>Network round-trip (same DC)</td><td>~0.5 ms</td><td>Cross-continent ≈ 150 ms</td></tr>
+  <tr><td>L1 cache hit</td><td>~1 ns</td><td>L2 ≈ 5 ns, RAM ≈ 100 ns</td></tr>
+</table>
+
+<h3>Estimation Template</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>QPS</h4>
+    <p>Peak QPS ≈ 2–3× average. Average = total requests per day ÷ 86 400. State read/write ratio (often 10:1 to 100:1).</p>
+  </div>
+  <div class="card">
+    <h4>Storage</h4>
+    <p>Daily data = records/day × avg record size. Multiply by retention years. Add 20% overhead for indices, replication factor (usually 3).</p>
+  </div>
+  <div class="card">
+    <h4>Bandwidth</h4>
+    <p>Ingress = write QPS × payload size. Egress = read QPS × response size. CDN can offload 80–95% of egress for media-heavy services.</p>
+  </div>
+</div>
+
+<details>
+  <summary>Worked estimation: URL shortener at 100 M DAU</summary>
+  <div class="body">
+    <p><strong>Writes:</strong> 1% of users create a short URL daily → 1 M writes/day ÷ 86 400 ≈ <strong>12 writes/s</strong>.</p>
+    <p><strong>Reads:</strong> 100:1 read/write ratio → 1 200 reads/s; peak 3× → ~3 600 reads/s.</p>
+    <p><strong>Storage (5 years):</strong> 1 M new URLs/day × 365 × 5 = 1.825 B records. Each ~500 bytes (short key + long URL + metadata) → ~900 GB raw, ~2.7 TB with 3× replication.</p>
+    <p><strong>Bandwidth:</strong> Read egress = 3 600 × 500 B ≈ 1.8 MB/s — trivial; most is HTTP redirects, not payload.</p>
+  </div>
+</details>
+
+<div class="callout note"><span class="t">Note</span> Estimation is about order of magnitude, not precision. Being off by 2× is fine. Reveal your assumptions explicitly — "assuming 100:1 read/write, roughly 10:1 peak/average…"</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="load-balancers">Load Balancers</h2>
+<p class="lead">A load balancer is the first distributed systems primitive. Know the layers, algorithms, and when sticky sessions matter.</p>
+
+<h3>L4 vs L7</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Layer 4 (Transport)</h4>
+    <p>Routes by IP + TCP port. Extremely fast — no HTTP parsing. Cannot inspect URL path, headers, or cookies. Used for raw throughput (databases, gRPC). Examples: AWS NLB, HAProxy in TCP mode.</p>
+  </div>
+  <div class="card">
+    <h4>Layer 7 (Application)</h4>
+    <p>Routes by HTTP method, path, headers, cookies. Enables path-based routing (<code>/api</code> → service A, <code>/static</code> → CDN), SSL termination, health checks, WebSocket upgrades. Examples: AWS ALB, Nginx, Envoy.</p>
+  </div>
+</div>
+
+<h3>Routing Algorithms</h3>
+<table>
+  <tr><th>Algorithm</th><th>Best For</th><th>Weakness</th></tr>
+  <tr><td>Round-Robin</td><td>Homogeneous servers, stateless</td><td>Ignores server load</td></tr>
+  <tr><td>Least Connections</td><td>Variable request duration</td><td>Slight overhead tracking connections</td></tr>
+  <tr><td>IP Hash</td><td>Sticky sessions (stateful)</td><td>Uneven distribution if few clients</td></tr>
+  <tr><td>Weighted Round-Robin</td><td>Heterogeneous server capacity</td><td>Manual weight tuning</td></tr>
+  <tr><td>Least Response Time</td><td>Latency-sensitive APIs</td><td>More complex health tracking</td></tr>
+  <tr><td>Random</td><td>Simple, low overhead</td><td>Not optimal; use for testing</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Interview tip</span> When the interviewer asks "how do you handle server failures?" — mention health checks (active probes every 5 s, passive circuit-breaking), automatic draining of in-flight connections, and auto-scaling triggers.</div>
+
+<h3>Health Checks &amp; High Availability</h3>
+<p>LBs themselves are SPOFs — use an active-passive pair with a floating VIP (Virtual IP) and VRRP/ECMP. In cloud environments (AWS, GCP) the load balancer is a managed multi-AZ service and this is handled for you.</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="caching">Caching</h2>
+<p class="lead">Caching is the single highest-leverage optimisation in most systems. Know the strategies, eviction policies, and failure modes cold.</p>
+
+<h3>Where to Cache</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Client / Browser</h4>
+    <p>Cache-Control headers, ETags. Zero server load for static assets. TTL-driven invalidation.</p>
+  </div>
+  <div class="card">
+    <h4>CDN Edge</h4>
+    <p>Static + semi-static content served globally. Origin shield reduces origin traffic by 80–95%.</p>
+  </div>
+  <div class="card">
+    <h4>In-Process Memory</h4>
+    <p>Fastest (nanoseconds). Limited to one server. Use for reference data — country codes, config flags.</p>
+  </div>
+  <div class="card">
+    <h4>Distributed Cache</h4>
+    <p>Redis / Memcached shared across app servers. Millisecond latency. Central invalidation. 100 K–1 M+ ops/s per node.</p>
+  </div>
+  <div class="card">
+    <h4>DB Query Cache</h4>
+    <p>Deprecated in MySQL 8+. Prefer application-level caching — more control, less contention.</p>
+  </div>
+  <div class="card">
+    <h4>Read Replicas</h4>
+    <p>Not a cache per se, but offloads read traffic. Eventual consistency — replicas lag by milliseconds.</p>
+  </div>
+</div>
+
+<h3>Cache Strategies</h3>
+<div class="diagram">
+<svg viewBox="0 0 740 200" width="740" height="200">
+  <!-- Cache-Aside -->
+  <text x="10" y="20" font-size="13" font-weight="700" fill="#1e3a8a">Cache-Aside (Lazy Loading)</text>
+  <rect x="10"  y="30" width="80" height="36" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="50"  y="53" text-anchor="middle" font-size="11" fill="#1e3a8a">App</text>
+  <rect x="130" y="30" width="80" height="36" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="170" y="53" text-anchor="middle" font-size="11" fill="#065f46">Cache</text>
+  <rect x="250" y="30" width="80" height="36" rx="6" fill="#fff7ed" stroke="#b45309" stroke-width="1.5"/>
+  <text x="290" y="53" text-anchor="middle" font-size="11" fill="#92400e">DB</text>
+
+  <!-- arrows cache-aside -->
+  <line x1="90" y1="48" x2="130" y2="48" stroke="#2563eb" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="110" y="43" font-size="9" fill="#2563eb" text-anchor="middle">read?</text>
+  <line x1="130" y1="58" x2="90" y2="58" stroke="#059669" stroke-width="1.5" marker-end="url(#a3)"/>
+  <text x="110" y="72" font-size="9" fill="#059669" text-anchor="middle">miss→</text>
+  <line x1="210" y1="48" x2="250" y2="48" stroke="#b45309" stroke-width="1.5" marker-end="url(#a4)"/>
+  <text x="230" y="43" font-size="9" fill="#b45309" text-anchor="middle">fetch DB</text>
+  <line x1="250" y1="58" x2="210" y2="58" stroke="#b45309" stroke-width="1.5" marker-end="url(#a5)"/>
+  <text x="230" y="72" font-size="9" fill="#b45309" text-anchor="middle">populate</text>
+  <text x="10" y="100" font-size="10" fill="#1a2233">+ Simple. Only caches what is used. — Cache miss = 3 round trips. Stale on write.</text>
+
+  <!-- Write-Through -->
+  <text x="380" y="20" font-size="13" font-weight="700" fill="#1e3a8a">Write-Through</text>
+  <rect x="380" y="30" width="80" height="36" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="420" y="53" text-anchor="middle" font-size="11" fill="#1e3a8a">App</text>
+  <rect x="500" y="30" width="80" height="36" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="540" y="53" text-anchor="middle" font-size="11" fill="#065f46">Cache</text>
+  <rect x="620" y="30" width="80" height="36" rx="6" fill="#fff7ed" stroke="#b45309" stroke-width="1.5"/>
+  <text x="660" y="53" text-anchor="middle" font-size="11" fill="#92400e">DB</text>
+  <line x1="460" y1="48" x2="500" y2="48" stroke="#2563eb" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="580" y1="48" x2="620" y2="48" stroke="#059669" stroke-width="1.5" marker-end="url(#a3)"/>
+  <text x="380" y="100" font-size="10" fill="#1a2233">+ Cache always fresh. — Write latency doubles. Wasted writes for rarely-read data.</text>
+
+  <!-- Write-Back -->
+  <text x="10" y="130" font-size="13" font-weight="700" fill="#1e3a8a">Write-Back (Write-Behind)</text>
+  <rect x="10"  y="140" width="80" height="36" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="50"  y="163" text-anchor="middle" font-size="11" fill="#1e3a8a">App</text>
+  <rect x="130" y="140" width="80" height="36" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="170" y="163" text-anchor="middle" font-size="11" fill="#065f46">Cache</text>
+  <rect x="250" y="140" width="80" height="36" rx="6" fill="#fff7ed" stroke="#b45309" stroke-width="1.5"/>
+  <text x="290" y="163" text-anchor="middle" font-size="11" fill="#92400e">DB</text>
+  <line x1="90" y1="158" x2="130" y2="158" stroke="#2563eb" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="210" y1="162" x2="250" y2="162" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a4)"/>
+  <text x="230" y="155" font-size="9" fill="#b45309" text-anchor="middle">async</text>
+  <text x="10" y="196" font-size="10" fill="#1a2233">+ Lowest write latency. Batched DB writes. — Data loss risk if cache crashes before flush.</text>
+
+  <defs>
+    <marker id="a2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#2563eb"/></marker>
+    <marker id="a3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#059669"/></marker>
+    <marker id="a4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#b45309"/></marker>
+    <marker id="a5" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#b45309"/></marker>
+  </defs>
+</svg>
+<div class="cap">Three caching strategies — Cache-Aside is the default; Write-Through for read-heavy data that must be fresh; Write-Back for high-write, latency-sensitive workloads.</div>
+</div>
+
+<h3>Eviction Policies</h3>
+<table>
+  <tr><th>Policy</th><th>Rule</th><th>Use When</th></tr>
+  <tr><td>LRU (Least Recently Used)</td><td>Evict the key unused longest</td><td>General purpose — the safe default</td></tr>
+  <tr><td>LFU (Least Frequently Used)</td><td>Evict the key hit least often</td><td>Long-lived hot keys (song catalogue)</td></tr>
+  <tr><td>TTL (Time-to-Live)</td><td>Expire after fixed duration</td><td>Session tokens, OTP codes</td></tr>
+  <tr><td>FIFO</td><td>Evict oldest inserted key</td><td>Queue-style, rare in caching</td></tr>
+  <tr><td>Random</td><td>Evict random key</td><td>Approximates LRU cheaply</td></tr>
+  <tr><td>allkeys-lru (Redis)</td><td>LRU across all keys, no TTL required</td><td>When TTLs are inconsistently set</td></tr>
+</table>
+
+<h3>Cache Failure Modes</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Cache Stampede</h4>
+    <p>Many threads miss simultaneously and all hit the DB. Fix with probabilistic early expiry, a mutex/lock on the first miss (cache aside with locks), or background refresh.</p>
+  </div>
+  <div class="card">
+    <h4>Cache Penetration</h4>
+    <p>Queries for keys that never exist bypass the cache and hit the DB every time. Fix with a Bloom filter at the cache layer to reject known-absent keys.</p>
+  </div>
+  <div class="card">
+    <h4>Cache Avalanche</h4>
+    <p>Many keys expire at the same time (e.g., after a cache flush). Fix with jittered TTLs — add ±10–20% random offset to each key's TTL.</p>
+  </div>
+</div>
+
+<h3>Redis vs Memcached</h3>
+<table>
+  <tr><th>Feature</th><th>Redis</th><th>Memcached</th></tr>
+  <tr><td>Data structures</td><td>String, Hash, List, Set, ZSet, Stream, Bitmap, HLL</td><td>String only</td></tr>
+  <tr><td>Persistence</td><td>RDB snapshots + AOF log</td><td>None (RAM only)</td></tr>
+  <tr><td>Replication</td><td>Primary-replica + Sentinel/Cluster</td><td>Client-side sharding only</td></tr>
+  <tr><td>Lua scripting</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Best for</td><td>Leaderboards, sessions, pub/sub, rate limiting, distributed locks</td><td>Simple object cache, multi-threaded high throughput</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="databases-sql-nosql-and-the-cap-theorem">Databases: SQL, NoSQL, and the CAP Theorem</h2>
+<p class="lead">Choosing the right database is the most consequential early decision. Understand the trade-offs, not just the names.</p>
+
+<h3>SQL vs NoSQL — When to Use Which</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Relational (SQL)</h4>
+    <p><strong>Choose when:</strong> data has complex relationships, transactions span multiple tables (financial transfers, inventory), schema is stable, strong consistency is required. PostgreSQL is the modern default. MySQL for legacy systems. CockroachDB / Spanner for distributed ACID.</p>
+  </div>
+  <div class="card">
+    <h4>NoSQL</h4>
+    <p><strong>Choose when:</strong> massive scale (hundreds of millions of rows), flexible/evolving schema, high write throughput, simple access patterns (key-value, document). Cassandra for write-heavy time-series; MongoDB for document; DynamoDB for serverless key-value; Elasticsearch for full-text search.</p>
+  </div>
+</div>
+
+<h3>Sharding / Partitioning</h3>
+<p>Sharding splits a dataset across multiple DB nodes. Each shard owns a range of keys. It is the primary path to horizontal write scaling.</p>
+
+<table>
+  <tr><th>Strategy</th><th>How</th><th>Pros</th><th>Cons</th></tr>
+  <tr><td>Hash Sharding</td><td>shard = hash(key) % N</td><td>Even distribution</td><td>Range queries span all shards; resharding is painful</td></tr>
+  <tr><td>Range Sharding</td><td>shard by key range (A–M, N–Z)</td><td>Range queries efficient</td><td>Hot partition if range is uneven (time-series: latest shard gets all writes)</td></tr>
+  <tr><td>Directory / Lookup</td><td>Mapping table: key → shard ID</td><td>Flexible; easy resharding</td><td>Lookup table is a SPOF; extra hop</td></tr>
+  <tr><td>Geo-Sharding</td><td>shard by region</td><td>Data locality, compliance</td><td>Cross-region queries slow</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Warning</span> Avoid cross-shard transactions whenever possible — they require distributed locks (2PC) and can degrade to O(n) latency. Design your data model to co-locate related records on the same shard.</div>
+
+<h3>Replication</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Single-Leader</h4>
+    <p>One primary accepts writes; replicas stream changes. Reads can go to replicas (replication lag ≈ ms). Most common. Failover: replica promoted on primary death.</p>
+  </div>
+  <div class="card">
+    <h4>Multi-Leader</h4>
+    <p>Multiple nodes accept writes (geo-distributed teams, offline clients). Requires conflict resolution (last-write-wins, CRDTs, custom merge). Complexity cost is high.</p>
+  </div>
+  <div class="card">
+    <h4>Leaderless (Dynamo-style)</h4>
+    <p>Any node accepts reads/writes. Quorum: W + R &gt; N for consistency. Used in Cassandra, DynamoDB. Tunable consistency. Best for high availability.</p>
+  </div>
+</div>
+
+<h3>The CAP Theorem</h3>
+<p>A distributed system can guarantee at most two of the three: Consistency, Availability, Partition Tolerance. Because network partitions are inevitable, you always choose between CP and AP.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 420 310" width="420" height="310">
+  <!-- Triangle -->
+  <polygon points="210,20 40,280 380,280" fill="none" stroke="#1a2233" stroke-width="2"/>
+
+  <!-- Vertex labels -->
+  <text x="210" y="15" text-anchor="middle" font-size="14" font-weight="700" fill="#2563eb">Consistency</text>
+  <text x="210" y="30" text-anchor="middle" font-size="10" fill="#2563eb">Every read sees latest write</text>
+
+  <text x="18" y="300" font-size="14" font-weight="700" fill="#059669">Availability</text>
+  <text x="18" y="314" font-size="10" fill="#059669">Every request gets a response</text>
+
+  <text x="282" y="300" font-size="14" font-weight="700" fill="#b45309">Partition</text>
+  <text x="282" y="314" font-size="10" fill="#b45309">Tolerance</text>
+
+  <!-- CP zone label -->
+  <text x="155" y="130" text-anchor="middle" font-size="11" fill="#1e3a8a" font-weight="600">CP</text>
+  <text x="155" y="145" text-anchor="middle" font-size="9" fill="#1e3a8a">HBase, ZooKeeper,</text>
+  <text x="155" y="157" text-anchor="middle" font-size="9" fill="#1e3a8a">Spanner, MongoDB</text>
+
+  <!-- AP zone label -->
+  <text x="270" y="200" text-anchor="middle" font-size="11" fill="#065f46" font-weight="600">AP</text>
+  <text x="270" y="215" text-anchor="middle" font-size="9" fill="#065f46">Cassandra, DynamoDB,</text>
+  <text x="270" y="227" text-anchor="middle" font-size="9" fill="#065f46">CouchDB, Riak</td></text>
+
+  <!-- CA zone (not really achievable) -->
+  <text x="210" y="265" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">CA (single node only)</text>
+  <text x="210" y="278" text-anchor="middle" font-size="9" fill="#92400e">PostgreSQL, MySQL (no dist.)</text>
+</svg>
+<div class="cap">CAP Triangle — real distributed systems sit on the CP or AP edge. CA is only possible without network partitions, i.e. single-node.</div>
+</div>
+
+<div class="callout note"><span class="t">Note</span> PACELC extends CAP: even without a partition (E), systems trade off Latency (L) vs Consistency (C). DynamoDB defaults to low latency with eventual consistency; it can be tuned toward consistency at the cost of latency.</div>
+
+<h3>Database Indexing Essentials</h3>
+<p>B-tree indexes (default in PostgreSQL/MySQL) excel at range queries and equality. Composite indexes follow left-prefix rules. Hash indexes suit exact equality only. Avoid over-indexing — each index adds write overhead and storage. Cover your most common query patterns; EXPLAIN ANALYZE every slow query.</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="message-queues-amp-event-streaming">Message Queues &amp; Event Streaming</h2>
+<p class="lead">Async communication decouples services, absorbs traffic spikes, and enables durable processing. Know when to use a queue vs a stream.</p>
+
+<h3>Queue vs Stream</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Message Queue (RabbitMQ, SQS)</h4>
+    <p>Each message consumed once by one consumer. Message deleted on ACK. Best for task distribution, background jobs (send email, resize image). Supports fan-out via exchanges. Delivery guarantees: at-least-once or exactly-once (with transactions).</p>
+  </div>
+  <div class="card">
+    <h4>Event Stream (Kafka, Kinesis)</h4>
+    <p>Log-based. Messages retained for days/weeks. Multiple consumer groups each read independently. Best for audit logs, analytics pipelines, CDC (Change Data Capture), event sourcing. Replay from any offset.</p>
+  </div>
+</div>
+
+<h3>Kafka Architecture</h3>
+<div class="pipeline">
+  <span class="step">Producer</span><span class="arrow">-></span>
+  <span class="step">Topic Partitions</span><span class="arrow">-></span>
+  <span class="step">Consumer Group A</span>
+</div>
+<div class="pipeline">
+  <span class="step">&nbsp;</span><span class="arrow">&nbsp;</span>
+  <span class="step">&nbsp;</span><span class="arrow">-></span>
+  <span class="step">Consumer Group B</span>
+</div>
+
+<p>Kafka partitions enable parallel consumption. Within a partition messages are ordered. A consumer group scales horizontally up to the partition count — beyond that, consumers are idle. Key-based partitioning ensures ordering for related events (all events for user ID X go to the same partition).</p>
+
+<table>
+  <tr><th>Concept</th><th>Kafka</th><th>RabbitMQ</th></tr>
+  <tr><td>Model</td><td>Persistent log / stream</td><td>Message queue (push)</td></tr>
+  <tr><td>Retention</td><td>Days to weeks (configurable)</td><td>Until consumed/ACKed</td></tr>
+  <tr><td>Ordering</td><td>Per-partition</td><td>Per-queue (FIFO)</td></tr>
+  <tr><td>Throughput</td><td>Millions/s per partition</td><td>Tens of thousands/s</td></tr>
+  <tr><td>Consumer model</td><td>Pull (consumer controls offset)</td><td>Push (broker delivers)</td></tr>
+  <tr><td>Replay</td><td>Yes — seek to any offset</td><td>No — message gone after ACK</td></tr>
+  <tr><td>Best for</td><td>Event sourcing, analytics, CDC</td><td>Task queues, RPC, work distribution</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Tip</span> When asked "how do you handle a spike in user uploads?" the answer is: write upload metadata to a Kafka topic; a downstream consumer pool processes them asynchronously. The API responds immediately; the queue absorbs the burst.</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="cdn-amp-rate-limiting">CDN &amp; Rate Limiting</h2>
+
+<h3>Content Delivery Network (CDN)</h3>
+<p>A CDN is a globally distributed cache of static (and increasingly dynamic) content. Edge nodes serve requests from the geographically nearest PoP (Point of Presence), reducing latency from hundreds of milliseconds to single-digit milliseconds.</p>
+<div class="grid c2">
+  <div class="card">
+    <h4>Pull CDN</h4>
+    <p>CDN fetches from origin on first cache miss, then caches. Simple to operate. Cold start latency on first request per edge. Examples: Cloudflare, Fastly.</p>
+  </div>
+  <div class="card">
+    <h4>Push CDN</h4>
+    <p>You upload content to CDN nodes explicitly. Good for rarely-changing large files. Must manage cache invalidation. Examples: AWS CloudFront with S3 sync.</p>
+  </div>
+</div>
+<p>Use CDNs for: images/video, JavaScript/CSS bundles, HTML pages with long TTLs, API responses that are the same for all users (public product listings). Do not cache: personalised API responses, session-sensitive data.</p>
+
+<h3>Rate Limiting</h3>
+<p>Rate limiting protects services from abuse, runaway clients, and DDoS. Implement at the API gateway or a dedicated reverse proxy layer.</p>
+<table>
+  <tr><th>Algorithm</th><th>How</th><th>Pros</th><th>Cons</th></tr>
+  <tr><td>Token Bucket</td><td>Bucket fills at rate r. Each request costs 1 token.</td><td>Allows bursting up to bucket size</td><td>More state per user</td></tr>
+  <tr><td>Leaky Bucket</td><td>FIFO queue drains at constant rate</td><td>Smooth output — no bursts</td><td>Latency for queued requests</td></tr>
+  <tr><td>Fixed Window Counter</td><td>Count requests per window (1 min). Reset at boundary.</td><td>Simple, O(1) storage</td><td>Boundary spike: 2× traffic at window edge</td></tr>
+  <tr><td>Sliding Window Log</td><td>Timestamp log of requests; prune old entries</td><td>Accurate, no boundary spike</td><td>High memory — stores every request timestamp</td></tr>
+  <tr><td>Sliding Window Counter</td><td>Weighted blend of current + previous window</td><td>Accurate, low memory</td><td>Approximate (not exact)</td></tr>
+</table>
+<div class="callout note"><span class="t">Distributed Rate Limiting</span> Token counters stored in Redis with Lua scripts or atomic INCR+EXPIRE. Use Redis Cluster for HA. In multi-region setups, counters can be per-region (approximate global limit) or centralised (exact but higher latency).</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="api-design">API Design</h2>
+<p class="lead">API design is an interface contract. In system design interviews, briefly discuss the client-facing API before designing internals.</p>
+
+<h3>REST</h3>
+<p>Resource-oriented, stateless, HTTP verbs (GET/POST/PUT/PATCH/DELETE). Standard pagination: cursor-based (stable) or offset-based (simple but inconsistent on live data). Use HTTP status codes semantically: 200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 429 Too Many Requests, 503 Service Unavailable. Version via URL (<code>/v1/</code>) or <code>Accept</code> header.</p>
+
+<h3>gRPC</h3>
+<p>Protocol Buffers (binary serialisation), HTTP/2, bidirectional streaming, auto-generated clients. 5–10× smaller payload than JSON. Best for internal service-to-service communication. Requires HTTP/2 support from load balancers.</p>
+
+<h3>GraphQL</h3>
+<p>Client specifies exact fields needed. Eliminates over-fetching and under-fetching. Single endpoint. Trade-off: N+1 query problem mitigated by DataLoader (batching), but can be expensive server-side without query depth limits and cost analysis.</p>
+
+<h3>WebSocket</h3>
+<p>Full-duplex persistent connection. Use for: real-time chat, live dashboards, collaborative editing, notifications. Stateful — session is pinned to one server. Use IP-hash LB or move session state to Redis pub/sub for horizontal scaling.</p>
+
+<h3>API Gateway Pattern</h3>
+<div class="pipeline">
+  <span class="step">Client</span><span class="arrow">-></span>
+  <span class="step">API Gateway</span><span class="arrow">-></span>
+  <span class="step">Auth Service</span>
+</div>
+<div class="pipeline">
+  <span class="step">&nbsp;</span><span class="arrow">&nbsp;</span>
+  <span class="step">&nbsp;</span><span class="arrow">-></span>
+  <span class="step">Microservice A / B / C</span>
+</div>
+<p>The API gateway handles: authentication/authorisation, rate limiting, request routing, SSL termination, protocol translation (REST → gRPC), response aggregation, logging and tracing injection. Examples: AWS API Gateway, Kong, Nginx, Envoy.</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="consistency-models">Consistency Models</h2>
+<p class="lead">Distributed systems trade consistency for availability and latency. Know the spectrum — from strict serialisability to eventual consistency.</p>
+
+<table>
+  <tr><th>Model</th><th>Guarantee</th><th>Latency</th><th>Example</th></tr>
+  <tr><td>Strict Serialisability</td><td>Total order; reads see latest write globally</td><td>Highest</td><td>Spanner, FoundationDB</td></tr>
+  <tr><td>Linearisability</td><td>Every operation appears instantaneous; real-time order</td><td>High</td><td>Zookeeper, etcd</td></tr>
+  <tr><td>Sequential Consistency</td><td>All processes see same order; not necessarily real-time</td><td>Medium</td><td>Raft consensus</td></tr>
+  <tr><td>Causal Consistency</td><td>Causally related writes seen in order by all clients</td><td>Medium</td><td>MongoDB sessions</td></tr>
+  <tr><td>Read-Your-Writes</td><td>A client always sees its own writes</td><td>Low</td><td>Sticky sessions or token routing</td></tr>
+  <tr><td>Eventual Consistency</td><td>All replicas converge given no new writes</td><td>Lowest</td><td>DynamoDB default, DNS</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Interview answer scaffold</span> "For user profile reads after a write, I need read-your-writes consistency. I'll route all reads for a user to the same replica for 5 seconds after a write using a session token. For the global feed, eventual consistency is fine — a few seconds of staleness is invisible to users."</div>
+
+<h3>Achieving Read-Your-Writes at Scale</h3>
+<p>Three practical patterns: (1) route all requests for a user to the primary for N seconds after a write; (2) attach a "replication token" (write LSN) to the response and route reads to a replica only if its LSN ≥ token; (3) write to cache simultaneously on DB write so reads always find the latest version in cache.</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="scalability-patterns">Scalability Patterns</h2>
+<p class="lead">Scale by dimension: vertical (bigger box), horizontal (more boxes), or by sharding data and distributing state.</p>
+
+<h3>Vertical vs Horizontal Scaling</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Vertical (Scale-Up)</h4>
+    <p>Larger CPU, more RAM, faster SSD. Simple — no code changes. Hard ceiling (largest instance type). Single point of failure. Good for databases that resist horizontal sharding (complex joins, ACID transactions). Cost: diminishing returns beyond a threshold.</p>
+  </div>
+  <div class="card">
+    <h4>Horizontal (Scale-Out)</h4>
+    <p>More servers behind a load balancer. Linear cost scaling. Requires stateless application tier — all state lives in shared storage (DB, Redis, object store). Fault tolerant — losing one node is not catastrophic. Required for &gt;1 TB data or &gt;100 K QPS sustained.</p>
+  </div>
+</div>
+
+<h3>Stateless Services</h3>
+<p>A service is stateless when any instance can handle any request. Session state, user context, and ephemeral data must be externalised to Redis/Memcached (sessions), S3/GCS (file uploads), or a DB (persistent state). This is non-negotiable for horizontal scaling and zero-downtime deploys.</p>
+
+<h3>Database Scaling Ladder</h3>
+<div class="pipeline">
+  <span class="step">Single DB</span><span class="arrow">-></span>
+  <span class="step">Read Replicas</span><span class="arrow">-></span>
+  <span class="step">Cache Layer</span><span class="arrow">-></span>
+  <span class="step">Vertical Scale</span><span class="arrow">-></span>
+  <span class="step">Sharding</span>
+</div>
+<p>Exhaust cheaper options before sharding. Sharding multiplies operational complexity: queries must be shard-aware, joins across shards are expensive, migrations require careful coordination.</p>
+
+<h3>Additional Patterns</h3>
+<table>
+  <tr><th>Pattern</th><th>Problem Solved</th><th>Trade-off</th></tr>
+  <tr><td>CQRS (Command/Query Segregation)</td><td>Separate read and write models for different scaling needs</td><td>Two models to maintain; eventual consistency between them</td></tr>
+  <tr><td>Event Sourcing</td><td>Audit log, replay, time-travel debugging</td><td>Complex queries on event log; snapshot needed for performance</td></tr>
+  <tr><td>Saga Pattern</td><td>Distributed transactions across microservices</td><td>Compensating transactions complexity; eventual consistency</td></tr>
+  <tr><td>Circuit Breaker</td><td>Prevent cascade failures when downstream service is slow</td><td>Caller must handle "open circuit" state gracefully</td></tr>
+  <tr><td>Bulkhead</td><td>Isolate failures to a pool — one slow service doesn't starve others</td><td>Over-provisioning thread pools</td></tr>
+  <tr><td>Backpressure</td><td>Slow producers/consumers from overwhelming downstream</td><td>Requires queue depth monitoring and producer throttling</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="worked-example-url-shortener">Worked Example: URL Shortener</h2>
+<p class="lead">A URL shortener is the "hello world" of system design. Walk through the full design — estimation, schema, read/write paths, and failure handling.</p>
+
+<h3>Requirements</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Functional</h4>
+    <ul>
+      <li>POST /shorten — accepts long URL, returns short code</li>
+      <li>GET /{code} — redirects to original URL (301/302)</li>
+      <li>Optional: custom aliases, expiry, click analytics</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Non-Functional</h4>
+    <ul>
+      <li>100:1 read/write ratio</li>
+      <li>Redirect latency p99 &lt; 50 ms</li>
+      <li>99.99% availability for redirects</li>
+      <li>Short codes: globally unique, hard to predict</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Estimation</h3>
+<p>100 M DAU, 1% create URLs → 1 M writes/day ≈ 12 writes/s. Reads: 100:1 → 1 200 reads/s average, 3 600 reads/s peak. Storage: 1 M × 365 × 5 years × 500 B ≈ 900 GB. Bandwidth: trivial (HTTP redirects, no payload).</p>
+
+<h3>Short Code Generation</h3>
+<p>Options: (1) <strong>Random base62 (7 chars)</strong> — 62⁷ = 3.5 T URLs, collision probability low, but must check DB on collision; (2) <strong>Snowflake-style auto-increment ID → base62</strong> — monotonically increasing, no collision check needed, reveals insertion order; (3) <strong>MD5/SHA hash of URL truncated</strong> — deterministic, deduplication free, but rare collision. Best answer: Snowflake ID (distributed, time-ordered, no collisions) encoded in base62 → 7 chars.</p>
+
+<h3>Architecture Diagram</h3>
+<div class="diagram">
+<svg viewBox="0 0 720 370" width="720" height="370">
+  <!-- Client -->
+  <rect x="10" y="160" width="80" height="50" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="50" y="181" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">Client</text>
+  <text x="50" y="197" text-anchor="middle" font-size="10" fill="#2563eb">Browser/App</text>
+
+  <!-- CDN -->
+  <rect x="120" y="60" width="100" height="50" rx="8" fill="#f0fdfa" stroke="#0891b2" stroke-width="2"/>
+  <text x="170" y="81" text-anchor="middle" font-size="12" font-weight="700" fill="#164e63">CDN</text>
+  <text x="170" y="97" text-anchor="middle" font-size="10" fill="#0891b2">Static assets</text>
+
+  <!-- Load Balancer -->
+  <rect x="120" y="160" width="100" height="50" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="170" y="181" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">LB (L7)</text>
+  <text x="170" y="197" text-anchor="middle" font-size="10" fill="#2563eb">Nginx / ALB</text>
+
+  <!-- API Servers -->
+  <rect x="260" y="100" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="315" y="121" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">Write API</text>
+  <text x="315" y="137" text-anchor="middle" font-size="10" fill="#059669">POST /shorten</text>
+
+  <rect x="260" y="200" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="315" y="221" text-anchor="middle" font-size="12" font-weight="700" fill="#065f46">Read API</text>
+  <text x="315" y="237" text-anchor="middle" font-size="10" fill="#059669">GET /{code}</text>
+
+  <!-- ID Generator -->
+  <rect x="260" y="300" width="110" height="50" rx="8" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="315" y="321" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">Snowflake ID</text>
+  <text x="315" y="337" text-anchor="middle" font-size="10" fill="#b45309">Generator</text>
+
+  <!-- Cache -->
+  <rect x="420" y="200" width="110" height="50" rx="8" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <text x="475" y="221" text-anchor="middle" font-size="12" font-weight="700" fill="#713f12">Redis Cache</text>
+  <text x="475" y="237" text-anchor="middle" font-size="10" fill="#ca8a04">code→URL, LRU</text>
+
+  <!-- DB Primary -->
+  <rect x="580" y="100" width="120" height="50" rx="8" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="640" y="121" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">DB Primary</text>
+  <text x="640" y="137" text-anchor="middle" font-size="10" fill="#b45309">MySQL / PG</text>
+
+  <!-- DB Replica -->
+  <rect x="580" y="200" width="120" height="50" rx="8" fill="#fff7ed" stroke="#b45309" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="640" y="221" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">DB Replica</text>
+  <text x="640" y="237" text-anchor="middle" font-size="10" fill="#b45309">Read replica ×2</text>
+
+  <!-- Analytics Queue -->
+  <rect x="420" y="300" width="110" height="50" rx="8" fill="#f0fdfa" stroke="#0891b2" stroke-width="2"/>
+  <text x="475" y="321" text-anchor="middle" font-size="12" font-weight="700" fill="#164e63">Kafka</text>
+  <text x="475" y="337" text-anchor="middle" font-size="10" fill="#0891b2">Click events</text>
+
+  <!-- Arrows -->
+  <!-- Client -> LB -->
+  <line x1="90" y1="185" x2="120" y2="185" stroke="#1a2233" stroke-width="1.5" marker-end="url(#ma)"/>
+  <!-- LB -> Write API -->
+  <line x1="220" y1="175" x2="260" y2="135" stroke="#1a2233" stroke-width="1.5" marker-end="url(#ma)"/>
+  <!-- LB -> Read API -->
+  <line x1="220" y1="195" x2="260" y2="215" stroke="#1a2233" stroke-width="1.5" marker-end="url(#ma)"/>
+  <!-- Write API -> ID Gen -->
+  <line x1="315" y1="150" x2="315" y2="300" stroke="#b45309" stroke-width="1.5" marker-end="url(#mb)"/>
+  <!-- Write API -> DB Primary -->
+  <line x1="370" y1="125" x2="580" y2="125" stroke="#b45309" stroke-width="1.5" marker-end="url(#mb)"/>
+  <!-- Read API -> Cache -->
+  <line x1="370" y1="225" x2="420" y2="225" stroke="#ca8a04" stroke-width="1.5" marker-end="url(#mc)"/>
+  <!-- Cache miss -> DB Replica -->
+  <line x1="530" y1="225" x2="580" y2="225" stroke="#ca8a04" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#mc)"/>
+  <!-- DB Primary -> DB Replica -->
+  <line x1="640" y1="150" x2="640" y2="200" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#mb)"/>
+  <!-- Read API -> Kafka -->
+  <line x1="340" y1="250" x2="420" y2="315" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#md)"/>
+
+  <!-- Legend -->
+  <text x="10" y="350" font-size="10" fill="#1a2233">— solid: primary path   - - dashed: async/fallback path</text>
+
+  <defs>
+    <marker id="ma" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#1a2233"/></marker>
+    <marker id="mb" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#b45309"/></marker>
+    <marker id="mc" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#ca8a04"/></marker>
+    <marker id="md" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#0891b2"/></marker>
+  </defs>
+</svg>
+<div class="cap">URL Shortener architecture — write path (blue) vs read path (gold) with Redis cache-aside, read replicas, Kafka analytics stream, and a distributed Snowflake ID generator.</div>
+</div>
+
+<h3>Read Path</h3>
+<div class="pipeline">
+  <span class="step">GET /abc1234</span><span class="arrow">-></span>
+  <span class="step">LB</span><span class="arrow">-></span>
+  <span class="step">Read API</span><span class="arrow">-></span>
+  <span class="step">Redis (hit?)</span><span class="arrow">-></span>
+  <span class="step">302 Redirect</span>
+</div>
+<p>On cache miss: Read API → DB Replica → populate Redis (TTL 24 h) → return 302. Click event published to Kafka asynchronously. Cache hit rate should be &gt;95% for popular URLs; tail latency dominated by DB replica reads.</p>
+
+<h3>Write Path</h3>
+<div class="pipeline">
+  <span class="step">POST /shorten</span><span class="arrow">-></span>
+  <span class="step">Write API</span><span class="arrow">-></span>
+  <span class="step">Snowflake ID</span><span class="arrow">-></span>
+  <span class="step">base62 encode</span><span class="arrow">-></span>
+  <span class="step">DB Primary</span><span class="arrow">-></span>
+  <span class="step">Return short URL</span>
+</div>
+
+<h3>DB Schema</h3>
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">CREATE TABLE</span> url_map (
+  id          <span class="hljs-type">BIGINT</span> <span class="hljs-keyword">PRIMARY KEY</span>,         <span class="hljs-comment">-- Snowflake ID</span>
+  short_code  <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">10</span>) <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">UNIQUE</span>, <span class="hljs-comment">-- base62(id)</span>
+  long_url    TEXT        <span class="hljs-keyword">NOT NULL</span>,
+  user_id     <span class="hljs-type">BIGINT</span>,
+  created_at  <span class="hljs-type">TIMESTAMP</span>   <span class="hljs-keyword">DEFAULT</span> NOW(),
+  expires_at  <span class="hljs-type">TIMESTAMP</span>,
+  click_count <span class="hljs-type">BIGINT</span>      <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0</span>        <span class="hljs-comment">-- updated by analytics consumer</span>
+);
+<span class="hljs-keyword">CREATE</span> INDEX idx_short_code <span class="hljs-keyword">ON</span> url_map (short_code);</code></pre>
+
+<h3>Failure Scenarios</h3>
+<table>
+  <tr><th>Failure</th><th>Impact</th><th>Mitigation</th></tr>
+  <tr><td>Cache node dies</td><td>All reads hit DB — 10× load spike</td><td>Redis Cluster (multi-node); circuit breaker; serve stale on error</td></tr>
+  <tr><td>DB Primary dies</td><td>Writes fail; reads can continue from replica</td><td>Automated failover (RDS Multi-AZ, Patroni); writes queue in Kafka</td></tr>
+  <tr><td>Short code collision</td><td>Second URL overwrites first</td><td>Snowflake IDs are unique by design; unique constraint in DB</td></tr>
+  <tr><td>Hot URL (viral)</td><td>Single key hammers cache, then DB</td><td>Local in-process cache per app server for top-N keys; cache-aside with lock</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="ml-llm-system-design">ML/LLM System Design</h2>
+<p class="lead">AI/ML workloads have unique infrastructure concerns: GPU affinity, large model weights, embedding indices, and streaming inference. Interviewers increasingly expect fluency here.</p>
+
+<h3>ML Model Serving Layer</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Online Serving (Low Latency)</h4>
+    <p>Real-time inference. Framework: TorchServe, Triton Inference Server, vLLM (for LLMs), ONNX Runtime. GPU instances (A10G/A100/H100). Batching: dynamic micro-batching (group requests in a 5–20 ms window). Auto-scaling on GPU utilisation + request queue depth.</p>
+  </div>
+  <div class="card">
+    <h4>Batch / Offline Serving</h4>
+    <p>Bulk predictions — product recommendations, email content scoring, document classification. Spark / Ray for distributed processing. GPU spot instances for cost. Results written to a feature store or DB for downstream reads.</p>
+  </div>
+</div>
+
+<h3>LLM Serving Optimisations</h3>
+<table>
+  <tr><th>Technique</th><th>What It Does</th><th>Impact</th></tr>
+  <tr><td>KV Cache</td><td>Caches Key/Value attention tensors for the prompt prefix</td><td>Eliminates redundant prompt re-computation; critical for multi-turn chat</td></tr>
+  <tr><td>Continuous Batching</td><td>Interleave tokens from multiple requests mid-generation</td><td>3–10× GPU utilisation improvement vs naive batching</td></tr>
+  <tr><td>Speculative Decoding</td><td>Small draft model proposes tokens; large model verifies</td><td>2–4× throughput for low-temperature generation</td></tr>
+  <tr><td>Quantisation (INT8/INT4)</td><td>Reduce weight precision</td><td>2–4× memory reduction; slight quality trade-off</td></tr>
+  <tr><td>Tensor Parallelism</td><td>Shard weight matrices across GPUs</td><td>Fit larger models; latency scales sub-linearly</td></tr>
+  <tr><td>Prefix Caching (vLLM)</td><td>Re-use KV cache across requests with identical system prompts</td><td>Dramatically reduces TTFT for shared-system-prompt workloads</td></tr>
+</table>
+
+<h3>RAG Pipeline at Scale</h3>
+<div class="pipeline">
+  <span class="step">User Query</span><span class="arrow">-></span>
+  <span class="step">Embed Query</span><span class="arrow">-></span>
+  <span class="step">Vector DB ANN Search</span><span class="arrow">-></span>
+  <span class="step">Top-K Chunks</span><span class="arrow">-></span>
+  <span class="step">LLM + Context</span><span class="arrow">-></span>
+  <span class="step">Response</span>
+</div>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Embedding Service</h4>
+    <p>Dedicated embedding endpoint (e.g. text-embedding-3-small, GTE-large). Batch offline for document corpus. GPU for throughput; CPU for p99 latency with small models. Cache embeddings to avoid re-embedding identical chunks.</p>
+  </div>
+  <div class="card">
+    <h4>Vector Database</h4>
+    <p>Stores dense vectors + metadata. ANN algorithms: HNSW (low latency, high recall), IVF-PQ (compression + speed). Options: Pinecone, Weaviate, Qdrant, pgvector (PostgreSQL). Scale: 100 M vectors needs dedicated vector DB, not in-process FAISS.</p>
+  </div>
+  <div class="card">
+    <h4>Retrieval Quality</h4>
+    <p>Hybrid search: dense (semantic) + sparse (BM25 keyword) with RRF re-ranking. Chunk strategy: 256–512 token chunks with 10–20% overlap. Re-ranker (cross-encoder) re-orders top-K before sending to LLM. Metadata filters reduce search space.</p>
+  </div>
+</div>
+
+<h3>Feature Store</h3>
+<p>A feature store centralises ML features so they are consistent between training and serving — eliminating training/serving skew. Offline store (S3 + Spark) for historical features. Online store (Redis/DynamoDB) for low-latency feature retrieval at serve time. Examples: Feast, Tecton, Vertex AI Feature Store.</p>
+
+<h3>ML System Design Checklist</h3>
+<div class="callout note"><span class="t">Checklist</span>
+  <ul>
+    <li>Define the ML task (classification, regression, ranking, generation)</li>
+    <li>Feature pipeline: sources → transform → online/offline store</li>
+    <li>Training: batch size, distributed training (DDP/FSDP), experiment tracking (MLflow, W&amp;B)</li>
+    <li>Evaluation: offline metrics (AUC, NDCG, BLEU) vs online metrics (CTR, revenue)</li>
+    <li>Serving: online (latency &lt; 100 ms) vs batch; model registry → canary deploy</li>
+    <li>Monitoring: data drift, concept drift, model performance decay, alerting</li>
+    <li>Feedback loop: user signals → labels → retraining pipeline</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="building-blocks-cheat-sheet">Building Blocks Cheat Sheet</h2>
+<p class="lead">One-page reference for the most common components and the questions they answer.</p>
+
+<table>
+  <tr><th>Component</th><th>Primary Role</th><th>Go-To Options (2026)</th><th>Key Config / Tuning</th></tr>
+  <tr><td>L7 Load Balancer</td><td>Route HTTP traffic, TLS termination</td><td>AWS ALB, Nginx, Envoy, Traefik</td><td>Health check interval, sticky sessions, connection draining</td></tr>
+  <tr><td>Reverse Proxy / API GW</td><td>Auth, rate limit, routing</td><td>Kong, AWS API GW, Apigee</td><td>Rate limit policy, JWT validation, plugin chain</td></tr>
+  <tr><td>Distributed Cache</td><td>Sub-ms reads, offload DB</td><td>Redis 7 (Cluster), Memcached</td><td>Max memory policy (allkeys-lru), eviction, persistence RDB+AOF</td></tr>
+  <tr><td>RDBMS</td><td>ACID transactions, complex queries</td><td>PostgreSQL 17, MySQL 9, CockroachDB</td><td>Connection pool (PgBouncer), read replicas, EXPLAIN ANALYZE</td></tr>
+  <tr><td>Wide-Column / KV NoSQL</td><td>High write throughput, simple access</td><td>Cassandra 5, DynamoDB, ScyllaDB</td><td>Replication factor, consistency level, compaction strategy</td></tr>
+  <tr><td>Document DB</td><td>Flexible schema, rich queries</td><td>MongoDB 8, Firestore</td><td>Indexes, aggregation pipeline, change streams</td></tr>
+  <tr><td>Search Engine</td><td>Full-text search, faceted filter</td><td>Elasticsearch 9, OpenSearch</td><td>Index mapping, shard count, refresh interval</td></tr>
+  <tr><td>Vector DB</td><td>Semantic search, RAG retrieval</td><td>Qdrant, Weaviate, pgvector</td><td>HNSW ef_construction, index segment merge, hybrid BM25+dense</td></tr>
+  <tr><td>Message Queue</td><td>Async task dispatch, decoupling</td><td>RabbitMQ 4, AWS SQS</td><td>Dead-letter queue, visibility timeout, message TTL</td></tr>
+  <tr><td>Event Stream</td><td>Durable log, multi-consumer</td><td>Kafka 3.9 (KRaft), AWS Kinesis</td><td>Partition count, replication factor, consumer lag alert</td></tr>
+  <tr><td>Object Storage</td><td>Blob / file storage at scale</td><td>AWS S3, GCS, Azure Blob</td><td>Multipart upload, lifecycle rules, presigned URLs</td></tr>
+  <tr><td>CDN</td><td>Static asset delivery, latency</td><td>Cloudflare, AWS CloudFront, Fastly</td><td>Cache-Control TTL, origin shield, purge/invalidation strategy</td></tr>
+  <tr><td>LLM Inference</td><td>Text generation, embeddings</td><td>vLLM, Triton, TGI, Bedrock</td><td>Continuous batching, KV cache size, quantisation, TP degree</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="trade-offs-reference">Trade-offs Reference</h2>
+<p class="lead">Use this table to justify architectural decisions. Every choice is a trade-off — internalise the vocabulary.</p>
+
+<table>
+  <tr><th>Decision</th><th>Option A</th><th>Option B</th><th>When to Choose A</th><th>When to Choose B</th></tr>
+  <tr>
+    <td>Consistency</td><td>Strong (synchronous replication)</td><td>Eventual (async replication)</td>
+    <td>Financial transactions, inventory, leaderboards</td>
+    <td>Social feed, analytics, DNS, notifications</td>
+  </tr>
+  <tr>
+    <td>DB type</td><td>SQL (PostgreSQL)</td><td>NoSQL (Cassandra)</td>
+    <td>Complex joins, ACID needed, stable schema</td>
+    <td>100 M+ rows, write-heavy, simple key-based access</td>
+  </tr>
+  <tr>
+    <td>Cache strategy</td><td>Cache-Aside</td><td>Write-Through</td>
+    <td>Read-heavy, tolerate brief staleness</td>
+    <td>Write-heavy read-back, freshness critical</td>
+  </tr>
+  <tr>
+    <td>Scaling axis</td><td>Vertical</td><td>Horizontal</td>
+    <td>Stateful DB under 10 TB, strong consistency, simplicity</td>
+    <td>Stateless app tier, &gt;100 K QPS, fault tolerance needed</td>
+  </tr>
+  <tr>
+    <td>Async comms</td><td>Message Queue (SQS)</td><td>Event Stream (Kafka)</td>
+    <td>Task distribution, each message consumed once</td>
+    <td>Event log, multiple consumers, replay needed</td>
+  </tr>
+  <tr>
+    <td>API protocol</td><td>REST (JSON)</td><td>gRPC (Protobuf)</td>
+    <td>Public APIs, browser clients, simplicity</td>
+    <td>Internal microservices, high throughput, streaming</td>
+  </tr>
+  <tr>
+    <td>ID generation</td><td>UUID v4 (random)</td><td>Snowflake (time-ordered)</td>
+    <td>Fully decentralised, opaque IDs needed</td>
+    <td>DB index locality, time-sortable, smaller than UUID</td>
+  </tr>
+  <tr>
+    <td>Storage</td><td>SSD (block)</td><td>Object store (S3)</td>
+    <td>Low latency DB I/O, random access</td>
+    <td>Large blobs, images, backups, low cost per GB</td>
+  </tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="q-amp-a-practice">Q&amp;A Practice</h2>
+<p class="lead">Drill these out loud. The ability to articulate concise answers under pressure is the interview skill.</p>
+
+<div class="qa">
+  <div class="q">How would you design Twitter's timeline?</div>
+  <div class="a">Two approaches: (1) Fan-out on write — on tweet, push tweet ID to all followers' timeline caches in Redis. O(followers) write amplification; bad for celebrities. (2) Fan-out on read — merge timelines from followed users at read time. O(following) DB reads per page load. Hybrid: fan-out on write for &lt;1 M followers; fan-out on read for celebrities. Cache precomputed timelines in Redis sorted sets (ZRANGEBYSCORE by timestamp).</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you prevent a cache stampede?</div>
+  <div class="a">Three patterns: (1) Probabilistic early expiry — before TTL expires, a small probability of refreshing on each read, so many callers don't all expire at once; (2) Mutex/lock on first miss — first thread to miss acquires a lock, fetches DB, populates cache; other threads wait and read from cache once populated; (3) Background refresh — a daemon refreshes keys proactively before TTL, so the cache never actually expires for hot keys.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Explain the difference between a message queue and an event stream.</div>
+  <div class="a">A message queue (SQS, RabbitMQ) delivers each message to one consumer, deletes on ACK. An event stream (Kafka, Kinesis) is a durable log — messages are retained, and multiple independent consumer groups each read at their own offset. Use queues for task distribution; use streams for event sourcing, audit logs, and multi-consumer fanout.</div>
+</div>
+
+<div class="qa">
+  <div class="q">When would you shard a database?</div>
+  <div class="a">Only after exhausting: read replicas, caching, vertical scaling, and query optimisation. Sharding is warranted when: single-node write throughput is saturated (&gt;~50 K writes/s), or data size exceeds single-node storage (~10 TB). Sharding adds complexity: cross-shard queries, distributed transactions, and resharding pain. Choose shard key carefully — avoid hot partitions; co-locate frequently joined data.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is the CAP theorem and how does it guide database choice?</div>
+  <div class="a">CAP: Consistency (all nodes return the same data), Availability (every request returns a response), Partition Tolerance (the system operates despite network splits). Since partitions are unavoidable in distributed systems, you choose CP (PostgreSQL, ZooKeeper — sacrifice availability under partition) or AP (Cassandra, DynamoDB — remain available, sacrifice strong consistency). For financial data: CP. For social feeds: AP with read-your-writes for self-reads.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you design a rate limiter at scale?</div>
+  <div class="a">Use a Token Bucket algorithm (allows bursts) or Sliding Window Counter (accurate, low memory). Store counters in Redis with INCR+EXPIRE using a Lua script for atomicity. For multi-region: each region maintains a local counter (approximate global limit) or sync to a central Redis (exact but adds latency). Return 429 with Retry-After header. Apply limits at the API gateway before hitting application servers.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How does consistent hashing work and why is it used for sharding?</div>
+  <div class="a">Nodes and keys are mapped to a hash ring (0 to 2³²). A key is owned by the first node clockwise from its hash. When a node is added/removed, only the keys between the new node and its predecessor move — typically 1/N of all keys, not all keys. This minimises data movement during scale-out events. Virtual nodes (vnodes) per physical node smooth key distribution and handle heterogeneous capacity.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How would you design a notification system for 100 M users?</div>
+  <div class="a">Publisher writes notification event to Kafka. Fan-out service reads topic, looks up user device tokens, groups by channel (push/email/SMS). Channel workers (one per channel type) batch-send via Firebase FCM, AWS SES, Twilio. Store notification records in Cassandra (wide-column, write-heavy). Unread badge count in Redis INCR/DECR. For real-time: WebSocket gateway subscribes to a user-specific Redis pub/sub channel; notification event triggers push to connected clients.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is read-your-writes consistency and how do you achieve it?</div>
+  <div class="a">Read-your-writes guarantees that after you write, subsequent reads from the same session see your write. Strategies: (1) Route all reads to the primary for N seconds post-write; (2) Attach the write's LSN (log sequence number) to the response cookie; route reads to a replica only if replica_lsn ≥ write_lsn; (3) Populate the cache on write, so reads always hit the cache. Option 2 is cleanest for read-heavy workloads that have occasional writes.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you design a RAG system for 10 M documents?</div>
+  <div class="a">Offline: chunk documents (256–512 tokens, 10% overlap) → embed with a sentence-transformer → store vectors + metadata in a dedicated vector DB (Qdrant/Weaviate with HNSW index). At query time: embed user query → ANN search (top-100) → BM25 keyword search → Reciprocal Rank Fusion → cross-encoder re-rank top-10 → inject into LLM context. Scale: dedicated embedding microservice (GPU or CPU depending on model size); vector DB sharded by document collection; KV cache for repeated system-prompt prefixes in vLLM.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What would you monitor in production for a system you just designed?</div>
+  <div class="a">Four golden signals: Latency (p50/p99/p999), Traffic (QPS by endpoint), Errors (5xx rate, % of requests), Saturation (CPU/memory/disk, queue depth, DB connection pool). Plus: cache hit rate (if &lt;80%, investigate), replication lag (if &gt;1 s, investigate), queue consumer lag (Kafka: lag by consumer group), and business metrics (revenue, orders/min). Alert on anomaly detection (sudden drop in traffic = bad as much as sudden spike).</div>
+</div>
+
+<div class="qa">
+  <div class="q">How does Kafka guarantee message ordering?</div>
+  <div class="a">Kafka guarantees ordering within a partition. Messages with the same key always go to the same partition (key-based partitioning), so all events for a given entity (e.g. user_id=123) are ordered. Across partitions there is no total order — only per-partition ordering. For global order you would need a single partition (sacrificing parallelism) or a coordination layer. Consumer groups scale up to the partition count; adding more consumers than partitions yields idle consumers.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2 id="how-to-communicate-your-design">How to Communicate Your Design</h2>
+<p class="lead">Technical correctness is necessary but not sufficient. How you communicate is evaluated as heavily as what you design.</p>
+
+<h3>Narrate, Don't Draw in Silence</h3>
+<p>Speak every decision as you make it: "I'm adding a Redis cache here because reads are 100× more frequent than writes and DB latency would otherwise dominate." Silence reads as uncertainty. Narration shows reasoning, not just recall.</p>
+
+<h3>Check In Before Going Deep</h3>
+<p>After the high-level sketch, pause: "Does this structure look right to you? Is there a specific component you'd like me to go deeper on?" This prevents 20 minutes on the wrong deep-dive. It also shows collaborative instinct — a senior engineer would seek alignment before over-engineering one corner.</p>
+
+<h3>Lead with Trade-offs</h3>
+<p>Never present a decision without its cost: "I'm using eventual consistency here which means a user might see a stale count for a few seconds — that's acceptable for a social feed but I'd reconsider for financial transactions." Interviewers at senior levels are specifically listening for this vocabulary.</p>
+
+<h3>Name What You Are Not Solving</h3>
+<p>Explicitly park scope: "I'm not designing the recommendation engine today — that's a separate ML problem. I'll note it as a future extension." This demonstrates scope awareness and prevents rambling.</p>
+
+<h3>Handle Pushback Gracefully</h3>
+<p>When the interviewer challenges a decision, say: "That's a good point. If [concern] is true, the better approach would be [alternative] because [reason]. I chose the original approach assuming [assumption] — want me to redesign with your assumption?" This models how senior engineers actually change their minds.</p>
+
+<div class="callout ok"><span class="t">Golden rule</span> Drive the conversation. The best candidates never wait to be asked the next question — they say "Now that we have the high-level design, let me walk through the most interesting problem: how do we handle hot-key contention in the cache." Ownership of the narrative is itself a signal of senior-level behaviour.</div>
+
+<h3>Common Mistakes to Avoid</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Jumping to Solutions</h4>
+    <p>Saying "I'll use Kafka" before establishing the scale or requirement signals pattern-matching rather than reasoning. State the requirement first, then justify the choice.</p>
+  </div>
+  <div class="card">
+    <h4>Ignoring Failure Modes</h4>
+    <p>Every component you add is a potential failure point. For each box you draw, briefly mention: what happens when it goes down? What is the fallback? What is the SLA impact?</p>
+  </div>
+  <div class="card">
+    <h4>Premature Optimisation</h4>
+    <p>Designing for 1 billion users when the requirement is 10 million wastes interview time and signals poor prioritisation. Scale to the stated requirement; note what you'd change at 100×.</p>
+  </div>
+  <div class="card">
+    <h4>No Estimation</h4>
+    <p>Skipping back-of-envelope math leaves your design ungrounded. Estimation reveals whether you need 1 server or 1 000. Always quantify before architecting.</p>
+  </div>
+</div>
+
+<details>
+  <summary>30-minute interview pacing guide</summary>
+  <div class="body">
+    <table>
+      <tr><th>Time</th><th>Activity</th></tr>
+      <tr><td>0–5 min</td><td>Clarify requirements. Ask functional + non-functional questions. Confirm scope.</td></tr>
+      <tr><td>5–10 min</td><td>Back-of-envelope estimation. Write numbers on board. Confirm with interviewer.</td></tr>
+      <tr><td>10–20 min</td><td>High-level design. Draw 5–8 components. Walk through read path + write path.</td></tr>
+      <tr><td>20–28 min</td><td>Deep-dive on 1–2 critical components (usually the hardest). Show schema, algorithms, consistency model.</td></tr>
+      <tr><td>28–30 min</td><td>Wrap-up. Name bottlenecks, next steps, trade-offs summary.</td></tr>
+    </table>
+  </div>
+</details>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

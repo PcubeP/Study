@@ -1,0 +1,459 @@
+<h2>What SAP BTP Is &amp; Why It Matters</h2>
+<p class="lead">SAP Business Technology Platform (BTP) is SAP's unified Platform-as-a-Service for building, extending, and integrating applications around a company's SAP core (S/4HANA, SuccessFactors, Ariba, and more) — without modifying that core.</p>
+
+<p>BTP bundles four technology pillars under one roof: <strong>application development</strong> (runtimes, the CAP model, Fiori/UI5), <strong>integration</strong> (Integration Suite, APIs, events), <strong>data &amp; analytics</strong> (SAP HANA Cloud, Datasphere, SAP Analytics Cloud), and <strong>AI</strong> (SAP AI Core, Joule, Generative AI Hub). The strategic promise is the <em>clean core</em>: keep your ERP standard and upgradable, and push all customization into a governed platform alongside it.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Extend, don't modify</h4>Add custom logic and UIs <em>next to</em> S/4HANA instead of patching it, so upgrades stay painless and your core stays "clean."</div>
+  <div class="card"><h4>One account, many services</h4>A single global account gives entitlement-based access to dozens of services across multiple hyperscaler regions (AWS, Azure, GCP, AliCloud).</div>
+  <div class="card"><h4>Open &amp; standards-based</h4>Cloud Foundry, Kubernetes (Kyma), OData, OAuth 2.0, OpenAPI, CloudEvents — not a proprietary silo.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 780 340" width="780" height="340">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="390" y="24" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">BTP as the extension layer around a clean core</text>
+
+  <rect x="300" y="130" width="180" height="80" rx="10" fill="#eff4ff" stroke="#1e3a8a" stroke-width="2"/>
+  <text x="390" y="162" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">SAP Digital Core</text>
+  <text x="390" y="182" text-anchor="middle" font-size="11" fill="#1a2233">S/4HANA, SuccessFactors</text>
+  <text x="390" y="198" text-anchor="middle" font-size="11" fill="#1a2233">Ariba, Concur…</text>
+
+  <rect x="40" y="60" width="200" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="140" y="86" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">App Dev &amp; Automation</text>
+  <text x="140" y="104" text-anchor="middle" font-size="10" fill="#1a2233">CAP, Fiori/UI5, Build Apps</text>
+
+  <rect x="540" y="60" width="200" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="640" y="86" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">Integration Suite</text>
+  <text x="640" y="104" text-anchor="middle" font-size="10" fill="#1a2233">APIs, events, iFlows</text>
+
+  <rect x="40" y="230" width="200" height="60" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="140" y="256" text-anchor="middle" font-size="12" fill="#0891b2" font-weight="bold">Data &amp; Analytics</text>
+  <text x="140" y="274" text-anchor="middle" font-size="10" fill="#1a2233">HANA Cloud, Datasphere, SAC</text>
+
+  <rect x="540" y="230" width="200" height="60" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="640" y="256" text-anchor="middle" font-size="12" fill="#b45309" font-weight="bold">AI</text>
+  <text x="640" y="274" text-anchor="middle" font-size="10" fill="#1a2233">AI Core, Joule, GenAI Hub</text>
+
+  <line x1="240" y1="90" x2="300" y2="150" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="540" y1="90" x2="480" y2="150" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="240" y1="260" x2="300" y2="190" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <line x1="540" y1="260" x2="480" y2="190" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ar)"/>
+</svg><div class="cap">Fig 1 — BTP services surround the digital core; extensions live outside it, connected through destinations and events.</div></div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of BTP as "the App Store, dev environment, and integration bus for your SAP landscape." Your ERP is the system of record; BTP is where you build everything that would otherwise be a risky core modification.</div>
+
+<h2>Account Model &amp; Getting Started</h2>
+<p>Before you deploy anything you must understand the BTP account hierarchy. It is the governance and billing backbone, and interviewers love to probe it.</p>
+
+<div class="pipeline"><span class="step">Global Account</span><span class="arrow">-&gt;</span><span class="step">Directory (optional)</span><span class="arrow">-&gt;</span><span class="step">Subaccount</span><span class="arrow">-&gt;</span><span class="step">Space (CF) / Namespace (Kyma)</span></div>
+
+<div class="grid c2">
+  <div class="card"><h4>Global Account</h4>The top contract with SAP. Holds your entitlements and quotas, and is tied to a commercial model (consumption-based <span class="badge g">CPEA/BTPEA</span> or subscription).</div>
+  <div class="card"><h4>Directory</h4>Optional grouping of subaccounts for shared entitlements, custom properties, and authorization inheritance.</div>
+  <div class="card"><h4>Subaccount</h4>The real working unit: pinned to a <em>region</em> and <em>provider</em>, carries its own trust config, destinations, and enabled environment (CF/Kyma/ABAP).</div>
+  <div class="card"><h4>Space / Namespace</h4>Within a subaccount: a Cloud Foundry <em>space</em> or a Kyma <em>namespace</em> isolates deployed apps and their service instances.</div>
+</div>
+
+<p>Install the two CLIs you will use daily — the BTP CLI (account/platform management) and the Cloud Foundry CLI (app lifecycle):</p>
+
+<pre><code class="language-bash"># btp CLI — manage global accounts, subaccounts, entitlements, trust
+btp login --url https://cli.btp.cloud.sap
+btp list accounts/subaccount
+btp assign security/role-collection "Subaccount Administrator" --to-user you@corp.com
+
+# Cloud Foundry CLI — target an org/space and push apps
+cf login -a https://api.cf.eu10-004.hana.ondemand.com
+cf target -o my-org -s dev
+cf marketplace            # list available services (plans)
+cf services               # instances already created</code></pre>
+
+<p>For local development you install the CAP toolkit and the MTA build tool:</p>
+
+<pre><code class="language-bash"># Node.js CAP development kit (the `cds` command)
+npm install -g @sap/cds-dk
+cds --version
+
+# Multi-Target Application (MTA) build tool — packages apps for BTP
+npm install -g mbt
+npm install -g @sap/approuter   # the application router</code></pre>
+
+<div class="callout tip"><span class="t">Trial vs free tier</span> Use the <strong>BTP free tier</strong> (within a productive global account, cancellable services) or a <strong>trial account</strong> to learn. Free-tier service plans are real services with capacity caps — perfect for a portfolio project.</div>
+
+<h2>The Three Runtime Environments</h2>
+<p>A subaccount can enable one or more <em>environments</em>. Choosing between them is a classic design decision.</p>
+
+<div class="diagram"><svg viewBox="0 0 780 300" width="780" height="300">
+  <defs><marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/></marker></defs>
+  <text x="390" y="24" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Pick a runtime by workload shape</text>
+
+  <rect x="30" y="60" width="220" height="200" rx="10" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="140" y="88" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Cloud Foundry</text>
+  <text x="140" y="112" text-anchor="middle" font-size="11" fill="#1a2233">Managed PaaS, buildpacks</text>
+  <text x="140" y="132" text-anchor="middle" font-size="11" fill="#1a2233">push an app, SAP runs it</text>
+  <text x="140" y="152" text-anchor="middle" font-size="11" fill="#1a2233">Node.js, Java, Python…</text>
+  <text x="140" y="172" text-anchor="middle" font-size="11" fill="#1a2233">spaces + service bindings</text>
+  <text x="140" y="202" text-anchor="middle" font-size="11" fill="#059669" font-weight="bold">Best: most CAP apps</text>
+  <text x="140" y="222" text-anchor="middle" font-size="10" fill="#1a2233">fastest path, least ops</text>
+
+  <rect x="280" y="60" width="220" height="200" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="390" y="88" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Kyma</text>
+  <text x="390" y="112" text-anchor="middle" font-size="11" fill="#1a2233">Managed Kubernetes</text>
+  <text x="390" y="132" text-anchor="middle" font-size="11" fill="#1a2233">+ Istio + Serverless</text>
+  <text x="390" y="152" text-anchor="middle" font-size="11" fill="#1a2233">containers &amp; functions</text>
+  <text x="390" y="172" text-anchor="middle" font-size="11" fill="#1a2233">eventing, CRDs, Helm</text>
+  <text x="390" y="202" text-anchor="middle" font-size="11" fill="#059669" font-weight="bold">Best: cloud-native teams</text>
+  <text x="390" y="222" text-anchor="middle" font-size="10" fill="#1a2233">full k8s control, polyglot</text>
+
+  <rect x="530" y="60" width="220" height="200" rx="10" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="640" y="88" text-anchor="middle" font-size="13" fill="#b45309" font-weight="bold">ABAP (Steampunk)</text>
+  <text x="640" y="112" text-anchor="middle" font-size="11" fill="#1a2233">ABAP Cloud in BTP</text>
+  <text x="640" y="132" text-anchor="middle" font-size="11" fill="#1a2233">RAP programming model</text>
+  <text x="640" y="152" text-anchor="middle" font-size="11" fill="#1a2233">released APIs only</text>
+  <text x="640" y="172" text-anchor="middle" font-size="11" fill="#1a2233">ADT / Eclipse</text>
+  <text x="640" y="202" text-anchor="middle" font-size="11" fill="#059669" font-weight="bold">Best: ABAP shops</text>
+  <text x="640" y="222" text-anchor="middle" font-size="10" fill="#1a2233">reuse ABAP skills, OData</text>
+</svg><div class="cap">Fig 2 — Cloud Foundry, Kyma, and the ABAP environment side by side.</div></div>
+
+<h4>Cloud Foundry</h4>
+<p>The default and most mature environment. You <code>cf push</code> an application; buildpacks detect the language and produce a running container. Services are consumed via <em>service instances</em> bound to the app, which inject credentials as the <code>VCAP_SERVICES</code> environment variable.</p>
+
+<h4>Kyma</h4>
+<p>A fully managed Kubernetes cluster with Istio service mesh, API Gateway, and a serverless Function engine. You deploy standard container images and Helm charts, define <code>APIRule</code> resources to expose services, and use SAP BTP Service Operator to provision BTP services as Kubernetes resources.</p>
+
+<h4>ABAP Environment</h4>
+<p>Nicknamed "Steampunk," this is ABAP in the cloud. You develop in ABAP Development Tools (ADT) using the <strong>RAP</strong> (RESTful Application Programming) model and may only call <em>released</em> SAP APIs — enforcing the clean-core discipline at the language level. Ideal for teams with deep ABAP investment.</p>
+
+<h2>The Cloud Application Programming (CAP) Model</h2>
+<p class="lead">CAP is SAP's opinionated, framework for building services and apps. You model data and services declaratively in <strong>CDS</strong> (Core Data Services), and CAP generates a running OData/REST service with sensible defaults — you add custom logic only where needed.</p>
+
+<p>CAP comes in two flavors: <strong>Node.js</strong> (<code>@sap/cds</code>) and <strong>Java</strong> (CAP Java SDK). The CDS modeling language is identical across both. A CAP project has a conventional layout:</p>
+
+<pre><code class="language-bash">my-cap-app/
+├── db/            # domain model (entities) + .csv seed data
+│   └── schema.cds
+├── srv/           # service definitions + custom handlers
+│   ├── cat-service.cds
+│   └── cat-service.js
+├── app/           # UI modules (Fiori/UI5), Fiori preview config
+├── package.json   # cds config, dependencies
+└── mta.yaml       # deployment descriptor (generated by `cds add mta`)</code></pre>
+
+<h4>1. Define the domain model (CDS)</h4>
+<pre><code class="language-cds">// db/schema.cds
+namespace my.bookshop;
+
+using { managed, cuid } from '@sap/cds/common';
+
+entity Books : cuid, managed {
+  title  : String(111);
+  stock  : Integer;
+  price  : Decimal(9,2);
+  author : Association to Authors;   // managed foreign-key association
+}
+
+entity Authors : cuid, managed {
+  name  : String(111);
+  books : Association to many Books on books.author = $self;
+}</code></pre>
+
+<h4>2. Expose a service</h4>
+<pre><code class="language-cds">// srv/cat-service.cds
+using my.bookshop as my from '../db/schema';
+
+service CatalogService @(path: '/browse') {
+  @readonly entity Books   as projection on my.Books;
+            entity Authors as projection on my.Authors;
+
+  // an unbound action — custom business operation
+  action submitOrder(book : UUID, quantity : Integer) returns { stock : Integer };
+}</code></pre>
+
+<h4>3. Add custom logic with event handlers</h4>
+<p>CAP's runtime is event-driven: every CRUD request and action fires events you can hook with <code>before</code>, <code>on</code>, and <code>after</code> handlers.</p>
+
+<pre><code class="language-javascript">// srv/cat-service.js
+const cds = require('@sap/cds')
+
+module.exports = class CatalogService extends cds.ApplicationService {
+  init() {
+    const { Books } = this.entities
+
+    // Validate before every CREATE/UPDATE on Books
+    this.before(['CREATE', 'UPDATE'], Books, (req) =&gt; {
+      if (req.data.stock &lt; 0) req.error(400, 'Stock must not be negative')
+    })
+
+    // Enrich each row after reading
+    this.after('READ', Books, (books) =&gt; {
+      for (const b of books) if (b.stock &lt; 5) b.title += ' (low stock!)'
+    })
+
+    // Custom action implementation
+    this.on('submitOrder', async (req) =&gt; {
+      const { book, quantity } = req.data
+      const row = await SELECT.one.from(Books).where({ ID: book })
+      if (!row) return req.error(404, 'Book not found')
+      if (quantity &gt; row.stock) return req.error(409, 'Not enough stock')
+      await UPDATE(Books).set({ stock: { '-=': quantity } }).where({ ID: book })
+      return { stock: row.stock - quantity }
+    })
+
+    return super.init()
+  }
+}</code></pre>
+
+<h4>4. Run it locally</h4>
+<pre><code class="language-bash">cds watch        # starts an in-memory SQLite DB, serves OData, hot-reloads
+# Browse:  http://localhost:4004/browse/Books
+# OData:   http://localhost:4004/browse/$metadata</code></pre>
+
+<div class="callout tip"><span class="t">Why CAP wins</span> You wrote ~20 lines of model and got a full OData v4 service with CRUD, deep-insert, pagination (<code>$top/$skip</code>), filtering (<code>$filter</code>), draft handling, and input validation — plus a path to HANA with zero rewrite.</div>
+
+<p>The CAP request lifecycle is worth internalizing:</p>
+<div class="diagram"><svg viewBox="0 0 780 170" width="780" height="170">
+  <defs><marker id="ar3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect x="20" y="60" width="110" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="90" text-anchor="middle" font-size="12" fill="#1e3a8a">Request</text>
+  <rect x="165" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="220" y="85" text-anchor="middle" font-size="12" fill="#059669">before</text><text x="220" y="101" text-anchor="middle" font-size="9" fill="#1a2233">validate</text>
+  <rect x="310" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="365" y="85" text-anchor="middle" font-size="12" fill="#059669">on</text><text x="365" y="101" text-anchor="middle" font-size="9" fill="#1a2233">handle / to DB</text>
+  <rect x="455" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="510" y="85" text-anchor="middle" font-size="12" fill="#059669">after</text><text x="510" y="101" text-anchor="middle" font-size="9" fill="#1a2233">enrich result</text>
+  <rect x="600" y="60" width="110" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="655" y="90" text-anchor="middle" font-size="12" fill="#1e3a8a">Response</text>
+  <line x1="130" y1="85" x2="163" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+  <line x1="275" y1="85" x2="308" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+  <line x1="420" y1="85" x2="453" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+  <line x1="565" y1="85" x2="598" y2="85" stroke="#2563eb" marker-end="url(#ar3)"/>
+</svg><div class="cap">Fig 3 — CAP event phases: before (validation), on (persistence/custom), after (post-processing).</div></div>
+
+<h2>Destinations &amp; Connectivity</h2>
+<p>A <strong>destination</strong> is a reusable, centrally managed definition of a remote endpoint — URL, authentication type, and credentials. Your app never hard-codes a system's URL or secrets; it asks the Destination service for a destination by name at runtime.</p>
+
+<pre><code class="language-json">// A destination configured in the BTP cockpit (shown as its JSON form)
+{
+  "Name": "S4HANA_API",
+  "URL": "https://my-s4.s4hana.ondemand.com",
+  "Type": "HTTP",
+  "ProxyType": "Internet",
+  "Authentication": "OAuth2SAMLBearerAssertion",  // principal propagation
+  "tokenServiceURL": "https://.../oauth/token",
+  "clientId": "sb-...",
+  "sap-client": "100"
+}</code></pre>
+
+<p>CAP consumes destinations transparently when you declare a remote service and bind the destination + connectivity services:</p>
+
+<pre><code class="language-javascript">// package.json → cds.requires
+// "S4bupa": { "kind": "odata-v2", "credentials": { "destination": "S4HANA_API" } }
+
+const s4 = await cds.connect.to('S4bupa')
+const partners = await s4.run(
+  SELECT.from('A_BusinessPartner').limit(10)
+)   // CAP builds the HTTP call, resolves the destination, attaches the token</code></pre>
+
+<div class="callout note"><span class="t">On-premise reach</span> To call systems behind a corporate firewall, pair the Destination service with the <strong>Cloud Connector</strong> (a lightweight on-prem agent) and set <code>ProxyType: OnPremise</code>. The Connectivity service tunnels the request securely — no inbound firewall holes.</div>
+
+<h2>XSUAA — Authentication &amp; Authorization</h2>
+<p class="lead">XSUAA (Extended Services for UAA) is BTP's OAuth 2.0 authorization server. It issues JWT access tokens, maps your Identity Provider's users to application-defined <em>scopes</em> and <em>role collections</em>, and is the backbone of security on Cloud Foundry.</p>
+
+<p>You declare your app's security model in <code>xs-security.json</code>: scopes (atomic permissions), attributes, and role templates.</p>
+
+<pre><code class="language-json">// xs-security.json
+{
+  "xsappname": "bookshop",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    { "name": "$XSAPPNAME.Read",  "description": "Read books" },
+    { "name": "$XSAPPNAME.Admin", "description": "Manage catalog" }
+  ],
+  "role-templates": [
+    { "name": "Viewer", "scope-references": ["$XSAPPNAME.Read"] },
+    { "name": "Administrator",
+      "scope-references": ["$XSAPPNAME.Read", "$XSAPPNAME.Admin"] }
+  ]
+}</code></pre>
+
+<p>In CDS you annotate services with <code>@requires</code> and <code>@restrict</code>; CAP enforces the scopes from the JWT automatically:</p>
+
+<pre><code class="language-cds">service CatalogService {
+  @requires: 'authenticated-user'
+  entity Books @(restrict: [
+    { grant: 'READ',  to: 'Viewer' },
+    { grant: ['CREATE','UPDATE','DELETE'], to: 'Administrator' }
+  ]) as projection on my.Books;
+}</code></pre>
+
+<p>The runtime flow ties the Approuter, XSUAA, and your service together:</p>
+<div class="diagram"><svg viewBox="0 0 780 300" width="780" height="300">
+  <defs><marker id="ar4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect x="20" y="120" width="120" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="80" y="146" text-anchor="middle" font-size="12" fill="#1e3a8a" font-weight="bold">Browser</text><text x="80" y="164" text-anchor="middle" font-size="10" fill="#1a2233">user</text>
+  <rect x="200" y="120" width="130" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="265" y="146" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">Approuter</text><text x="265" y="164" text-anchor="middle" font-size="10" fill="#1a2233">@sap/approuter</text>
+  <rect x="400" y="30" width="140" height="60" rx="8" fill="#fff7ed" stroke="#b45309"/><text x="470" y="56" text-anchor="middle" font-size="12" fill="#b45309" font-weight="bold">XSUAA</text><text x="470" y="74" text-anchor="middle" font-size="10" fill="#1a2233">OAuth server + IdP</text>
+  <rect x="610" y="120" width="140" height="60" rx="8" fill="#eff4ff" stroke="#0891b2"/><text x="680" y="146" text-anchor="middle" font-size="12" fill="#0891b2" font-weight="bold">CAP service</text><text x="680" y="164" text-anchor="middle" font-size="10" fill="#1a2233">validates JWT scopes</text>
+
+  <line x1="140" y1="150" x2="198" y2="150" stroke="#2563eb" marker-end="url(#ar4)"/><text x="168" y="142" text-anchor="middle" font-size="9" fill="#1a2233">1. request</text>
+  <line x1="300" y1="120" x2="420" y2="92" stroke="#2563eb" marker-end="url(#ar4)"/><text x="360" y="100" text-anchor="middle" font-size="9" fill="#1a2233">2. login / token</text>
+  <line x1="470" y1="90" x2="300" y2="128" stroke="#94a3b8" stroke-dasharray="4 3" marker-end="url(#ar4)"/><text x="400" y="124" text-anchor="middle" font-size="9" fill="#1a2233">3. JWT</text>
+  <line x1="330" y1="150" x2="608" y2="150" stroke="#2563eb" marker-end="url(#ar4)"/><text x="470" y="142" text-anchor="middle" font-size="9" fill="#1a2233">4. forward + Bearer JWT</text>
+</svg><div class="cap">Fig 4 — The Approuter authenticates users at XSUAA, then forwards requests with a JWT the backend validates against required scopes.</div></div>
+
+<div class="callout warn"><span class="t">XSUAA vs IAS</span> XSUAA handles <em>authorization</em> (scopes/roles) for apps. SAP <strong>Identity Authentication Service (IAS)</strong> is the <em>authentication</em> IdP for users across the whole tenant. Modern BTP setups increasingly front XSUAA with IAS; know the distinction.</div>
+
+<h2>Extension vs Side-by-Side</h2>
+<p>"Extensibility" is BTP's reason to exist. There are three recognized tiers — interviewers expect you to name and contrast them.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Key-user (in-app)</h4>No-code/low-code adaptations <em>inside</em> S/4HANA by a business expert: custom fields, UI layout tweaks, custom logic via released BAdIs. Stays in the core but upgrade-safe.</div>
+  <div class="card"><h4>Developer (in-stack)</h4>ABAP Cloud developments <em>on</em> the S/4HANA stack (or the BTP ABAP environment), restricted to released APIs. More power, still governed.</div>
+  <div class="card"><h4>Side-by-side</h4>A separate app <em>on BTP</em> (CAP/Fiori/Kyma) that integrates via OData APIs, events, and destinations. Maximum freedom, independent lifecycle, polyglot.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 780 230" width="780" height="230">
+  <defs><marker id="ar5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#64748b"/></marker></defs>
+  <rect x="60" y="70" width="260" height="110" rx="10" fill="#eff4ff" stroke="#1e3a8a" stroke-width="2"/>
+  <text x="190" y="98" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">S/4HANA (clean core)</text>
+  <text x="190" y="122" text-anchor="middle" font-size="11" fill="#1a2233">key-user + in-stack</text>
+  <text x="190" y="140" text-anchor="middle" font-size="11" fill="#1a2233">extensions live here</text>
+  <text x="190" y="162" text-anchor="middle" font-size="10" fill="#b45309">released APIs only</text>
+
+  <rect x="460" y="70" width="260" height="110" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="590" y="98" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">BTP side-by-side app</text>
+  <text x="590" y="122" text-anchor="middle" font-size="11" fill="#1a2233">CAP / Fiori / Kyma</text>
+  <text x="590" y="140" text-anchor="middle" font-size="11" fill="#1a2233">own DB, own lifecycle</text>
+  <text x="590" y="162" text-anchor="middle" font-size="10" fill="#1a2233">scales independently</text>
+
+  <line x1="320" y1="110" x2="458" y2="110" stroke="#64748b" marker-end="url(#ar5)"/><text x="389" y="102" text-anchor="middle" font-size="10" fill="#1a2233">OData / events</text>
+  <line x1="458" y1="145" x2="322" y2="145" stroke="#64748b" marker-end="url(#ar5)"/><text x="389" y="162" text-anchor="middle" font-size="10" fill="#1a2233">destinations</text>
+</svg><div class="cap">Fig 5 — Side-by-side keeps the core untouched; integration happens over APIs and events.</div></div>
+
+<div class="callout ok"><span class="t">Rule of thumb</span> If it changes core data behavior and is small, extend in-app/in-stack. If it has its own UI, data, scaling needs, or non-ABAP tech, build it side-by-side on BTP.</div>
+
+<h2>Fiori / UI5 in the BTP Picture</h2>
+<p>SAP Fiori is the design language; SAPUI5 is the JavaScript framework that implements it. On BTP, a CAP OData service plus a Fiori <strong>elements</strong> app is the canonical full-stack combo — the UI is largely generated from OData annotations rather than hand-coded.</p>
+
+<pre><code class="language-javascript">// Scaffold a Fiori elements app over your CAP service
+// (via the SAP Fiori generator in VS Code / Business Application Studio)
+// Annotations drive the List Report + Object Page UI:</code></pre>
+
+<pre><code class="language-cds">// app/annotations.cds — no imperative UI code needed
+using CatalogService as service from '../srv/cat-service';
+
+annotate service.Books with @(
+  UI: {
+    LineItem: [
+      { Value: title },
+      { Value: stock },
+      { Value: price }
+    ],
+    HeaderInfo: { TypeName: 'Book', TypeNamePlural: 'Books', Title: { Value: title } }
+  }
+);</code></pre>
+
+<p>Freestyle UI5 (hand-written XML views + controllers) is used when you need full control:</p>
+<pre><code class="language-xml">&lt;mvc:View controllerName="bookshop.controller.List"
+  xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"&gt;
+  &lt;Table items="{/Books}"&gt;
+    &lt;columns&gt;&lt;Column&gt;&lt;Text text="Title"/&gt;&lt;/Column&gt;&lt;/columns&gt;
+    &lt;items&gt;&lt;ColumnListItem&gt;&lt;cells&gt;
+      &lt;Text text="{title}"/&gt;
+    &lt;/cells&gt;&lt;/ColumnListItem&gt;&lt;/items&gt;
+  &lt;/Table&gt;
+&lt;/mvc:View&gt;</code></pre>
+
+<p>Finished apps are published to the <strong>SAP Build Work Zone</strong> (formerly Launchpad service), which gives users a single tile-based entry point across all their Fiori apps.</p>
+
+<h2>Deploying to BTP: MTA</h2>
+<p>Multi-Target Applications bundle every module — the CAP service, the Approuter, the UI, the HANA DB deployer — into one deployable archive described by <code>mta.yaml</code>.</p>
+
+<pre><code class="language-yaml"># mta.yaml (abridged)
+ID: bookshop
+version: 1.0.0
+modules:
+  - name: bookshop-srv            # CAP service
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: bookshop-db
+      - name: bookshop-auth
+  - name: bookshop-db-deployer    # pushes schema to HANA Cloud
+    type: hdb
+    path: gen/db
+    requires: [{ name: bookshop-db }]
+  - name: bookshop-approuter
+    type: approuter.nodejs
+    path: app/router
+    requires: [{ name: bookshop-auth }]
+resources:
+  - name: bookshop-db
+    type: com.sap.xs.hdi-container     # HANA HDI container
+  - name: bookshop-auth
+    type: org.cloudfoundry.managed-service
+    parameters: { service: xsuaa, service-plan: application }</code></pre>
+
+<pre><code class="language-bash">cds add hana,xsuaa,approuter,mta   # wire up the deployment artifacts
+mbt build                          # produces mta_archives/bookshop_1.0.0.mtar
+cf deploy mta_archives/bookshop_1.0.0.mtar   # needs the MultiApps CF plugin</code></pre>
+
+<h2>Cheat-Sheet &amp; Comparisons</h2>
+<table>
+<tr><th>Command</th><th>What it does</th></tr>
+<tr><td><code>btp login --url ...</code></td><td>Authenticate the BTP CLI to a region</td></tr>
+<tr><td><code>btp list accounts/subaccount</code></td><td>List subaccounts in the global account</td></tr>
+<tr><td><code>cf push</code></td><td>Build &amp; deploy an app to Cloud Foundry</td></tr>
+<tr><td><code>cf create-service xsuaa application my-auth</code></td><td>Provision an XSUAA instance</td></tr>
+<tr><td><code>cf bind-service my-app my-auth</code></td><td>Inject service credentials into an app</td></tr>
+<tr><td><code>cds watch</code></td><td>Run the CAP app locally with hot reload</td></tr>
+<tr><td><code>cds add hana,xsuaa,mta</code></td><td>Add production deployment artifacts</td></tr>
+<tr><td><code>mbt build</code></td><td>Build the MTA archive (.mtar)</td></tr>
+<tr><td><code>cf deploy app.mtar</code></td><td>Deploy a multi-target application</td></tr>
+</table>
+
+<table>
+<tr><th>Aspect</th><th>Cloud Foundry</th><th>Kyma</th><th>ABAP Env.</th></tr>
+<tr><td>Abstraction</td><td>PaaS / buildpacks</td><td>Managed Kubernetes</td><td>ABAP platform</td></tr>
+<tr><td>Deploy unit</td><td><code>cf push</code> / MTA</td><td>Container + Helm</td><td>Transport / ADT</td></tr>
+<tr><td>Languages</td><td>Node, Java, Python…</td><td>Any (containers)</td><td>ABAP Cloud</td></tr>
+<tr><td>Ops burden</td><td>Lowest</td><td>Higher (k8s skills)</td><td>Low (SAP-managed)</td></tr>
+<tr><td>Best fit</td><td>Most CAP apps</td><td>Cloud-native, eventing</td><td>ABAP teams, RAP</td></tr>
+</table>
+
+<table>
+<tr><th>Concept</th><th>One-line definition</th></tr>
+<tr><td>Entitlement</td><td>The <em>right</em> to use a service plan, assigned to a subaccount</td></tr>
+<tr><td>Service instance</td><td>A provisioned, bindable instance of a service</td></tr>
+<tr><td>Destination</td><td>Named, managed definition of a remote endpoint + auth</td></tr>
+<tr><td>Approuter</td><td>Single entry point handling auth, routing, static content</td></tr>
+<tr><td>Role collection</td><td>Bundle of roles assigned to users/groups in a subaccount</td></tr>
+<tr><td>HDI container</td><td>Isolated schema in SAP HANA Cloud for one app</td></tr>
+</table>
+
+<h2>Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Keep the core clean</span> Default to side-by-side or released-API extensions. Never modify standard SAP objects; it breaks upgrades and support.</div>
+<div class="callout tip"><span class="t">Externalize everything</span> Use destinations for URLs/credentials and user-provided or service bindings for secrets. No hard-coded endpoints or passwords in code.</div>
+<div class="callout tip"><span class="t">Multitenancy early</span> If you may sell your extension to multiple customers, design for SaaS multitenancy from day one — retrofitting <code>tenant-mode: shared</code> is painful.</div>
+<div class="callout warn"><span class="t">Mind the quotas</span> Entitlements are finite. A failed deploy is often just an unassigned entitlement or an exhausted quota in the subaccount, not a code bug.</div>
+<div class="callout warn"><span class="t">Don't skip the Approuter</span> Calling a CAP service directly in production bypasses central auth and CSRF handling. The Approuter (or Work Zone) must front user-facing apps.</div>
+<div class="callout danger"><span class="t">Token &amp; trust pitfalls</span> JWT audience/scope mismatches cause silent 403s. Verify <code>xsappname</code>, that the right role collections are assigned, and that your subaccount trusts the correct IdP.</div>
+
+<h2>Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What problem does SAP BTP solve?</div><div class="a">It provides a governed platform to extend and integrate SAP systems <em>without</em> modifying the core, enabling the "clean core" strategy: the ERP stays standard and upgradable while customization lives on BTP via app dev, integration, data/analytics, and AI services.</div></div>
+<div class="qa"><div class="q">Explain the BTP account hierarchy.</div><div class="a">Global account (commercial contract + entitlements) → optional directories (grouping) → subaccounts (region/provider-bound working units with their own trust, destinations, environments) → spaces (Cloud Foundry) or namespaces (Kyma).</div></div>
+<div class="qa"><div class="q">Compare the three runtime environments.</div><div class="a">Cloud Foundry: managed PaaS via buildpacks, lowest ops, best for most CAP apps. Kyma: managed Kubernetes + Istio + serverless, for cloud-native polyglot workloads. ABAP (Steampunk): ABAP Cloud with the RAP model and released APIs only, for ABAP-centric teams.</div></div>
+<div class="qa"><div class="q">What is the CAP model and why use it?</div><div class="a">Cloud Application Programming is SAP's framework where you model data/services declaratively in CDS and get a full OData/REST service with CRUD, pagination, filtering, draft handling, and validation out of the box. You add imperative logic only via before/on/after event handlers. It runs on Node.js or Java and deploys cleanly to HANA.</div></div>
+<div class="qa"><div class="q">What is a destination and why not just hard-code URLs?</div><div class="a">A destination is a centrally managed definition of a remote endpoint (URL, auth type, credentials). It decouples code from environment config, lets admins rotate secrets without redeploying, and — with the Cloud Connector — securely reaches on-premise systems via <code>ProxyType: OnPremise</code>.</div></div>
+<div class="qa"><div class="q">What is XSUAA and how does auth flow work?</div><div class="a">XSUAA is BTP's OAuth 2.0 authorization server. The Approuter authenticates the user (often via IAS), obtains a JWT, and forwards requests with it. The backend validates the JWT and checks scopes defined in <code>xs-security.json</code>. Scopes map to role templates → roles → role collections assigned to users.</div></div>
+<div class="qa"><div class="q">Difference between XSUAA and IAS?</div><div class="a">IAS (Identity Authentication Service) authenticates <em>who the user is</em> (the IdP). XSUAA handles <em>what they can do</em> (authorization scopes/roles) for applications. Modern setups front XSUAA with IAS for unified authentication.</div></div>
+<div class="qa"><div class="q">Explain extension vs side-by-side.</div><div class="a">Key-user and in-stack (ABAP Cloud) extensions live on the core, limited to released APIs, upgrade-safe but constrained. Side-by-side runs a separate app on BTP integrating via OData/events/destinations — maximum freedom, independent lifecycle and scaling, polyglot tech.</div></div>
+<div class="qa"><div class="q">What does the Approuter do?</div><div class="a">It is the single entry point for a BTP app: handles user authentication against XSUAA, manages login sessions and CSRF tokens, serves static UI content, and reverse-proxies routes to backend microservices with the JWT attached.</div></div>
+<div class="qa"><div class="q">How do you deploy a full CAP+UI app to BTP?</div><div class="a">Run <code>cds add hana,xsuaa,approuter,mta</code> to generate deployment artifacts, <code>mbt build</code> to produce an <code>.mtar</code> archive bundling the service, DB deployer, Approuter, and UI, then <code>cf deploy</code> it. The MTA descriptor wires modules to resources like the HDI container and XSUAA instance.</div></div>
+<div class="qa"><div class="q">What is Fiori elements vs freestyle UI5?</div><div class="a">Fiori elements generates standardized floorplans (List Report, Object Page) from OData annotations — little custom JS, consistent UX, fast. Freestyle UI5 is hand-coded XML views and controllers for full control when a scenario doesn't fit the standard templates.</div></div>
+<div class="qa"><div class="q">How does CAP connect to a remote S/4HANA service?</div><div class="a">Declare a required remote service in <code>cds.requires</code> pointing at a destination, then <code>cds.connect.to('Service')</code> and run CQL queries against it. CAP builds the HTTP/OData call, resolves the destination, and attaches the token (e.g. principal propagation via OAuth2SAMLBearerAssertion).</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+  <li>Work through the official <strong>CAP (capire)</strong> documentation and build the bookshop sample end to end on the free tier.</li>
+  <li>Complete the SAP <strong>Learning Journey</strong> "Developing Applications on SAP BTP" and the CAP + Fiori elements tutorials on the SAP Tutorial Navigator.</li>
+  <li>Deploy a side-by-side extension that reads S/4HANA Business Partners via a destination and the Cloud Connector.</li>
+  <li>Explore Kyma: containerize a service, expose it with an <code>APIRule</code>, and trigger a serverless Function from a business event.</li>
+  <li>Study <strong>RAP</strong> (RESTful ABAP Programming) if you work in ABAP shops, and the <strong>SAP Integration Suite</strong> for iFlows and API management.</li>
+  <li>Target the <strong>SAP Certified Development Associate — SAP BTP Extensions</strong> (CAP, Fiori) certification to validate your skills.</li>
+</ul>

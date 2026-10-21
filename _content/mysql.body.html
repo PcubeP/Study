@@ -1,0 +1,574 @@
+<h2>What MySQL Is and Why It Matters</h2>
+<p class="lead">MySQL is the world's most widely deployed open-source relational database management system (RDBMS). It stores data in <strong>tables</strong> of rows and columns, enforces structure and relationships, and answers questions about that data using <strong>SQL</strong> — Structured Query Language.</p>
+
+<p>A relational database organizes information into tables that reference one another through <strong>keys</strong>. Instead of duplicating a customer's details inside every order, you store the customer once and point orders at it. This eliminates redundancy, keeps data consistent, and lets you ask complex questions by <em>joining</em> tables back together at query time.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Relational</h4>Data lives in typed tables with declared relationships, not loose documents.</div>
+  <div class="card"><h4>Transactional</h4>The default InnoDB engine gives you ACID guarantees — all-or-nothing changes.</div>
+  <div class="card"><h4>Ubiquitous</h4>Powers WordPress, countless SaaS backends, and the LAMP/LEMP stack.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="200" height="120" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="120" y="45" font-size="14" text-anchor="middle" fill="#1e3a8a" font-weight="bold">customers</text>
+  <line x1="30" y1="55" x2="210" y2="55" stroke="#94a3b8"/>
+  <text x="35" y="75" font-size="12" fill="#1a2233">id (PK)</text>
+  <text x="35" y="95" font-size="12" fill="#1a2233">name</text>
+  <text x="35" y="115" font-size="12" fill="#1a2233">email</text>
+
+  <rect x="500" y="20" width="200" height="160" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="600" y="45" font-size="14" text-anchor="middle" fill="#059669" font-weight="bold">orders</text>
+  <line x1="510" y1="55" x2="690" y2="55" stroke="#94a3b8"/>
+  <text x="515" y="75" font-size="12" fill="#1a2233">id (PK)</text>
+  <text x="515" y="95" font-size="12" fill="#1a2233">customer_id (FK)</text>
+  <text x="515" y="115" font-size="12" fill="#1a2233">total</text>
+  <text x="515" y="135" font-size="12" fill="#1a2233">created_at</text>
+
+  <path d="M220 100 C 360 100, 360 100, 500 100" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+  <text x="360" y="90" font-size="12" text-anchor="middle" fill="#1e3a8a">1 customer -&gt; many orders</text>
+
+  <rect x="260" y="210" width="400" height="70" rx="8" fill="#fff" stroke="#94a3b8"/>
+  <text x="460" y="240" font-size="13" text-anchor="middle" fill="#1a2233">SELECT c.name, o.total FROM customers c</text>
+  <text x="460" y="262" font-size="13" text-anchor="middle" fill="#1a2233">JOIN orders o ON o.customer_id = c.id;</text>
+</svg><div class="cap">Fig 1. Two tables linked by a foreign key; a JOIN recombines them at query time.</div></div>
+
+<div class="callout note"><span class="t">Note</span> MySQL and MariaDB share a common ancestry; MariaDB is a community fork created after Oracle's acquisition of MySQL. Syntax overlaps heavily, but this guide targets MySQL 8.x (current LTS line as of 2026, with 8.4 as the long-term support release).</div>
+
+<h2>Setup and Getting Started</h2>
+
+<p>Install the server and client, start the service, and connect with the <span class="kbd">mysql</span> command-line client.</p>
+
+<pre><code class="language-bash"># macOS (Homebrew)
+brew install mysql
+brew services start mysql
+
+# Debian / Ubuntu
+sudo apt update &amp;&amp; sudo apt install mysql-server
+sudo systemctl start mysql
+
+# Secure the install (sets root password, removes anonymous users)
+sudo mysql_secure_installation
+
+# Connect as root
+mysql -u root -p
+
+# Connect to a specific host/port/database
+mysql -h db.example.com -P 3306 -u app_user -p shop_db</code></pre>
+
+<p>Once connected, these meta-commands orient you:</p>
+
+<pre><code class="language-sql">SHOW DATABASES;            -- list databases
+CREATE DATABASE shop_db;   -- create one
+USE shop_db;               -- select it for subsequent commands
+SHOW TABLES;               -- list tables in current database
+DESCRIBE customers;        -- show a table's columns and types
+SHOW CREATE TABLE orders\G -- full DDL; \G formats rows vertically</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Ending a statement with <span class="kbd">\G</span> instead of <span class="kbd">;</span> prints each row as a vertical key/value block — invaluable for wide tables in the terminal.</div>
+
+<h2>The Relational Model and Data Types</h2>
+
+<p>A <strong>table</strong> (relation) is a set of <strong>rows</strong> (tuples). Each <strong>column</strong> (attribute) has a fixed data type. Choosing the right type matters for correctness, storage, and index performance.</p>
+
+<table>
+<tr><th>Category</th><th>Types</th><th>Use for</th></tr>
+<tr><td>Integer</td><td><code>TINYINT</code>, <code>INT</code>, <code>BIGINT</code></td><td>IDs, counts; add <code>UNSIGNED</code> when never negative</td></tr>
+<tr><td>Decimal</td><td><code>DECIMAL(p,s)</code></td><td>Money — exact, no float rounding</td></tr>
+<tr><td>Float</td><td><code>FLOAT</code>, <code>DOUBLE</code></td><td>Scientific/approximate values only</td></tr>
+<tr><td>String</td><td><code>VARCHAR(n)</code>, <code>CHAR(n)</code>, <code>TEXT</code></td><td>Names, short text; <code>TEXT</code> for large blobs</td></tr>
+<tr><td>Date/Time</td><td><code>DATE</code>, <code>DATETIME</code>, <code>TIMESTAMP</code></td><td><code>TIMESTAMP</code> is UTC-aware, range ends 2038</td></tr>
+<tr><td>Other</td><td><code>BOOLEAN</code>, <code>ENUM</code>, <code>JSON</code></td><td>Flags, fixed sets, semi-structured data</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Watch out</span> Never store money in <code>FLOAT</code>/<code>DOUBLE</code>. <code>0.1 + 0.2 != 0.3</code> in binary floating point. Use <code>DECIMAL(10,2)</code> so arithmetic stays exact.</div>
+
+<h2>DDL: Creating Tables, Keys, and Constraints</h2>
+
+<p>Data Definition Language (DDL) defines structure: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>. Constraints enforce rules the database guarantees even when application code has bugs.</p>
+
+<pre><code class="language-sql">CREATE TABLE customers (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name        VARCHAR(120) NOT NULL,
+  email       VARCHAR(255) NOT NULL UNIQUE,       -- no two customers share an email
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE orders (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  customer_id BIGINT UNSIGNED NOT NULL,
+  total       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  status      ENUM('pending','paid','shipped','cancelled') NOT NULL DEFAULT 'pending',
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_orders_customer
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+    ON DELETE CASCADE          -- deleting a customer removes their orders
+) ENGINE=InnoDB;</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>Primary key</h4>Uniquely identifies a row. One per table. In InnoDB it also physically orders the data (clustered index).</div>
+  <div class="card"><h4>Foreign key</h4>Points at another table's primary key. Enforces referential integrity — you cannot insert an order for a customer that does not exist.</div>
+  <div class="card"><h4>UNIQUE</h4>Guarantees no duplicate values in a column or set of columns (e.g. one account per email).</div>
+  <div class="card"><h4>NOT NULL / DEFAULT</h4><code>NOT NULL</code> forbids missing values; <code>DEFAULT</code> supplies one when the client omits the column.</div>
+</div>
+
+<p>Modifying an existing table:</p>
+
+<pre><code class="language-sql">ALTER TABLE customers ADD COLUMN phone VARCHAR(32) NULL;
+ALTER TABLE customers MODIFY COLUMN name VARCHAR(200) NOT NULL;
+ALTER TABLE customers DROP COLUMN phone;
+ALTER TABLE orders ADD INDEX idx_status (status);</code></pre>
+
+<h2>SQL Queries: SELECT, WHERE, ORDER BY, LIMIT</h2>
+
+<p>The <code>SELECT</code> statement is how you read data. MySQL evaluates its clauses in a logical order that differs from how you write them — understanding this explains many surprises.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 160" width="720" height="160">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <g font-size="12" text-anchor="middle">
+    <rect x="10"  y="60" width="90" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="55" y="85" fill="#1e3a8a">FROM/JOIN</text>
+    <rect x="130" y="60" width="80" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="170" y="85" fill="#1e3a8a">WHERE</text>
+    <rect x="240" y="60" width="90" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="285" y="85" fill="#1e3a8a">GROUP BY</text>
+    <rect x="360" y="60" width="80" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="400" y="85" fill="#1e3a8a">HAVING</text>
+    <rect x="470" y="60" width="80" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="510" y="85" fill="#059669">SELECT</text>
+    <rect x="580" y="60" width="60" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="610" y="85" fill="#1e3a8a">ORDER</text>
+    <rect x="660" y="60" width="50" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="685" y="85" fill="#1e3a8a">LIMIT</text>
+  </g>
+  <g stroke="#0891b2" stroke-width="2" fill="none">
+    <line x1="100" y1="80" x2="128" y2="80" marker-end="url(#ah2)"/>
+    <line x1="210" y1="80" x2="238" y2="80" marker-end="url(#ah2)"/>
+    <line x1="330" y1="80" x2="358" y2="80" marker-end="url(#ah2)"/>
+    <line x1="440" y1="80" x2="468" y2="80" marker-end="url(#ah2)"/>
+    <line x1="550" y1="80" x2="578" y2="80" marker-end="url(#ah2)"/>
+    <line x1="640" y1="80" x2="658" y2="80" marker-end="url(#ah2)"/>
+  </g>
+  <text x="360" y="30" font-size="13" text-anchor="middle" fill="#1a2233" font-weight="bold">Logical evaluation order of a SELECT</text>
+</svg><div class="cap">Fig 2. Rows are filtered (WHERE) before grouping; HAVING filters groups; SELECT runs late — which is why column aliases are usable in ORDER BY but not WHERE.</div></div>
+
+<pre><code class="language-sql">SELECT id, name, email
+FROM customers
+WHERE name LIKE 'A%'          -- starts with A
+  AND created_at &gt;= '2026-01-01'
+ORDER BY created_at DESC
+LIMIT 20 OFFSET 0;            -- first page of 20
+
+-- Useful predicates
+WHERE status IN ('paid','shipped')
+WHERE total BETWEEN 10 AND 100
+WHERE phone IS NULL                 -- NULL needs IS, never =
+WHERE email LIKE '%@gmail.com';</code></pre>
+
+<div class="callout warn"><span class="t">NULL is not a value</span> <code>NULL = NULL</code> is <code>NULL</code> (unknown), not true. Use <code>IS NULL</code> / <code>IS NOT NULL</code>. Aggregates like <code>COUNT(col)</code> skip NULLs, while <code>COUNT(*)</code> counts rows.</div>
+
+<h2>JOINs: Combining Tables</h2>
+
+<p>A JOIN matches rows across tables on a condition. The join type decides what happens to rows with no match.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 220" width="720" height="220">
+  <g font-size="12" text-anchor="middle">
+    <text x="120" y="25" font-weight="bold" fill="#1a2233">INNER JOIN</text>
+    <circle cx="95" cy="90" r="45" fill="#eff4ff" stroke="#2563eb"/>
+    <circle cx="145" cy="90" r="45" fill="#ecfdf5" stroke="#059669"/>
+    <path d="M120 52 A45 45 0 0 1 120 128 A45 45 0 0 1 120 52 Z" fill="#2563eb" opacity="0.35"/>
+    <text x="120" y="170" fill="#1a2233">only matching rows</text>
+
+    <text x="360" y="25" font-weight="bold" fill="#1a2233">LEFT JOIN</text>
+    <circle cx="335" cy="90" r="45" fill="#2563eb" opacity="0.35" stroke="#2563eb"/>
+    <circle cx="385" cy="90" r="45" fill="#ecfdf5" stroke="#059669"/>
+    <text x="360" y="170" fill="#1a2233">all left + matches</text>
+
+    <text x="600" y="25" font-weight="bold" fill="#1a2233">FULL (emulated)</text>
+    <circle cx="575" cy="90" r="45" fill="#2563eb" opacity="0.35" stroke="#2563eb"/>
+    <circle cx="625" cy="90" r="45" fill="#059669" opacity="0.3" stroke="#059669"/>
+    <text x="600" y="170" fill="#1a2233">LEFT UNION RIGHT</text>
+  </g>
+  <text x="360" y="205" font-size="12" text-anchor="middle" fill="#b45309">MySQL has no native FULL OUTER JOIN — combine LEFT and RIGHT with UNION.</text>
+</svg><div class="cap">Fig 3. Join types as set operations over two tables.</div></div>
+
+<pre><code class="language-sql">-- INNER: customers who have at least one order
+SELECT c.name, o.id AS order_id, o.total
+FROM customers c
+INNER JOIN orders o ON o.customer_id = c.id;
+
+-- LEFT: every customer, even those with zero orders (NULLs for order columns)
+SELECT c.name, COUNT(o.id) AS order_count
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id, c.name;
+
+-- Self join: find customers in the same city
+SELECT a.name, b.name
+FROM customers a
+JOIN customers b ON a.city = b.city AND a.id &lt; b.id;</code></pre>
+
+<h2>Aggregation: GROUP BY, HAVING, and Window Functions</h2>
+
+<p>Aggregate functions collapse many rows into one summary value. <code>GROUP BY</code> produces one output row per group; <code>HAVING</code> filters those groups (it runs <em>after</em> aggregation, unlike <code>WHERE</code>).</p>
+
+<pre><code class="language-sql">SELECT status,
+       COUNT(*)      AS n,
+       SUM(total)    AS revenue,
+       AVG(total)    AS avg_order,
+       MAX(total)    AS biggest
+FROM orders
+GROUP BY status
+HAVING SUM(total) &gt; 1000       -- only groups whose revenue exceeds 1000
+ORDER BY revenue DESC;</code></pre>
+
+<p><strong>Window functions</strong> (MySQL 8.0+) compute across a set of rows <em>without</em> collapsing them — perfect for running totals, rankings, and "top N per group".</p>
+
+<pre><code class="language-sql">-- Rank each customer's orders by total, keeping every row
+SELECT
+  customer_id,
+  total,
+  ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY total DESC) AS rn,
+  SUM(total)   OVER (PARTITION BY customer_id)                     AS customer_lifetime
+FROM orders;
+
+-- "Latest order per customer" = keep rows where rn = 1 (wrap in a subquery)</code></pre>
+
+<table>
+<tr><th>Function</th><th>Returns</th></tr>
+<tr><td><code>COUNT(*)</code> / <code>COUNT(col)</code></td><td>Row count / non-NULL count</td></tr>
+<tr><td><code>SUM</code> / <code>AVG</code> / <code>MIN</code> / <code>MAX</code></td><td>Numeric aggregates</td></tr>
+<tr><td><code>GROUP_CONCAT(col)</code></td><td>Concatenated string of group values</td></tr>
+<tr><td><code>ROW_NUMBER()</code> / <code>RANK()</code> / <code>DENSE_RANK()</code></td><td>Ordinal / ranking within a window</td></tr>
+<tr><td><code>LAG()</code> / <code>LEAD()</code></td><td>Value from a previous / next row</td></tr>
+</table>
+
+<h2>Subqueries, CTEs, and Views</h2>
+
+<p>A <strong>subquery</strong> is a query nested inside another. A <strong>CTE</strong> (Common Table Expression, <code>WITH</code>) is a named, readable subquery. A <strong>view</strong> is a stored, reusable query that behaves like a virtual table.</p>
+
+<pre><code class="language-sql">-- Scalar subquery: customers who spent above the overall average
+SELECT c.name
+FROM customers c
+WHERE (SELECT SUM(total) FROM orders o WHERE o.customer_id = c.id)
+      &gt; (SELECT AVG(total) FROM orders);
+
+-- Correlated EXISTS: customers with at least one shipped order
+SELECT name FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o
+  WHERE o.customer_id = c.id AND o.status = 'shipped'
+);
+
+-- CTE: cleaner and composable
+WITH customer_revenue AS (
+  SELECT customer_id, SUM(total) AS revenue
+  FROM orders GROUP BY customer_id
+)
+SELECT c.name, cr.revenue
+FROM customer_revenue cr
+JOIN customers c ON c.id = cr.customer_id
+WHERE cr.revenue &gt; 500;
+
+-- View: freeze the query behind a name
+CREATE VIEW v_top_customers AS
+SELECT c.id, c.name, SUM(o.total) AS revenue
+FROM customers c JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id, c.name;
+
+SELECT * FROM v_top_customers WHERE revenue &gt; 1000;</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Prefer <code>EXISTS</code> over <code>IN (SELECT ...)</code> for correlated existence checks on large tables — it can short-circuit on the first match and handles NULLs more predictably.</div>
+
+<h2>Indexes and How They Work</h2>
+
+<p>An index is an auxiliary data structure — a <strong>B+tree</strong> in InnoDB — that lets the engine find rows without scanning every one. Without an index, <code>WHERE email = ?</code> is a full table scan: O(n). With one, it is a tree descent: O(log n).</p>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <defs><marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+  <rect x="300" y="20" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="45" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 50 | 100 ]</text>
+
+  <rect x="110" y="110" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="170" y="135" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 10 | 30 ]</text>
+  <rect x="300" y="110" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="135" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 60 | 80 ]</text>
+  <rect x="490" y="110" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="550" y="135" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 120 | 150 ]</text>
+
+  <g font-size="11" text-anchor="middle" fill="#059669">
+    <rect x="40"  y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="85" y="222">10 -&gt; row</text>
+    <rect x="150" y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="195" y="222">30 -&gt; row</text>
+    <rect x="300" y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="345" y="222">60 -&gt; row</text>
+    <rect x="490" y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="535" y="222">120 -&gt; row</text>
+  </g>
+  <g stroke="#94a3b8" stroke-width="1.5" fill="none">
+    <line x1="340" y1="60" x2="190" y2="108" marker-end="url(#ah3)"/>
+    <line x1="360" y1="60" x2="360" y2="108" marker-end="url(#ah3)"/>
+    <line x1="390" y1="60" x2="540" y2="108" marker-end="url(#ah3)"/>
+    <line x1="150" y1="150" x2="95"  y2="198" marker-end="url(#ah3)"/>
+    <line x1="190" y1="150" x2="195" y2="198" marker-end="url(#ah3)"/>
+    <line x1="340" y1="150" x2="345" y2="198" marker-end="url(#ah3)"/>
+    <line x1="520" y1="150" x2="535" y2="198" marker-end="url(#ah3)"/>
+  </g>
+  <text x="360" y="255" font-size="11" text-anchor="middle" fill="#1a2233">Leaf nodes are linked -&gt; range scans (BETWEEN, ORDER BY) are fast too.</text>
+</svg><div class="cap">Fig 4. A B+tree index: internal nodes route the search; leaves hold keys pointing to rows.</div></div>
+
+<pre><code class="language-sql">-- Single-column index
+CREATE INDEX idx_orders_customer ON orders(customer_id);
+
+-- Composite index: order of columns matters! Follows the "leftmost prefix" rule.
+CREATE INDEX idx_orders_cust_status ON orders(customer_id, status);
+-- This index helps: WHERE customer_id = 5
+--                   WHERE customer_id = 5 AND status = 'paid'
+-- It does NOT help:  WHERE status = 'paid'   (skips the leftmost column)
+
+-- Covering index: query answered entirely from the index, no row lookup
+CREATE INDEX idx_cover ON orders(customer_id, status, total);</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>When to index</h4>Columns in <code>WHERE</code>, <code>JOIN ON</code>, and <code>ORDER BY</code>; high-selectivity columns (many distinct values).</div>
+  <div class="card"><h4>Cost of indexes</h4>Every <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code> must maintain them. They consume disk and RAM. Index deliberately, not reflexively.</div>
+</div>
+
+<div class="callout warn"><span class="t">Index killers</span> Wrapping an indexed column in a function or doing a leading wildcard defeats the index: <code>WHERE YEAR(created_at) = 2026</code> and <code>WHERE email LIKE '%@x.com'</code> both force scans. Rewrite as range predicates (<code>created_at &gt;= '2026-01-01'</code>).</div>
+
+<h2>Normalization: Designing Clean Schemas</h2>
+
+<p>Normalization is the process of structuring tables to reduce redundancy and prevent update anomalies. The first three normal forms cover the vast majority of real designs.</p>
+
+<table>
+<tr><th>Form</th><th>Rule</th><th>Fixes</th></tr>
+<tr><td><strong>1NF</strong></td><td>Atomic values; no repeating groups or arrays in a column</td><td>Comma-separated lists, repeated <code>item1,item2</code> columns</td></tr>
+<tr><td><strong>2NF</strong></td><td>1NF + every non-key column depends on the <em>whole</em> composite key</td><td>Partial dependency on part of a key</td></tr>
+<tr><td><strong>3NF</strong></td><td>2NF + no non-key column depends on another non-key column</td><td>Transitive dependencies (e.g. storing <code>zip</code> and <code>city</code> derivable from zip)</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Pragmatism</span> Normalize for correctness, then <em>selectively denormalize</em> for read performance (e.g. a cached <code>order_count</code>) when profiling proves it necessary. Analytics/reporting schemas (star schemas) are deliberately denormalized.</div>
+
+<h2>Transactions and ACID</h2>
+
+<p>A transaction groups statements into an all-or-nothing unit. InnoDB guarantees <strong>ACID</strong>:</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Atomicity</h4>All statements commit, or none do. A failure rolls everything back.</div>
+  <div class="card"><h4>Consistency</h4>Constraints and foreign keys hold before and after the transaction.</div>
+  <div class="card"><h4>Isolation</h4>Concurrent transactions don't corrupt each other; the isolation level tunes how much they see.</div>
+  <div class="card"><h4>Durability</h4>Once committed, changes survive a crash (written to the redo log / disk).</div>
+</div>
+
+<pre><code class="language-sql">START TRANSACTION;
+
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+
+-- If both succeed:
+COMMIT;
+-- If anything is wrong:
+-- ROLLBACK;</code></pre>
+
+<p>The <strong>isolation level</strong> controls which concurrency anomalies are possible. MySQL's InnoDB default is <code>REPEATABLE READ</code>.</p>
+
+<table>
+<tr><th>Level</th><th>Dirty read</th><th>Non-repeatable read</th><th>Phantom</th></tr>
+<tr><td>READ UNCOMMITTED</td><td>Possible</td><td>Possible</td><td>Possible</td></tr>
+<tr><td>READ COMMITTED</td><td>No</td><td>Possible</td><td>Possible</td></tr>
+<tr><td>REPEATABLE READ <span class="badge g">default</span></td><td>No</td><td>No</td><td>Mostly prevented*</td></tr>
+<tr><td>SERIALIZABLE</td><td>No</td><td>No</td><td>No</td></tr>
+</table>
+<p style="font-size:0.9em">*InnoDB's gap locks largely prevent phantoms at REPEATABLE READ, going beyond the SQL standard.</p>
+
+<div class="callout danger"><span class="t">Deadlocks</span> Two transactions each holding a lock the other needs will deadlock; InnoDB detects this and kills one with error 1213. Mitigate by acquiring locks in a consistent order and keeping transactions short. Always be ready to retry a deadlocked transaction.</div>
+
+<h2>Query Optimization with EXPLAIN</h2>
+
+<p><code>EXPLAIN</code> shows the optimizer's execution plan: which indexes it uses, how many rows it estimates, and the access method. It is your single most important tuning tool.</p>
+
+<pre><code class="language-sql">EXPLAIN SELECT c.name, SUM(o.total)
+FROM customers c JOIN orders o ON o.customer_id = c.id
+WHERE o.status = 'paid'
+GROUP BY c.id;
+
+-- EXPLAIN ANALYZE actually runs it and reports real timings (MySQL 8.0.18+)
+EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 42;</code></pre>
+
+<table>
+<tr><th>EXPLAIN column</th><th>What to look for</th></tr>
+<tr><td><code>type</code></td><td>Access method, best to worst: <code>const</code> &gt; <code>eq_ref</code> &gt; <code>ref</code> &gt; <code>range</code> &gt; <code>index</code> &gt; <code>ALL</code>. <code>ALL</code> = full scan, a red flag on big tables.</td></tr>
+<tr><td><code>key</code></td><td>The index actually chosen (<code>NULL</code> means none).</td></tr>
+<tr><td><code>rows</code></td><td>Estimated rows examined — lower is better.</td></tr>
+<tr><td><code>Extra</code></td><td><code>Using index</code> (covering, great); <code>Using filesort</code> / <code>Using temporary</code> (often fixable with an index).</td></tr>
+</table>
+
+<div class="pipeline"><span class="step">Write query</span><span class="arrow">-&gt;</span><span class="step">EXPLAIN</span><span class="arrow">-&gt;</span><span class="step">Spot ALL / filesort</span><span class="arrow">-&gt;</span><span class="step">Add/fix index</span><span class="arrow">-&gt;</span><span class="step">Re-EXPLAIN</span></div>
+
+<h2>A Worked Mini-Example: Monthly Revenue Report</h2>
+
+<p>Suppose a product manager asks: "Show me the top 3 customers by revenue for paid orders in Q1 2026, with their order counts." Here is the full build-up.</p>
+
+<details><summary>Show the complete solution</summary><div class="body">
+<pre><code class="language-sql">WITH q1_paid AS (
+  SELECT customer_id, total
+  FROM orders
+  WHERE status = 'paid'
+    AND created_at &gt;= '2026-01-01'
+    AND created_at &lt;  '2026-04-01'
+),
+ranked AS (
+  SELECT
+    customer_id,
+    COUNT(*)   AS order_count,
+    SUM(total) AS revenue,
+    RANK() OVER (ORDER BY SUM(total) DESC) AS rnk
+  FROM q1_paid
+  GROUP BY customer_id
+)
+SELECT c.name, r.order_count, r.revenue
+FROM ranked r
+JOIN customers c ON c.id = r.customer_id
+WHERE r.rnk &lt;= 3
+ORDER BY r.revenue DESC;</code></pre>
+<p>Supporting index so the CTE filter and grouping stay fast:</p>
+<pre><code class="language-sql">CREATE INDEX idx_orders_status_created
+  ON orders(status, created_at, customer_id, total);</code></pre>
+<p>This covering index lets the <code>q1_paid</code> CTE be answered from the index alone — no table rows are read for the filter.</p>
+</div></details>
+
+<h2>Connecting from Python and Node.js</h2>
+
+<p>Applications talk to MySQL through a driver. The cardinal rule in every language: <strong>use parameterized queries</strong> so user input can never be interpreted as SQL. String-concatenating values is the classic SQL-injection vulnerability.</p>
+
+<h3>Python</h3>
+<pre><code class="language-bash">pip install mysql-connector-python   # official Oracle driver
+# or: pip install PyMySQL             # pure-Python alternative</code></pre>
+
+<pre><code class="language-python">import mysql.connector
+
+conn = mysql.connector.connect(
+    host="localhost", user="app_user",
+    password="secret", database="shop_db",
+)
+try:
+    cur = conn.cursor(dictionary=True)   # rows as dicts
+
+    # Parameterized query — %s placeholders, NEVER f-strings
+    cur.execute(
+        "SELECT id, name FROM customers WHERE email = %s",
+        ("alice@example.com",),
+    )
+    for row in cur.fetchall():
+        print(row["id"], row["name"])
+
+    # A transaction: autocommit is off by default
+    cur.execute("UPDATE accounts SET balance = balance - %s WHERE id = %s", (100, 1))
+    cur.execute("UPDATE accounts SET balance = balance + %s WHERE id = %s", (100, 2))
+    conn.commit()                         # make it durable
+except mysql.connector.Error as e:
+    conn.rollback()
+    raise
+finally:
+    conn.close()</code></pre>
+
+<h3>Node.js</h3>
+<pre><code class="language-bash">npm install mysql2        # supports promises + prepared statements</code></pre>
+
+<pre><code class="language-javascript">import mysql from 'mysql2/promise';
+
+// A connection pool reuses connections — essential under load.
+const pool = mysql.createPool({
+  host: 'localhost', user: 'app_user',
+  password: 'secret', database: 'shop_db',
+  connectionLimit: 10,
+});
+
+// Parameterized query with ? placeholders
+const [rows] = await pool.execute(
+  'SELECT id, name FROM customers WHERE email = ?',
+  ['alice@example.com'],
+);
+console.log(rows);
+
+// Transaction with a dedicated connection
+const conn = await pool.getConnection();
+try {
+  await conn.beginTransaction();
+  await conn.execute('UPDATE accounts SET balance = balance - ? WHERE id = ?', [100, 1]);
+  await conn.execute('UPDATE accounts SET balance = balance + ? WHERE id = ?', [100, 2]);
+  await conn.commit();
+} catch (err) {
+  await conn.rollback();
+  throw err;
+} finally {
+  conn.release();   // return it to the pool
+}</code></pre>
+
+<div class="callout danger"><span class="t">SQL injection</span> Never do <code>"... WHERE email = '" + userInput + "'"</code>. One input of <code>' OR '1'='1</code> dumps your table. Placeholders (<code>%s</code> / <code>?</code>) send data separately from SQL text, closing the hole entirely.</div>
+
+<h2>Cheat Sheet</h2>
+
+<table>
+<tr><th>Task</th><th>Statement</th></tr>
+<tr><td>Insert</td><td><code>INSERT INTO t (a,b) VALUES (1,'x');</code></td></tr>
+<tr><td>Insert many</td><td><code>INSERT INTO t (a,b) VALUES (1,'x'),(2,'y');</code></td></tr>
+<tr><td>Update</td><td><code>UPDATE t SET b='z' WHERE id=1;</code></td></tr>
+<tr><td>Delete</td><td><code>DELETE FROM t WHERE id=1;</code></td></tr>
+<tr><td>Upsert</td><td><code>INSERT ... ON DUPLICATE KEY UPDATE b=VALUES(b);</code></td></tr>
+<tr><td>Distinct</td><td><code>SELECT DISTINCT city FROM customers;</code></td></tr>
+<tr><td>Count rows</td><td><code>SELECT COUNT(*) FROM t;</code></td></tr>
+<tr><td>Pagination</td><td><code>... ORDER BY id LIMIT 20 OFFSET 40;</code></td></tr>
+<tr><td>Conditional</td><td><code>CASE WHEN total&gt;100 THEN 'big' ELSE 'small' END</code></td></tr>
+<tr><td>Null default</td><td><code>COALESCE(phone, 'n/a')</code></td></tr>
+<tr><td>Add index</td><td><code>CREATE INDEX ix ON t(col);</code></td></tr>
+<tr><td>Show plan</td><td><code>EXPLAIN SELECT ...;</code></td></tr>
+</table>
+
+<h3>MySQL vs PostgreSQL vs SQLite (quick comparison)</h3>
+<table>
+<tr><th>Aspect</th><th>MySQL</th><th>PostgreSQL</th><th>SQLite</th></tr>
+<tr><td>Model</td><td>Client/server</td><td>Client/server</td><td>Embedded file</td></tr>
+<tr><td>Strength</td><td>Fast reads, ubiquity, replication</td><td>Standards, advanced types, extensibility</td><td>Zero-config, local apps</td></tr>
+<tr><td>JSON</td><td>Good</td><td>Excellent (JSONB)</td><td>Basic</td></tr>
+<tr><td>Window fns</td><td>8.0+</td><td>Yes</td><td>3.25+</td></tr>
+<tr><td>Typical use</td><td>Web backends, WordPress</td><td>Complex apps, analytics</td><td>Mobile, tests, prototypes</td></tr>
+</table>
+
+<h2>Best Practices and Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Use <code>InnoDB</code> (default), declare primary and foreign keys, pick the smallest correct data type, parameterize all queries, use connection pools, and run <code>EXPLAIN</code> on any slow query before guessing.</div>
+
+<div class="callout tip"><span class="t">Do</span> Store timestamps in UTC. Set a sensible charset — <code>utf8mb4</code> (full Unicode, including emoji) rather than the legacy <code>utf8</code> which is only 3 bytes and cannot store all characters.</div>
+
+<div class="callout warn"><span class="t">Avoid</span> <code>SELECT *</code> in application code (fetches unused columns, breaks on schema change), <code>OFFSET</code> pagination on huge tables (use keyset/seek pagination), and giant <code>IN (...)</code> lists.</div>
+
+<div class="callout danger"><span class="t">Never</span> run <code>UPDATE</code>/<code>DELETE</code> without a <code>WHERE</code> clause on production, and never string-concatenate user input into SQL. Enable <code>sql_safe_updates</code> in interactive sessions as a guardrail.</div>
+
+<h2>Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between WHERE and HAVING?</div><div class="a"><code>WHERE</code> filters individual rows before grouping and cannot reference aggregates. <code>HAVING</code> filters groups after <code>GROUP BY</code> and can use aggregates like <code>SUM()</code>. If there is no <code>GROUP BY</code>, put conditions in <code>WHERE</code> for efficiency.</div></div>
+
+<div class="qa"><div class="q">Explain the difference between INNER JOIN and LEFT JOIN.</div><div class="a"><code>INNER JOIN</code> returns only rows with a match in both tables. <code>LEFT JOIN</code> returns all rows from the left table and matched rows from the right, filling right-side columns with <code>NULL</code> where there is no match — useful for "find records with no related rows" via <code>WHERE right.id IS NULL</code>.</div></div>
+
+<div class="qa"><div class="q">What is a primary key versus a unique key?</div><div class="a">Both enforce uniqueness. A table has exactly one primary key, which cannot be NULL and (in InnoDB) determines the clustered storage order. A table can have many unique keys, and a unique key column may allow a single NULL (NULLs are treated as distinct).</div></div>
+
+<div class="qa"><div class="q">How does an index speed up queries, and what is the downside?</div><div class="a">An index is a sorted B+tree that turns a full table scan (O(n)) into a logarithmic lookup (O(log n)) and enables fast range scans and ordering. The downside: it adds storage and slows writes, since every insert/update/delete must also maintain the index. Over-indexing hurts write-heavy workloads.</div></div>
+
+<div class="qa"><div class="q">What is the leftmost prefix rule for composite indexes?</div><div class="a">An index on <code>(a, b, c)</code> can be used for predicates on <code>a</code>, <code>a,b</code>, or <code>a,b,c</code> — always starting from the left. A query filtering only on <code>b</code> or <code>c</code> cannot use it. Design composite indexes with the most selective, most frequently filtered column first.</div></div>
+
+<div class="qa"><div class="q">What are the ACID properties?</div><div class="a">Atomicity (all-or-nothing), Consistency (constraints always hold), Isolation (concurrent transactions don't interfere), Durability (committed data survives crashes). InnoDB provides all four; MyISAM does not support transactions.</div></div>
+
+<div class="qa"><div class="q">What isolation anomalies exist and what is MySQL's default?</div><div class="a">Dirty reads (seeing uncommitted data), non-repeatable reads (a row changes between reads), and phantom reads (new rows appear in a repeated range query). InnoDB defaults to <code>REPEATABLE READ</code>, which prevents dirty and non-repeatable reads and, via gap locks, largely prevents phantoms too.</div></div>
+
+<div class="qa"><div class="q">What is normalization and when would you denormalize?</div><div class="a">Normalization organizes data to eliminate redundancy and update anomalies (1NF atomic values, 2NF no partial key dependency, 3NF no transitive dependency). You denormalize deliberately for read performance — caching an aggregate, or building a star schema for analytics — once profiling shows the join cost is a real bottleneck.</div></div>
+
+<div class="qa"><div class="q">How do you prevent SQL injection?</div><div class="a">Use parameterized / prepared statements so values travel separately from the SQL text (<code>?</code> or <code>%s</code> placeholders), never string concatenation. Add least-privilege database accounts and input validation as defense in depth, but parameterization is the actual fix.</div></div>
+
+<div class="qa"><div class="q">What does EXPLAIN tell you, and what is a warning sign?</div><div class="a">It shows the execution plan: access <code>type</code>, chosen <code>key</code>, estimated <code>rows</code>, and <code>Extra</code> notes. Red flags are <code>type: ALL</code> (full scan) on large tables, <code>key: NULL</code> (no index used), and <code>Using filesort</code>/<code>Using temporary</code> where an index could satisfy the sort or grouping.</div></div>
+
+<div class="qa"><div class="q">What is the difference between DELETE, TRUNCATE, and DROP?</div><div class="a"><code>DELETE</code> removes rows (optionally filtered), is transactional and logged row-by-row. <code>TRUNCATE</code> quickly empties a whole table by recreating it — fast, not row-logged, resets AUTO_INCREMENT, and implicitly commits. <code>DROP</code> removes the table definition entirely.</div></div>
+
+<div class="qa"><div class="q">What is a covering index?</div><div class="a">An index that contains every column a query needs (in SELECT, WHERE, ORDER BY), so the engine answers entirely from the index without touching the table rows. <code>EXPLAIN</code> shows <code>Using index</code>. It is one of the most effective single-query optimizations.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+  <li><strong>Official docs</strong>: the MySQL 8.4 Reference Manual — authoritative on syntax, functions, and the InnoDB engine.</li>
+  <li><strong>Practice</strong>: solve joins/aggregation/window problems on sites like LeetCode (Database) and HackerRank (SQL).</li>
+  <li><strong>Depth</strong>: read <em>High Performance MySQL</em> for indexing internals, replication, and tuning at scale.</li>
+  <li><strong>Adjacent skills</strong>: database replication and sharding, read replicas, an ORM (SQLAlchemy, Prisma, Sequelize), and migration tools (Flyway, Alembic, Liquibase).</li>
+  <li><strong>Next topics</strong>: query plan caching, partitioning, full-text search, and the JSON column type for semi-structured data.</li>
+</ul>

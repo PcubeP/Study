@@ -1,0 +1,760 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>scikit-learn — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">AI/ML Frameworks</div>
+  <h1>scikit-learn</h1>
+  <div class="subtitle">Master the consistent estimator API, pipelines, classic models, and rigorous model evaluation that make scikit-learn the backbone of classical machine learning.</div>
+  <div class="tags"><span>scikit-learn</span><span>machine-learning</span><span>python</span><span>pipelines</span><span>cross-validation</span><span>model-selection</span><span>preprocessing</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~15 min read &middot; 3,307 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#1-what-scikit-learn-is-and-why-it-matters">1. What scikit-learn Is and Why It Matters</a></li><li><a href="#2-getting-started">2. Getting Started</a></li><li><a href="#3-the-estimator-api-fit-predict-transform">3. The Estimator API: fit, predict, transform</a></li><li><a href="#4-splitting-data-honestly">4. Splitting Data Honestly</a></li><li><a href="#5-preprocessing-and-feature-engineering">5. Preprocessing and Feature Engineering</a></li><li><a href="#6-pipelines-and-columntransformer">6. Pipelines and ColumnTransformer</a></li><li><a href="#7-classic-models-a-tour">7. Classic Models: A Tour</a></li><li><a href="#8-metrics-measuring-what-matters">8. Metrics: Measuring What Matters</a></li><li><a href="#9-cross-validation-and-model-selection">9. Cross-Validation and Model Selection</a></li><li><a href="#10-a-worked-mini-example-titanic-survival">10. A Worked Mini-Example: Titanic Survival</a></li><li><a href="#11-cheat-sheet-reference">11. Cheat-Sheet Reference</a></li><li><a href="#12-best-practices-and-common-pitfalls">12. Best Practices and Common Pitfalls</a></li><li><a href="#13-interview-questions-amp-answers">13. Interview Questions &amp; Answers</a></li><li><a href="#14-further-learning">14. Further Learning</a></li></ol></nav>
+<p class="lead">scikit-learn is the de-facto standard library for classical machine learning in Python. Its genius is one tiny, uniform contract — <code>fit</code>, <code>predict</code>, <code>transform</code> — shared by hundreds of algorithms. Learn the contract once and you can swap a logistic regression for a random forest by changing a single line, chain preprocessing and models into leak-proof pipelines, and tune everything with the same grid-search machinery.</p>
+
+<h2 id="1-what-scikit-learn-is-and-why-it-matters">1. What scikit-learn Is and Why It Matters</h2>
+
+<p>scikit-learn (imported as <code>sklearn</code>) sits on top of NumPy, SciPy, and (optionally) pandas. It is <strong>not</strong> a deep-learning framework — there is no GPU autodiff. Its sweet spot is <em>tabular data</em>: the structured, columnar datasets that dominate real-world business problems — fraud detection, churn, pricing, risk scoring, demand forecasting. For these, gradient-boosted trees and linear models usually beat neural nets, and scikit-learn ships all of them behind one API.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Consistency</h4>Every algorithm is an <em>estimator</em> with the same methods. Knowledge transfers instantly across models.</div>
+  <div class="card"><h4>Composability</h4><code>Pipeline</code> and <code>ColumnTransformer</code> glue preprocessing to models so the whole flow is one object you can fit, score, and persist.</div>
+  <div class="card"><h4>Rigor</h4>First-class cross-validation, metrics, and hyper-parameter search make honest evaluation the default, not an afterthought.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 760 280" width="760" height="280">
+  <defs>
+    <marker id="a1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="110" width="110" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="75" y="138" text-anchor="middle" font-size="13" fill="#1a2233">Raw data</text>
+  <text x="75" y="155" text-anchor="middle" font-size="11" fill="#1a2233">X, y</text>
+
+  <rect x="175" y="110" width="130" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="240" y="135" text-anchor="middle" font-size="12" fill="#1a2233">Transformer</text>
+  <text x="240" y="152" text-anchor="middle" font-size="11" fill="#1a2233">fit + transform</text>
+
+  <rect x="350" y="110" width="130" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="415" y="135" text-anchor="middle" font-size="12" fill="#1a2233">Estimator</text>
+  <text x="415" y="152" text-anchor="middle" font-size="11" fill="#1a2233">fit(X, y)</text>
+
+  <rect x="525" y="110" width="130" height="60" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="590" y="135" text-anchor="middle" font-size="12" fill="#fff">Predictions</text>
+  <text x="590" y="152" text-anchor="middle" font-size="11" fill="#fff">predict(X)</text>
+
+  <line x1="130" y1="140" x2="175" y2="140" stroke="#94a3b8" stroke-width="2" marker-end="url(#a1)"/>
+  <line x1="305" y1="140" x2="350" y2="140" stroke="#94a3b8" stroke-width="2" marker-end="url(#a1)"/>
+  <line x1="480" y1="140" x2="525" y2="140" stroke="#94a3b8" stroke-width="2" marker-end="url(#a1)"/>
+
+  <rect x="175" y="215" width="305" height="40" rx="8" fill="none" stroke="#b45309" stroke-dasharray="5 4"/>
+  <text x="327" y="240" text-anchor="middle" font-size="12" fill="#b45309">Pipeline wraps these into one estimator</text>
+  <line x1="240" y1="215" x2="240" y2="172" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <line x1="415" y1="215" x2="415" y2="172" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 3"/>
+</svg>
+<div class="cap">Fig 1 — The core mental model: transformers reshape features, estimators learn, and a Pipeline chains them into one fit/predict object.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of scikit-learn as LEGO. Each brick (estimator) has the same studs (<code>fit</code>/<code>predict</code>/<code>transform</code>). You never glue bricks permanently — you snap them together into a Pipeline and can pull any brick out and replace it.</div>
+
+<h2 id="2-getting-started">2. Getting Started</h2>
+
+<p>Install into an isolated environment. The <code>scikit-learn</code> package name differs from the import name <code>sklearn</code>.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Create and activate a virtual environment</span>
+python -m venv .venv
+<span class="hljs-built_in">source</span> .venv/bin/activate        <span class="hljs-comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="hljs-comment"># Install scikit-learn plus the usual companions</span>
+pip install scikit-learn pandas matplotlib
+
+<span class="hljs-comment"># Verify</span>
+python -c <span class="hljs-string">&quot;import sklearn; print(sklearn.__version__)&quot;</span>   <span class="hljs-comment"># 1.7.x as of 2026</span></code></pre>
+
+<p>A complete first program — load data, split, fit, evaluate — in a dozen lines:</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.datasets <span class="hljs-keyword">import</span> load_iris
+<span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> RandomForestClassifier
+<span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> accuracy_score
+
+X, y = load_iris(return_X_y=<span class="hljs-literal">True</span>)          <span class="hljs-comment"># X: (150, 4) features, y: (150,) labels</span>
+
+<span class="hljs-comment"># Hold out 25% for honest evaluation; stratify keeps class ratios balanced</span>
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=<span class="hljs-number">0.25</span>, random_state=<span class="hljs-number">42</span>, stratify=y)
+
+clf = RandomForestClassifier(n_estimators=<span class="hljs-number">200</span>, random_state=<span class="hljs-number">42</span>)
+clf.fit(X_train, y_train)                   <span class="hljs-comment"># learn from training data only</span>
+preds = clf.predict(X_test)                 <span class="hljs-comment"># predict on unseen data</span>
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;accuracy = <span class="hljs-subst">{accuracy_score(y_test, preds):<span class="hljs-number">.3</span>f}</span>&quot;</span>)   <span class="hljs-comment"># ~0.95</span></code></pre>
+
+<div class="callout tip"><span class="t">Reproducibility</span> Always pass <code>random_state</code> to any object that uses randomness (splits, forests, KMeans). Without it, results change every run and bugs become impossible to reproduce.</div>
+
+<h2 id="3-the-estimator-api-fit-predict-transform">3. The Estimator API: fit, predict, transform</h2>
+
+<p>Everything in scikit-learn implements a subset of four verbs. This uniformity is the whole point of the library.</p>
+
+<table>
+  <tr><th>Method</th><th>Who implements it</th><th>What it does</th></tr>
+  <tr><td><code>fit(X, y=None)</code></td><td>Every estimator</td><td>Learns parameters from data. Stores results as attributes ending in <code>_</code> (e.g. <code>coef_</code>). Returns <code>self</code>.</td></tr>
+  <tr><td><code>predict(X)</code></td><td>Classifiers, regressors, clusterers</td><td>Produces a label or value for each row of X.</td></tr>
+  <tr><td><code>transform(X)</code></td><td>Transformers (scalers, encoders, PCA)</td><td>Returns a modified feature matrix.</td></tr>
+  <tr><td><code>fit_transform(X)</code></td><td>Transformers</td><td>Convenience: fit then transform in one call (often optimized).</td></tr>
+  <tr><td><code>predict_proba(X)</code></td><td>Most classifiers</td><td>Per-class probabilities, shape (n_samples, n_classes).</td></tr>
+  <tr><td><code>score(X, y)</code></td><td>Classifiers, regressors</td><td>Default metric: accuracy for classifiers, R&sup2; for regressors.</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The golden rule</span> Call <code>fit</code> (or <code>fit_transform</code>) on <strong>training data only</strong>. On test data call <code>transform</code> and <code>predict</code> only. Fitting a scaler or encoder on the full dataset leaks test-set statistics into training — the single most common cause of "great in notebook, terrible in production."</div>
+
+<div class="diagram">
+<svg viewBox="0 0 700 230" width="700" height="230">
+  <defs>
+    <marker id="a2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="30" y="90" width="140" height="55" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="100" y="115" text-anchor="middle" font-size="12" fill="#1a2233">X_train, y_train</text>
+  <text x="100" y="132" text-anchor="middle" font-size="11" fill="#b45309">fit()</text>
+
+  <rect x="280" y="90" width="150" height="55" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="355" y="112" text-anchor="middle" font-size="12" fill="#1a2233">Fitted model</text>
+  <text x="355" y="129" text-anchor="middle" font-size="11" fill="#1a2233">coef_, classes_ ...</text>
+
+  <rect x="530" y="30" width="140" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="600" y="52" text-anchor="middle" font-size="11" fill="#1a2233">X_test</text>
+  <text x="600" y="69" text-anchor="middle" font-size="11" fill="#b45309">predict()</text>
+
+  <rect x="530" y="150" width="140" height="50" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="600" y="178" text-anchor="middle" font-size="12" fill="#fff">y_pred</text>
+
+  <line x1="170" y1="117" x2="280" y2="117" stroke="#94a3b8" stroke-width="2" marker-end="url(#a2)"/>
+  <line x1="430" y1="110" x2="530" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#a2)"/>
+  <line x1="600" y1="80" x2="600" y2="150" stroke="#94a3b8" stroke-width="2" marker-end="url(#a2)"/>
+</svg>
+<div class="cap">Fig 2 — Learned state lives on the fitted estimator as trailing-underscore attributes; predict reuses that state on new data.</div>
+</div>
+
+<h2 id="4-splitting-data-honestly">4. Splitting Data Honestly</h2>
+
+<p>The cardinal sin of ML is evaluating on data the model has seen. <code>train_test_split</code> is the first defense; cross-validation (Section 9) is the stronger one.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=<span class="hljs-number">0.2</span>,       <span class="hljs-comment"># 20% held out (or train_size=0.8)</span>
+    random_state=<span class="hljs-number">42</span>,     <span class="hljs-comment"># reproducible shuffle</span>
+    stratify=y,          <span class="hljs-comment"># preserve class proportions (classification)</span>
+    shuffle=<span class="hljs-literal">True</span>,        <span class="hljs-comment"># default; set False for time series!</span>
+)</code></pre>
+
+<div class="callout danger"><span class="t">Time-series trap</span> Never randomly shuffle time-ordered data — you would train on the future to predict the past. Use <code>TimeSeriesSplit</code> or a manual cutoff date instead.</div>
+
+<h2 id="5-preprocessing-and-feature-engineering">5. Preprocessing and Feature Engineering</h2>
+
+<p>Raw features are rarely model-ready. Numeric columns need scaling for distance- and gradient-based models; categorical columns need encoding; missing values need imputing. All of these are <em>transformers</em>.</p>
+
+<table>
+  <tr><th>Transformer</th><th>Use for</th><th>Notes</th></tr>
+  <tr><td><code>StandardScaler</code></td><td>Center to mean 0, scale to std 1</td><td>Needed by SVM, KNN, logistic regression, PCA, KMeans.</td></tr>
+  <tr><td><code>MinMaxScaler</code></td><td>Squash into [0, 1]</td><td>Good when you need bounded features.</td></tr>
+  <tr><td><code>RobustScaler</code></td><td>Scale using median/IQR</td><td>Resistant to outliers.</td></tr>
+  <tr><td><code>OneHotEncoder</code></td><td>Nominal categoricals</td><td><code>handle_unknown='ignore'</code> for unseen categories at predict time.</td></tr>
+  <tr><td><code>OrdinalEncoder</code></td><td>Ordered categoricals</td><td>Only when order is meaningful (low &lt; mid &lt; high).</td></tr>
+  <tr><td><code>SimpleImputer</code></td><td>Fill missing values</td><td><code>strategy='median'</code> is a robust default for numerics.</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> sklearn.preprocessing <span class="hljs-keyword">import</span> StandardScaler
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)   <span class="hljs-comment"># learns mean_ and scale_ HERE</span>
+X_test_scaled  = scaler.transform(X_test)        <span class="hljs-comment"># reuses TRAIN statistics</span>
+
+<span class="hljs-built_in">print</span>(scaler.mean_)    <span class="hljs-comment"># learned per-column means</span>
+<span class="hljs-comment"># Tree-based models (RF, gradient boosting) do NOT need scaling —</span>
+<span class="hljs-comment"># they split on thresholds, so monotonic rescaling changes nothing.</span></code></pre>
+
+<p>Tree models are scale-invariant; distance and gradient models are not. Keep this table in your head:</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Needs scaling</h4>SVM, KNN, Logistic/Linear Regression (for regularization), PCA, KMeans, neural nets.</div>
+  <div class="card"><h4>Scale-invariant</h4>Decision Trees, Random Forests, Gradient Boosting, Extra Trees.</div>
+</div>
+
+<h2 id="6-pipelines-and-columntransformer">6. Pipelines and ColumnTransformer</h2>
+
+<p>A <code>Pipeline</code> chains transformers and a final estimator into a single object. Calling <code>fit</code> on the pipeline fits each step in order; calling <code>predict</code> applies every transform then the model. This makes leakage structurally impossible during cross-validation, because the scaler is re-fit on each training fold only.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.pipeline <span class="hljs-keyword">import</span> Pipeline
+<span class="hljs-keyword">from</span> sklearn.preprocessing <span class="hljs-keyword">import</span> StandardScaler
+<span class="hljs-keyword">from</span> sklearn.linear_model <span class="hljs-keyword">import</span> LogisticRegression
+
+pipe = Pipeline([
+    (<span class="hljs-string">&quot;scale&quot;</span>, StandardScaler()),
+    (<span class="hljs-string">&quot;clf&quot;</span>, LogisticRegression(max_iter=<span class="hljs-number">1000</span>)),
+])
+
+pipe.fit(X_train, y_train)      <span class="hljs-comment"># scaler.fit_transform -&gt; clf.fit</span>
+pipe.predict(X_test)            <span class="hljs-comment"># scaler.transform      -&gt; clf.predict</span>
+pipe.score(X_test, y_test)</code></pre>
+
+<p>Real datasets mix numeric and categorical columns needing different treatment. <code>ColumnTransformer</code> routes each column subset to the right transformer, then concatenates the results.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">from</span> sklearn.compose <span class="hljs-keyword">import</span> ColumnTransformer
+<span class="hljs-keyword">from</span> sklearn.pipeline <span class="hljs-keyword">import</span> Pipeline
+<span class="hljs-keyword">from</span> sklearn.impute <span class="hljs-keyword">import</span> SimpleImputer
+<span class="hljs-keyword">from</span> sklearn.preprocessing <span class="hljs-keyword">import</span> StandardScaler, OneHotEncoder
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> RandomForestClassifier
+
+num_cols = [<span class="hljs-string">&quot;age&quot;</span>, <span class="hljs-string">&quot;income&quot;</span>, <span class="hljs-string">&quot;balance&quot;</span>]
+cat_cols = [<span class="hljs-string">&quot;country&quot;</span>, <span class="hljs-string">&quot;product&quot;</span>]
+
+numeric = Pipeline([
+    (<span class="hljs-string">&quot;impute&quot;</span>, SimpleImputer(strategy=<span class="hljs-string">&quot;median&quot;</span>)),
+    (<span class="hljs-string">&quot;scale&quot;</span>, StandardScaler()),
+])
+categorical = Pipeline([
+    (<span class="hljs-string">&quot;impute&quot;</span>, SimpleImputer(strategy=<span class="hljs-string">&quot;most_frequent&quot;</span>)),
+    (<span class="hljs-string">&quot;ohe&quot;</span>, OneHotEncoder(handle_unknown=<span class="hljs-string">&quot;ignore&quot;</span>)),
+])
+
+pre = ColumnTransformer([
+    (<span class="hljs-string">&quot;num&quot;</span>, numeric, num_cols),
+    (<span class="hljs-string">&quot;cat&quot;</span>, categorical, cat_cols),
+])
+
+model = Pipeline([
+    (<span class="hljs-string">&quot;pre&quot;</span>, pre),
+    (<span class="hljs-string">&quot;clf&quot;</span>, RandomForestClassifier(n_estimators=<span class="hljs-number">300</span>, random_state=<span class="hljs-number">42</span>)),
+])
+model.fit(X_train, y_train)     <span class="hljs-comment"># X_train is a DataFrame with the named columns</span></code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 720 260" width="720" height="260">
+  <defs>
+    <marker id="a3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="100" width="110" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="75" y="128" text-anchor="middle" font-size="12" fill="#1a2233">DataFrame</text>
+  <text x="75" y="145" text-anchor="middle" font-size="11" fill="#1a2233">mixed columns</text>
+
+  <rect x="220" y="30" width="200" height="55" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="320" y="52" text-anchor="middle" font-size="12" fill="#1a2233">num: impute + scale</text>
+  <text x="320" y="70" text-anchor="middle" font-size="11" fill="#1a2233">age, income, balance</text>
+
+  <rect x="220" y="175" width="200" height="55" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="320" y="197" text-anchor="middle" font-size="12" fill="#1a2233">cat: impute + one-hot</text>
+  <text x="320" y="215" text-anchor="middle" font-size="11" fill="#1a2233">country, product</text>
+
+  <rect x="480" y="100" width="110" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="535" y="128" text-anchor="middle" font-size="11" fill="#1a2233">concatenated</text>
+  <text x="535" y="145" text-anchor="middle" font-size="11" fill="#1a2233">feature matrix</text>
+
+  <rect x="630" y="100" width="70" height="60" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="665" y="135" text-anchor="middle" font-size="12" fill="#fff">clf</text>
+
+  <line x1="130" y1="120" x2="220" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#a3)"/>
+  <line x1="130" y1="140" x2="220" y2="200" stroke="#94a3b8" stroke-width="2" marker-end="url(#a3)"/>
+  <line x1="420" y1="58" x2="480" y2="118" stroke="#94a3b8" stroke-width="2" marker-end="url(#a3)"/>
+  <line x1="420" y1="202" x2="480" y2="142" stroke="#94a3b8" stroke-width="2" marker-end="url(#a3)"/>
+  <line x1="590" y1="130" x2="630" y2="130" stroke="#94a3b8" stroke-width="2" marker-end="url(#a3)"/>
+</svg>
+<div class="cap">Fig 3 — ColumnTransformer splits columns by type, transforms each subset in parallel, concatenates, then feeds the final estimator.</div>
+</div>
+
+<div class="callout ok"><span class="t">Why this matters</span> One <code>model</code> object now encapsulates imputation, scaling, encoding, and the classifier. Persist it with <code>joblib.dump</code> and production inference is a single <code>model.predict(df)</code> — no risk of forgetting a preprocessing step.</div>
+
+<h2 id="7-classic-models-a-tour">7. Classic Models: A Tour</h2>
+
+<p>Swap any model below into the pipeline above by changing the final step. The API is identical.</p>
+
+<h3>Linear and Logistic Regression</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.linear_model <span class="hljs-keyword">import</span> LinearRegression, LogisticRegression, Ridge
+
+<span class="hljs-comment"># Regression: predict a continuous value</span>
+reg = LinearRegression().fit(X_train, y_train)
+<span class="hljs-built_in">print</span>(reg.coef_, reg.intercept_)         <span class="hljs-comment"># learned weights and bias</span>
+
+<span class="hljs-comment"># Ridge adds L2 regularization (alpha controls strength) to fight overfitting</span>
+ridge = Ridge(alpha=<span class="hljs-number">1.0</span>).fit(X_train, y_train)
+
+<span class="hljs-comment"># Classification despite the name: logistic regression outputs probabilities</span>
+log = LogisticRegression(C=<span class="hljs-number">1.0</span>, max_iter=<span class="hljs-number">1000</span>).fit(X_train, y_train)
+log.predict_proba(X_test)[:<span class="hljs-number">5</span>]            <span class="hljs-comment"># per-class probabilities</span></code></pre>
+
+<div class="callout note"><span class="t">C vs alpha</span> In <code>LogisticRegression</code>/<code>SVC</code>, <code>C</code> is <em>inverse</em> regularization strength — smaller C = more regularization. In <code>Ridge</code>/<code>Lasso</code>, <code>alpha</code> is direct — larger alpha = more regularization. Easy to mix up.</div>
+
+<h3>Decision Trees, Random Forests, Gradient Boosting</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.tree <span class="hljs-keyword">import</span> DecisionTreeClassifier
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> RandomForestClassifier, GradientBoostingClassifier, HistGradientBoostingClassifier
+
+<span class="hljs-comment"># A single tree: interpretable but prone to overfitting</span>
+tree = DecisionTreeClassifier(max_depth=<span class="hljs-number">5</span>, random_state=<span class="hljs-number">42</span>).fit(X_train, y_train)
+
+<span class="hljs-comment"># Random Forest: many de-correlated trees voting — strong, robust default</span>
+rf = RandomForestClassifier(n_estimators=<span class="hljs-number">300</span>, max_depth=<span class="hljs-literal">None</span>,
+                            n_jobs=-<span class="hljs-number">1</span>, random_state=<span class="hljs-number">42</span>).fit(X_train, y_train)
+<span class="hljs-built_in">print</span>(rf.feature_importances_)           <span class="hljs-comment"># which features drove splits</span>
+
+<span class="hljs-comment"># HistGradientBoosting: fast, handles NaNs natively — top tabular performer</span>
+hgb = HistGradientBoostingClassifier(max_iter=<span class="hljs-number">300</span>,
+                                     learning_rate=<span class="hljs-number">0.1</span>).fit(X_train, y_train)</code></pre>
+
+<h3>SVM, KNN, KMeans</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.svm <span class="hljs-keyword">import</span> SVC
+<span class="hljs-keyword">from</span> sklearn.neighbors <span class="hljs-keyword">import</span> KNeighborsClassifier
+<span class="hljs-keyword">from</span> sklearn.cluster <span class="hljs-keyword">import</span> KMeans
+
+<span class="hljs-comment"># SVM with RBF kernel — powerful on small/medium data; MUST scale features first</span>
+svm = SVC(kernel=<span class="hljs-string">&quot;rbf&quot;</span>, C=<span class="hljs-number">1.0</span>, gamma=<span class="hljs-string">&quot;scale&quot;</span>, probability=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># KNN — lazy learner; prediction compares to k nearest training points</span>
+knn = KNeighborsClassifier(n_neighbors=<span class="hljs-number">5</span>, weights=<span class="hljs-string">&quot;distance&quot;</span>)
+
+<span class="hljs-comment"># KMeans — UNSUPERVISED: no y. Groups data into k clusters.</span>
+km = KMeans(n_clusters=<span class="hljs-number">3</span>, n_init=<span class="hljs-string">&quot;auto&quot;</span>, random_state=<span class="hljs-number">42</span>).fit(X_train)
+<span class="hljs-built_in">print</span>(km.labels_, km.cluster_centers_)   <span class="hljs-comment"># assignments + centroids</span>
+new_labels = km.predict(X_test)          <span class="hljs-comment"># assign new points to nearest centroid</span></code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 700 240" width="700" height="240">
+  <defs>
+    <marker id="a4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker>
+  </defs>
+  <rect x="30" y="20" width="640" height="200" rx="10" fill="#fafbff" stroke="#94a3b8"/>
+  <text x="350" y="42" text-anchor="middle" font-size="13" fill="#1a2233">Decision tree: recursive binary splits on feature thresholds</text>
+  <rect x="300" y="60" width="110" height="34" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="355" y="82" text-anchor="middle" font-size="12" fill="#1a2233">age &lt; 30 ?</text>
+  <rect x="150" y="130" width="120" height="34" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="210" y="152" text-anchor="middle" font-size="12" fill="#1a2233">income &lt; 50k ?</text>
+  <rect x="450" y="130" width="110" height="34" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="505" y="152" text-anchor="middle" font-size="12" fill="#1a2233">class = Yes</text>
+  <rect x="90" y="190" width="90" height="30" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="135" y="210" text-anchor="middle" font-size="11" fill="#1a2233">No</text>
+  <rect x="230" y="190" width="90" height="30" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="275" y="210" text-anchor="middle" font-size="11" fill="#1a2233">Yes</text>
+  <line x1="330" y1="94" x2="230" y2="130" stroke="#1e3a8a" stroke-width="2" marker-end="url(#a4)"/>
+  <line x1="380" y1="94" x2="490" y2="130" stroke="#1e3a8a" stroke-width="2" marker-end="url(#a4)"/>
+  <text x="270" y="118" font-size="10" fill="#b45309">true</text>
+  <text x="440" y="118" font-size="10" fill="#b45309">false</text>
+  <line x1="190" y1="164" x2="150" y2="190" stroke="#1e3a8a" stroke-width="2" marker-end="url(#a4)"/>
+  <line x1="230" y1="164" x2="270" y2="190" stroke="#1e3a8a" stroke-width="2" marker-end="url(#a4)"/>
+</svg>
+<div class="cap">Fig 4 — A decision tree splits the feature space with axis-aligned thresholds; a Random Forest averages hundreds of such trees.</div>
+</div>
+
+<h2 id="8-metrics-measuring-what-matters">8. Metrics: Measuring What Matters</h2>
+
+<p>Accuracy lies on imbalanced data. If 99% of transactions are legitimate, a model that predicts "legit" always scores 99% accuracy and catches zero fraud. Choose the metric that reflects the business cost.</p>
+
+<table>
+  <tr><th>Task</th><th>Metric</th><th>When to use</th></tr>
+  <tr><td>Classification</td><td><code>accuracy_score</code></td><td>Balanced classes, equal error costs.</td></tr>
+  <tr><td>Classification</td><td><code>precision_score</code></td><td>Cost of false positives is high (spam filter).</td></tr>
+  <tr><td>Classification</td><td><code>recall_score</code></td><td>Cost of false negatives is high (cancer screening).</td></tr>
+  <tr><td>Classification</td><td><code>f1_score</code></td><td>Need a balance of precision and recall.</td></tr>
+  <tr><td>Classification</td><td><code>roc_auc_score</code></td><td>Ranking quality, threshold-independent.</td></tr>
+  <tr><td>Regression</td><td><code>mean_absolute_error</code></td><td>Robust, same units as target.</td></tr>
+  <tr><td>Regression</td><td><code>root_mean_squared_error</code></td><td>Penalizes large errors more.</td></tr>
+  <tr><td>Regression</td><td><code>r2_score</code></td><td>Fraction of variance explained (1.0 = perfect).</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> (classification_report, confusion_matrix,
+                             roc_auc_score, root_mean_squared_error)
+
+y_pred = clf.predict(X_test)
+<span class="hljs-built_in">print</span>(confusion_matrix(y_test, y_pred))        <span class="hljs-comment"># rows=true, cols=predicted</span>
+<span class="hljs-built_in">print</span>(classification_report(y_test, y_pred))   <span class="hljs-comment"># precision/recall/f1 per class</span>
+
+<span class="hljs-comment"># For probabilistic ranking (binary), use predicted probabilities, not labels</span>
+proba = clf.predict_proba(X_test)[:, <span class="hljs-number">1</span>]
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;AUC:&quot;</span>, roc_auc_score(y_test, proba))</code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 520 230" width="520" height="230">
+  <text x="260" y="24" text-anchor="middle" font-size="13" fill="#1a2233">Confusion matrix (binary)</text>
+  <rect x="160" y="50" width="150" height="70" fill="#ecfdf5" stroke="#059669"/>
+  <rect x="310" y="50" width="150" height="70" fill="#fff4ec" stroke="#b45309"/>
+  <rect x="160" y="120" width="150" height="70" fill="#fff4ec" stroke="#b45309"/>
+  <rect x="310" y="120" width="150" height="70" fill="#ecfdf5" stroke="#059669"/>
+  <text x="235" y="90" text-anchor="middle" font-size="13" fill="#1a2233">TN</text>
+  <text x="385" y="90" text-anchor="middle" font-size="13" fill="#1a2233">FP</text>
+  <text x="235" y="160" text-anchor="middle" font-size="13" fill="#1a2233">FN</text>
+  <text x="385" y="160" text-anchor="middle" font-size="13" fill="#1a2233">TP</text>
+  <text x="235" y="40" text-anchor="middle" font-size="11" fill="#1a2233">Pred 0</text>
+  <text x="385" y="40" text-anchor="middle" font-size="11" fill="#1a2233">Pred 1</text>
+  <text x="150" y="90" text-anchor="end" font-size="11" fill="#1a2233">True 0</text>
+  <text x="150" y="160" text-anchor="end" font-size="11" fill="#1a2233">True 1</text>
+  <text x="110" y="214" font-size="11" fill="#1a2233">Precision = TP/(TP+FP)  &#183;  Recall = TP/(TP+FN)</text>
+</svg>
+<div class="cap">Fig 5 — Precision asks "of those I flagged, how many were right?"; recall asks "of the real positives, how many did I catch?"</div>
+</div>
+
+<h2 id="9-cross-validation-and-model-selection">9. Cross-Validation and Model Selection</h2>
+
+<p>A single train/test split gives a noisy estimate. <strong>K-fold cross-validation</strong> rotates the test fold across the data, training k times, so every row is tested exactly once. The mean score is far more trustworthy.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 640 220" width="640" height="220">
+  <text x="320" y="22" text-anchor="middle" font-size="13" fill="#1a2233">5-fold cross-validation (orange = validation fold)</text>
+  <g font-size="11" fill="#1a2233">
+    <text x="20" y="55">Fold 1</text><text x="20" y="90">Fold 2</text><text x="20" y="125">Fold 3</text><text x="20" y="160">Fold 4</text><text x="20" y="195">Fold 5</text>
+  </g>
+  <!-- Row builder: 5 blocks each row -->
+  <g stroke="#1e3a8a">
+    <!-- row1 -->
+    <rect x="80" y="40" width="100" height="22" fill="#b45309"/><rect x="180" y="40" width="100" height="22" fill="#eff4ff"/><rect x="280" y="40" width="100" height="22" fill="#eff4ff"/><rect x="380" y="40" width="100" height="22" fill="#eff4ff"/><rect x="480" y="40" width="100" height="22" fill="#eff4ff"/>
+    <!-- row2 -->
+    <rect x="80" y="75" width="100" height="22" fill="#eff4ff"/><rect x="180" y="75" width="100" height="22" fill="#b45309"/><rect x="280" y="75" width="100" height="22" fill="#eff4ff"/><rect x="380" y="75" width="100" height="22" fill="#eff4ff"/><rect x="480" y="75" width="100" height="22" fill="#eff4ff"/>
+    <!-- row3 -->
+    <rect x="80" y="110" width="100" height="22" fill="#eff4ff"/><rect x="180" y="110" width="100" height="22" fill="#eff4ff"/><rect x="280" y="110" width="100" height="22" fill="#b45309"/><rect x="380" y="110" width="100" height="22" fill="#eff4ff"/><rect x="480" y="110" width="100" height="22" fill="#eff4ff"/>
+    <!-- row4 -->
+    <rect x="80" y="145" width="100" height="22" fill="#eff4ff"/><rect x="180" y="145" width="100" height="22" fill="#eff4ff"/><rect x="280" y="145" width="100" height="22" fill="#eff4ff"/><rect x="380" y="145" width="100" height="22" fill="#b45309"/><rect x="480" y="145" width="100" height="22" fill="#eff4ff"/>
+    <!-- row5 -->
+    <rect x="80" y="180" width="100" height="22" fill="#eff4ff"/><rect x="180" y="180" width="100" height="22" fill="#eff4ff"/><rect x="280" y="180" width="100" height="22" fill="#eff4ff"/><rect x="380" y="180" width="100" height="22" fill="#eff4ff"/><rect x="480" y="180" width="100" height="22" fill="#b45309"/>
+  </g>
+</svg>
+<div class="cap">Fig 6 — Each row trains on blue blocks and validates on the orange one; averaging the 5 scores yields a stable estimate.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> cross_val_score, cross_validate, StratifiedKFold
+
+cv = StratifiedKFold(n_splits=<span class="hljs-number">5</span>, shuffle=<span class="hljs-literal">True</span>, random_state=<span class="hljs-number">42</span>)
+
+<span class="hljs-comment"># Pass the PIPELINE, not a bare model — scaler is re-fit per fold (no leak)</span>
+scores = cross_val_score(pipe, X, y, cv=cv, scoring=<span class="hljs-string">&quot;f1_macro&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{scores.mean():<span class="hljs-number">.3</span>f}</span> +/- <span class="hljs-subst">{scores.std():<span class="hljs-number">.3</span>f}</span>&quot;</span>)
+
+<span class="hljs-comment"># cross_validate returns multiple metrics and fit/score times</span>
+results = cross_validate(pipe, X, y, cv=cv,
+                         scoring=[<span class="hljs-string">&quot;accuracy&quot;</span>, <span class="hljs-string">&quot;roc_auc&quot;</span>], return_train_score=<span class="hljs-literal">True</span>)</code></pre>
+
+<h3>Hyper-parameter tuning</h3>
+<p><code>GridSearchCV</code> exhaustively tries every combination with cross-validation; <code>RandomizedSearchCV</code> samples a fixed budget — better when the grid is large. Use <code>step__param</code> double-underscore syntax to reach inside pipeline steps.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> GridSearchCV
+
+param_grid = {
+    <span class="hljs-string">&quot;clf__C&quot;</span>: [<span class="hljs-number">0.01</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">10</span>],          <span class="hljs-comment"># &#x27;clf&#x27; is the pipeline step name</span>
+    <span class="hljs-string">&quot;clf__penalty&quot;</span>: [<span class="hljs-string">&quot;l1&quot;</span>, <span class="hljs-string">&quot;l2&quot;</span>],
+    <span class="hljs-string">&quot;clf__solver&quot;</span>: [<span class="hljs-string">&quot;liblinear&quot;</span>],
+}
+
+search = GridSearchCV(pipe, param_grid, cv=<span class="hljs-number">5</span>,
+                      scoring=<span class="hljs-string">&quot;f1_macro&quot;</span>, n_jobs=-<span class="hljs-number">1</span>, refit=<span class="hljs-literal">True</span>)
+search.fit(X_train, y_train)
+
+<span class="hljs-built_in">print</span>(search.best_params_, search.best_score_)
+best_model = search.best_estimator_        <span class="hljs-comment"># already refit on all training data</span>
+best_model.predict(X_test)</code></pre>
+
+<div class="callout warn"><span class="t">Nested leakage</span> If you tune hyper-parameters with CV and then report that same CV score as your final performance, you have optimistically biased it. For an unbiased estimate use <em>nested</em> CV, or keep a final untouched hold-out test set you only score once.</div>
+
+<h2 id="10-a-worked-mini-example-titanic-survival">10. A Worked Mini-Example: Titanic Survival</h2>
+
+<p>End-to-end: mixed-type preprocessing, a tuned classifier, honest evaluation — the shape of nearly every real project.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">from</span> sklearn.model_selection <span class="hljs-keyword">import</span> train_test_split, GridSearchCV
+<span class="hljs-keyword">from</span> sklearn.compose <span class="hljs-keyword">import</span> ColumnTransformer
+<span class="hljs-keyword">from</span> sklearn.pipeline <span class="hljs-keyword">import</span> Pipeline
+<span class="hljs-keyword">from</span> sklearn.impute <span class="hljs-keyword">import</span> SimpleImputer
+<span class="hljs-keyword">from</span> sklearn.preprocessing <span class="hljs-keyword">import</span> StandardScaler, OneHotEncoder
+<span class="hljs-keyword">from</span> sklearn.ensemble <span class="hljs-keyword">import</span> HistGradientBoostingClassifier
+<span class="hljs-keyword">from</span> sklearn.metrics <span class="hljs-keyword">import</span> classification_report
+
+df = pd.read_csv(<span class="hljs-string">&quot;titanic.csv&quot;</span>)
+y = df[<span class="hljs-string">&quot;Survived&quot;</span>]
+X = df[[<span class="hljs-string">&quot;Pclass&quot;</span>, <span class="hljs-string">&quot;Sex&quot;</span>, <span class="hljs-string">&quot;Age&quot;</span>, <span class="hljs-string">&quot;SibSp&quot;</span>, <span class="hljs-string">&quot;Fare&quot;</span>, <span class="hljs-string">&quot;Embarked&quot;</span>]]
+
+num = [<span class="hljs-string">&quot;Age&quot;</span>, <span class="hljs-string">&quot;SibSp&quot;</span>, <span class="hljs-string">&quot;Fare&quot;</span>]
+cat = [<span class="hljs-string">&quot;Pclass&quot;</span>, <span class="hljs-string">&quot;Sex&quot;</span>, <span class="hljs-string">&quot;Embarked&quot;</span>]
+
+pre = ColumnTransformer([
+    (<span class="hljs-string">&quot;num&quot;</span>, Pipeline([(<span class="hljs-string">&quot;imp&quot;</span>, SimpleImputer(strategy=<span class="hljs-string">&quot;median&quot;</span>)),
+                      (<span class="hljs-string">&quot;sc&quot;</span>, StandardScaler())]), num),
+    (<span class="hljs-string">&quot;cat&quot;</span>, Pipeline([(<span class="hljs-string">&quot;imp&quot;</span>, SimpleImputer(strategy=<span class="hljs-string">&quot;most_frequent&quot;</span>)),
+                      (<span class="hljs-string">&quot;ohe&quot;</span>, OneHotEncoder(handle_unknown=<span class="hljs-string">&quot;ignore&quot;</span>))]), cat),
+])
+
+model = Pipeline([(<span class="hljs-string">&quot;pre&quot;</span>, pre),
+                  (<span class="hljs-string">&quot;clf&quot;</span>, HistGradientBoostingClassifier(random_state=<span class="hljs-number">42</span>))])
+
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=<span class="hljs-number">0.2</span>,
+                                          stratify=y, random_state=<span class="hljs-number">42</span>)
+
+grid = {<span class="hljs-string">&quot;clf__learning_rate&quot;</span>: [<span class="hljs-number">0.05</span>, <span class="hljs-number">0.1</span>], <span class="hljs-string">&quot;clf__max_iter&quot;</span>: [<span class="hljs-number">200</span>, <span class="hljs-number">400</span>]}
+search = GridSearchCV(model, grid, cv=<span class="hljs-number">5</span>, scoring=<span class="hljs-string">&quot;roc_auc&quot;</span>, n_jobs=-<span class="hljs-number">1</span>)
+search.fit(X_tr, y_tr)
+
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Best CV AUC:&quot;</span>, <span class="hljs-built_in">round</span>(search.best_score_, <span class="hljs-number">3</span>))
+<span class="hljs-built_in">print</span>(classification_report(y_te, search.predict(X_te)))
+
+<span class="hljs-comment"># Persist the entire pipeline for production</span>
+<span class="hljs-keyword">import</span> joblib
+joblib.dump(search.best_estimator_, <span class="hljs-string">&quot;titanic_model.joblib&quot;</span>)</code></pre>
+
+<h2 id="11-cheat-sheet-reference">11. Cheat-Sheet Reference</h2>
+
+<table>
+  <tr><th>Goal</th><th>Import</th><th>Call</th></tr>
+  <tr><td>Split data</td><td><code>model_selection.train_test_split</code></td><td><code>train_test_split(X, y, stratify=y)</code></td></tr>
+  <tr><td>Scale features</td><td><code>preprocessing.StandardScaler</code></td><td><code>.fit_transform(X_train)</code></td></tr>
+  <tr><td>Encode categories</td><td><code>preprocessing.OneHotEncoder</code></td><td><code>handle_unknown='ignore'</code></td></tr>
+  <tr><td>Chain steps</td><td><code>pipeline.Pipeline</code></td><td><code>Pipeline([(name, step), ...])</code></td></tr>
+  <tr><td>Route columns</td><td><code>compose.ColumnTransformer</code></td><td><code>[(name, transformer, cols)]</code></td></tr>
+  <tr><td>Cross-validate</td><td><code>model_selection.cross_val_score</code></td><td><code>cross_val_score(est, X, y, cv=5)</code></td></tr>
+  <tr><td>Tune params</td><td><code>model_selection.GridSearchCV</code></td><td><code>step__param</code> keys</td></tr>
+  <tr><td>Save model</td><td><code>joblib</code></td><td><code>joblib.dump(est, 'm.joblib')</code></td></tr>
+</table>
+
+<h4>Model comparison</h4>
+<table>
+  <tr><th>Model</th><th>Strengths</th><th>Watch out for</th></tr>
+  <tr><td>Logistic Regression</td><td>Fast, interpretable, calibrated probabilities</td><td>Only linear boundaries; needs scaling</td></tr>
+  <tr><td>Random Forest</td><td>Strong default, no scaling, feature importance</td><td>Large memory; weaker on extrapolation</td></tr>
+  <tr><td>HistGradientBoosting</td><td>Top tabular accuracy, handles NaNs</td><td>More hyper-parameters to tune</td></tr>
+  <tr><td>SVM (RBF)</td><td>Powerful on small/medium data</td><td>Scales poorly past ~50k rows; must scale</td></tr>
+  <tr><td>KNN</td><td>Simple, no training phase</td><td>Slow predict; curse of dimensionality</td></tr>
+  <tr><td>KMeans</td><td>Fast unsupervised clustering</td><td>Must pick k; assumes spherical clusters</td></tr>
+</table>
+
+<h2 id="12-best-practices-and-common-pitfalls">12. Best Practices and Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Wrap all preprocessing in a Pipeline so transforms are fit per CV fold. Always stratify classification splits. Set <code>random_state</code> everywhere. Keep one final hold-out set you touch exactly once.</div>
+
+<div class="callout tip"><span class="t">Do</span> Start with a dumb baseline (<code>DummyClassifier</code>/<code>DummyRegressor</code>). If your fancy model barely beats "predict the majority class," something is wrong. Prefer <code>n_jobs=-1</code> to use all cores for forests and grid search.</div>
+
+<div class="callout warn"><span class="t">Avoid</span> Fitting scalers/encoders on the whole dataset before splitting (data leakage). Using accuracy on imbalanced data. Shuffling time-series. Comparing models on different random splits.</div>
+
+<div class="callout danger"><span class="t">Never</span> Report your cross-validation / grid-search score as the model's real-world performance after you used that same CV to choose hyper-parameters — it is optimistically biased. The number stakeholders see must come from data the selection process never saw.</div>
+
+<h2 id="13-interview-questions-amp-answers">13. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between <code>fit</code>, <code>transform</code>, and <code>fit_transform</code>?</div><div class="a"><code>fit</code> learns parameters from data (e.g. a scaler's mean and std) and stores them; <code>transform</code> applies those learned parameters to produce new output; <code>fit_transform</code> does both in one step and is used on <em>training</em> data only. On test data you call <code>transform</code> alone so you reuse the training statistics and avoid leakage.</div></div>
+
+<div class="qa"><div class="q">What is data leakage and how do pipelines prevent it?</div><div class="a">Leakage is when information from outside the training fold influences the model — most commonly by fitting a scaler or imputer on the full dataset. A <code>Pipeline</code> prevents it because during cross-validation each fold calls <code>fit</code> on only that fold's training portion, so preprocessing statistics never see the validation data.</div></div>
+
+<div class="qa"><div class="q">Why is accuracy a poor metric for imbalanced classification?</div><div class="a">With 99% negatives, always predicting "negative" scores 99% accuracy while catching zero positives. Precision, recall, F1, and ROC-AUC reveal performance on the minority class, which is usually the class you actually care about.</div></div>
+
+<div class="qa"><div class="q">Explain precision versus recall.</div><div class="a">Precision = TP/(TP+FP): of everything predicted positive, how many were truly positive — penalizes false alarms. Recall = TP/(TP+FN): of all actual positives, how many were caught — penalizes misses. There is a trade-off: lowering the decision threshold raises recall but lowers precision. F1 is their harmonic mean.</div></div>
+
+<div class="qa"><div class="q">When should you scale features, and which models need it?</div><div class="a">Scale when the algorithm depends on distances or gradient magnitudes: SVM, KNN, KMeans, PCA, and regularized linear models. Tree-based models (decision trees, random forests, gradient boosting) are scale-invariant because they split on thresholds, so monotonic rescaling does not change the splits.</div></div>
+
+<div class="qa"><div class="q">How does Random Forest reduce overfitting compared to a single decision tree?</div><div class="a">It trains many trees on bootstrap samples (bagging) and considers only a random subset of features at each split. This de-correlates the trees; averaging their votes cancels much of the variance of any single deep tree, yielding lower generalization error without materially increasing bias.</div></div>
+
+<div class="qa"><div class="q">What does <code>GridSearchCV</code> do, and what is the <code>__</code> syntax?</div><div class="a">It performs an exhaustive search over a parameter grid, scoring each combination with k-fold cross-validation, then refits the best estimator on all training data. The double-underscore (<code>step__param</code>) addresses a parameter of a named step inside a Pipeline, e.g. <code>clf__C</code> sets <code>C</code> on the step named <code>clf</code>.</div></div>
+
+<div class="qa"><div class="q">What is the difference between GridSearchCV and RandomizedSearchCV?</div><div class="a">GridSearch tries every combination — exhaustive but exponential in the number of parameters. RandomizedSearch samples a fixed number of random combinations (<code>n_iter</code>), which explores large or continuous spaces far more efficiently and often finds comparable optima for a fraction of the compute.</div></div>
+
+<div class="qa"><div class="q">Why pass <code>stratify=y</code> to <code>train_test_split</code>?</div><div class="a">It preserves the class proportions of the full dataset in both splits. Without it, a random split can under-represent a minority class in the test set (or omit it entirely), making the evaluation unreliable, especially for imbalanced problems.</div></div>
+
+<div class="qa"><div class="q">What are the trailing-underscore attributes like <code>coef_</code> or <code>classes_</code>?</div><div class="a">By convention, attributes learned during <code>fit</code> end with an underscore. They did not exist before fitting. Examples: <code>coef_</code> (linear weights), <code>feature_importances_</code> (trees), <code>cluster_centers_</code> (KMeans), <code>classes_</code> (label ordering). Accessing them before <code>fit</code> raises <code>NotFittedError</code>.</div></div>
+
+<div class="qa"><div class="q">How do supervised and unsupervised estimators differ in the API?</div><div class="a">Supervised estimators take labels: <code>fit(X, y)</code> and <code>predict(X)</code>. Unsupervised ones like KMeans or PCA take only features: <code>fit(X)</code>. Clusterers expose <code>labels_</code> after fitting and can <code>predict</code> new points; dimensionality reducers expose <code>transform</code>.</div></div>
+
+<div class="qa"><div class="q">Logistic Regression is a classifier — why "regression" in the name?</div><div class="a">It regresses the log-odds of the positive class as a linear function of the features, then passes the result through a sigmoid to produce a probability. The underlying model is a linear regression on log-odds; thresholding that probability turns it into a classifier.</div></div>
+
+<h2 id="14-further-learning">14. Further Learning</h2>
+
+<ul>
+  <li><strong>Official User Guide</strong> — scikit-learn.org/stable/user_guide.html is unusually well-written; read the sections on Pipelines and Model Selection in full.</li>
+  <li><strong>Gradient boosting libraries</strong> — graduate to XGBoost, LightGBM, and CatBoost; they share scikit-learn's API and dominate tabular competitions.</li>
+  <li><strong>Model inspection</strong> — learn <code>permutation_importance</code>, partial dependence plots, and SHAP for explaining predictions.</li>
+  <li><strong>Imbalanced data</strong> — explore <code>imbalanced-learn</code> (SMOTE, class weights) for fraud/anomaly problems.</li>
+  <li><strong>Calibration</strong> — study <code>CalibratedClassifierCV</code> when you need trustworthy probabilities, not just rankings.</li>
+  <li><strong>Deployment</strong> — practice persisting pipelines with <code>joblib</code> and serving them behind a FastAPI endpoint.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

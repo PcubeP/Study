@@ -1,0 +1,723 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Java — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Programming Languages</div>
+  <h1>Java</h1>
+  <div class="subtitle">A comprehensive, interview-ready tour of modern Java: the JVM, OOP, generics, collections, streams, concurrency, and build tooling.</div>
+  <div class="tags"><span>java</span><span>jvm</span><span>oop</span><span>collections</span><span>generics</span><span>streams</span><span>concurrency</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~17 min read &middot; 3,656 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-java-is-amp-why-it-matters">What Java Is &amp; Why It Matters</a></li><li><a href="#setup-amp-getting-started">Setup &amp; Getting Started</a></li><li><a href="#types-variables-amp-the-memory-model">Types, Variables &amp; the Memory Model</a></li><li><a href="#object-oriented-programming">Object-Oriented Programming</a></li><li><a href="#generics">Generics</a></li><li><a href="#the-collections-framework">The Collections Framework</a></li><li><a href="#the-streams-api-amp-lambdas">The Streams API &amp; Lambdas</a></li><li><a href="#exceptions-amp-error-handling">Exceptions &amp; Error Handling</a></li><li><a href="#concurrency-basics">Concurrency Basics</a></li><li><a href="#build-tools-maven-amp-gradle">Build Tools: Maven &amp; Gradle</a></li><li><a href="#worked-mini-example-word-frequency-counter">Worked Mini-Example: Word Frequency Counter</a></li><li><a href="#cheat-sheet-amp-python-comparison">Cheat-Sheet &amp; Python Comparison</a></li><li><a href="#best-practices">Best Practices</a></li><li><a href="#common-pitfalls">Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-java-is-amp-why-it-matters">What Java Is &amp; Why It Matters</h2>
+<p class="lead">Java is a statically typed, object-oriented, garbage-collected language that compiles to a portable intermediate form (bytecode) and runs on the Java Virtual Machine. Its promise since 1995 has been "write once, run anywhere": the same compiled artifact runs unmodified on Linux, Windows, macOS, servers, and phones.</p>
+
+<p>Java dominates large-scale backend systems, Android apps, big-data tooling (Hadoop, Spark, Kafka, Elasticsearch), and enterprise services (Spring). Its appeal is a combination of a strong static type system that catches errors at compile time, a mature just-in-time (JIT) compiling VM that reaches near-native speed on hot code paths, automatic memory management, and one of the deepest ecosystems and labour markets in software. As of 2026 the current long-term-support (LTS) release is <span class="badge g">Java 21</span> (with Java 25 as the newest LTS), and modern Java is far more concise than the verbose reputation it earned in the 2000s.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 320" width="760" height="320">
+  <defs>
+    <marker id="ja" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="18" width="720" height="284" rx="10" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="380" y="42" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e3a8a">Compile once, run anywhere</text>
+  <rect x="50" y="70" width="150" height="60" rx="8" fill="#fff" stroke="#2563eb"/>
+  <text x="125" y="96" text-anchor="middle" font-size="13" fill="#1a2233">App.java</text>
+  <text x="125" y="114" text-anchor="middle" font-size="11" fill="#64748b">source</text>
+  <rect x="250" y="70" width="150" height="60" rx="8" fill="#fff" stroke="#0891b2"/>
+  <text x="325" y="92" text-anchor="middle" font-size="13" fill="#1a2233">javac</text>
+  <text x="325" y="110" text-anchor="middle" font-size="11" fill="#64748b">compiler</text>
+  <rect x="450" y="70" width="150" height="60" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="525" y="92" text-anchor="middle" font-size="13" fill="#1a2233">App.class</text>
+  <text x="525" y="110" text-anchor="middle" font-size="11" fill="#64748b">bytecode (portable)</text>
+  <line x1="200" y1="100" x2="246" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#ja)"/>
+  <line x1="400" y1="100" x2="446" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#ja)"/>
+  <text x="380" y="175" text-anchor="middle" font-size="13" fill="#1a2233">One .class file &#8594; many JVMs</text>
+  <rect x="90" y="200" width="160" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="170" y="230" text-anchor="middle" font-size="12" fill="#059669">JVM on Linux</text>
+  <text x="170" y="250" text-anchor="middle" font-size="11" fill="#64748b">JIT &#8594; native</text>
+  <rect x="300" y="200" width="160" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="380" y="230" text-anchor="middle" font-size="12" fill="#059669">JVM on Windows</text>
+  <text x="380" y="250" text-anchor="middle" font-size="11" fill="#64748b">JIT &#8594; native</text>
+  <rect x="510" y="200" width="160" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="590" y="230" text-anchor="middle" font-size="12" fill="#059669">JVM on macOS</text>
+  <text x="590" y="250" text-anchor="middle" font-size="11" fill="#64748b">JIT &#8594; native</text>
+  <line x1="525" y1="130" x2="200" y2="196" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ja)"/>
+  <line x1="525" y1="130" x2="380" y2="196" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ja)"/>
+  <line x1="525" y1="130" x2="585" y2="196" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ja)"/>
+</svg><div class="cap">Fig 1 &mdash; The Java toolchain: javac emits portable bytecode once; each platform's JVM JIT-compiles it to native code at runtime.</div></div>
+
+<div class="callout note"><span class="t">Python contrast</span> Python is dynamically typed and interpreted (CPython), with duck typing and an implicit runtime. Java forces you to declare types up front, catches whole classes of bugs at compile time, and typically runs 5-30x faster on CPU-bound code thanks to the JIT &mdash; at the cost of more ceremony and longer feedback loops.</div>
+
+<h2 id="setup-amp-getting-started">Setup &amp; Getting Started</h2>
+<p>Install a JDK (Java Development Kit, which includes <code>javac</code>, the JVM, and tooling). A build tool like Maven or Gradle is standard for anything beyond a toy. The easiest path on any OS is <a>SDKMAN!</a>.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Install SDKMAN! then a JDK (Temurin is a popular free OpenJDK build)</span>
+curl -s <span class="hljs-string">&quot;https://get.sdkman.io&quot;</span> | bash
+sdk install java 21.0.5-tem      <span class="hljs-comment"># install a specific LTS</span>
+sdk install maven
+sdk install gradle
+
+java -version                    <span class="hljs-comment"># verify the runtime</span>
+javac -version                   <span class="hljs-comment"># verify the compiler</span></code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Classic compile-and-run (no build tool)</span>
+javac Hello.java                 <span class="hljs-comment"># produces Hello.class</span>
+java Hello                       <span class="hljs-comment"># runs the class (no .class extension)</span>
+
+<span class="hljs-comment"># Java 11+ can run a single source file directly, no javac step:</span>
+java Hello.java
+
+<span class="hljs-comment"># Java 21+ &quot;instance main&quot; lets you skip the ceremony entirely for scripts</span>
+java --enable-preview Script.java</code></pre>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-comment">// Hello.java  — the traditional entry point</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Hello</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> {
+        System.out.println(<span class="hljs-string">&quot;Hello, world!&quot;</span>);
+        <span class="hljs-keyword">for</span> (String arg : args) {
+            System.out.println(<span class="hljs-string">&quot;arg: &quot;</span> + arg);
+        }
+    }
+}</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Use an LTS release (21 or 25) for anything you ship. Non-LTS releases (22, 23, 24...) are fine for experimenting with new features but receive only six months of updates.</div>
+
+<h2 id="types-variables-amp-the-memory-model">Types, Variables &amp; the Memory Model</h2>
+<p>Java has two kinds of types: <strong>primitives</strong> (stored by value, on the stack or inline) and <strong>reference types</strong> (objects, where the variable holds a reference to a heap-allocated object). Understanding this split explains most Java surprises.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Primitives (8 of them)</h4>
+    <p><code>byte</code> (8-bit), <code>short</code> (16), <code>int</code> (32), <code>long</code> (64), <code>float</code> (32-bit IEEE), <code>double</code> (64), <code>char</code> (16-bit UTF-16 unit), <code>boolean</code>. No methods, never null, fixed size.</p>
+  </div>
+  <div class="card"><h4>Reference types</h4>
+    <p>Everything else: <code>String</code>, arrays, your classes, <code>Integer</code>, <code>List</code>. The variable is a handle; the object lives on the garbage-collected heap. Can be <code>null</code>.</p>
+  </div>
+</div>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> <span class="hljs-number">42</span>;                 <span class="hljs-comment">// primitive, lives inline</span>
+<span class="hljs-type">Integer</span> <span class="hljs-variable">boxed</span> <span class="hljs-operator">=</span> count;          <span class="hljs-comment">// autoboxing: primitive -&gt; wrapper object</span>
+<span class="hljs-type">int</span> <span class="hljs-variable">back</span> <span class="hljs-operator">=</span> boxed;               <span class="hljs-comment">// unboxing: wrapper -&gt; primitive</span>
+
+<span class="hljs-type">long</span> <span class="hljs-variable">big</span> <span class="hljs-operator">=</span> <span class="hljs-number">9_000_000_000L</span>;      <span class="hljs-comment">// underscores for readability; L suffix for long</span>
+<span class="hljs-type">double</span> <span class="hljs-variable">pi</span> <span class="hljs-operator">=</span> <span class="hljs-number">3.14159</span>;
+<span class="hljs-type">char</span> <span class="hljs-variable">c</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;J&#x27;</span>;
+<span class="hljs-type">boolean</span> <span class="hljs-variable">ok</span> <span class="hljs-operator">=</span> <span class="hljs-literal">true</span>;
+
+<span class="hljs-type">var</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;Alice&quot;</span>;             <span class="hljs-comment">// Java 10+ local type inference (still static!)</span>
+<span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">MAX</span> <span class="hljs-operator">=</span> <span class="hljs-number">100</span>;            <span class="hljs-comment">// final = cannot be reassigned</span>
+
+<span class="hljs-type">String</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;                <span class="hljs-comment">// references can be null</span>
+<span class="hljs-comment">// int n = null;                // COMPILE ERROR: primitives cannot be null</span></code></pre>
+
+<div class="diagram"><svg viewBox="0 0 740 300" width="740" height="300">
+  <rect x="20" y="20" width="340" height="260" rx="10" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="190" y="46" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">Stack (per thread)</text>
+  <rect x="50" y="70" width="280" height="40" rx="6" fill="#fff" stroke="#2563eb"/>
+  <text x="70" y="95" font-size="12" fill="#1a2233">int count = 42</text>
+  <text x="300" y="95" text-anchor="end" font-size="12" fill="#059669">42</text>
+  <rect x="50" y="125" width="280" height="40" rx="6" fill="#fff" stroke="#2563eb"/>
+  <text x="70" y="150" font-size="12" fill="#1a2233">String s</text>
+  <text x="300" y="150" text-anchor="end" font-size="12" fill="#b45309">ref &#9679;</text>
+  <rect x="50" y="180" width="280" height="40" rx="6" fill="#fff" stroke="#2563eb"/>
+  <text x="70" y="205" font-size="12" fill="#1a2233">Integer boxed</text>
+  <text x="300" y="205" text-anchor="end" font-size="12" fill="#b45309">ref &#9679;</text>
+  <rect x="400" y="20" width="320" height="260" rx="10" fill="#ecfdf5" stroke="#94a3b8"/>
+  <text x="560" y="46" text-anchor="middle" font-size="14" font-weight="bold" fill="#059669">Heap (shared, GC-managed)</text>
+  <rect x="430" y="110" width="200" height="46" rx="6" fill="#fff" stroke="#059669"/>
+  <text x="530" y="138" text-anchor="middle" font-size="12" fill="#1a2233">String "Alice"</text>
+  <rect x="430" y="185" width="200" height="46" rx="6" fill="#fff" stroke="#059669"/>
+  <text x="530" y="213" text-anchor="middle" font-size="12" fill="#1a2233">Integer(42)</text>
+  <defs><marker id="hp" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker></defs>
+  <line x1="315" y1="145" x2="426" y2="130" stroke="#b45309" stroke-width="1.8" marker-end="url(#hp)"/>
+  <line x1="315" y1="200" x2="426" y2="206" stroke="#b45309" stroke-width="1.8" marker-end="url(#hp)"/>
+</svg><div class="cap">Fig 2 &mdash; Primitives store their value directly in the stack frame; reference variables store a pointer to an object on the heap.</div></div>
+
+<div class="callout warn"><span class="t">Pitfall: == vs equals</span> For reference types, <code>==</code> compares <em>references</em> (identity), while <code>.equals()</code> compares <em>value</em>. <code>"a" + x == "ax"</code> is often false; always use <code>.equals()</code> for String/object content comparison. Primitives use <code>==</code> for value.</div>
+
+<h2 id="object-oriented-programming">Object-Oriented Programming</h2>
+<p>Java is class-based OOP to its core. The four pillars &mdash; <strong>encapsulation</strong>, <strong>inheritance</strong>, <strong>polymorphism</strong>, and <strong>abstraction</strong> &mdash; map directly to language features.</p>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-comment">// Encapsulation: private fields + public accessors</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Account</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-type">double</span> balance;              <span class="hljs-comment">// hidden state</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String owner;          <span class="hljs-comment">// immutable after construction</span>
+
+    <span class="hljs-type">public</span> <span class="hljs-title function_">Account</span><span class="hljs-params">(String owner, <span class="hljs-type">double</span> opening)</span> {
+        <span class="hljs-built_in">this</span>.owner = owner;
+        <span class="hljs-built_in">this</span>.balance = opening;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">deposit</span><span class="hljs-params">(<span class="hljs-type">double</span> amount)</span> {
+        <span class="hljs-keyword">if</span> (amount &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalArgumentException</span>(<span class="hljs-string">&quot;must be positive&quot;</span>);
+        balance += amount;
+    }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getBalance</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> balance; }   <span class="hljs-comment">// controlled read access</span>
+}</code></pre>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-comment">// Inheritance + polymorphism</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Shape</span> {
+    <span class="hljs-keyword">abstract</span> <span class="hljs-type">double</span> <span class="hljs-title function_">area</span><span class="hljs-params">()</span>;                          <span class="hljs-comment">// subclasses must implement</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">String</span> <span class="hljs-title function_">describe</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;area=&quot;</span> + area(); }
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Circle</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Shape</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">double</span> r;
+    <span class="hljs-type">public</span> <span class="hljs-title function_">Circle</span><span class="hljs-params">(<span class="hljs-type">double</span> r)</span> { <span class="hljs-built_in">this</span>.r = r; }
+    <span class="hljs-meta">@Override</span> <span class="hljs-type">double</span> <span class="hljs-title function_">area</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> Math.PI * r * r; }
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Square</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Shape</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">double</span> side;
+    <span class="hljs-type">public</span> <span class="hljs-title function_">Square</span><span class="hljs-params">(<span class="hljs-type">double</span> side)</span> { <span class="hljs-built_in">this</span>.side = side; }
+    <span class="hljs-meta">@Override</span> <span class="hljs-type">double</span> <span class="hljs-title function_">area</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> side * side; }
+}
+
+<span class="hljs-comment">// Polymorphism: one reference type, many runtime behaviours</span>
+<span class="hljs-type">Shape</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Circle</span>(<span class="hljs-number">2.0</span>);
+System.out.println(s.describe());        <span class="hljs-comment">// dispatches to Circle.area() at runtime</span></code></pre>
+
+<div class="grid c3">
+  <div class="card"><h4>interface</h4><p>A contract of method signatures. A class can implement many. Can hold <code>default</code> and <code>static</code> methods since Java 8.</p></div>
+  <div class="card"><h4>abstract class</h4><p>Partial implementation + state. A class extends exactly one. Use when subclasses share code.</p></div>
+  <div class="card"><h4>record</h4><p>Java 16+ immutable data carrier. One line replaces constructor, getters, <code>equals</code>, <code>hashCode</code>, <code>toString</code>.</p></div>
+</div>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-comment">// interface with a default method</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Greeter</span> {
+    <span class="hljs-type">String</span> <span class="hljs-title function_">name</span><span class="hljs-params">()</span>;
+    <span class="hljs-keyword">default</span> <span class="hljs-type">String</span> <span class="hljs-title function_">greet</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Hello, &quot;</span> + name(); }  <span class="hljs-comment">// shared default</span>
+}
+
+<span class="hljs-comment">// record: immutable data class in a single line (Java 16+)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">record</span> <span class="hljs-title class_">Point</span><span class="hljs-params">(<span class="hljs-type">int</span> x, <span class="hljs-type">int</span> y)</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">distanceTo</span><span class="hljs-params">(Point o)</span> {
+        <span class="hljs-keyword">return</span> Math.hypot(x - o.x, y - o.y);
+    }
+}
+<span class="hljs-type">Point</span> <span class="hljs-variable">p</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Point</span>(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>);
+System.out.println(p.x() + <span class="hljs-string">&quot;,&quot;</span> + p.y());   <span class="hljs-comment">// auto-generated accessors</span>
+System.out.println(p);                     <span class="hljs-comment">// Point[x=3, y=4]  (auto toString)</span>
+
+<span class="hljs-comment">// sealed types + pattern matching (Java 21) — exhaustive, no default needed</span>
+<span class="hljs-keyword">sealed</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Expr</span> <span class="hljs-keyword">permits</span> Num, Add {}
+<span class="hljs-keyword">record</span> <span class="hljs-title class_">Num</span><span class="hljs-params">(<span class="hljs-type">int</span> v)</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Expr</span> {}
+<span class="hljs-keyword">record</span> <span class="hljs-title class_">Add</span><span class="hljs-params">(Expr l, Expr r)</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Expr</span> {}
+
+<span class="hljs-keyword">static</span> <span class="hljs-type">int</span> <span class="hljs-title function_">eval</span><span class="hljs-params">(Expr e)</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">switch</span> (e) {
+        <span class="hljs-keyword">case</span> Num n -&gt; n.v();
+        <span class="hljs-keyword">case</span> Add a -&gt; eval(a.l()) + eval(a.r());
+    };
+}</code></pre>
+
+<div class="callout note"><span class="t">Python contrast</span> Python uses duck typing (<em>"if it quacks..."</em>) and multiple inheritance with MRO. Java requires explicit <code>implements</code>/<code>extends</code>, forbids multiple class inheritance (but allows many interfaces), and resolves method calls through a strongly typed vtable.</div>
+
+<h2 id="generics">Generics</h2>
+<p>Generics give you type-safe containers and algorithms without casting. A <code>List&lt;String&gt;</code> can only hold Strings; the compiler enforces it and inserts casts for you.</p>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-comment">// Generic class</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Box</span>&lt;T&gt; {
+    <span class="hljs-keyword">private</span> T value;
+    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">set</span><span class="hljs-params">(T value)</span> { <span class="hljs-built_in">this</span>.value = value; }
+    <span class="hljs-keyword">public</span> <span class="hljs-type">T</span> <span class="hljs-title function_">get</span><span class="hljs-params">()</span> { <span class="hljs-keyword">return</span> value; }
+}
+
+<span class="hljs-type">Box</span>&lt;String&gt; <span class="hljs-variable">b</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Box</span>&lt;&gt;();     <span class="hljs-comment">// diamond operator infers &lt;String&gt;</span>
+b.set(<span class="hljs-string">&quot;hi&quot;</span>);
+<span class="hljs-type">String</span> <span class="hljs-variable">v</span> <span class="hljs-operator">=</span> b.get();              <span class="hljs-comment">// no cast needed</span>
+
+<span class="hljs-comment">// Generic method with a bounded type parameter</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> &lt;T <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Comparable</span>&lt;T&gt;&gt; <span class="hljs-type">T</span> <span class="hljs-title function_">max</span><span class="hljs-params">(List&lt;T&gt; items)</span> {
+    <span class="hljs-type">T</span> <span class="hljs-variable">best</span> <span class="hljs-operator">=</span> items.get(<span class="hljs-number">0</span>);
+    <span class="hljs-keyword">for</span> (T it : items) <span class="hljs-keyword">if</span> (it.compareTo(best) &gt; <span class="hljs-number">0</span>) best = it;
+    <span class="hljs-keyword">return</span> best;
+}
+
+<span class="hljs-comment">// Wildcards: ? extends (producer, read) vs ? super (consumer, write) — &quot;PECS&quot;</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">printAll</span><span class="hljs-params">(List&lt;? extends Number&gt; nums)</span> {        <span class="hljs-comment">// can READ as Number</span>
+    <span class="hljs-keyword">for</span> (Number n : nums) System.out.println(n);
+}
+<span class="hljs-type">void</span> <span class="hljs-title function_">addInts</span><span class="hljs-params">(List&lt;? <span class="hljs-built_in">super</span> Integer&gt; sink)</span> {          <span class="hljs-comment">// can WRITE Integers</span>
+    sink.add(<span class="hljs-number">42</span>);
+}</code></pre>
+
+<div class="callout warn"><span class="t">Type erasure</span> Generics are a compile-time construct; at runtime <code>List&lt;String&gt;</code> and <code>List&lt;Integer&gt;</code> are both just <code>List</code>. You cannot do <code>new T[]</code> or <code>x instanceof List&lt;String&gt;</code>. This is called <em>erasure</em> and is a favourite interview topic.</div>
+
+<h2 id="the-collections-framework">The Collections Framework</h2>
+<p>The <code>java.util</code> collections are the daily bread of Java. Know the interface hierarchy and the performance of each implementation cold.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 300" width="760" height="300">
+  <defs><marker id="ci" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+  <rect x="310" y="20" width="150" height="44" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="385" y="47" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">Iterable</text>
+  <rect x="310" y="90" width="150" height="44" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="385" y="117" text-anchor="middle" font-size="13" fill="#1a2233">Collection</text>
+  <line x1="385" y1="64" x2="385" y2="88" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ci)"/>
+  <rect x="90" y="170" width="130" height="42" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="155" y="196" text-anchor="middle" font-size="13" fill="#059669">List</text>
+  <rect x="320" y="170" width="130" height="42" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="385" y="196" text-anchor="middle" font-size="13" fill="#059669">Set</text>
+  <rect x="550" y="170" width="130" height="42" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="615" y="196" text-anchor="middle" font-size="13" fill="#059669">Queue</text>
+  <line x1="360" y1="134" x2="170" y2="168" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ci)"/>
+  <line x1="385" y1="134" x2="385" y2="168" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ci)"/>
+  <line x1="410" y1="134" x2="600" y2="168" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#ci)"/>
+  <text x="155" y="248" text-anchor="middle" font-size="11" fill="#64748b">ArrayList, LinkedList</text>
+  <text x="385" y="248" text-anchor="middle" font-size="11" fill="#64748b">HashSet, TreeSet</text>
+  <text x="615" y="248" text-anchor="middle" font-size="11" fill="#64748b">ArrayDeque, PriorityQueue</text>
+  <rect x="520" y="60" width="200" height="44" rx="8" fill="#fff" stroke="#b45309" stroke-dasharray="4 3"/>
+  <text x="620" y="80" text-anchor="middle" font-size="12" fill="#b45309">Map (separate hierarchy)</text>
+  <text x="620" y="97" text-anchor="middle" font-size="10" fill="#64748b">HashMap, TreeMap</text>
+</svg><div class="cap">Fig 3 &mdash; The collections interface hierarchy. Note Map is NOT a Collection &mdash; it is a separate root.</div></div>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-keyword">import</span> java.util.*;
+
+<span class="hljs-type">List</span>&lt;String&gt; <span class="hljs-variable">list</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();     <span class="hljs-comment">// ordered, indexed, allows dups</span>
+list.add(<span class="hljs-string">&quot;a&quot;</span>); list.add(<span class="hljs-string">&quot;b&quot;</span>);
+<span class="hljs-type">String</span> <span class="hljs-variable">first</span> <span class="hljs-operator">=</span> list.get(<span class="hljs-number">0</span>);
+
+<span class="hljs-type">Set</span>&lt;Integer&gt; <span class="hljs-variable">set</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashSet</span>&lt;&gt;();        <span class="hljs-comment">// unique elements, no order</span>
+set.add(<span class="hljs-number">1</span>); set.add(<span class="hljs-number">1</span>);                     <span class="hljs-comment">// second add is a no-op</span>
+<span class="hljs-type">boolean</span> <span class="hljs-variable">has</span> <span class="hljs-operator">=</span> set.contains(<span class="hljs-number">1</span>);
+
+<span class="hljs-type">Map</span>&lt;String,Integer&gt; <span class="hljs-variable">map</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashMap</span>&lt;&gt;();  <span class="hljs-comment">// key -&gt; value</span>
+map.put(<span class="hljs-string">&quot;apples&quot;</span>, <span class="hljs-number">3</span>);
+map.merge(<span class="hljs-string">&quot;apples&quot;</span>, <span class="hljs-number">1</span>, Integer::sum);       <span class="hljs-comment">// idiomatic counter increment -&gt; 4</span>
+<span class="hljs-type">int</span> <span class="hljs-variable">n</span> <span class="hljs-operator">=</span> map.getOrDefault(<span class="hljs-string">&quot;pears&quot;</span>, <span class="hljs-number">0</span>);
+
+<span class="hljs-type">Deque</span>&lt;Integer&gt; <span class="hljs-variable">stack</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayDeque</span>&lt;&gt;();  <span class="hljs-comment">// use as stack OR queue</span>
+stack.push(<span class="hljs-number">10</span>); stack.push(<span class="hljs-number">20</span>);
+<span class="hljs-type">int</span> <span class="hljs-variable">top</span> <span class="hljs-operator">=</span> stack.pop();                      <span class="hljs-comment">// 20</span>
+
+<span class="hljs-comment">// Immutable factory methods (Java 9+)</span>
+<span class="hljs-type">List</span>&lt;String&gt; <span class="hljs-variable">fixed</span> <span class="hljs-operator">=</span> List.of(<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-string">&quot;y&quot;</span>, <span class="hljs-string">&quot;z&quot;</span>);   <span class="hljs-comment">// throws on modification</span></code></pre>
+
+<table>
+<tr><th>Type</th><th>Backing</th><th>get/contains</th><th>add/insert</th><th>Ordered?</th><th>Use when</th></tr>
+<tr><td>ArrayList</td><td>resizable array</td><td>O(1) index</td><td>O(1) amortized end</td><td>insertion</td><td>default list, random access</td></tr>
+<tr><td>LinkedList</td><td>doubly linked</td><td>O(n)</td><td>O(1) at ends</td><td>insertion</td><td>frequent head/tail ops</td></tr>
+<tr><td>HashMap / HashSet</td><td>hash table</td><td>O(1) avg</td><td>O(1) avg</td><td>no</td><td>default map/set</td></tr>
+<tr><td>TreeMap / TreeSet</td><td>red-black tree</td><td>O(log n)</td><td>O(log n)</td><td>sorted</td><td>need sorted order / ranges</td></tr>
+<tr><td>LinkedHashMap</td><td>hash + list</td><td>O(1) avg</td><td>O(1) avg</td><td>insertion/access</td><td>LRU caches, stable iteration</td></tr>
+<tr><td>ArrayDeque</td><td>circular array</td><td>&mdash;</td><td>O(1) ends</td><td>insertion</td><td>stack or queue (beats Stack/LinkedList)</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Tip</span> Any object used as a <code>HashMap</code> key or <code>HashSet</code> element MUST override both <code>equals()</code> and <code>hashCode()</code> consistently. <code>record</code> types do this for you automatically &mdash; one more reason to prefer them for keys.</div>
+
+<h2 id="the-streams-api-amp-lambdas">The Streams API &amp; Lambdas</h2>
+<p>Java 8 introduced lambdas and the Streams API, bringing a functional, declarative style for processing sequences. Streams express <em>what</em> you want (filter, map, reduce) rather than <em>how</em> to loop.</p>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-keyword">import</span> java.util.*;
+<span class="hljs-keyword">import</span> java.util.stream.*;
+
+<span class="hljs-type">List</span>&lt;String&gt; <span class="hljs-variable">names</span> <span class="hljs-operator">=</span> List.of(<span class="hljs-string">&quot;Alice&quot;</span>, <span class="hljs-string">&quot;Bob&quot;</span>, <span class="hljs-string">&quot;Carol&quot;</span>, <span class="hljs-string">&quot;Dave&quot;</span>);
+
+<span class="hljs-comment">// Filter, transform, collect — reads top-to-bottom like a pipeline</span>
+<span class="hljs-type">List</span>&lt;String&gt; <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> names.stream()
+    .filter(n -&gt; n.length() &gt; <span class="hljs-number">3</span>)           <span class="hljs-comment">// keep long names</span>
+    .map(String::toUpperCase)             <span class="hljs-comment">// method reference</span>
+    .sorted()
+    .collect(Collectors.toList());        <span class="hljs-comment">// -&gt; [ALICE, CAROL, DAVE]</span>
+
+<span class="hljs-comment">// Numeric reduction</span>
+<span class="hljs-type">int</span> <span class="hljs-variable">totalLen</span> <span class="hljs-operator">=</span> names.stream().mapToInt(String::length).sum();
+
+<span class="hljs-comment">// Grouping — one of the most useful collectors</span>
+<span class="hljs-type">Map</span>&lt;Integer, List&lt;String&gt;&gt; <span class="hljs-variable">byLen</span> <span class="hljs-operator">=</span> names.stream()
+    .collect(Collectors.groupingBy(String::length));
+
+<span class="hljs-comment">// Reduce to a single value</span>
+<span class="hljs-type">Optional</span>&lt;String&gt; <span class="hljs-variable">longest</span> <span class="hljs-operator">=</span> names.stream()
+    .max(Comparator.comparingInt(String::length));
+
+<span class="hljs-comment">// Lambdas implement functional interfaces (single-abstract-method)</span>
+<span class="hljs-type">Runnable</span> <span class="hljs-variable">r</span> <span class="hljs-operator">=</span> () -&gt; System.out.println(<span class="hljs-string">&quot;run!&quot;</span>);
+<span class="hljs-type">Comparator</span>&lt;String&gt; <span class="hljs-variable">byLenCmp</span> <span class="hljs-operator">=</span> (a, b) -&gt; a.length() - b.length();</code></pre>
+
+<div class="pipeline"><span class="step">source</span><span class="arrow">-&gt;</span><span class="step">filter</span><span class="arrow">-&gt;</span><span class="step">map</span><span class="arrow">-&gt;</span><span class="step">sorted</span><span class="arrow">-&gt;</span><span class="step">collect</span></div>
+
+<div class="callout warn"><span class="t">Pitfall</span> Streams are lazy and single-use. Intermediate ops (<code>filter</code>, <code>map</code>) do nothing until a terminal op (<code>collect</code>, <code>forEach</code>, <code>count</code>) runs. Reusing a consumed stream throws <code>IllegalStateException</code>. Avoid side effects inside stream pipelines.</div>
+
+<h2 id="exceptions-amp-error-handling">Exceptions &amp; Error Handling</h2>
+<p>Java splits exceptions into <strong>checked</strong> (must be declared or caught &mdash; e.g. <code>IOException</code>) and <strong>unchecked</strong> (<code>RuntimeException</code> and subclasses &mdash; e.g. <code>NullPointerException</code>, <code>IllegalArgumentException</code>). <code>Error</code> (e.g. <code>OutOfMemoryError</code>) you generally never catch.</p>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-comment">// try-with-resources: auto-closes anything implementing AutoCloseable</span>
+<span class="hljs-keyword">import</span> java.io.*;
+
+<span class="hljs-keyword">static</span> <span class="hljs-type">String</span> <span class="hljs-title function_">readFirstLine</span><span class="hljs-params">(String path)</span> <span class="hljs-keyword">throws</span> IOException {   <span class="hljs-comment">// checked, declared</span>
+    <span class="hljs-keyword">try</span> (<span class="hljs-type">BufferedReader</span> <span class="hljs-variable">br</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BufferedReader</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">FileReader</span>(path))) {
+        <span class="hljs-keyword">return</span> br.readLine();
+    }   <span class="hljs-comment">// br.close() called automatically, even on exception</span>
+}
+
+<span class="hljs-comment">// try / catch / finally with multi-catch</span>
+<span class="hljs-keyword">try</span> {
+    <span class="hljs-type">int</span> <span class="hljs-variable">x</span> <span class="hljs-operator">=</span> Integer.parseInt(userInput);
+    process(x);
+} <span class="hljs-keyword">catch</span> (NumberFormatException | IllegalStateException e) {   <span class="hljs-comment">// multi-catch</span>
+    System.err.println(<span class="hljs-string">&quot;Bad input: &quot;</span> + e.getMessage());
+} <span class="hljs-keyword">finally</span> {
+    cleanup();   <span class="hljs-comment">// always runs</span>
+}
+
+<span class="hljs-comment">// Custom exceptions — extend RuntimeException for unchecked</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">InsufficientFundsException</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">RuntimeException</span> {
+    <span class="hljs-type">public</span> <span class="hljs-title function_">InsufficientFundsException</span><span class="hljs-params">(String msg)</span> { <span class="hljs-built_in">super</span>(msg); }
+}</code></pre>
+
+<div class="callout danger"><span class="t">Danger</span> Never write an empty <code>catch (Exception e) {}</code>. Swallowing exceptions hides bugs. At minimum log it; usually rethrow or wrap. Also avoid catching <code>Throwable</code> &mdash; it traps <code>Error</code>s you cannot recover from.</div>
+
+<h2 id="concurrency-basics">Concurrency Basics</h2>
+<p>The JVM has true OS threads and a mature concurrency toolkit. Modern Java (21+) adds <strong>virtual threads</strong>, making it cheap to run millions of blocking tasks.</p>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-keyword">import</span> java.util.concurrent.*;
+<span class="hljs-keyword">import</span> java.util.concurrent.atomic.*;
+
+<span class="hljs-comment">// Prefer an ExecutorService over raw new Thread()</span>
+<span class="hljs-keyword">try</span> (<span class="hljs-type">ExecutorService</span> <span class="hljs-variable">pool</span> <span class="hljs-operator">=</span> Executors.newFixedThreadPool(<span class="hljs-number">4</span>)) {
+    <span class="hljs-type">Future</span>&lt;Integer&gt; <span class="hljs-variable">f</span> <span class="hljs-operator">=</span> pool.submit(() -&gt; expensiveCompute());
+    <span class="hljs-type">Integer</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> f.get();      <span class="hljs-comment">// blocks until done</span>
+}   <span class="hljs-comment">// pool.close() shuts down and awaits (Java 19+ AutoCloseable)</span>
+
+<span class="hljs-comment">// Virtual threads (Java 21): millions of cheap threads for blocking I/O</span>
+<span class="hljs-keyword">try</span> (<span class="hljs-type">var</span> <span class="hljs-variable">vpool</span> <span class="hljs-operator">=</span> Executors.newVirtualThreadPerTaskExecutor()) {
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">10_000</span>; i++) {
+        vpool.submit(() -&gt; { doBlockingIo(); <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>; });
+    }
+}
+
+<span class="hljs-comment">// Shared mutable state needs synchronization</span>
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">AtomicInteger</span> <span class="hljs-variable">counter</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">AtomicInteger</span>();   <span class="hljs-comment">// lock-free</span>
+counter.incrementAndGet();
+
+<span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">balance</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">synchronized</span> <span class="hljs-type">void</span> <span class="hljs-title function_">deposit</span><span class="hljs-params">(<span class="hljs-type">int</span> n)</span> { balance += n; }    <span class="hljs-comment">// intrinsic lock</span>
+
+<span class="hljs-comment">// CompletableFuture: compose async work</span>
+CompletableFuture.supplyAsync(() -&gt; fetch())
+    .thenApply(data -&gt; transform(data))
+    .thenAccept(System.out::println);</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>Concurrent collections</h4><p>Use <code>ConcurrentHashMap</code>, <code>CopyOnWriteArrayList</code>, and <code>BlockingQueue</code> instead of manually locking plain collections.</p></div>
+  <div class="card"><h4>Visibility: volatile</h4><p><code>volatile</code> guarantees reads/writes of a field are visible across threads (no caching), but does NOT make compound actions atomic.</p></div>
+</div>
+
+<div class="callout note"><span class="t">Python contrast</span> CPython has a Global Interpreter Lock (GIL) that serializes bytecode, so threads do not run Python in parallel. The JVM has no GIL &mdash; Java threads achieve genuine multi-core parallelism, which is why Java is favoured for CPU-bound concurrent workloads.</div>
+
+<h2 id="build-tools-maven-amp-gradle">Build Tools: Maven &amp; Gradle</h2>
+<p>Real projects use a build tool to manage dependencies, compile, test, and package. Maven uses declarative XML; Gradle uses a Groovy/Kotlin DSL and is faster via incremental builds and caching.</p>
+
+<div class="code-label">XML</div><pre><code class="hljs"><span class="hljs-comment">&lt;!-- Maven: pom.xml --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">project</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.example<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>myapp<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.release</span>&gt;</span>21<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.release</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.junit.jupiter<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>junit-jupiter<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>5.11.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span></code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Maven lifecycle</span>
+mvn compile          <span class="hljs-comment"># compile sources</span>
+mvn <span class="hljs-built_in">test</span>             <span class="hljs-comment"># run tests</span>
+mvn package          <span class="hljs-comment"># build a JAR into target/</span>
+mvn clean install    <span class="hljs-comment"># wipe, build, install to local repo (~/.m2)</span></code></pre>
+
+<div class="code-label">GROOVY</div><pre><code class="hljs"><span class="hljs-comment">// Gradle: build.gradle (Groovy DSL)</span>
+plugins { id <span class="hljs-string">&#x27;java&#x27;</span> }
+java { toolchain { languageVersion = JavaLanguageVersion.of(<span class="hljs-number">21</span>) } }
+repositories { mavenCentral() }
+dependencies {
+    testImplementation <span class="hljs-string">&#x27;org.junit.jupiter:junit-jupiter:5.11.0&#x27;</span>
+}
+<span class="hljs-comment">// Run with:  ./gradlew build   ./gradlew test   ./gradlew run</span></code></pre>
+
+<h2 id="worked-mini-example-word-frequency-counter">Worked Mini-Example: Word Frequency Counter</h2>
+<p>A small end-to-end program tying together collections, streams, and modern syntax: count the most frequent words in a block of text.</p>
+
+<div class="code-label">JAVA</div><pre><code class="hljs"><span class="hljs-keyword">import</span> java.util.*;
+<span class="hljs-keyword">import</span> java.util.stream.*;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">WordCount</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> {
+        <span class="hljs-type">String</span> <span class="hljs-variable">text</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;&quot;
+            the quick brown fox the lazy dog
+            the fox jumps the dog sleeps
+            &quot;&quot;&quot;</span>;                                   <span class="hljs-comment">// text block (Java 15+)</span>
+
+        <span class="hljs-type">Map</span>&lt;String, Long&gt; <span class="hljs-variable">freq</span> <span class="hljs-operator">=</span> Arrays.stream(text.toLowerCase().split(<span class="hljs-string">&quot;\\s+&quot;</span>))
+            .filter(w -&gt; !w.isBlank())
+            .collect(Collectors.groupingBy(w -&gt; w, Collectors.counting()));
+
+        <span class="hljs-comment">// Top 3 by count, descending</span>
+        freq.entrySet().stream()
+            .sorted(Map.Entry.&lt;String,Long&gt;comparingByValue().reversed())
+            .limit(<span class="hljs-number">3</span>)
+            .forEach(e -&gt; System.out.printf(<span class="hljs-string">&quot;%-6s %d%n&quot;</span>, e.getKey(), e.getValue()));
+    }
+}
+<span class="hljs-comment">// Output:</span>
+<span class="hljs-comment">// the    4</span>
+<span class="hljs-comment">// fox    2</span>
+<span class="hljs-comment">// dog    2</span></code></pre>
+
+<h2 id="cheat-sheet-amp-python-comparison">Cheat-Sheet &amp; Python Comparison</h2>
+<table>
+<tr><th>Task</th><th>Java</th><th>Notes</th></tr>
+<tr><td>Print</td><td><code>System.out.println(x)</code></td><td>or <code>printf</code> with format strings</td></tr>
+<tr><td>Format string</td><td><code>"x=%d".formatted(n)</code></td><td>or <code>String.format</code></td></tr>
+<tr><td>Make list</td><td><code>List.of(1,2,3)</code></td><td>immutable; use <code>new ArrayList&lt;&gt;()</code> for mutable</td></tr>
+<tr><td>Iterate</td><td><code>for (var x : list)</code></td><td>enhanced for-loop</td></tr>
+<tr><td>Map entry loop</td><td><code>for (var e : map.entrySet())</code></td><td><code>e.getKey()</code> / <code>e.getValue()</code></td></tr>
+<tr><td>Null-safe</td><td><code>Optional&lt;T&gt;</code></td><td>avoid returning null from APIs</td></tr>
+<tr><td>Immutable data</td><td><code>record Point(int x,int y){}</code></td><td>Java 16+</td></tr>
+<tr><td>Switch value</td><td><code>var r = switch(x){...}</code></td><td>arrow form, returns a value</td></tr>
+</table>
+
+<table>
+<tr><th>Concept</th><th>Java</th><th>Python</th></tr>
+<tr><td>Typing</td><td>static, compile-checked</td><td>dynamic, duck typing</td></tr>
+<tr><td>Execution</td><td>bytecode + JIT (fast)</td><td>interpreted (CPython)</td></tr>
+<tr><td>Memory</td><td>GC, primitives vs objects</td><td>GC, everything an object</td></tr>
+<tr><td>Parallelism</td><td>real threads, no GIL</td><td>GIL serializes threads</td></tr>
+<tr><td>Lists</td><td><code>List&lt;T&gt;</code> (typed)</td><td><code>list</code> (any)</td></tr>
+<tr><td>Dicts</td><td><code>Map&lt;K,V&gt;</code></td><td><code>dict</code></td></tr>
+<tr><td>Lambda</td><td><code>x -&gt; x+1</code></td><td><code>lambda x: x+1</code></td></tr>
+<tr><td>None/null</td><td><code>null</code> (refs only)</td><td><code>None</code></td></tr>
+</table>
+
+<h2 id="best-practices">Best Practices</h2>
+<div class="callout ok"><span class="t">Do</span> Program to interfaces (<code>List&lt;String&gt; x = new ArrayList&lt;&gt;()</code>), prefer immutability (<code>final</code>, records), favour composition over inheritance, and return <code>Optional</code> instead of null for "maybe absent" values.</div>
+<div class="callout tip"><span class="t">Tip</span> Use <code>var</code> for obvious local types to cut noise, but keep explicit types in public APIs. Let the IDE and compiler guide you &mdash; Java's static types make refactoring safe and automated.</div>
+<div class="callout ok"><span class="t">Do</span> Write tests with JUnit 5. Keep methods short and single-purpose. Use <code>equals</code>/<code>hashCode</code>/<code>toString</code> (or records) on any value type.</div>
+
+<h2 id="common-pitfalls">Common Pitfalls</h2>
+<div class="callout warn"><span class="t">== on objects</span> Comparing Strings or boxed numbers with <code>==</code> compares identity, not value. The <code>Integer</code> cache (-128..127) makes this bug intermittent and maddening. Always use <code>.equals()</code>.</div>
+<div class="callout warn"><span class="t">Mutating during iteration</span> Modifying a collection while a for-each loop iterates throws <code>ConcurrentModificationException</code>. Use an <code>Iterator.remove()</code> or <code>removeIf()</code> instead.</div>
+<div class="callout danger"><span class="t">NullPointerException</span> The most common runtime failure. Validate inputs, prefer <code>Optional</code>, use <code>Objects.requireNonNull</code>, and enable helpful NPE messages (default since Java 15).</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What is the difference between the JDK, JRE, and JVM?</div><div class="a">The JVM is the runtime engine that executes bytecode. The JRE (now folded into the JDK) is the JVM plus standard libraries needed to run apps. The JDK is the full development kit: JRE plus compiler (<code>javac</code>), debugger, and tools. You develop with the JDK; you run on the JVM.</div></div>
+<div class="qa"><div class="q">Explain <code>==</code> versus <code>.equals()</code>.</div><div class="a"><code>==</code> compares primitives by value and objects by reference (identity). <code>.equals()</code> compares logical equality as defined by the class. For custom value types you must override <code>equals</code> (and <code>hashCode</code> alongside it) or use a record.</div></div>
+<div class="qa"><div class="q">Why must you override <code>hashCode</code> whenever you override <code>equals</code>?</div><div class="a">Hash-based collections (<code>HashMap</code>, <code>HashSet</code>) locate objects by their hash code first, then confirm with <code>equals</code>. If two equal objects return different hash codes, they land in different buckets and the collection breaks (duplicates, failed lookups). The contract: equal objects must have equal hash codes.</div></div>
+<div class="qa"><div class="q">What is type erasure?</div><div class="a">Generics exist only at compile time. The compiler checks types and inserts casts, then erases the type parameters, so <code>List&lt;String&gt;</code> becomes raw <code>List</code> at runtime. Consequences: you cannot do <code>new T[]</code>, cannot use <code>instanceof List&lt;String&gt;</code>, and overloads differing only by generic type are illegal.</div></div>
+<div class="qa"><div class="q">Checked vs unchecked exceptions &mdash; when to use each?</div><div class="a">Checked exceptions (extend <code>Exception</code>) must be declared or caught and model recoverable conditions (file not found). Unchecked (<code>RuntimeException</code>) model programming errors (bad argument, null) and need no declaration. Modern practice leans toward unchecked exceptions to avoid boilerplate; use checked only when the caller can realistically recover.</div></div>
+<div class="qa"><div class="q">What does <code>final</code> mean in its three positions?</div><div class="a">On a variable: cannot be reassigned (the reference is fixed, though a mutable object it points to can still change). On a method: cannot be overridden. On a class: cannot be subclassed (e.g. <code>String</code>).</div></div>
+<div class="qa"><div class="q">How does the garbage collector decide what to free?</div><div class="a">An object is eligible for GC when it is no longer reachable from any GC root (stack variables, static fields, active threads). Modern collectors (G1, ZGC, Shenandoah) are generational and mostly concurrent, minimizing pause times. You never free memory manually; you can only drop references.</div></div>
+<div class="qa"><div class="q">ArrayList vs LinkedList &mdash; which and why?</div><div class="a">Prefer <code>ArrayList</code> almost always: O(1) random access and cache-friendly contiguous memory. <code>LinkedList</code> only wins for frequent insertion/removal at both ends &mdash; and even there <code>ArrayDeque</code> is usually faster. In practice LinkedList is rarely the right answer.</div></div>
+<div class="qa"><div class="q">What are virtual threads and why do they matter?</div><div class="a">Introduced in Java 21, virtual threads are lightweight threads scheduled by the JVM onto a small pool of OS carrier threads. They make blocking I/O cheap &mdash; you can run millions concurrently &mdash; letting you write simple synchronous code that scales like async, without callback hell or reactive frameworks.</div></div>
+<div class="qa"><div class="q">What is the difference between an interface and an abstract class?</div><div class="a">A class implements many interfaces but extends only one abstract class. Interfaces define contracts (plus default/static methods) and hold no instance state; abstract classes can hold state and constructors and share implementation. Choose an interface for a capability, an abstract class for a partial base implementation.</div></div>
+<div class="qa"><div class="q">Explain the PECS rule for generics wildcards.</div><div class="a">"Producer Extends, Consumer Super." Use <code>? extends T</code> when a structure produces values you read as T; use <code>? super T</code> when it consumes values you write as T. This maximizes flexibility of generic method signatures while staying type-safe.</div></div>
+<div class="qa"><div class="q">Is Java pass-by-value or pass-by-reference?</div><div class="a">Always pass-by-value. For objects, the value passed is a copy of the reference, so the method can mutate the pointed-to object but cannot reassign the caller's variable. There is no pass-by-reference in Java.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li><strong>Effective Java</strong> (Joshua Bloch) &mdash; the canonical best-practices book; read it twice.</li>
+  <li><strong>Modern features</strong> &mdash; practice records, sealed types, pattern matching in <code>switch</code>, and virtual threads (Java 21+).</li>
+  <li><strong>Spring Boot</strong> &mdash; the dominant framework for Java web services and microservices.</li>
+  <li><strong>Concurrency in Practice</strong> (Goetz) &mdash; deep dive into the memory model and thread-safety.</li>
+  <li><strong>JVM internals</strong> &mdash; learn GC tuning, JIT, and tools like <code>jcmd</code>, <code>jstack</code>, and JDK Flight Recorder.</li>
+  <li><strong>Build &amp; test</strong> &mdash; get fluent with Maven/Gradle, JUnit 5, and Mockito.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

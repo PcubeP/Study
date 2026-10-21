@@ -1,0 +1,593 @@
+<p class="lead">Hugging Face <strong>Transformers</strong> is the de-facto standard library for working with pretrained deep-learning models — from a one-line <code>pipeline()</code> that classifies text, to full fine-tuning of a 7B-parameter LLM with LoRA. It gives you a unified Python API over tens of thousands of models on the Hub, backed interchangeably by PyTorch, and ships the tokenizers, training loop, and inference utilities you need to go from prototype to production.</p>
+
+<h2>1. What It Is and Why It Matters</h2>
+
+<p>Before Transformers, using a state-of-the-art NLP model meant cloning a research repo, reconciling framework versions, and reimplementing preprocessing. The library collapses that into three composable abstractions you will use everywhere: a <span class="badge">tokenizer</span> that turns text into model-ready integer tensors, a <span class="badge g">model</span> that maps those tensors to hidden states or predictions, and a <span class="badge o">pipeline</span> that wires both together for a task.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>The Hub</h4>A git-backed registry of 1M+ models, datasets, and demos. Any checkpoint is one string away: <code>"bert-base-uncased"</code>, <code>"meta-llama/Llama-3.1-8B"</code>.</div>
+  <div class="card"><h4>Auto classes</h4><code>AutoModel</code>/<code>AutoTokenizer</code> read a model's config and instantiate the correct architecture — your code stays identical across BERT, GPT, T5, or Llama.</div>
+  <div class="card"><h4>One ecosystem</h4><code>transformers</code>, <code>datasets</code>, <code>tokenizers</code>, <code>accelerate</code>, <code>peft</code>, and <code>evaluate</code> interoperate so training and inference share one data path.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 760 250" width="760" height="250">
+  <defs>
+    <marker id="hf-ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="95" width="130" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="85" y="122" text-anchor="middle" font-size="13" fill="#1a2233">Raw text</text>
+  <text x="85" y="140" text-anchor="middle" font-size="11" fill="#64748b">"I love this!"</text>
+
+  <rect x="200" y="95" width="150" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="275" y="118" text-anchor="middle" font-size="13" fill="#1a2233">Tokenizer</text>
+  <text x="275" y="136" text-anchor="middle" font-size="11" fill="#64748b">input_ids, mask</text>
+
+  <rect x="400" y="95" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="475" y="118" text-anchor="middle" font-size="13" fill="#1a2233">Model</text>
+  <text x="475" y="136" text-anchor="middle" font-size="11" fill="#64748b">forward pass</text>
+
+  <rect x="600" y="95" width="140" height="60" rx="8" fill="#1e3a8a" stroke="#1e3a8a"/>
+  <text x="670" y="118" text-anchor="middle" font-size="13" fill="#fff">Logits /</text>
+  <text x="670" y="136" text-anchor="middle" font-size="13" fill="#fff">hidden states</text>
+
+  <line x1="150" y1="125" x2="200" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah)"/>
+  <line x1="350" y1="125" x2="400" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah)"/>
+  <line x1="550" y1="125" x2="600" y2="125" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah)"/>
+
+  <rect x="200" y="30" width="350" height="34" rx="6" fill="none" stroke="#b45309" stroke-dasharray="5 4"/>
+  <text x="375" y="52" text-anchor="middle" font-size="12" fill="#b45309">pipeline() wraps both and post-processes</text>
+  <line x1="275" y1="64" x2="275" y2="93" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <line x1="475" y1="64" x2="475" y2="93" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+  <text x="375" y="210" text-anchor="middle" font-size="12" fill="#64748b">Post-process (argmax + label map) → {"label": "POSITIVE", "score": 0.99}</text>
+</svg>
+<div class="cap">Fig 1 — The core data path. <code>pipeline()</code> is a convenience wrapper over the same tokenizer + model you can also drive manually.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of Transformers as "drivers for neural networks". The model file is the hardware; the <code>config.json</code> tells the Auto classes which driver to load; the tokenizer is the cable that converts your text into the exact signal the model was trained on.</div>
+
+<h2>2. Setup and Getting Started</h2>
+
+<p>Install the library with a backend. PyTorch is the default and most widely supported. Add the sibling libraries you'll need for data and efficient fine-tuning.</p>
+
+<pre><code class="language-bash"># Isolated environment
+python -m venv .venv &amp;&amp; source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# Core + PyTorch backend
+pip install "transformers[torch]"
+
+# Common companions
+pip install datasets           # streaming/efficient dataset loading
+pip install accelerate         # device placement + distributed training
+pip install evaluate           # metrics (accuracy, f1, bleu, ...)
+pip install peft               # LoRA / parameter-efficient fine-tuning
+pip install sentencepiece      # tokenizers for T5, Llama, etc.
+
+# Verify
+python -c "import transformers; print(transformers.__version__)"</code></pre>
+
+<pre><code class="language-bash"># Authenticate to download gated models (e.g. Llama) and push your own
+huggingface-cli login          # paste a token from huggingface.co/settings/tokens
+
+# Caching: downloaded weights live here (override with HF_HOME)
+export HF_HOME="$HOME/.cache/huggingface"</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Set <code>HF_HUB_ENABLE_HF_TRANSFER=1</code> and <code>pip install hf_transfer</code> for much faster multi-gigabyte downloads. In notebooks, use <code>from huggingface_hub import notebook_login</code>.</div>
+
+<h2>3. The pipeline() — Zero-to-Inference</h2>
+
+<p><code>pipeline()</code> is the fastest path to a working result. You name a task; it picks a sensible default model, downloads it, and handles pre/post-processing. Pass an explicit <code>model=</code> for reproducibility in real code.</p>
+
+<pre><code class="language-python">from transformers import pipeline
+
+# Sentiment analysis (default model chosen for the task)
+clf = pipeline("sentiment-analysis")
+print(clf("Hugging Face makes NLP wonderfully simple."))
+# [{'label': 'POSITIVE', 'score': 0.9998}]
+
+# Pin a model explicitly + run on GPU (device=0) or Apple Silicon ("mps")
+clf = pipeline(
+    task="sentiment-analysis",
+    model="distilbert-base-uncased-finetuned-sst-2-english",
+    device=0,                      # -1 = CPU
+)
+
+# Batch many inputs at once — far faster than a Python loop
+results = clf(["Great value.", "Terrible support.", "It's fine."])</code></pre>
+
+<p>The task string selects the output shape and post-processing. A representative set:</p>
+
+<table>
+<tr><th>Task string</th><th>What it does</th><th>Typical default head</th></tr>
+<tr><td><code>sentiment-analysis</code> / <code>text-classification</code></td><td>Label a whole sequence</td><td>SequenceClassification</td></tr>
+<tr><td><code>ner</code> / <code>token-classification</code></td><td>Tag each token (entities)</td><td>TokenClassification</td></tr>
+<tr><td><code>question-answering</code></td><td>Extract an answer span from a context</td><td>QuestionAnswering</td></tr>
+<tr><td><code>fill-mask</code></td><td>Predict masked tokens</td><td>MaskedLM</td></tr>
+<tr><td><code>summarization</code> / <code>translation</code></td><td>Seq2seq text generation</td><td>Seq2SeqLM</td></tr>
+<tr><td><code>text-generation</code></td><td>Autoregressive completion / chat</td><td>CausalLM</td></tr>
+<tr><td><code>feature-extraction</code></td><td>Return raw hidden states (embeddings)</td><td>base Model</td></tr>
+<tr><td><code>zero-shot-classification</code></td><td>Classify into arbitrary labels via NLI</td><td>SequenceClassification</td></tr>
+<tr><td><code>automatic-speech-recognition</code></td><td>Transcribe audio (Whisper)</td><td>SpeechSeq2Seq</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Reuse the pipeline</span> Constructing a pipeline reloads weights from disk every time. Create it <em>once</em> at startup and reuse it; never build one inside a request handler or a loop.</div>
+
+<h2>4. AutoTokenizer and AutoModel — The Manual API</h2>
+
+<p>When you need control — custom pre/post-processing, access to hidden states, or integration into a training loop — drop below the pipeline. The <code>Auto*</code> classes inspect <code>config.json</code> and return the right concrete class.</p>
+
+<pre><code class="language-python">from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+
+ckpt = "distilbert-base-uncased-finetuned-sst-2-english"
+tok = AutoTokenizer.from_pretrained(ckpt)
+model = AutoModelForSequenceClassification.from_pretrained(ckpt)
+
+# Tokenize → PyTorch tensors, padded + truncated to the model's limit
+inputs = tok(
+    ["I love this", "I hate waiting"],
+    padding=True, truncation=True, return_tensors="pt",
+)
+# inputs = {'input_ids': tensor([...]), 'attention_mask': tensor([...])}
+
+with torch.no_grad():                 # inference: no gradients needed
+    logits = model(**inputs).logits   # shape [batch, num_labels]
+
+probs = torch.softmax(logits, dim=-1)
+preds = probs.argmax(dim=-1)
+# Map ids to names via the model's config
+labels = [model.config.id2label[i.item()] for i in preds]
+print(labels)                         # ['POSITIVE', 'NEGATIVE']</code></pre>
+
+<h3>The AutoModel family</h3>
+<p>Pick the class that matches your task — the suffix determines which <em>head</em> is attached on top of the base encoder/decoder.</p>
+
+<table>
+<tr><th>Class</th><th>Use for</th><th>Output</th></tr>
+<tr><td><code>AutoModel</code></td><td>Raw embeddings / custom heads</td><td><code>last_hidden_state</code></td></tr>
+<tr><td><code>AutoModelForSequenceClassification</code></td><td>Sentiment, topic, NLI</td><td>logits [batch, labels]</td></tr>
+<tr><td><code>AutoModelForTokenClassification</code></td><td>NER, POS tagging</td><td>logits [batch, seq, labels]</td></tr>
+<tr><td><code>AutoModelForQuestionAnswering</code></td><td>Extractive QA</td><td>start/end logits</td></tr>
+<tr><td><code>AutoModelForCausalLM</code></td><td>GPT-style generation, chat LLMs</td><td>next-token logits</td></tr>
+<tr><td><code>AutoModelForSeq2SeqLM</code></td><td>Translation, summarization (T5, BART)</td><td>decoder logits</td></tr>
+<tr><td><code>AutoModelForMaskedLM</code></td><td>Masked-token prediction (BERT)</td><td>vocab logits</td></tr>
+</table>
+
+<h2>5. Tokenization in Depth</h2>
+
+<p>Tokenization is where most subtle bugs hide. Modern tokenizers use <strong>subword</strong> algorithms (WordPiece, Byte-Pair Encoding, SentencePiece/Unigram) so any string — including unseen words and emoji — maps to a finite vocabulary. The tokenizer also adds special tokens the model expects and produces an <code>attention_mask</code> marking real vs. padded positions.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 220" width="720" height="220">
+  <defs>
+    <marker id="hf-ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker>
+  </defs>
+  <text x="20" y="40" font-size="13" fill="#1a2233">"tokenizing"</text>
+  <line x1="130" y1="35" x2="190" y2="35" stroke="#0891b2" stroke-width="2" marker-end="url(#hf-ah2)"/>
+  <text x="200" y="40" font-size="12" fill="#64748b">BPE split</text>
+
+  <rect x="300" y="18" width="70" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="335" y="38" text-anchor="middle" font-size="12" fill="#1a2233">token</text>
+  <rect x="380" y="18" width="70" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="415" y="38" text-anchor="middle" font-size="12" fill="#1a2233">##izing</text>
+
+  <text x="20" y="110" font-size="13" fill="#1a2233">Add specials</text>
+  <rect x="150" y="92" width="60" height="30" rx="5" fill="#ecfdf5" stroke="#059669"/>
+  <text x="180" y="112" text-anchor="middle" font-size="11" fill="#1a2233">[CLS]</text>
+  <rect x="215" y="92" width="60" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="245" y="112" text-anchor="middle" font-size="11" fill="#1a2233">token</text>
+  <rect x="280" y="92" width="60" height="30" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="310" y="112" text-anchor="middle" font-size="11" fill="#1a2233">##izing</text>
+  <rect x="345" y="92" width="60" height="30" rx="5" fill="#ecfdf5" stroke="#059669"/>
+  <text x="375" y="112" text-anchor="middle" font-size="11" fill="#1a2233">[SEP]</text>
+
+  <text x="20" y="175" font-size="13" fill="#1a2233">To ids</text>
+  <rect x="150" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="180" y="177" text-anchor="middle" font-size="11" fill="#1a2233">101</text>
+  <rect x="215" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="245" y="177" text-anchor="middle" font-size="11" fill="#1a2233">19204</text>
+  <rect x="280" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="310" y="177" text-anchor="middle" font-size="11" fill="#1a2233">6894</text>
+  <rect x="345" y="157" width="60" height="30" rx="5" fill="#fff7ed" stroke="#b45309"/>
+  <text x="375" y="177" text-anchor="middle" font-size="11" fill="#1a2233">102</text>
+</svg>
+<div class="cap">Fig 2 — Tokenization stages: subword split → add special tokens → map to vocabulary ids. The exact split and specials are baked into each checkpoint.</div>
+</div>
+
+<pre><code class="language-python">from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+enc = tok("Tokenizing isn't hard.")
+print(enc["input_ids"])            # [101, 19204, 6026, 2003, 2025, 2524, 1012, 102]
+print(tok.convert_ids_to_tokens(enc["input_ids"]))
+# ['[CLS]', 'token', '##izing', 'is', "n't", 'hard', '.', '[SEP]']
+
+# Round-trip back to text
+print(tok.decode(enc["input_ids"], skip_special_tokens=True))  # "tokenizing isn't hard."
+
+# Key arguments you will use constantly
+batch = tok(
+    ["short", "a much longer sequence that may exceed the limit"],
+    padding="longest",       # or "max_length"
+    truncation=True,
+    max_length=128,
+    return_tensors="pt",     # "pt" torch, "np" numpy, None lists
+)</code></pre>
+
+<h3>Chat templates</h3>
+<p>Instruction-tuned LLMs expect a specific role-formatted prompt. Never hand-format it — use the tokenizer's built-in template so special tokens match training exactly.</p>
+
+<pre><code class="language-python">messages = [
+    {"role": "system", "content": "You are a concise assistant."},
+    {"role": "user", "content": "Explain attention in one sentence."},
+]
+prompt = tok.apply_chat_template(
+    messages,
+    tokenize=False,
+    add_generation_prompt=True,   # append the assistant turn marker
+)</code></pre>
+
+<div class="callout danger"><span class="t">Golden rule</span> Always load the tokenizer from the <em>same checkpoint</em> as the model. A model's weights are meaningless if the token ids, special tokens, or vocabulary don't match what it was trained on.</div>
+
+<h2>6. Text Generation</h2>
+
+<p>Causal LMs generate autoregressively: predict the next token, append it, repeat. The <code>generate()</code> method exposes decoding strategy, length, and sampling controls. Understanding these knobs is essential interview material.</p>
+
+<pre><code class="language-python">from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+ckpt = "Qwen/Qwen2.5-0.5B-Instruct"
+tok = AutoTokenizer.from_pretrained(ckpt)
+model = AutoModelForCausalLM.from_pretrained(ckpt, torch_dtype="auto", device_map="auto")
+
+messages = [{"role": "user", "content": "Give me a haiku about tensors."}]
+inputs = tok.apply_chat_template(
+    messages, add_generation_prompt=True, return_tensors="pt"
+).to(model.device)
+
+out = model.generate(
+    inputs,
+    max_new_tokens=64,       # cap generated length (NOT total length)
+    do_sample=True,          # False = greedy/deterministic
+    temperature=0.7,         # &lt;1 sharper, &gt;1 more random
+    top_p=0.9,               # nucleus sampling
+    top_k=50,
+    repetition_penalty=1.1,
+)
+# Slice off the prompt tokens before decoding
+text = tok.decode(out[0][inputs.shape[-1]:], skip_special_tokens=True)
+print(text)</code></pre>
+
+<table>
+<tr><th>Strategy</th><th>Settings</th><th>When to use</th></tr>
+<tr><td>Greedy</td><td><code>do_sample=False</code></td><td>Deterministic, factual, short answers</td></tr>
+<tr><td>Beam search</td><td><code>num_beams=4</code></td><td>Translation/summarization quality</td></tr>
+<tr><td>Sampling</td><td><code>do_sample=True, temperature, top_p</code></td><td>Creative, diverse open-ended text</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Streaming + speed</span> Pass a <code>TextIteratorStreamer</code> to <code>generate()</code> to yield tokens as they arrive. Set <code>model.generation_config.pad_token_id = tok.eos_token_id</code> to silence padding warnings, and prefer <code>torch_dtype=torch.bfloat16</code> on modern GPUs to halve memory.</div>
+
+<h2>7. Embeddings and Feature Extraction</h2>
+
+<p>For semantic search, clustering, or RAG retrieval you need a fixed-size vector per text. Transformers gives raw hidden states; you pool them into a sentence embedding. <strong>Mean pooling</strong> over the attention mask is the standard recipe for most sentence encoders.</p>
+
+<pre><code class="language-python">from transformers import AutoTokenizer, AutoModel
+import torch
+import torch.nn.functional as F
+
+ckpt = "sentence-transformers/all-MiniLM-L6-v2"
+tok = AutoTokenizer.from_pretrained(ckpt)
+model = AutoModel.from_pretrained(ckpt)
+
+def mean_pool(last_hidden, mask):
+    mask = mask.unsqueeze(-1).float()            # [batch, seq, 1]
+    summed = (last_hidden * mask).sum(1)
+    counts = mask.sum(1).clamp(min=1e-9)
+    return summed / counts                       # [batch, hidden]
+
+sentences = ["A dog runs in the park.", "A canine sprints across a field."]
+enc = tok(sentences, padding=True, truncation=True, return_tensors="pt")
+with torch.no_grad():
+    out = model(**enc)
+
+emb = mean_pool(out.last_hidden_state, enc["attention_mask"])
+emb = F.normalize(emb, p=2, dim=1)               # unit vectors for cosine sim
+
+similarity = (emb[0] @ emb[1]).item()            # dot of normalized == cosine
+print(f"cosine similarity: {similarity:.3f}")    # ~0.7 (semantically close)</code></pre>
+
+<div class="callout note"><span class="t">Shortcut</span> The <code>sentence-transformers</code> library wraps this pooling for you: <code>SentenceTransformer(ckpt).encode(sentences)</code>. Use raw Transformers when you need custom pooling or want zero extra dependencies.</div>
+
+<h2>8. The datasets Library</h2>
+
+<p>The <code>datasets</code> library loads data lazily via Apache Arrow (memory-mapped, so it won't blow up your RAM), and offers fast <code>.map()</code> transforms that integrate directly with the <code>Trainer</code>.</p>
+
+<pre><code class="language-python">from datasets import load_dataset
+
+# Load from the Hub (train/validation/test splits come as a DatasetDict)
+ds = load_dataset("imdb")
+print(ds)
+# DatasetDict({ train: Dataset(25000), test: Dataset(25000) })
+
+# Load your own files
+local = load_dataset("csv", data_files={"train": "train.csv", "test": "test.csv"})
+
+# Tokenize the whole dataset in batches (cached to disk automatically)
+from transformers import AutoTokenizer
+tok = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+def preprocess(batch):
+    return tok(batch["text"], truncation=True, max_length=256)
+
+ds = ds.map(preprocess, batched=True)
+ds = ds.remove_columns(["text"]).rename_column("label", "labels")
+ds.set_format("torch")
+
+# Stream a huge dataset without downloading it all
+big = load_dataset("c4", "en", split="train", streaming=True)
+for example in big.take(2):
+    print(example["text"][:80])</code></pre>
+
+<h2>9. Fine-Tuning with Trainer</h2>
+
+<p>The <code>Trainer</code> class implements a robust training loop — mixed precision, gradient accumulation, checkpointing, logging, distributed training — so you supply only the model, data, and <code>TrainingArguments</code>. Here is a complete, runnable classification fine-tune.</p>
+
+<pre><code class="language-python">import numpy as np
+import evaluate
+from datasets import load_dataset
+from transformers import (
+    AutoTokenizer, AutoModelForSequenceClassification,
+    TrainingArguments, Trainer, DataCollatorWithPadding,
+)
+
+ckpt = "distilbert-base-uncased"
+tok = AutoTokenizer.from_pretrained(ckpt)
+
+ds = load_dataset("imdb")
+def prep(b): return tok(b["text"], truncation=True, max_length=256)
+ds = ds.map(prep, batched=True)
+
+# Dynamic padding per-batch is faster than padding everything to max_length
+collator = DataCollatorWithPadding(tokenizer=tok)
+
+model = AutoModelForSequenceClassification.from_pretrained(
+    ckpt, num_labels=2,
+    id2label={0: "NEG", 1: "POS"}, label2id={"NEG": 0, "POS": 1},
+)
+
+accuracy = evaluate.load("accuracy")
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    preds = np.argmax(logits, axis=-1)
+    return accuracy.compute(predictions=preds, references=labels)
+
+args = TrainingArguments(
+    output_dir="imdb-distilbert",
+    learning_rate=2e-5,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=32,
+    num_train_epochs=2,
+    weight_decay=0.01,
+    eval_strategy="epoch",       # evaluate each epoch
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    fp16=True,                   # mixed precision on GPU
+    push_to_hub=False,
+)
+
+trainer = Trainer(
+    model=model,
+    args=args,
+    train_dataset=ds["train"].shuffle(seed=42).select(range(5000)),
+    eval_dataset=ds["test"].select(range(1000)),
+    processing_class=tok,        # (was tokenizer=) handles saving the tokenizer
+    data_collator=collator,
+    compute_metrics=compute_metrics,
+)
+
+trainer.train()
+trainer.save_model("imdb-distilbert/best")   # saves weights + tokenizer + config</code></pre>
+
+<div class="diagram">
+<svg viewBox="0 0 720 150" width="720" height="150">
+  <defs>
+    <marker id="hf-ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <rect x="10" y="55" width="110" height="44" rx="7" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="65" y="82" text-anchor="middle" font-size="12" fill="#1a2233">Dataset</text>
+  <rect x="150" y="55" width="110" height="44" rx="7" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="205" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Collator</text>
+  <text x="205" y="90" text-anchor="middle" font-size="10" fill="#64748b">(pad batch)</text>
+  <rect x="290" y="55" width="120" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="350" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Forward +</text>
+  <text x="350" y="90" text-anchor="middle" font-size="11" fill="#1a2233">loss</text>
+  <rect x="440" y="55" width="120" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="500" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Backward +</text>
+  <text x="500" y="90" text-anchor="middle" font-size="11" fill="#1a2233">optimizer step</text>
+  <rect x="590" y="55" width="120" height="44" rx="7" fill="#fff7ed" stroke="#b45309"/>
+  <text x="650" y="76" text-anchor="middle" font-size="11" fill="#1a2233">Eval +</text>
+  <text x="650" y="90" text-anchor="middle" font-size="11" fill="#1a2233">checkpoint</text>
+
+  <line x1="120" y1="77" x2="150" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <line x1="260" y1="77" x2="290" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <line x1="410" y1="77" x2="440" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <line x1="560" y1="77" x2="590" y2="77" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah3)"/>
+  <path d="M650 99 C650 135, 65 135, 65 101" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#hf-ah3)"/>
+  <text x="360" y="130" text-anchor="middle" font-size="11" fill="#64748b">repeat for each batch / epoch</text>
+</svg>
+<div class="cap">Fig 3 — What Trainer orchestrates per step: batch → pad → forward/loss → backward/step, with periodic eval and checkpointing.</div>
+</div>
+
+<h2>10. PEFT and LoRA</h2>
+
+<p>Full fine-tuning of a billion-parameter model updates every weight — enormous memory and storage. <strong>Parameter-Efficient Fine-Tuning (PEFT)</strong> freezes the base model and trains a tiny number of extra parameters. The dominant method, <strong>LoRA (Low-Rank Adaptation)</strong>, injects two small matrices <em>A</em> (d×r) and <em>B</em> (r×d) whose product approximates the weight update, where rank <em>r</em> is typically 8-64. You train &lt;1% of the parameters and ship a few-MB adapter instead of a multi-GB checkpoint.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 680 220" width="680" height="220">
+  <defs>
+    <marker id="hf-ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="60" y="80" width="130" height="60" rx="8" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="125" y="106" text-anchor="middle" font-size="13" fill="#1a2233">W (frozen)</text>
+  <text x="125" y="124" text-anchor="middle" font-size="11" fill="#64748b">d × d</text>
+
+  <rect x="300" y="40" width="90" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="345" y="60" text-anchor="middle" font-size="12" fill="#1a2233">A (d×r)</text>
+  <text x="345" y="76" text-anchor="middle" font-size="10" fill="#059669">trainable</text>
+  <rect x="300" y="104" width="90" height="44" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="345" y="124" text-anchor="middle" font-size="12" fill="#1a2233">B (r×d)</text>
+  <text x="345" y="140" text-anchor="middle" font-size="10" fill="#059669">trainable</text>
+
+  <circle cx="500" cy="110" r="22" fill="#1e3a8a"/>
+  <text x="500" y="116" text-anchor="middle" font-size="18" fill="#fff">+</text>
+
+  <rect x="560" y="80" width="100" height="60" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="610" y="114" text-anchor="middle" font-size="12" fill="#1a2233">output</text>
+
+  <line x1="190" y1="110" x2="478" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <line x1="390" y1="62" x2="482" y2="98" stroke="#059669" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <line x1="390" y1="126" x2="482" y2="122" stroke="#059669" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <line x1="522" y1="110" x2="560" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#hf-ah4)"/>
+  <text x="345" y="175" text-anchor="middle" font-size="12" fill="#64748b">ΔW ≈ B·A  (rank r ≪ d, so few parameters)</text>
+  <text x="125" y="60" text-anchor="middle" font-size="11" fill="#64748b">original weights unchanged</text>
+</svg>
+<div class="cap">Fig 4 — LoRA. The frozen weight W is kept; only the low-rank adapters A and B are trained, and their product is added to W's output.</div>
+</div>
+
+<pre><code class="language-python">from peft import LoraConfig, get_peft_model, TaskType
+from transformers import AutoModelForCausalLM
+
+base = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen2.5-0.5B", torch_dtype="auto", device_map="auto",
+)
+
+lora = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,
+    r=16,                     # rank
+    lora_alpha=32,            # scaling (effective LR multiplier ~ alpha/r)
+    lora_dropout=0.05,
+    target_modules=["q_proj", "v_proj"],   # which linear layers get adapters
+)
+
+model = get_peft_model(base, lora)
+model.print_trainable_parameters()
+# trainable params: 1.08M || all params: 495M || trainable%: 0.22
+
+# Train with the SAME Trainer as before, then save just the adapter (a few MB)
+model.save_pretrained("qwen-lora-adapter")
+
+# Later: reload base + adapter for inference
+from peft import PeftModel
+base = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-0.5B")
+model = PeftModel.from_pretrained(base, "qwen-lora-adapter")</code></pre>
+
+<div class="callout tip"><span class="t">QLoRA</span> Combine LoRA with a 4-bit quantized base (<code>bitsandbytes</code>, <code>load_in_4bit=True</code>) to fine-tune a 7B model on a single consumer GPU. The base is frozen anyway, so quantizing it costs little accuracy.</div>
+
+<h2>11. Saving, Loading, and Sharing</h2>
+
+<pre><code class="language-python"># Save locally — produces config.json, model weights (safetensors), tokenizer files
+model.save_pretrained("my-model")
+tok.save_pretrained("my-model")
+
+# Reload later
+model = AutoModelForSequenceClassification.from_pretrained("my-model")
+
+# Push to the Hub (requires huggingface-cli login)
+model.push_to_hub("your-username/my-model")
+tok.push_to_hub("your-username/my-model")</code></pre>
+
+<div class="callout note"><span class="t">safetensors</span> The default weight format is <code>.safetensors</code> — a safe, fast, zero-copy format that cannot execute arbitrary code on load (unlike pickle-based <code>.bin</code>). Prefer it, especially for third-party checkpoints.</div>
+
+<h2>12. Cheat-Sheet Reference</h2>
+
+<table>
+<tr><th>Goal</th><th>Call</th></tr>
+<tr><td>Quick inference</td><td><code>pipeline(task, model=...)</code></td></tr>
+<tr><td>Load tokenizer</td><td><code>AutoTokenizer.from_pretrained(ckpt)</code></td></tr>
+<tr><td>Load model + head</td><td><code>AutoModelForXxx.from_pretrained(ckpt)</code></td></tr>
+<tr><td>Encode text</td><td><code>tok(text, padding=True, truncation=True, return_tensors="pt")</code></td></tr>
+<tr><td>Decode ids</td><td><code>tok.decode(ids, skip_special_tokens=True)</code></td></tr>
+<tr><td>Chat prompt</td><td><code>tok.apply_chat_template(msgs, add_generation_prompt=True)</code></td></tr>
+<tr><td>Generate text</td><td><code>model.generate(ids, max_new_tokens=...)</code></td></tr>
+<tr><td>Load data</td><td><code>load_dataset(name_or_format, ...)</code></td></tr>
+<tr><td>Map transform</td><td><code>ds.map(fn, batched=True)</code></td></tr>
+<tr><td>Train</td><td><code>Trainer(model, args, ...).train()</code></td></tr>
+<tr><td>Add LoRA</td><td><code>get_peft_model(model, LoraConfig(...))</code></td></tr>
+<tr><td>Save / share</td><td><code>model.save_pretrained(dir)</code> / <code>.push_to_hub(repo)</code></td></tr>
+</table>
+
+<h3>Model families at a glance</h3>
+<table>
+<tr><th>Family</th><th>Type</th><th>Best for</th></tr>
+<tr><td>BERT / RoBERTa / DeBERTa</td><td>Encoder-only</td><td>Classification, NER, embeddings</td></tr>
+<tr><td>GPT / Llama / Qwen / Mistral</td><td>Decoder-only</td><td>Generation, chat, few-shot</td></tr>
+<tr><td>T5 / BART / mBART</td><td>Encoder-decoder</td><td>Summarization, translation</td></tr>
+<tr><td>Whisper</td><td>Speech seq2seq</td><td>Transcription / ASR</td></tr>
+<tr><td>CLIP / ViT</td><td>Vision / multimodal</td><td>Image classification, retrieval</td></tr>
+</table>
+
+<h2>13. Best Practices and Common Pitfalls</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Do</h4>
+    <ul>
+      <li>Pin exact checkpoint strings and a <code>revision=</code> commit hash for reproducibility.</li>
+      <li>Use <code>torch.no_grad()</code> or <code>@torch.inference_mode()</code> for inference.</li>
+      <li>Batch inputs; use <code>DataCollatorWithPadding</code> for dynamic padding.</li>
+      <li>Prefer <code>bfloat16</code>/<code>fp16</code> on GPU to cut memory and speed up.</li>
+    </ul>
+  </div>
+  <div class="card"><h4>Avoid</h4>
+    <ul>
+      <li>Building a pipeline inside a request handler or loop.</li>
+      <li>Mismatched tokenizer and model checkpoints.</li>
+      <li>Forgetting to slice the prompt off generated output before decoding.</li>
+      <li>Padding everything to <code>max_length</code> when dynamic padding is faster.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout ok"><span class="t">Best practice</span> Keep model loading separate from inference. Load once (ideally at process start), move to the right device, set <code>model.eval()</code>, and reuse the handle. This dominates latency in real services.</div>
+
+<div class="callout warn"><span class="t">Pitfall: OOM during training</span> If you hit CUDA out-of-memory, reduce <code>per_device_train_batch_size</code> and compensate with <code>gradient_accumulation_steps</code>, enable <code>gradient_checkpointing=True</code>, and switch to <code>fp16</code>/<code>bf16</code>. These trade compute/time for memory.</div>
+
+<div class="callout danger"><span class="t">Pitfall: trusting remote code</span> Some models require <code>trust_remote_code=True</code>, which executes code from the repo on your machine. Only enable it for sources you trust, and pin a specific <code>revision</code>.</div>
+
+<h2>14. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What do the Auto classes actually do?</div><div class="a">They read the model's <code>config.json</code> (specifically <code>architectures</code>/<code>model_type</code>) and dynamically instantiate the matching concrete class — e.g. <code>AutoModelForCausalLM</code> on a Llama config returns <code>LlamaForCausalLM</code>. This lets one code path work across architectures and keeps your code decoupled from a specific model.</div></div>
+
+<div class="qa"><div class="q">Why must the tokenizer match the model?</div><div class="a">The model learned a mapping from specific token ids and special tokens to meaning. A different tokenizer produces different ids, vocabulary, and special-token placement, so the inputs no longer mean what the model expects — outputs become garbage. Always load both from the same checkpoint.</div></div>
+
+<div class="qa"><div class="q">What is the attention_mask for?</div><div class="a">When batching sequences of different lengths you pad shorter ones to a common length. The attention mask is 1 for real tokens and 0 for padding, telling the attention mechanism to ignore padded positions so they don't affect the output.</div></div>
+
+<div class="qa"><div class="q">Explain temperature, top_k, and top_p in generation.</div><div class="a">They shape the next-token distribution during sampling. Temperature scales logits before softmax (&lt;1 sharpens toward the top token, &gt;1 flattens for more randomness). top_k keeps only the k highest-probability tokens. top_p (nucleus) keeps the smallest set of tokens whose cumulative probability reaches p. Greedy decoding (<code>do_sample=False</code>) always takes the argmax.</div></div>
+
+<div class="qa"><div class="q">How does LoRA reduce fine-tuning cost?</div><div class="a">It freezes the pretrained weights and learns a low-rank update ΔW = B·A, where A is d×r and B is r×d with rank r≪d. Only A and B are trained — often &lt;1% of parameters — so optimizer state and gradients are tiny, and the resulting adapter is a few MB. The base model is shared across many task adapters.</div></div>
+
+<div class="qa"><div class="q">What problem does the datasets library's Arrow backend solve?</div><div class="a">It memory-maps data from disk instead of loading it all into RAM, so you can work with datasets larger than memory. It also enables fast columnar access, zero-copy slicing, on-disk caching of <code>.map()</code> results, and streaming mode for datasets too large to download.</div></div>
+
+<div class="qa"><div class="q">When would you choose full fine-tuning over LoRA?</div><div class="a">When you have ample compute, the target task differs substantially from pretraining, and you need maximum accuracy with no inference-time adapter overhead. For most practical adaptation — limited GPU, many tasks, fast iteration — LoRA/QLoRA gives comparable quality at a fraction of the cost.</div></div>
+
+<div class="qa"><div class="q">How do you get a sentence embedding from a BERT-style model?</div><div class="a">Run the base model to get <code>last_hidden_state</code> (one vector per token), then pool. Mean pooling over non-padding tokens (weighted by the attention mask) is the standard; some models use the <code>[CLS]</code> token. Normalize to unit length so dot product equals cosine similarity.</div></div>
+
+<div class="qa"><div class="q">Encoder-only vs decoder-only vs encoder-decoder — when to use each?</div><div class="a">Encoder-only (BERT) sees the whole sequence bidirectionally — best for understanding tasks like classification and NER. Decoder-only (GPT, Llama) is causal/autoregressive — best for generation and chat. Encoder-decoder (T5, BART) encodes an input then generates a transformed output — best for translation and summarization.</div></div>
+
+<div class="qa"><div class="q">What does gradient accumulation do and why use it?</div><div class="a">It runs several forward/backward passes, summing gradients, before a single optimizer step. This simulates a larger effective batch size (small batch × accumulation steps) without the memory of a big batch — essential for training large models on limited VRAM.</div></div>
+
+<div class="qa"><div class="q">Why prefer safetensors over pickle checkpoints?</div><div class="a">Pickle (<code>.bin</code>) can execute arbitrary code when loaded, a security risk for untrusted models. safetensors stores only tensor data, loads faster via zero-copy/mmap, and cannot run code — making it the safe default.</div></div>
+
+<div class="qa"><div class="q">How would you serve a fine-tuned model efficiently in production?</div><div class="a">Load the model once at startup in eval mode on the GPU with bf16; batch incoming requests; use <code>torch.inference_mode()</code>; cache the tokenizer. For high-throughput LLM generation, use a dedicated serving engine (e.g. TGI or vLLM) that adds KV-cache management, continuous batching, and paged attention rather than calling <code>generate()</code> per request.</div></div>
+
+<h2>15. Further Learning</h2>
+
+<ul>
+  <li><strong>Official course</strong> — the free Hugging Face LLM/NLP course walks through tokenizers, fine-tuning, and the Trainer end to end.</li>
+  <li><strong>Docs deep-dives</strong> — read the <code>generate()</code> and <code>GenerationConfig</code> reference, and the PEFT guide for LoRA/QLoRA/prefix tuning.</li>
+  <li><strong>accelerate</strong> — learn multi-GPU and mixed-precision training to scale beyond one device.</li>
+  <li><strong>sentence-transformers</strong> — for production embedding and semantic search.</li>
+  <li><strong>Serving</strong> — explore Text Generation Inference (TGI) and vLLM for low-latency, high-throughput LLM serving.</li>
+  <li><strong>Build something</strong> — fine-tune a small model on your own labelled data with LoRA, push the adapter to the Hub, and wire it into a RAG or chat demo.</li>
+</ul>

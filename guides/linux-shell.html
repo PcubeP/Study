@@ -1,0 +1,1665 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux & the Command Line — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Infrastructure & DevOps</div>
+  <h1>Linux & the Command Line</h1>
+  <div class="subtitle">Operate confidently on any Linux box you did not build — shell, systemd, SSH, networking, and the triage runbooks an FDE lives on.</div>
+  <div class="tags"><span>linux</span><span>bash</span><span>shell</span><span>systemd</span><span>ssh</span><span>networking</span><span>permissions</span><span>processes</span><span>awk</span><span>grep</span><span>troubleshooting</span><span>sysadmin</span><span>devops</span><span>fde</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~71 min read &middot; 15,651 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#why-the-command-line-is-the-fde-s-primary-instrument">Why the Command Line Is the FDE's Primary Instrument</a></li><li><a href="#the-filesystem-hierarchy-and-how-to-navigate-it">The Filesystem Hierarchy and How to Navigate It</a></li><li><a href="#files-links-globbing-find-and-the-xargs-pattern">Files, Links, Globbing, find, and the xargs Pattern</a></li><li><a href="#users-groups-permissions-sudo-and-acls">Users, Groups, Permissions, sudo, and ACLs</a></li><li><a href="#processes-signals-job-control-and-inspection">Processes, Signals, Job Control, and Inspection</a></li><li><a href="#systemd-units-systemctl-journalctl-and-timers">systemd: Units, systemctl, journalctl, and Timers</a></li><li><a href="#package-management-across-distros-and-air-gapped-installs">Package Management Across Distros and Air-Gapped Installs</a></li><li><a href="#ssh-deep-dive">SSH Deep Dive</a></li><li><a href="#text-processing-grep-sed-awk-cut-sort-jq">Text Processing: grep, sed, awk, cut, sort, jq</a></li><li><a href="#pipes-redirection-file-descriptors-and-here-docs">Pipes, Redirection, File Descriptors, and Here-Docs</a></li><li><a href="#bash-scripting-that-does-not-break">Bash Scripting That Does Not Break</a></li><li><a href="#networking-from-the-shell">Networking From the Shell</a></li><li><a href="#performance-and-resource-triage">Performance and Resource Triage</a></li><li><a href="#logs-where-they-live-and-how-to-read-them">Logs: Where They Live and How to Read Them</a></li><li><a href="#working-remotely-for-days-tmux-dotfiles-persistence">Working Remotely for Days: tmux, Dotfiles, Persistence</a></li><li><a href="#the-fde-field-kit">The FDE Field Kit</a></li><li><a href="#interview-questions">Interview Questions</a></li><li><a href="#practice-drills-and-a-14-day-fluency-plan">Practice Drills and a 14-Day Fluency Plan</a></li></ol></nav>
+<h2 id="why-the-command-line-is-the-fde-s-primary-instrument">Why the Command Line Is the FDE's Primary Instrument</h2>
+<p class="lead">A Forward Deployed Engineer is dropped into someone else's infrastructure with a laptop, an SSH key, and a deadline. There is no IDE on the jump host, no Docker Desktop, no browser that can reach the internet. What there is — always — is a shell. Fluency here is not a nice-to-have; it is the difference between diagnosing a broken deployment in eleven minutes and escalating to a customer's platform team and losing three days.</p>
+
+<div class="facts">
+  <div class="f"><b>~60</b><span>COMMANDS THAT COVER 95% OF WORK</span></div>
+  <div class="f"><b>0</b><span>GUIS GUARANTEED ON A CUSTOMER BOX</span></div>
+  <div class="f"><b>1973</b><span>YEAR PIPES SHIPPED IN UNIX V3</span></div>
+  <div class="f"><b>2h</b><span>TYPICAL TIME UNTIL THE DEMO</span></div>
+</div>
+
+<h3>What actually happens on a customer engagement</h3>
+<p>You get a bastion host. It runs a distro you did not choose — RHEL 8 at a bank, Ubuntu 22.04 at a startup, SLES 15 at a manufacturer, Amazon Linux 2023 in an AWS account. Your account has no root. Outbound traffic goes through a proxy that requires a corporate CA bundle. The container registry is an internal Artifactory mirror. The Python package index is a Nexus proxy that lags upstream by six weeks. Nothing you learned from a laptop-only workflow transfers cleanly. What transfers is the shell.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Composability</h4><p>Every tool reads text on stdin and writes text on stdout. That contract means you can assemble a diagnostic that nobody wrote in advance — <code>journalctl -u api --since -1h | grep 502 | awk '{print $NF}' | sort | uniq -c | sort -rn</code> — in twenty seconds.</p></div>
+  <div class="card"><h4>Ubiquity</h4><p>Bash, coreutils, grep, sed and awk are present on essentially every Linux host built since 1995. Your fancy TUI tool is not. Learn the baseline, then layer niceties on top only where you control the image.</p></div>
+  <div class="card"><h4>Reproducibility</h4><p>A command is a record. You can paste it into the customer's ticket, into a runbook, into a CI job. A sequence of mouse clicks in a web console is an anecdote.</p></div>
+</div>
+
+<div class="callout warn"><span class="t">Assume you are a guest</span>Everything you type on a customer system is potentially logged, audited, and attributed to you. Never run a destructive command you have not read twice. Never <code>curl | sudo bash</code> on someone else's box. Prefer read-only investigation until you have explicit written approval to change state.</div>
+
+<h3>Shell vs terminal vs console — get the vocabulary right</h3>
+<table>
+<tr><th>Term</th><th>What it actually is</th><th>Why you care</th></tr>
+<tr><td>Terminal emulator</td><td>The GUI app (iTerm2, Windows Terminal, GNOME Terminal) that draws characters and handles key input</td><td>Controls colour, scrollback, and whether <span class="kbd">Alt</span> sends Meta</td></tr>
+<tr><td>TTY / PTY</td><td>Kernel device pair providing the character stream. <code>tty</code> prints yours; <code>ls /dev/pts</code> lists them</td><td>Scripts behave differently without a TTY — that is why Docker needs <code>-t</code></td></tr>
+<tr><td>Shell</td><td>The program interpreting your commands: bash, zsh, dash, ksh, ash (BusyBox)</td><td><code>/bin/sh</code> on Debian is <strong>dash</strong>, not bash. Bash-isms silently fail</td></tr>
+<tr><td>Console</td><td>The physical/virtual system console (<code>/dev/console</code>, Ctrl+Alt+F2)</td><td>Where kernel panics go when SSH is already dead</td></tr>
+</table>
+
+<h3>Login, non-login, interactive, non-interactive</h3>
+<p>This quadrant explains ninety percent of "it works when I SSH in but not from cron."</p>
+<table>
+<tr><th>Invocation</th><th>Files read</th><th>Typical case</th></tr>
+<tr><td>Interactive login</td><td><code>/etc/profile</code>, then first of <code>~/.bash_profile</code> / <code>~/.bash_login</code> / <code>~/.profile</code></td><td><code>ssh host</code></td></tr>
+<tr><td>Interactive non-login</td><td><code>/etc/bash.bashrc</code>, <code>~/.bashrc</code></td><td>Opening a new tab locally, <code>bash</code> inside a session</td></tr>
+<tr><td>Non-interactive</td><td>Only <code>$BASH_ENV</code> if set — <strong>not</strong> <code>.bashrc</code></td><td><code>ssh host 'cmd'</code>, cron, systemd, CI</td></tr>
+</table>
+<div class="callout tip"><span class="t">The canonical fix</span>Put environment (PATH, exports) in <code>~/.profile</code>; put interactive niceties (aliases, prompt) in <code>~/.bashrc</code>; have <code>~/.bash_profile</code> contain <code>[ -f ~/.bashrc ] &amp;&amp; . ~/.bashrc</code>. When cron fails with "command not found", it is almost always because cron's PATH is <code>/usr/bin:/bin</code> and nothing else.</div>
+
+<h3>Readline: the keystrokes that compound</h3>
+<table>
+<tr><th>Keys</th><th>Action</th><th>Keys</th><th>Action</th></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">R</span></td><td>Reverse-search history (press again to cycle)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">A</span> / <span class="kbd">E</span></td><td>Start / end of line</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">W</span></td><td>Delete previous word</td><td><span class="kbd">Ctrl</span>+<span class="kbd">U</span> / <span class="kbd">K</span></td><td>Cut to start / end</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">Y</span></td><td>Paste what you cut</td><td><span class="kbd">Alt</span>+<span class="kbd">.</span></td><td>Insert last argument of previous command</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">L</span></td><td>Clear screen (keeps the line)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">X</span> <span class="kbd">Ctrl</span>+<span class="kbd">E</span></td><td>Open current line in <code>$EDITOR</code></td></tr>
+</table>
+<p>History expansion earns its keep too: <code>!!</code> repeats the last command, <code>sudo !!</code> repeats it with privilege, <code>!$</code> is the last argument, <code>^old^new</code> re-runs with a substitution. Set <code>HISTCONTROL=ignoreboth</code> and <code>HISTSIZE=50000</code> so your history is actually useful.</p>
+
+<h2 id="the-filesystem-hierarchy-and-how-to-navigate-it">The Filesystem Hierarchy and How to Navigate It</h2>
+<p class="lead">Linux has one tree. Everything — disks, processes, kernel knobs, USB devices — is a file somewhere under <code>/</code>. The Filesystem Hierarchy Standard (FHS) tells you where to look before you have to search, and on a customer's unfamiliar host that knowledge is worth minutes you do not have.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg">
+  <rect x="330" y="10" width="100" height="34" rx="6" fill="#1e3a8a" stroke="#1e3a8a"/>
+  <text x="380" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">/</text>
+
+  <line x1="380" y1="44" x2="380" y2="60" stroke="#6b7688" stroke-width="2"/>
+  <line x1="60" y1="60" x2="700" y2="60" stroke="#6b7688" stroke-width="2"/>
+
+  <line x1="60" y1="60" x2="60" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="220" y1="60" x2="220" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="380" y1="60" x2="380" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="540" y1="60" x2="540" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="700" y1="60" x2="700" y2="80" stroke="#6b7688" stroke-width="2"/>
+
+  <rect x="10" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="60" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/etc</text>
+  <text x="60" y="116" text-anchor="middle" font-size="10" fill="#2563eb">config, text only</text>
+
+  <rect x="170" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="220" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/var</text>
+  <text x="220" y="116" text-anchor="middle" font-size="10" fill="#2563eb">logs, spool, state</text>
+
+  <rect x="330" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="380" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/usr</text>
+  <text x="380" y="116" text-anchor="middle" font-size="10" fill="#2563eb">distro binaries</text>
+
+  <rect x="490" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="540" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/opt</text>
+  <text x="540" y="116" text-anchor="middle" font-size="10" fill="#2563eb">your software</text>
+
+  <rect x="650" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="700" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/proc</text>
+  <text x="700" y="116" text-anchor="middle" font-size="10" fill="#0891b2">kernel, virtual</text>
+
+  <rect x="10" y="150" width="340" height="120" rx="6" fill="#ffffff" stroke="#e3e8ef" stroke-width="2"/>
+  <text x="26" y="172" font-size="11" font-weight="700" fill="#1e3a8a">Read-only-ish, package-owned</text>
+  <text x="26" y="192" font-size="11" fill="#6b7688">/usr/bin  /usr/lib  /usr/share  /usr/local</text>
+  <text x="26" y="210" font-size="11" fill="#6b7688">/bin and /sbin are symlinks into /usr on</text>
+  <text x="26" y="226" font-size="11" fill="#6b7688">modern distros (usrmerge, since ~2012)</text>
+  <text x="26" y="248" font-size="11" fill="#6b7688">Never edit here by hand — the next</text>
+  <text x="26" y="264" font-size="11" fill="#6b7688">package upgrade will overwrite you.</text>
+
+  <rect x="400" y="150" width="350" height="120" rx="6" fill="#ffffff" stroke="#e3e8ef" stroke-width="2"/>
+  <text x="416" y="172" font-size="11" font-weight="700" fill="#1e3a8a">Mutable, machine-specific</text>
+  <text x="416" y="192" font-size="11" fill="#6b7688">/etc        editable config, back it up</text>
+  <text x="416" y="210" font-size="11" fill="#6b7688">/var/log    where the evidence lives</text>
+  <text x="416" y="226" font-size="11" fill="#6b7688">/var/lib    databases, container state</text>
+  <text x="416" y="248" font-size="11" fill="#6b7688">/tmp        wiped on reboot, world-writable</text>
+  <text x="416" y="264" font-size="11" fill="#6b7688">/home, /root, /srv, /mnt, /media</text>
+</svg>
+<div class="cap">The FHS top level: immutable distro content on the left, machine state on the right.</div>
+</div>
+
+<h3>Directory-by-directory, with the FDE angle</h3>
+<table>
+<tr><th>Path</th><th>Contents</th><th>What you do there on day one</th></tr>
+<tr><td><code>/etc</code></td><td>System-wide configuration, all plain text</td><td><code>/etc/os-release</code>, <code>/etc/hosts</code>, <code>/etc/resolv.conf</code>, <code>/etc/ssl/certs</code>, <code>/etc/systemd/system</code></td></tr>
+<tr><td><code>/var/log</code></td><td>Logs: <code>syslog</code>/<code>messages</code>, <code>auth.log</code>/<code>secure</code>, app dirs, <code>journal/</code></td><td>First place you look after a failed deploy</td></tr>
+<tr><td><code>/var/lib</code></td><td>Persistent service state: <code>docker/</code>, <code>containerd/</code>, <code>postgresql/</code>, <code>kubelet/</code></td><td>Where the disk actually went when <code>/</code> fills up</td></tr>
+<tr><td><code>/usr/local</code></td><td>Software compiled or installed outside the package manager</td><td>Safe place to drop a static binary you brought with you</td></tr>
+<tr><td><code>/opt</code></td><td>Self-contained third-party packages, one directory each</td><td>Corporate agents live here — CrowdStrike, Splunk, Dynatrace</td></tr>
+<tr><td><code>/proc</code></td><td>Virtual filesystem exposing kernel &amp; process state</td><td><code>/proc/cpuinfo</code>, <code>/proc/meminfo</code>, <code>/proc/&lt;pid&gt;/environ</code>, <code>/proc/&lt;pid&gt;/limits</code></td></tr>
+<tr><td><code>/sys</code></td><td>Device/driver model, cgroups v2 knobs</td><td><code>/sys/fs/cgroup/memory.max</code> inside containers</td></tr>
+<tr><td><code>/dev</code></td><td>Device nodes plus <code>null</code>, <code>zero</code>, <code>urandom</code>, <code>/dev/tcp</code> (bash built-in)</td><td><code>echo &gt; /dev/tcp/host/443</code> tests reachability with no tools installed</td></tr>
+<tr><td><code>/run</code></td><td>tmpfs for runtime data: PID files, sockets</td><td><code>/run/docker.sock</code>, <code>/run/systemd/</code></td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Identify the host in three commands</span><code>cat /etc/os-release</code> for distro and version, <code>uname -r</code> for kernel, <code>hostnamectl</code> for a combined view including virtualization type. If <code>hostnamectl</code> says <code>Virtualization: kvm</code> you are on a VM; <code>docker</code> or <code>wsl</code> tells you something entirely different about what you can expect to work.</div>
+
+<h3>Navigating without wasting keystrokes</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Jump back to where you were</span>
+<span class="hljs-built_in">cd</span> -                      <span class="hljs-comment"># toggle between last two directories</span>
+<span class="hljs-built_in">pushd</span> /var/log; <span class="hljs-built_in">popd</span>      <span class="hljs-comment"># directory stack when you need three or four</span>
+
+<span class="hljs-comment"># Where am I really? (resolves symlinks)</span>
+<span class="hljs-built_in">pwd</span> -P
+
+<span class="hljs-comment"># Tree view without installing tree</span>
+find . -maxdepth 2 -<span class="hljs-built_in">type</span> d | <span class="hljs-built_in">sort</span>
+
+<span class="hljs-comment"># What is this file?</span>
+file /usr/bin/python3
+<span class="hljs-built_in">stat</span> -c <span class="hljs-string">&#x27;%A %U:%G %s bytes  mtime=%y  %n&#x27;</span> /etc/hosts
+
+<span class="hljs-comment"># Biggest things under here, fast</span>
+<span class="hljs-built_in">du</span> -xh --max-depth=1 . 2&gt;/dev/null | <span class="hljs-built_in">sort</span> -h | <span class="hljs-built_in">tail</span> -15</code></pre>
+<p>The <code>-x</code> on <code>du</code> keeps it on one filesystem, which stops you from walking an NFS mount for four minutes. <code>2&gt;/dev/null</code> suppresses the permission-denied noise you will get as a non-root user.</p>
+
+<h2 id="files-links-globbing-find-and-the-xargs-pattern">Files, Links, Globbing, find, and the xargs Pattern</h2>
+<p class="lead">Finding things is the core FDE skill. The customer says "the config is somewhere under <code>/opt</code>"; you have five minutes. <code>find</code> plus <code>xargs</code> is the instrument that answers almost any "where is it / which ones match / do this to all of them" question.</p>
+
+<h3>Hard links vs symbolic links</h3>
+<p>A hard link is another directory entry pointing at the same inode — same file, two names, no "original". A symlink is a tiny file containing a path. Delete the target and the symlink dangles; delete one hard link and the data survives until the last link goes.</p>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">ln</span>  /data/model.bin  /opt/app/model.bin      <span class="hljs-comment"># hard link: same inode, same filesystem only</span>
+<span class="hljs-built_in">ln</span> -s /data/model.bin /opt/app/model.bin     <span class="hljs-comment"># symlink: a pointer, can cross filesystems</span>
+<span class="hljs-built_in">ls</span> -li                                        <span class="hljs-comment"># first column is the inode number</span>
+<span class="hljs-built_in">readlink</span> -f /opt/app/current                  <span class="hljs-comment"># resolve a chain of symlinks fully</span></code></pre>
+<div class="callout note"><span class="t">The blue/green symlink trick</span>Deploy releases to <code>/opt/app/releases/2026-03-11T0930</code> and point <code>/opt/app/current</code> at it with <code>ln -sfn</code>. Rollback becomes one atomic symlink swap plus a service restart — no copy, no downtime window, no "which version is live?" ambiguity. The <code>-n</code> matters: without it, <code>ln -sf</code> creates a link <em>inside</em> the existing directory symlink.</div>
+
+<h3>Globbing is the shell, not the command</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">*.<span class="hljs-built_in">log</span>            <span class="hljs-comment"># any chars</span>
+report-?.csv     <span class="hljs-comment"># exactly one char</span>
+<span class="hljs-built_in">log</span>-[0-9][0-9]   <span class="hljs-comment"># character class</span>
+{api,worker}.yaml   <span class="hljs-comment"># brace expansion (not a glob - expands even if no file exists)</span>
+
+<span class="hljs-built_in">shopt</span> -s globstar
+<span class="hljs-built_in">ls</span> **/*.py       <span class="hljs-comment"># recursive, bash 4+</span>
+
+<span class="hljs-built_in">shopt</span> -s nullglob  <span class="hljs-comment"># unmatched glob expands to nothing instead of the literal string</span>
+<span class="hljs-built_in">shopt</span> -s dotglob   <span class="hljs-comment"># include hidden files</span></code></pre>
+<p>If a glob matches nothing, bash by default passes the literal pattern to the command — which is why <code>rm *.bak</code> in an empty directory complains about a file named <code>*.bak</code>. In scripts, <code>nullglob</code> plus an explicit emptiness check avoids a whole class of bugs.</p>
+
+<h3>find: the twelve expressions worth memorising</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">find /opt -name <span class="hljs-string">&#x27;*.yaml&#x27;</span>                     <span class="hljs-comment"># by name (quote it! or the shell expands first)</span>
+find /opt -iname <span class="hljs-string">&#x27;Config*&#x27;</span>                   <span class="hljs-comment"># case-insensitive</span>
+find /var/log -<span class="hljs-built_in">type</span> f -size +100M            <span class="hljs-comment"># files over 100 MB</span>
+find /var/log -<span class="hljs-built_in">type</span> f -mtime -1              <span class="hljs-comment"># modified in the last 24 h</span>
+find /var/log -<span class="hljs-built_in">type</span> f -mmin -15              <span class="hljs-comment"># modified in the last 15 minutes</span>
+find / -xdev -<span class="hljs-built_in">type</span> f -perm -4000 2&gt;/dev/null <span class="hljs-comment"># setuid binaries, one filesystem</span>
+find . -<span class="hljs-built_in">type</span> d -name node_modules -prune -o -<span class="hljs-built_in">type</span> f -<span class="hljs-built_in">print</span>   <span class="hljs-comment"># skip a subtree</span>
+find . -newer /tmp/marker                    <span class="hljs-comment"># changed since a reference file</span>
+find /data -<span class="hljs-built_in">type</span> f -user svc_app -group app  <span class="hljs-comment"># ownership</span>
+find . -empty -<span class="hljs-built_in">type</span> f                        <span class="hljs-comment"># zero-byte files</span>
+find . -name <span class="hljs-string">&#x27;*.tmp&#x27;</span> -delete                 <span class="hljs-comment"># built-in delete, no xargs needed</span>
+find . -<span class="hljs-built_in">type</span> f -<span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;%s\t%p\n&#x27;</span> | <span class="hljs-built_in">sort</span> -rn | <span class="hljs-built_in">head</span>   <span class="hljs-comment"># GNU-only: size then path</span></code></pre>
+<div class="callout warn"><span class="t">BSD vs GNU find</span><code>-printf</code>, <code>-mmin</code> and <code>-delete</code> are GNU extensions. macOS and some minimal images ship BSD or BusyBox find where they do not exist. On a customer box, test with a harmless case before relying on a flag in a script.</div>
+
+<h3>The xargs pattern</h3>
+<p><code>find ... -print0 | xargs -0</code> is the safe idiom: NUL-separated so filenames with spaces, quotes or newlines cannot break the pipeline.</p>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Grep only inside YAML files, safely, in parallel</span>
+find /opt/app -name <span class="hljs-string">&#x27;*.yaml&#x27;</span> -print0 | xargs -0 grep -l <span class="hljs-string">&#x27;imagePullSecrets&#x27;</span>
+
+<span class="hljs-comment"># -n1 one argument per invocation; -P4 four processes in parallel</span>
+find . -name <span class="hljs-string">&#x27;*.json&#x27;</span> -print0 | xargs -0 -n1 -P4 jq -e . &gt;/dev/null
+
+<span class="hljs-comment"># -I{} when the argument is not last</span>
+find /backup -name <span class="hljs-string">&#x27;*.sql.gz&#x27;</span> -print0 | xargs -0 -I{} sh -c <span class="hljs-string">&#x27;echo &quot;== {}&quot;; zcat {} | head -3&#x27;</span>
+
+<span class="hljs-comment"># Preview before you destroy: -t prints each command, -p prompts</span>
+find /tmp -name <span class="hljs-string">&#x27;core.*&#x27;</span> -print0 | xargs -0 -t <span class="hljs-built_in">rm</span> -f</code></pre>
+<p><code>find -exec cmd {} +</code> does the same batching without a pipe and is marginally safer because there is no quoting hand-off: <code>find . -name '*.log' -exec gzip {} +</code>. Use <code>\;</code> instead of <code>+</code> when the command can only take one file at a time.</p>
+
+<h3>locate, which, type, and friends</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">sudo</span> updatedb &amp;&amp; locate nginx.conf   <span class="hljs-comment"># instant, but only as fresh as the database</span>
+<span class="hljs-built_in">type</span> -a python3                       <span class="hljs-comment"># shows aliases, functions, AND all PATH hits</span>
+<span class="hljs-built_in">command</span> -v kubectl                    <span class="hljs-comment"># POSIX, script-safe &quot;is it installed?&quot;</span>
+<span class="hljs-built_in">which</span> -a java                         <span class="hljs-comment"># all matches on PATH</span>
+<span class="hljs-built_in">readlink</span> -f <span class="hljs-string">&quot;<span class="hljs-subst">$(command -v java)</span>&quot;</span>      <span class="hljs-comment"># the real binary behind the alternatives symlink</span>
+ldd /usr/bin/curl                     <span class="hljs-comment"># shared library dependencies</span>
+strings /opt/vendor/agent | grep -i version   <span class="hljs-comment"># when there is no --version flag</span></code></pre>
+<div class="callout tip"><span class="t">Use <code>command -v</code> in scripts</span><code>which</code> is an external binary with inconsistent exit codes across distros, and is absent from some minimal images. <code>command -v tool &gt;/dev/null || { echo "need tool"; exit 1; }</code> is portable and correct.</div>
+
+<h2 id="users-groups-permissions-sudo-and-acls">Users, Groups, Permissions, sudo, and ACLs</h2>
+<p class="lead">On a customer system you will almost never be root, and that constraint shapes everything. Knowing precisely what an octal mode means, what <code>sudo -l</code> tells you about your own blast radius, and why your service can read a file but not the directory containing it, is non-negotiable.</p>
+
+<h3>Reading <code>ls -l</code> correctly</h3>
+<div class="code-label">TEXT</div><pre><code class="hljs">-rwxr-x---  1 deploy  app   4096 Mar 11 09:30 run.sh
+│└┬┘└┬┘└┬┘  │   │      │
+│ │  │  └── other: ---  (0)
+│ │  └───── group: r-x  (5)
+│ └──────── owner: rwx  (7)
+└────────── type: - file, d dir, l symlink, s socket, c char dev, b block dev, p fifo</code></pre>
+<table>
+<tr><th>Bit</th><th>On a file</th><th>On a directory</th></tr>
+<tr><td><code>r</code> (4)</td><td>Read contents</td><td>List names (but not stat them)</td></tr>
+<tr><td><code>w</code> (2)</td><td>Modify contents</td><td>Create/delete/rename entries</td></tr>
+<tr><td><code>x</code> (1)</td><td>Execute</td><td>Traverse — needed to access anything inside</td></tr>
+</table>
+<div class="callout note"><span class="t">The classic confusion</span>Deleting a file depends on the <strong>directory's</strong> write bit, not the file's. A read-only file in a writable directory can be removed by anyone with write access to that directory — which is exactly why <code>/tmp</code> carries the sticky bit.</div>
+
+<h3>Octal, symbolic, and umask</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">chmod</span> 750 deploy.sh        <span class="hljs-comment"># rwx r-x ---</span>
+<span class="hljs-built_in">chmod</span> u+x,g-w,o= file      <span class="hljs-comment"># symbolic form</span>
+<span class="hljs-built_in">chmod</span> -R u+rwX,go+rX <span class="hljs-built_in">dir</span>   <span class="hljs-comment"># capital X = execute only where it already is, or on dirs</span>
+<span class="hljs-built_in">chown</span> -R svc_app:app /opt/app
+<span class="hljs-built_in">chgrp</span> app /var/log/app
+
+<span class="hljs-built_in">umask</span>                      <span class="hljs-comment"># 0022 typical -&gt; new files 644, new dirs 755</span>
+<span class="hljs-built_in">umask</span> 0027                 <span class="hljs-comment"># new files 640, dirs 750 - group-readable, world-blind</span></code></pre>
+<p>umask is subtractive from 666 for files and 777 for directories; it never grants execute to a regular file. Set it in the systemd unit (<code>UMask=0027</code>) rather than in a shell rc file, because services do not read your rc files.</p>
+
+<h3>setuid, setgid, sticky</h3>
+<table>
+<tr><th>Bit</th><th>Octal</th><th>Effect</th><th>Example</th></tr>
+<tr><td>setuid</td><td>4000</td><td>Binary runs as its <em>owner</em>, not the caller</td><td><code>/usr/bin/passwd</code> (<code>-rwsr-xr-x</code>)</td></tr>
+<tr><td>setgid</td><td>2000</td><td>On a binary: runs as owning group. On a <strong>directory</strong>: new files inherit the directory's group</td><td>Shared team directory</td></tr>
+<tr><td>sticky</td><td>1000</td><td>In a directory, only the file owner may delete</td><td><code>/tmp</code> (<code>drwxrwxrwt</code>)</td></tr>
+</table>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Shared drop directory where everything lands in group &quot;analytics&quot;</span>
+<span class="hljs-built_in">sudo</span> install -d -m 2770 -o root -g analytics /srv/dropbox
+<span class="hljs-built_in">ls</span> -ld /srv/dropbox      <span class="hljs-comment"># drwxrws--- </span>
+
+<span class="hljs-comment"># Audit for unexpected setuid binaries (a real finding on a hardening review)</span>
+find / -xdev \( -perm -4000 -o -perm -2000 \) -<span class="hljs-built_in">type</span> f -<span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;%M %u %p\n&#x27;</span> 2&gt;/dev/null</code></pre>
+
+<h3>Users, groups, and identity</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">id</span>                                 <span class="hljs-comment"># uid, gid, all supplementary groups</span>
+<span class="hljs-built_in">id</span> -nG svc_app                     <span class="hljs-comment"># group names for another user</span>
+getent passwd deploy               <span class="hljs-comment"># works with LDAP/SSSD, unlike grep /etc/passwd</span>
+getent group docker
+<span class="hljs-built_in">groups</span>                             <span class="hljs-comment"># your groups in the CURRENT session</span>
+
+<span class="hljs-built_in">sudo</span> useradd -r -s /usr/sbin/nologin -d /opt/app -M svc_app   <span class="hljs-comment"># service account</span>
+<span class="hljs-built_in">sudo</span> usermod -aG docker <span class="hljs-string">&quot;<span class="hljs-variable">$USER</span>&quot;</span>    <span class="hljs-comment"># -a is mandatory, without it you REPLACE groups</span>
+newgrp docker                      <span class="hljs-comment"># pick up the new group without logging out</span></code></pre>
+<div class="callout danger"><span class="t"><code>usermod -G</code> without <code>-a</code></span>This replaces all supplementary groups. Running <code>sudo usermod -G docker alice</code> can remove alice from <code>sudo</code>, <code>wheel</code> and every other group in one keystroke. Always <code>-aG</code>. Always check <code>id alice</code> before and after.</div>
+
+<h3>sudo: know your own blast radius</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">sudo</span> -l                            <span class="hljs-comment"># EXACTLY what you are permitted to run</span>
+<span class="hljs-built_in">sudo</span> -u svc_app -- /opt/app/bin/health   <span class="hljs-comment"># run as a service account</span>
+<span class="hljs-built_in">sudo</span> -i                            <span class="hljs-comment"># full login shell as root (loads root&#x27;s env)</span>
+<span class="hljs-built_in">sudo</span> -E <span class="hljs-built_in">env</span> | grep -i proxy        <span class="hljs-comment"># preserve YOUR environment (often blocked)</span>
+<span class="hljs-built_in">sudo</span> visudo -f /etc/sudoers.d/deploy     <span class="hljs-comment"># always edit via visudo - it validates</span></code></pre>
+<div class="code-label">TEXT</div><pre><code class="hljs"># /etc/sudoers.d/deploy  — least privilege, not blanket ALL
+Cmnd_Alias APPCTL = /bin/systemctl restart app, /bin/systemctl status app, \
+                    /usr/bin/journalctl -u app *
+%deploy ALL=(root) NOPASSWD: APPCTL
+Defaults:%deploy  env_keep += &quot;HTTP_PROXY HTTPS_PROXY NO_PROXY&quot;</code></pre>
+<p>Note <code>env_reset</code> is the default: sudo strips your environment, which is why <code>sudo pip install</code> suddenly cannot reach the proxy. The <code>env_keep</code> line above is the fix, and it is a change you will request from a customer's platform team more than once.</p>
+
+<h3>POSIX ACLs when owner/group/other is not enough</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">getfacl /srv/shared
+setfacl -m u:alice:rwx /srv/shared              <span class="hljs-comment"># grant one user</span>
+setfacl -m g:auditors:rx /srv/shared            <span class="hljs-comment"># grant one group</span>
+setfacl -d -m g:analytics:rwx /srv/shared       <span class="hljs-comment"># DEFAULT acl: applies to new children</span>
+setfacl -x u:alice /srv/shared                  <span class="hljs-comment"># remove</span>
+setfacl -b /srv/shared                          <span class="hljs-comment"># strip all ACLs</span></code></pre>
+<p>A trailing <code>+</code> in <code>ls -l</code> (<code>drwxrwx---+</code>) means ACLs are present. If permissions look right but access still fails, check <code>getfacl</code> — and then check SELinux.</p>
+<div class="callout warn"><span class="t">RHEL: it is probably SELinux</span>On RHEL/CentOS/Rocky/Amazon Linux, "Permission denied" with perfect-looking permissions usually means an SELinux denial. Check <code>getenforce</code>, then <code>sudo ausearch -m avc -ts recent</code> or <code>sudo journalctl -t setroubleshoot</code>. Fix with the right context (<code>semanage fcontext -a -t httpd_sys_content_t '/srv/web(/.*)?' &amp;&amp; restorecon -Rv /srv/web</code>) — never by telling the customer to run <code>setenforce 0</code>.</div>
+
+<h2 id="processes-signals-job-control-and-inspection">Processes, Signals, Job Control, and Inspection</h2>
+<p class="lead">"The service is up but requests hang." Answering that means reading process state, finding which process holds which port, seeing what syscall it is stuck in, and knowing which signal to send. These tools turn a vague complaint into a specific cause.</p>
+
+<h3>Seeing what runs</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">ps aux                              <span class="hljs-comment"># BSD syntax: everything, user-oriented</span>
+ps -ef                              <span class="hljs-comment"># System V syntax: same idea, different columns</span>
+ps -eo pid,ppid,user,%cpu,%mem,rss,etime,<span class="hljs-built_in">stat</span>,cmd --<span class="hljs-built_in">sort</span>=-%cpu | <span class="hljs-built_in">head</span> -20
+ps -eLf                             <span class="hljs-comment"># include threads</span>
+pgrep -af gunicorn                  <span class="hljs-comment"># PIDs + full command line, pattern match</span>
+pstree -pa 1                        <span class="hljs-comment"># process tree with PIDs and args</span></code></pre>
+<table>
+<tr><th>STAT</th><th>Meaning</th><th>FDE reading</th></tr>
+<tr><td><code>R</code></td><td>Running or runnable</td><td>Burning CPU</td></tr>
+<tr><td><code>S</code></td><td>Interruptible sleep</td><td>Normal — waiting on I/O or a timer</td></tr>
+<tr><td><code>D</code></td><td>Uninterruptible sleep</td><td>Blocked on disk/NFS. Cannot be killed. Suspect storage</td></tr>
+<tr><td><code>Z</code></td><td>Zombie</td><td>Exited, parent never reaped. Many zombies = buggy parent (common PID-1 problem in containers)</td></tr>
+<tr><td><code>T</code></td><td>Stopped</td><td>Someone pressed <span class="kbd">Ctrl</span>+<span class="kbd">Z</span> and walked away</td></tr>
+<tr><td><code>&lt;</code> / <code>N</code></td><td>High / low priority</td><td>Someone niced it</td></tr>
+</table>
+
+<h3>top and htop in anger</h3>
+<div class="code-label">TEXT</div><pre><code class="hljs">top - 14:22:11 up 42 days,  3:11,  2 users,  load average: 8.41, 6.02, 3.88
+Tasks: 312 total,   3 running, 308 sleeping,   0 stopped,   1 zombie
+%Cpu(s): 41.2 us,  9.8 sy,  0.0 ni, 12.4 id, 35.9 wa,  0.0 hi,  0.7 si
+MiB Mem :  15894.0 total,    412.3 free,  13201.8 used,   2279.9 buff/cache</code></pre>
+<p>Read it top-down: load average 8.41 on (check <code>nproc</code>) 4 cores means a deep run queue. <code>35.9 wa</code> is iowait — the CPU is idle waiting on storage, so this is a disk problem, not a CPU problem. <code>412 MiB free</code> with low <code>buff/cache</code> means memory pressure is real and the OOM killer is close.</p>
+<p>Inside <code>top</code>: <span class="kbd">1</span> shows per-core, <span class="kbd">M</span> sorts by memory, <span class="kbd">P</span> by CPU, <span class="kbd">c</span> shows full command lines, <span class="kbd">H</span> toggles threads, <span class="kbd">e</span> changes units. <code>htop</code> adds tree view (<span class="kbd">F5</span>), filtering (<span class="kbd">F4</span>) and per-process strace, but is not installed everywhere — know plain <code>top</code>.</p>
+
+<h3>Signals</h3>
+<table>
+<tr><th>Signal</th><th>No.</th><th>Default</th><th>When you send it</th></tr>
+<tr><td>SIGHUP</td><td>1</td><td>Terminate</td><td>Reload config without restart (nginx, sshd, rsyslog)</td></tr>
+<tr><td>SIGINT</td><td>2</td><td>Terminate</td><td><span class="kbd">Ctrl</span>+<span class="kbd">C</span></td></tr>
+<tr><td>SIGQUIT</td><td>3</td><td>Core dump</td><td>Java: dumps all thread stacks to stdout — invaluable for hangs</td></tr>
+<tr><td>SIGKILL</td><td>9</td><td>Die, uncatchable</td><td>Last resort. No cleanup, no flush, corrupt state possible</td></tr>
+<tr><td>SIGTERM</td><td>15</td><td>Terminate</td><td>The polite default. <code>kill</code> with no flag sends this</td></tr>
+<tr><td>SIGUSR1/2</td><td>10/12</td><td>Terminate</td><td>App-defined: log rotation, debug toggles</td></tr>
+<tr><td>SIGSTOP/CONT</td><td>19/18</td><td>Pause/resume</td><td>Freeze a runaway process without losing its state</td></tr>
+</table>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">kill</span> -TERM 4821          <span class="hljs-comment"># by name, clearer than -15</span>
+<span class="hljs-built_in">kill</span> -0 4821             <span class="hljs-comment"># does the process exist / can I signal it? (no signal sent)</span>
+pkill -f <span class="hljs-string">&#x27;gunicorn.*api&#x27;</span> <span class="hljs-comment"># pattern against the full command line</span>
+killall -u svc_app       <span class="hljs-comment"># everything owned by a user</span>
+<span class="hljs-built_in">kill</span> -QUIT $(pgrep -f java)   <span class="hljs-comment"># thread dump to the JVM&#x27;s stdout</span></code></pre>
+<div class="callout tip"><span class="t">Escalate, do not jump</span>Send SIGTERM, wait 10–30 s, then SIGKILL only if needed. A SIGKILL on Postgres means crash recovery on next start; on a Java app it means no shutdown hooks, no connection drain, and a burst of 502s at the load balancer.</div>
+
+<h3>Job control</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">long_task &amp;              <span class="hljs-comment"># start in background</span>
+<span class="hljs-built_in">jobs</span> -l                  <span class="hljs-comment"># list with PIDs</span>
+<span class="hljs-built_in">fg</span> %1                    <span class="hljs-comment"># bring job 1 forward</span>
+<span class="hljs-built_in">bg</span> %1                    <span class="hljs-comment"># resume a stopped job in the background</span>
+Ctrl+Z                   <span class="hljs-comment"># suspend the foreground job (SIGTSTP)</span>
+<span class="hljs-built_in">disown</span> -h %1             <span class="hljs-comment"># detach from the shell so SIGHUP on logout won&#x27;t kill it</span>
+<span class="hljs-built_in">nohup</span> long_task &gt; out.log 2&gt;&amp;1 &amp;   <span class="hljs-comment"># immune to HUP from the start</span>
+<span class="hljs-built_in">wait</span>                     <span class="hljs-comment"># block until all background jobs finish</span>
+<span class="hljs-built_in">wait</span> -n                  <span class="hljs-comment"># block until the NEXT one finishes (bash 4.3+)</span></code></pre>
+
+<h3>Priority and limits</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">nice</span> -n 10 ./reindex.sh              <span class="hljs-comment"># start lower priority (-20 highest .. 19 lowest)</span>
+renice -n 5 -p 4821                  <span class="hljs-comment"># change a running process</span>
+ionice -c3 -p 4821                   <span class="hljs-comment"># idle I/O class - huge for backup jobs</span>
+<span class="hljs-built_in">ulimit</span> -a                            <span class="hljs-comment"># your limits</span>
+<span class="hljs-built_in">ulimit</span> -n 65535                      <span class="hljs-comment"># file descriptors for this shell</span>
+<span class="hljs-built_in">cat</span> /proc/4821/limits                <span class="hljs-comment"># the real, effective limits of a running process</span></code></pre>
+<div class="callout note"><span class="t">"Too many open files"</span>The soft limit is often 1024. Raising it needs all three: <code>/etc/security/limits.conf</code> for login sessions, <code>LimitNOFILE=</code> in the systemd unit for services, and sometimes <code>fs.file-max</code> via sysctl. Verify with <code>cat /proc/&lt;pid&gt;/limits</code>, not with <code>ulimit -n</code> in your own shell — they are different contexts.</div>
+
+<h3>lsof: who has the file, who has the port</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">lsof -i :8080                    <span class="hljs-comment"># who is listening on / connected to 8080</span>
+lsof -i -P -n | grep LISTEN      <span class="hljs-comment"># all listeners, numeric, no DNS lag</span>
+lsof -p 4821                     <span class="hljs-comment"># everything this PID has open</span>
+lsof /var/log/app/app.log        <span class="hljs-comment"># which processes hold this file</span>
+lsof +D /opt/app                 <span class="hljs-comment"># everything under a directory (slow)</span>
+lsof | grep deleted              <span class="hljs-comment"># deleted-but-open files eating disk</span>
+lsof -u svc_app                  <span class="hljs-comment"># by user</span></code></pre>
+<p>That <code>grep deleted</code> line solves a real incident: <code>df</code> says the disk is 100% full, <code>du</code> says only 40% is used. A process is holding a deleted 60 GB log file open, so the space is not reclaimed until the process closes the descriptor or restarts.</p>
+
+<h3>strace and friends when nothing else explains it</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">strace -f -p 4821                              <span class="hljs-comment"># attach, follow forks</span>
+strace -f -e trace=openat,<span class="hljs-built_in">stat</span> -p 4821         <span class="hljs-comment"># only file-lookup syscalls</span>
+strace -f -e trace=network -p 4821             <span class="hljs-comment"># connect/send/recv</span>
+strace -c -p 4821                              <span class="hljs-comment"># summary: which syscall dominates</span>
+strace -f -tt -T -o /tmp/trace.txt ./app       <span class="hljs-comment"># timestamps + per-call duration</span>
+ltrace -p 4821                                 <span class="hljs-comment"># library calls instead of syscalls</span></code></pre>
+<p>Typical outcome: you attach to a hanging process and see it stuck on <code>connect(3, {sa_family=AF_INET, sin_port=htons(443), sin_addr=10.4.2.19}, 16</code> for sixty seconds — now you know it is a blocked egress to a specific IP, not an application bug.</p>
+<div class="callout warn"><span class="t">strace may be blocked</span>It needs <code>CAP_SYS_PTRACE</code>, and many hardened hosts set <code>kernel.yama.ptrace_scope=1</code> or higher. Check with <code>cat /proc/sys/kernel/yama/ptrace_scope</code>. If it is blocked, fall back to <code>/proc/&lt;pid&gt;/stack</code>, <code>/proc/&lt;pid&gt;/wchan</code>, <code>ss -tnp</code> and application-level debug logging.</div>
+
+<h2 id="systemd-units-systemctl-journalctl-and-timers">systemd: Units, systemctl, journalctl, and Timers</h2>
+<p class="lead">On any mainstream distro since roughly 2015, systemd is PID 1. It starts services, supervises them, captures their logs, enforces resource limits, and replaces half of cron. If you are shipping software into a customer VM rather than a cluster, a well-written unit file is your deployment artifact.</p>
+
+<h3>The commands that matter</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">systemctl status app                 <span class="hljs-comment"># state + recent log lines + the exact ExecStart</span>
+systemctl start|stop|restart app
+systemctl reload app                 <span class="hljs-comment"># if the unit defines ExecReload</span>
+systemctl <span class="hljs-built_in">enable</span> --now app           <span class="hljs-comment"># start now AND at boot</span>
+systemctl <span class="hljs-built_in">disable</span> --now app
+systemctl is-active app; systemctl is-enabled app     <span class="hljs-comment"># script-friendly, exit codes</span>
+systemctl <span class="hljs-built_in">cat</span> app                    <span class="hljs-comment"># full unit file including drop-ins</span>
+systemctl edit app                   <span class="hljs-comment"># create an override drop-in (the right way)</span>
+systemctl show app -p MainPID -p MemoryCurrent -p NRestarts
+systemctl daemon-reload              <span class="hljs-comment"># ALWAYS after editing unit files on disk</span>
+systemctl list-units --failed        <span class="hljs-comment"># the first thing to run on a sick host</span>
+systemctl list-dependencies app
+systemd-analyze blame                <span class="hljs-comment"># slowest units at boot</span></code></pre>
+<div class="callout danger"><span class="t">Edit overrides, never the vendor file</span>Changing <code>/usr/lib/systemd/system/app.service</code> means the next package upgrade silently reverts you. Use <code>systemctl edit app</code>, which creates <code>/etc/systemd/system/app.service.d/override.conf</code>. That file wins, survives upgrades, and shows up clearly in <code>systemctl cat</code>.</div>
+
+<h3>A production-grade service unit</h3>
+<div class="code-label">TEXT</div><pre><code class="hljs"># /etc/systemd/system/inference-api.service
+[Unit]
+Description=Inference API (FastAPI + uvicorn)
+Documentation=https://wiki.internal/runbooks/inference-api
+After=network-online.target postgresql.service
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=svc_api
+Group=app
+WorkingDirectory=/opt/inference-api/current
+Environment=&quot;PYTHONUNBUFFERED=1&quot;
+EnvironmentFile=-/etc/inference-api/env        # leading - = tolerate absence
+ExecStartPre=/opt/inference-api/current/bin/preflight.sh
+ExecStart=/opt/inference-api/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8080 --workers 4
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+KillSignal=SIGTERM
+UMask=0027
+
+# Resource ceilings - the customer&#x27;s SRE team will ask about these
+MemoryMax=6G
+MemoryHigh=5G
+CPUQuota=200%
+LimitNOFILE=65535
+TasksMax=512
+
+# Hardening - cheap, and it makes security review go quickly
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/inference-api /var/log/inference-api
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+<table>
+<tr><th>Type=</th><th>systemd considers it started when…</th><th>Use for</th></tr>
+<tr><td><code>simple</code></td><td>Immediately after fork (legacy default)</td><td>Rarely — prefer <code>exec</code></td></tr>
+<tr><td><code>exec</code></td><td>After <code>execve()</code> succeeds</td><td>Most modern services; catches "binary not found"</td></tr>
+<tr><td><code>forking</code></td><td>Parent exits; needs <code>PIDFile=</code></td><td>Old daemons that background themselves</td></tr>
+<tr><td><code>notify</code></td><td>Service calls <code>sd_notify(READY=1)</code></td><td>Accurate readiness ordering</td></tr>
+<tr><td><code>oneshot</code></td><td>Process exits; pair with <code>RemainAfterExit=yes</code></td><td>Migrations, setup tasks</td></tr>
+</table>
+
+<h3>journalctl queries you will actually type</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">journalctl -u inference-api -f                  <span class="hljs-comment"># follow</span>
+journalctl -u inference-api --since <span class="hljs-string">&#x27;30 min ago&#x27;</span>
+journalctl -u inference-api --since <span class="hljs-string">&#x27;2026-03-11 09:00&#x27;</span> --<span class="hljs-keyword">until</span> <span class="hljs-string">&#x27;2026-03-11 09:30&#x27;</span>
+journalctl -u inference-api -p err              <span class="hljs-comment"># priority err and worse (0-7)</span>
+journalctl -u inference-api -n 200 --no-pager
+journalctl -u inference-api -o json-pretty | jq -r <span class="hljs-string">&#x27;.MESSAGE&#x27;</span>
+journalctl -b            <span class="hljs-comment"># this boot;  -b -1  previous boot</span>
+journalctl -k            <span class="hljs-comment"># kernel ring buffer (= dmesg)</span>
+journalctl _PID=4821 ; journalctl _UID=1001
+journalctl --disk-usage ; <span class="hljs-built_in">sudo</span> journalctl --vacuum-size=500M
+journalctl -u inference-api --grep <span class="hljs-string">&#x27;Timeout|5[0-9]{2}&#x27;</span>   <span class="hljs-comment"># regex, systemd 237+</span></code></pre>
+<div class="callout warn"><span class="t">Volatile journals lose your evidence</span>If <code>/var/log/journal</code> does not exist, the journal is memory-only and vanishes on reboot. Create it (<code>sudo mkdir -p /var/log/journal &amp;&amp; sudo systemd-tmpfiles --create --prefix /var/log/journal</code>) or set <code>Storage=persistent</code> in <code>/etc/systemd/journald.conf</code> — otherwise the crash you are investigating left no trace.</div>
+
+<h3>Timers vs cron</h3>
+<div class="code-label">TEXT</div><pre><code class="hljs"># /etc/systemd/system/reindex.service
+[Unit]
+Description=Nightly vector reindex
+[Service]
+Type=oneshot
+User=svc_api
+ExecStart=/opt/inference-api/bin/reindex.sh
+
+# /etc/systemd/system/reindex.timer
+[Unit]
+Description=Run reindex nightly
+[Timer]
+OnCalendar=*-*-* 02:30:00
+RandomizedDelaySec=600        # jitter so 400 VMs don&#x27;t stampede the DB
+Persistent=true               # run on boot if the machine was off at 02:30
+AccuracySec=1min
+Unit=reindex.service
+[Install]
+WantedBy=timers.target</code></pre>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">sudo</span> systemctl <span class="hljs-built_in">enable</span> --now reindex.timer
+systemctl list-timers --all            <span class="hljs-comment"># NEXT, LEFT, LAST, PASSED - all in one view</span>
+systemd-analyze calendar <span class="hljs-string">&#x27;Mon *-*-* 06:00:00&#x27;</span>   <span class="hljs-comment"># verify an OnCalendar expression</span>
+<span class="hljs-built_in">sudo</span> systemctl start reindex.service   <span class="hljs-comment"># test the job immediately, without waiting</span></code></pre>
+<table>
+<tr><th>Concern</th><th>cron</th><th>systemd timer</th></tr>
+<tr><td>Logs</td><td>Mailed, or lost</td><td>In the journal, per-unit, queryable</td></tr>
+<tr><td>Missed runs</td><td>Skipped silently</td><td><code>Persistent=true</code> catches up</td></tr>
+<tr><td>Overlap</td><td>Runs concurrently unless you add flock</td><td>Blocked by default (one instance per unit)</td></tr>
+<tr><td>Environment</td><td>Minimal PATH, no profile</td><td>Explicit <code>Environment=</code>/<code>EnvironmentFile=</code></td></tr>
+<tr><td>Resource limits</td><td>None</td><td>Full cgroup controls</td></tr>
+<tr><td>Availability</td><td>Everywhere, including containers</td><td>Needs systemd as PID 1</td></tr>
+</table>
+<p>Cron still wins in containers and on minimal images. When you do use it, remember <code>%</code> must be escaped in crontabs, set <code>PATH=</code> and <code>SHELL=</code> at the top, redirect output explicitly (<code>&gt;&gt; /var/log/job.log 2&gt;&amp;1</code>), and wrap with <code>flock -n /var/lock/job.lock</code> to prevent overlap.</p>
+
+<h2 id="package-management-across-distros-and-air-gapped-installs">Package Management Across Distros and Air-Gapped Installs</h2>
+<p class="lead">You will not get to pick the distro. You will get a RHEL 8 box at one customer and an Alpine container at the next, and in both cases somebody will ask "can you just install it?" while the host has no route to the internet. Know the four package families and the offline workflow for each.</p>
+
+<h3>Identify first</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">cat</span> /etc/os-release
+<span class="hljs-comment"># ID=rhel  VERSION_ID=&quot;8.9&quot;       -&gt; dnf/yum, RPM</span>
+<span class="hljs-comment"># ID=ubuntu VERSION_ID=&quot;22.04&quot;    -&gt; apt, DEB</span>
+<span class="hljs-comment"># ID=sles  VERSION_ID=&quot;15.5&quot;      -&gt; zypper, RPM</span>
+<span class="hljs-comment"># ID=alpine VERSION_ID=&quot;3.19&quot;     -&gt; apk</span>
+<span class="hljs-comment"># ID=amzn  VERSION_ID=&quot;2023&quot;      -&gt; dnf, RPM</span>
+
+<span class="hljs-built_in">command</span> -v apt dnf yum zypper apk pacman 2&gt;/dev/null</code></pre>
+
+<h3>The cross-distro command table</h3>
+<table>
+<tr><th>Task</th><th>apt (Debian/Ubuntu)</th><th>dnf / yum (RHEL family)</th><th>zypper (SUSE)</th><th>apk (Alpine)</th></tr>
+<tr><td>Refresh metadata</td><td><code>apt update</code></td><td><code>dnf makecache</code></td><td><code>zypper refresh</code></td><td><code>apk update</code></td></tr>
+<tr><td>Install</td><td><code>apt install -y nginx</code></td><td><code>dnf install -y nginx</code></td><td><code>zypper -n in nginx</code></td><td><code>apk add nginx</code></td></tr>
+<tr><td>Remove</td><td><code>apt remove</code> / <code>purge</code></td><td><code>dnf remove</code></td><td><code>zypper rm</code></td><td><code>apk del</code></td></tr>
+<tr><td>Search</td><td><code>apt search</code> / <code>apt-cache search</code></td><td><code>dnf search</code></td><td><code>zypper se</code></td><td><code>apk search</code></td></tr>
+<tr><td>Info</td><td><code>apt show nginx</code></td><td><code>dnf info nginx</code></td><td><code>zypper info</code></td><td><code>apk info -a</code></td></tr>
+<tr><td>What provides file X?</td><td><code>dpkg -S /usr/sbin/nginx</code></td><td><code>dnf provides */nginx</code></td><td><code>zypper se --provides</code></td><td><code>apk info --who-owns</code></td></tr>
+<tr><td>List installed</td><td><code>dpkg -l</code> / <code>apt list --installed</code></td><td><code>rpm -qa</code></td><td><code>rpm -qa</code></td><td><code>apk info</code></td></tr>
+<tr><td>Files in a package</td><td><code>dpkg -L nginx</code></td><td><code>rpm -ql nginx</code></td><td><code>rpm -ql nginx</code></td><td><code>apk info -L</code></td></tr>
+<tr><td>Download only</td><td><code>apt install --download-only</code></td><td><code>dnf download --resolve</code></td><td><code>zypper --pkg-cache-dir . in -d</code></td><td><code>apk fetch -R</code></td></tr>
+<tr><td>Install local file</td><td><code>dpkg -i x.deb; apt -f install</code></td><td><code>dnf install ./x.rpm</code></td><td><code>zypper in ./x.rpm</code></td><td><code>apk add --allow-untrusted x.apk</code></td></tr>
+<tr><td>Hold version</td><td><code>apt-mark hold nginx</code></td><td><code>dnf versionlock add</code></td><td><code>zypper al nginx</code></td><td>pin in repo file</td></tr>
+<tr><td>Upgrade all</td><td><code>apt upgrade</code></td><td><code>dnf upgrade</code></td><td><code>zypper up</code></td><td><code>apk upgrade</code></td></tr>
+</table>
+
+<h3>Repositories, mirrors, and the corporate proxy</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Debian/Ubuntu</span>
+<span class="hljs-built_in">cat</span> /etc/apt/sources.list /etc/apt/sources.list.d/*.list
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;Acquire::http::Proxy &quot;http://proxy.corp:3128&quot;;&#x27;</span> | <span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> /etc/apt/apt.conf.d/95proxy
+
+<span class="hljs-comment"># RHEL family</span>
+<span class="hljs-built_in">ls</span> /etc/yum.repos.d/
+dnf repolist ; dnf config-manager --set-enabled powertools
+<span class="hljs-built_in">sudo</span> sed -i <span class="hljs-string">&#x27;/^\[main\]/a proxy=http://proxy.corp:3128&#x27;</span> /etc/dnf/dnf.conf
+
+<span class="hljs-comment"># Point at the customer&#x27;s internal mirror instead of upstream</span>
+<span class="hljs-built_in">sudo</span> sed -i <span class="hljs-string">&#x27;s|http://archive.ubuntu.com|https://nexus.corp/repository/ubuntu|g&#x27;</span> \
+  /etc/apt/sources.list</code></pre>
+<div class="callout warn"><span class="t">GPG and the corporate TLS-inspecting proxy</span>Many enterprises terminate TLS at the proxy with their own CA. Package tools then fail with certificate errors. The correct fix is to install the corporate CA into the system trust store — <code>sudo cp corp-root.crt /usr/local/share/ca-certificates/ &amp;&amp; sudo update-ca-certificates</code> on Debian, or <code>sudo cp corp-root.crt /etc/pki/ca-trust/source/anchors/ &amp;&amp; sudo update-ca-trust</code> on RHEL. Never disable verification as a workaround you leave behind.</div>
+
+<h3>Air-gapped install: the pattern</h3>
+<p>You have a connected staging machine of the <em>same distro, version and architecture</em>, and a target with no egress. Resolve dependencies on the connected box, carry the artifacts, install offline.</p>
+<ol class="steps">
+<li><b>Match the environment</b>Same <code>VERSION_ID</code> and <code>uname -m</code>. A container of the matching base image is the cleanest way: <code>docker run --rm -it -v "$PWD/out:/out" rockylinux:8 bash</code>.</li>
+<li><b>Download with dependencies</b>RHEL: <code>dnf download --resolve --alldeps --destdir /out nginx</code>. Debian: <code>apt-get install --download-only -o Dir::Cache::archives=/out nginx</code>. Alpine: <code>apk fetch -R -o /out nginx</code>.</li>
+<li><b>Build a local repo (RPM) or just copy (DEB)</b><code>createrepo_c /out</code> produces repodata so <code>dnf</code> can resolve offline.</li>
+<li><b>Transfer</b><code>tar czf bundle.tgz out/</code>, then <code>sha256sum bundle.tgz</code> and record the hash in the change ticket. Move via the approved channel (SFTP drop, removable media with scan, artifact promotion).</li>
+<li><b>Install on target</b>RPM: add a <code>baseurl=file:///srv/offline</code> repo file and <code>dnf --disablerepo='*' --enablerepo=offline install nginx</code>. DEB: <code>sudo dpkg -i *.deb || sudo apt-get -f install --no-download</code>.</li>
+<li><b>Verify</b><code>rpm -V nginx</code> / <code>debsums nginx</code>, then <code>nginx -v</code> and a smoke test. Record what you installed in the handover note.</li>
+</ol>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Language ecosystems have the same pattern</span>
+pip download -r requirements.txt -d wheels/ --platform manylinux2014_x86_64 \
+    --python-version 311 --only-binary=:all:
+pip install --no-index --find-links=wheels/ -r requirements.txt
+
+npm ci --omit=dev &amp;&amp; tar czf node_modules.tgz node_modules   <span class="hljs-comment"># or use `npm pack`/Verdaccio</span>
+<span class="hljs-comment"># Containers: docker save / docker load</span>
+docker pull myreg/api:1.4.2 &amp;&amp; docker save myreg/api:1.4.2 | gzip &gt; api-1.4.2.tar.gz
+gunzip -c api-1.4.2.tar.gz | docker load</code></pre>
+<div class="callout tip"><span class="t">Static binaries are your friend</span>For single-purpose tools, a statically linked binary (Go, Rust, or a musl build) is one <code>scp</code> and a <code>chmod +x</code> away from working — no dependency resolution, no package approval. Keep a personal kit of <code>jq</code>, <code>yq</code>, <code>ripgrep</code>, <code>fd</code>, <code>kubectl</code>, <code>busybox</code> as static amd64 and arm64 binaries. Verify checksums against upstream and get them approved once, not every engagement.</div>
+
+<h2 id="ssh-deep-dive">SSH Deep Dive</h2>
+<p class="lead">SSH is the FDE's transport layer. It is how you reach the host, how you tunnel to a database behind a firewall, how you copy a 4 GB model file, and how you get a browser onto an internal dashboard. Most engineers use ten percent of it. The other ninety percent is what gets you unblocked without filing a network ticket.</p>
+
+<h3>Keys</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">ssh-keygen -t ed25519 -C <span class="hljs-string">&quot;pranit@fde-laptop&quot;</span> -f ~/.ssh/id_ed25519_acme
+<span class="hljs-comment"># ed25519: small, fast, modern. Use RSA 4096 only if the customer&#x27;s tooling demands it:</span>
+ssh-keygen -t rsa -b 4096 -C <span class="hljs-string">&quot;...&quot;</span> -f ~/.ssh/id_rsa_legacy
+
+ssh-copy-id -i ~/.ssh/id_ed25519_acme.pub deploy@bastion.acme.internal
+<span class="hljs-comment"># No ssh-copy-id? Do it by hand:</span>
+<span class="hljs-built_in">cat</span> ~/.ssh/id_ed25519_acme.pub | ssh deploy@host \
+  <span class="hljs-string">&#x27;umask 077; mkdir -p ~/.ssh; cat &gt;&gt; ~/.ssh/authorized_keys&#x27;</span>
+
+ssh-keygen -lf ~/.ssh/id_ed25519_acme.pub      <span class="hljs-comment"># fingerprint, to confirm with the customer</span>
+ssh-keygen -p -f ~/.ssh/id_ed25519_acme        <span class="hljs-comment"># change the passphrase</span></code></pre>
+<div class="callout danger"><span class="t">Permissions kill SSH silently</span><code>~/.ssh</code> must be <code>700</code>, private keys <code>600</code>, <code>authorized_keys</code> <code>600</code>, and your <strong>home directory must not be group-writable</strong>. StrictModes rejects anything looser and the client-side error is just "Permission denied (publickey)". Debug with <code>ssh -vvv</code> on the client and <code>sudo journalctl -u sshd -f</code> on the server.</div>
+
+<h3>~/.ssh/config — the highest-leverage file you own</h3>
+<div class="code-label">TEXT</div><pre><code class="hljs">Host *
+    ServerAliveInterval 30
+    ServerAliveCountMax 4
+    TCPKeepAlive yes
+    ControlMaster auto
+    ControlPath ~/.ssh/cm-%r@%h:%p
+    ControlPersist 10m
+    HashKnownHosts no
+    AddKeysToAgent yes
+
+Host bastion-acme
+    HostName bastion.acme.example.com
+    User pranit.deshpande
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519_acme
+    IdentitiesOnly yes
+
+# Every private host reached THROUGH the bastion, by one rule
+Host 10.20.*.* app-* db-*
+    User deploy
+    IdentityFile ~/.ssh/id_ed25519_acme
+    IdentitiesOnly yes
+    ProxyJump bastion-acme
+
+Host gpu-node
+    HostName 10.20.4.17
+    ProxyJump bastion-acme
+    LocalForward 8888 127.0.0.1:8888      # Jupyter
+    LocalForward 5432 10.20.9.4:5432      # Postgres behind the same network
+    RequestTTY yes</code></pre>
+<p><code>ControlMaster</code> multiplexes: the second and subsequent connections to the same host reuse the first TCP session and skip the handshake entirely — on a high-latency VPN that turns a 3-second connect into 50 ms. <code>IdentitiesOnly yes</code> stops the agent from offering every key you own, which matters when a customer's server has <code>MaxAuthTries 3</code> and locks you out after three wrong keys.</p>
+
+<h3>Agent and agent forwarding</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">eval</span> <span class="hljs-string">&quot;<span class="hljs-subst">$(ssh-agent -s)</span>&quot;</span>
+ssh-add ~/.ssh/id_ed25519_acme
+ssh-add -l                      <span class="hljs-comment"># loaded keys</span>
+ssh-add -t 3600 ~/.ssh/key      <span class="hljs-comment"># auto-expire after an hour</span>
+ssh -A bastion                  <span class="hljs-comment"># forward the agent</span></code></pre>
+<div class="callout warn"><span class="t">Prefer ProxyJump to agent forwarding</span><code>-A</code> exposes your agent socket to anyone with root on the intermediate host; they can use your key for as long as you are connected. <code>ssh -J bastion target</code> (or <code>ProxyJump</code>) keeps the authentication on your laptop and only tunnels the TCP stream. Use <code>-A</code> only when you genuinely need to authenticate <em>from</em> the remote host (e.g. <code>git clone</code> on the server) and the customer permits it.</div>
+
+<h3>Port forwarding — the three directions</h3>
+<div class="diagram">
+<svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="24" font-size="12" font-weight="700" fill="#1e3a8a">-L  LOCAL FORWARD   ssh -L 5432:db.internal:5432 bastion</text>
+  <rect x="20" y="36" width="130" height="40" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="85" y="61" text-anchor="middle" font-size="11" fill="#1e3a8a">your laptop :5432</text>
+  <line x1="150" y1="56" x2="300" y2="56" stroke="#2563eb" stroke-width="2"/>
+  <text x="225" y="50" text-anchor="middle" font-size="10" fill="#6b7688">encrypted tunnel</text>
+  <rect x="300" y="36" width="130" height="40" rx="6" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="365" y="61" text-anchor="middle" font-size="11" fill="#1e3a8a">bastion</text>
+  <line x1="430" y1="56" x2="580" y2="56" stroke="#6b7688" stroke-width="2"/>
+  <rect x="580" y="36" width="160" height="40" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="660" y="61" text-anchor="middle" font-size="11" fill="#1e3a8a">db.internal:5432</text>
+
+  <text x="20" y="114" font-size="12" font-weight="700" fill="#1e3a8a">-R  REMOTE FORWARD   ssh -R 9000:localhost:3000 bastion</text>
+  <rect x="20" y="126" width="130" height="40" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="85" y="151" text-anchor="middle" font-size="11" fill="#1e3a8a">your app :3000</text>
+  <line x1="150" y1="146" x2="300" y2="146" stroke="#2563eb" stroke-width="2"/>
+  <text x="225" y="140" text-anchor="middle" font-size="10" fill="#6b7688">reverse</text>
+  <rect x="300" y="126" width="130" height="40" rx="6" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="365" y="151" text-anchor="middle" font-size="11" fill="#1e3a8a">bastion :9000</text>
+  <line x1="430" y1="146" x2="580" y2="146" stroke="#6b7688" stroke-width="2"/>
+  <rect x="580" y="126" width="160" height="40" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="660" y="151" text-anchor="middle" font-size="11" fill="#1e3a8a">customer tester</text>
+
+  <text x="20" y="204" font-size="12" font-weight="700" fill="#1e3a8a">-D  DYNAMIC (SOCKS5)   ssh -D 1080 bastion</text>
+  <rect x="20" y="214" width="130" height="30" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="85" y="234" text-anchor="middle" font-size="11" fill="#1e3a8a">browser -&gt; :1080</text>
+  <line x1="150" y1="229" x2="300" y2="229" stroke="#2563eb" stroke-width="2"/>
+  <rect x="300" y="214" width="130" height="30" rx="6" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="365" y="234" text-anchor="middle" font-size="11" fill="#1e3a8a">bastion</text>
+  <line x1="430" y1="229" x2="580" y2="229" stroke="#6b7688" stroke-width="2"/>
+  <rect x="580" y="214" width="160" height="30" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="660" y="234" text-anchor="middle" font-size="11" fill="#1e3a8a">any internal host</text>
+</svg>
+<div class="cap">Local brings a remote service to you; remote exposes your service to them; dynamic turns SSH into a SOCKS proxy for everything.</div>
+</div>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Local: reach a Postgres that only the bastion can see</span>
+ssh -N -L 5432:db.internal:5432 bastion-acme
+psql -h 127.0.0.1 -p 5432 -U app appdb
+
+<span class="hljs-comment"># Multiple at once, in the background, no shell</span>
+ssh -f -N -L 8080:app-1:8080 -L 9090:prometheus:9090 -L 5432:db.internal:5432 bastion-acme
+
+<span class="hljs-comment"># Remote: let a customer tester hit the demo running on your laptop</span>
+ssh -N -R 9000:localhost:3000 bastion-acme
+<span class="hljs-comment"># (needs GatewayPorts yes on the server for non-loopback binding)</span>
+
+<span class="hljs-comment"># Dynamic SOCKS5 proxy for a browser or curl</span>
+ssh -f -N -D 1080 bastion-acme
+curl --socks5-hostname 127.0.0.1:1080 http://grafana.internal:3000/api/health
+
+<span class="hljs-comment"># Manage forwards on a live session: press Enter, then ~C for the ssh prompt</span>
+<span class="hljs-comment"># ~. drops a hung session; ~? lists all escape sequences</span></code></pre>
+
+<h3>Copying files: scp vs rsync</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">scp -C model.bin deploy@app-1:/opt/app/           <span class="hljs-comment"># -C compresses; fine for one small file</span>
+scp -r ./dist deploy@app-1:/opt/app/releases/
+scp -3 host-a:/f host-b:/f                        <span class="hljs-comment"># relay through your machine</span>
+
+<span class="hljs-comment"># rsync is what you actually want for anything repeated or large</span>
+rsync -avz --partial --progress ./dist/ deploy@app-1:/opt/app/current/
+rsync -avz --delete --exclude <span class="hljs-string">&#x27;.git&#x27;</span> --exclude <span class="hljs-string">&#x27;node_modules&#x27;</span> ./src/ app-1:/opt/app/src/
+rsync -avz -e <span class="hljs-string">&#x27;ssh -J bastion-acme&#x27;</span> ./dist/ app-1:/opt/app/     <span class="hljs-comment"># through a jump host</span>
+rsync -avz --bwlimit=5000 bigfile host:/data/                   <span class="hljs-comment"># 5 MB/s cap, be a good guest</span>
+rsync -avzn --delete ./a/ host:/b/                              <span class="hljs-comment"># -n = DRY RUN. Always first.</span></code></pre>
+<div class="callout tip"><span class="t">Trailing slashes in rsync</span><code>rsync -a src/ dst/</code> copies the <em>contents</em> of src into dst. <code>rsync -a src dst/</code> creates <code>dst/src</code>. This single character has caused more misplaced deployments than any other rsync feature. And <code>--delete</code> plus a wrong path is how you erase a customer's directory — run with <code>-n</code> first, every time.</div>
+
+<h3>Server-side hardening you may be asked to review</h3>
+<div class="code-label">TEXT</div><pre><code class="hljs"># /etc/ssh/sshd_config.d/99-hardening.conf
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries 3
+AllowGroups ssh-users
+ClientAliveInterval 300
+ClientAliveCountMax 2
+X11Forwarding no
+AllowTcpForwarding yes          # FDEs need this; justify it rather than lose it
+LogLevel VERBOSE</code></pre>
+<p>Validate before restarting — <code>sudo sshd -t</code> — and keep your existing session open while you restart, so a mistake does not lock you out.</p>
+
+<h2 id="text-processing-grep-sed-awk-cut-sort-jq">Text Processing: grep, sed, awk, cut, sort, jq</h2>
+<p class="lead">Logs, configs and API responses are all text. The ability to go from a 2 GB log file to "these 7 request IDs failed, all from one upstream" in a single pipeline is the most visible skill you have in front of a customer.</p>
+
+<h3>grep and the regex you need</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">grep -r <span class="hljs-string">&#x27;apiKey&#x27;</span> /opt/app --include=<span class="hljs-string">&#x27;*.py&#x27;</span>     <span class="hljs-comment"># recursive, filtered by glob</span>
+grep -ri <span class="hljs-string">&#x27;timeout&#x27;</span> -n /etc/nginx               <span class="hljs-comment"># case-insensitive, line numbers</span>
+grep -c ERROR app.log                          <span class="hljs-comment"># count matching LINES</span>
+grep -v DEBUG app.log                          <span class="hljs-comment"># invert</span>
+grep -w <span class="hljs-built_in">id</span> app.log                             <span class="hljs-comment"># whole word - not &quot;uuid&quot;, not &quot;identity&quot;</span>
+grep -A3 -B3 <span class="hljs-string">&#x27;Traceback&#x27;</span> app.log               <span class="hljs-comment"># context after / before</span>
+grep -C5 <span class="hljs-string">&#x27;OOM&#x27;</span> /var/log/syslog                 <span class="hljs-comment"># 5 lines either side</span>
+grep -l <span class="hljs-string">&#x27;LoadBalancer&#x27;</span> *.yaml                  <span class="hljs-comment"># just the filenames</span>
+grep -o <span class="hljs-string">&#x27;req_id=[a-f0-9]\{12\}&#x27;</span> app.log        <span class="hljs-comment"># print only the match</span>
+grep -E <span class="hljs-string">&#x27;5[0-9]{2} &#x27;</span> access.log                <span class="hljs-comment"># ERE: no backslashes needed</span>
+grep -F <span class="hljs-string">&#x27;$special[chars]&#x27;</span> file                 <span class="hljs-comment"># fixed string, no regex</span>
+grep -P <span class="hljs-string">&#x27;(?&lt;=user=)\w+&#x27;</span> app.log                <span class="hljs-comment"># PCRE lookbehind (GNU only)</span></code></pre>
+<table>
+<tr><th>Pattern</th><th>Matches</th><th>Pattern</th><th>Matches</th></tr>
+<tr><td><code>^</code> <code>$</code></td><td>Line start / end</td><td><code>\b</code></td><td>Word boundary</td></tr>
+<tr><td><code>.</code></td><td>Any single char</td><td><code>[^abc]</code></td><td>Any char except a, b, c</td></tr>
+<tr><td><code>*</code> <code>+</code> <code>?</code></td><td>0+, 1+, 0 or 1</td><td><code>{2,5}</code></td><td>Between 2 and 5 repeats</td></tr>
+<tr><td><code>(a|b)</code></td><td>Alternation (ERE)</td><td><code>\d \w \s</code></td><td>Digit, word char, whitespace (PCRE)</td></tr>
+</table>
+<div class="callout tip"><span class="t">ripgrep when it exists</span><code>rg 'pattern' --type py -C3</code> is 5–20× faster than <code>grep -r</code>, respects <code>.gitignore</code>, and defaults to recursive. But it is not installed on customer boxes, so keep GNU grep in your fingers and treat <code>rg</code> as a local luxury.</div>
+
+<h3>sed: stream edits</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">sed <span class="hljs-string">&#x27;s/localhost/db.internal/&#x27;</span> config.ini          <span class="hljs-comment"># first occurrence per line</span>
+sed <span class="hljs-string">&#x27;s/old/new/g&#x27;</span> config.ini                       <span class="hljs-comment"># all occurrences</span>
+sed -i.bak <span class="hljs-string">&#x27;s/DEBUG/INFO/g&#x27;</span> app.conf               <span class="hljs-comment"># in place, keeping app.conf.bak</span>
+sed -n <span class="hljs-string">&#x27;120,140p&#x27;</span> huge.log                         <span class="hljs-comment"># print a line range only</span>
+sed -n <span class="hljs-string">&#x27;/BEGIN/,/END/p&#x27;</span> dump.txt                   <span class="hljs-comment"># range between two patterns</span>
+sed <span class="hljs-string">&#x27;/^#/d; /^$/d&#x27;</span> nginx.conf                      <span class="hljs-comment"># strip comments and blank lines</span>
+sed <span class="hljs-string">&#x27;3i\Inserted before line 3&#x27;</span> file
+sed <span class="hljs-string">&#x27;s|/old/path|/new/path|g&#x27;</span> file                 <span class="hljs-comment"># alternate delimiter for paths</span>
+sed -E <span class="hljs-string">&#x27;s/([0-9]{4})-([0-9]{2})/\2\/\1/&#x27;</span> dates.txt <span class="hljs-comment"># ERE with capture groups</span></code></pre>
+<div class="callout danger"><span class="t"><code>sed -i</code> is not portable and is not reversible</span>GNU sed accepts <code>-i</code> with an optional suffix; BSD/macOS sed <em>requires</em> an argument (<code>sed -i '' 's/a/b/'</code>). On a customer host, always use a suffix (<code>-i.bak</code>) so you have a rollback, and preview without <code>-i</code> first. One mistyped regex across <code>/etc</code> is an outage.</div>
+
+<h3>awk: the pocket language</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">awk <span class="hljs-string">&#x27;{print $1, $7}&#x27;</span> access.log                    <span class="hljs-comment"># fields; $0 is the whole line, NF the count</span>
+awk -F: <span class="hljs-string">&#x27;{print $1}&#x27;</span> /etc/passwd                   <span class="hljs-comment"># custom separator</span>
+awk -F<span class="hljs-string">&#x27;\t&#x27;</span> <span class="hljs-string">&#x27;NR&gt;1 {print $3}&#x27;</span> data.tsv              <span class="hljs-comment"># skip header</span>
+awk <span class="hljs-string">&#x27;$9 &gt;= 500 {print $7}&#x27;</span> access.log              <span class="hljs-comment"># filter then project</span>
+awk <span class="hljs-string">&#x27;{s+=$10} END {print s/1048576 &quot; MB&quot;}&#x27;</span> access.log   <span class="hljs-comment"># sum bytes column</span>
+awk <span class="hljs-string">&#x27;{c[$9]++} END {for (k in c) print c[k], k}&#x27;</span> access.log | <span class="hljs-built_in">sort</span> -rn   <span class="hljs-comment"># status histogram</span>
+awk <span class="hljs-string">&#x27;{t[$7]+=$NF; n[$7]++} END {for (u in t) printf &quot;%8.3f %5d %s\n&quot;, t[u]/n[u], n[u], u}&#x27;</span> \
+    timings.log | <span class="hljs-built_in">sort</span> -rn | <span class="hljs-built_in">head</span>
+awk <span class="hljs-string">&#x27;length($0) &gt; 200&#x27;</span> app.log                     <span class="hljs-comment"># abnormally long lines</span>
+awk <span class="hljs-string">&#x27;/BEGIN_TX/,/END_TX/&#x27;</span> app.log                  <span class="hljs-comment"># range patterns</span>
+awk <span class="hljs-string">&#x27;BEGIN{OFS=&quot;,&quot;} {print $1,$4,$9}&#x27;</span> access.log   <span class="hljs-comment"># retabulate as CSV</span></code></pre>
+<p>That status-histogram one-liner is the single most useful awk you will write: it turns an opaque access log into "487 × 200, 61 × 499, 12 × 502" in under a second, and it works on any log format once you know the column index.</p>
+
+<h3>cut, sort, uniq, tr, column, and the counting idiom</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">cut</span> -d, -f1,3 data.csv            <span class="hljs-comment"># by delimiter and field</span>
+<span class="hljs-built_in">cut</span> -c1-19 app.log                <span class="hljs-comment"># by character position - great for timestamps</span>
+<span class="hljs-built_in">sort</span> -u list.txt                  <span class="hljs-comment"># sort + dedupe</span>
+<span class="hljs-built_in">sort</span> -t, -k3,3nr -k1,1 data.csv   <span class="hljs-comment"># 3rd field numeric descending, then 1st ascending</span>
+<span class="hljs-built_in">sort</span> -h                           <span class="hljs-comment"># human sizes: 1K 23M 4G</span>
+<span class="hljs-built_in">uniq</span> -c                           <span class="hljs-comment"># count runs - REQUIRES sorted input</span>
+<span class="hljs-built_in">uniq</span> -d                           <span class="hljs-comment"># only duplicates</span>
+<span class="hljs-built_in">tr</span> -d <span class="hljs-string">&#x27;\r&#x27;</span> &lt; win.txt &gt; unix.txt   <span class="hljs-comment"># strip CRLF</span>
+<span class="hljs-built_in">tr</span> <span class="hljs-string">&#x27;[:upper:]&#x27;</span> <span class="hljs-string">&#x27;[:lower:]&#x27;</span>
+<span class="hljs-built_in">tr</span> -s <span class="hljs-string">&#x27; &#x27;</span>                         <span class="hljs-comment"># squeeze repeated spaces</span>
+<span class="hljs-built_in">paste</span> -d, a.txt b.txt             <span class="hljs-comment"># join files side by side</span>
+<span class="hljs-built_in">comm</span> -13 old.txt new.txt          <span class="hljs-comment"># lines only in new (both must be sorted)</span>
+<span class="hljs-built_in">join</span> -t, -1 1 -2 1 a.csv b.csv    <span class="hljs-comment"># relational join on a key</span>
+column -t -s, data.csv            <span class="hljs-comment"># align into readable columns</span>
+<span class="hljs-built_in">nl</span> -ba file                       <span class="hljs-comment"># number every line</span></code></pre>
+<div class="callout note"><span class="t">The universal frequency pipeline</span><code>… | sort | uniq -c | sort -rn | head -20</code>. Top IPs hitting your API, most common error strings, busiest endpoints, repeated stack frames — all the same four stages. Commit it to muscle memory.</div>
+
+<h3>jq: JSON is now the default log format</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">curl -s https://api.internal/v1/pods | jq .
+jq -r <span class="hljs-string">&#x27;.items[].metadata.name&#x27;</span> pods.json              <span class="hljs-comment"># -r drops the quotes</span>
+jq <span class="hljs-string">&#x27;.items[] | select(.status.phase != &quot;Running&quot;)&#x27;</span> pods.json
+jq -r <span class="hljs-string">&#x27;.items[] | [.metadata.name, .status.phase] | @tsv&#x27;</span> pods.json | column -t
+jq <span class="hljs-string">&#x27;map(.latency_ms) | add/length&#x27;</span> timings.json       <span class="hljs-comment"># mean</span>
+jq -s <span class="hljs-string">&#x27;group_by(.level) | map({level: .[0].level, n: length})&#x27;</span> app.jsonl
+jq -c <span class="hljs-string">&#x27;.&#x27;</span> pretty.json                                 <span class="hljs-comment"># compact, one line</span>
+jq -e <span class="hljs-string">&#x27;.status == &quot;ok&quot;&#x27;</span> resp.json &gt;/dev/null          <span class="hljs-comment"># EXIT CODE for scripts</span>
+jq --arg <span class="hljs-built_in">env</span> prod <span class="hljs-string">&#x27;.envs[$env]&#x27;</span> config.json           <span class="hljs-comment"># inject a shell variable safely</span>
+jq -r <span class="hljs-string">&#x27;to_entries[] | &quot;\(.key)=\(.value)&quot;&#x27;</span> env.json   <span class="hljs-comment"># JSON object -&gt; KEY=VALUE</span>
+<span class="hljs-built_in">cat</span> app.jsonl | jq -r <span class="hljs-string">&#x27;select(.level==&quot;error&quot;) | &quot;\(.ts) \(.req_id) \(.msg)&quot;&#x27;</span></code></pre>
+<p>For YAML, <code>yq</code> (the Go rewrite by mikefarah) uses the same expression language: <code>yq '.spec.template.spec.containers[0].image' deploy.yaml</code>. If neither is installed and you have Python, <code>python3 -c 'import sys,json;d=json.load(sys.stdin);print(d["items"][0]["metadata"]["name"])'</code> always works.</p>
+
+<h3>A worked investigation</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># &quot;The API got slow around 14:00.&quot; Access log is combined format, $NF = upstream time.</span>
+awk <span class="hljs-string">&#x27;$4 ~ /11\/Mar\/2026:14:/&#x27;</span> access.log \
+  | awk <span class="hljs-string">&#x27;{print $7, $NF}&#x27;</span> \
+  | <span class="hljs-built_in">sort</span> -k2 -rn | <span class="hljs-built_in">head</span> -20
+<span class="hljs-comment"># -&gt; /v1/search dominates with 8-12 s responses</span>
+
+<span class="hljs-comment"># Which upstream?  Count status codes for just that endpoint</span>
+grep <span class="hljs-string">&#x27; /v1/search&#x27;</span> access.log | awk <span class="hljs-string">&#x27;{print $9}&#x27;</span> | <span class="hljs-built_in">sort</span> | <span class="hljs-built_in">uniq</span> -c | <span class="hljs-built_in">sort</span> -rn
+<span class="hljs-comment">#  412 200</span>
+<span class="hljs-comment">#   97 499     &lt;- client gave up: timeouts, not errors</span>
+
+<span class="hljs-comment"># Correlate with the app&#x27;s own structured log</span>
+jq -r <span class="hljs-string">&#x27;select(.path==&quot;/v1/search&quot; and .duration_ms&gt;5000)
+       | &quot;\(.ts) \(.req_id) \(.db_ms) \(.vector_ms)&quot;&#x27;</span> app.jsonl | <span class="hljs-built_in">head</span>
+<span class="hljs-comment"># -&gt; vector_ms is 7800 of the 8200 ms.  The vector store is the bottleneck.</span></code></pre>
+
+<h2 id="pipes-redirection-file-descriptors-and-here-docs">Pipes, Redirection, File Descriptors, and Here-Docs</h2>
+<p class="lead">Every mysterious "my script logs nothing" or "the error disappeared" bug comes down to misunderstanding file descriptors. Three numbers, one ordering rule, and a handful of operators cover the whole topic.</p>
+
+<table>
+<tr><th>FD</th><th>Name</th><th>Default</th></tr>
+<tr><td>0</td><td>stdin</td><td>Keyboard / previous command in a pipe</td></tr>
+<tr><td>1</td><td>stdout</td><td>Terminal — normal output</td></tr>
+<tr><td>2</td><td>stderr</td><td>Terminal — errors and diagnostics, unbuffered</td></tr>
+</table>
+
+<div class="code-label">BASH</div><pre><code class="hljs">cmd &gt; out.txt            <span class="hljs-comment"># stdout, truncate</span>
+cmd &gt;&gt; out.txt           <span class="hljs-comment"># stdout, append</span>
+cmd 2&gt; err.txt           <span class="hljs-comment"># stderr only</span>
+cmd &gt; out.txt 2&gt;&amp;1       <span class="hljs-comment"># both to out.txt   (ORDER MATTERS)</span>
+cmd &amp;&gt; out.txt           <span class="hljs-comment"># bash shorthand for the same</span>
+cmd 2&gt;&amp;1 &gt; out.txt       <span class="hljs-comment"># WRONG: stderr goes to the TERMINAL, stdout to the file</span>
+cmd &gt; /dev/null 2&gt;&amp;1     <span class="hljs-comment"># silence everything</span>
+cmd 2&gt;/dev/null          <span class="hljs-comment"># keep output, drop the permission-denied noise</span>
+cmd &lt; input.txt          <span class="hljs-comment"># stdin from a file</span>
+cmd &lt;&lt;&lt; <span class="hljs-string">&quot;inline string&quot;</span>  <span class="hljs-comment"># here-string</span></code></pre>
+<p>The ordering rule: redirections are applied left to right, and <code>2&gt;&amp;1</code> means "make fd 2 a copy of wherever fd 1 points <em>right now</em>". So you must redirect stdout first, then duplicate.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Pipe stderr instead of stdout</span>
+cmd 2&gt;&amp;1 &gt;/dev/null | grep -i error
+
+<span class="hljs-comment"># Both to the terminal AND a file</span>
+cmd 2&gt;&amp;1 | <span class="hljs-built_in">tee</span> deploy.log
+cmd 2&gt;&amp;1 | <span class="hljs-built_in">tee</span> -a deploy.log      <span class="hljs-comment"># append</span>
+
+<span class="hljs-comment"># Capture stdout and stderr to separate files while still seeing both</span>
+cmd &gt; &gt;(<span class="hljs-built_in">tee</span> out.log) 2&gt; &gt;(<span class="hljs-built_in">tee</span> err.log &gt;&amp;2)
+
+<span class="hljs-comment"># Custom descriptors (useful when you need a side channel in a script)</span>
+<span class="hljs-built_in">exec</span> 3&gt; /var/log/audit-trail.log
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;starting deploy <span class="hljs-subst">$(date -Is)</span>&quot;</span> &gt;&amp;3
+<span class="hljs-built_in">exec</span> 3&gt;&amp;-                          <span class="hljs-comment"># close it</span>
+
+<span class="hljs-comment"># Pipeline exit status</span>
+<span class="hljs-literal">false</span> | <span class="hljs-literal">true</span>; <span class="hljs-built_in">echo</span> $?              <span class="hljs-comment"># 0 - you got the LAST command&#x27;s status</span>
+<span class="hljs-built_in">set</span> -o pipefail; <span class="hljs-literal">false</span> | <span class="hljs-literal">true</span>; <span class="hljs-built_in">echo</span> $?   <span class="hljs-comment"># 1 - what you actually wanted</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;<span class="hljs-variable">${PIPESTATUS[@]}</span>&quot;</span>            <span class="hljs-comment"># per-stage statuses: &quot;1 0&quot;</span></code></pre>
+
+<h3>Here-docs and here-strings</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Variables EXPAND</span>
+<span class="hljs-built_in">cat</span> &gt; /etc/app/config.yaml &lt;&lt;<span class="hljs-string">EOF
+environment: ${ENV}
+endpoint: https://${HOST}:8443
+EOF</span>
+
+<span class="hljs-comment"># Quoted delimiter: NOTHING expands - essential for scripts containing $ and `</span>
+<span class="hljs-built_in">cat</span> &gt; /usr/local/bin/wrapper.sh &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span>
+<span class="hljs-comment">#!/usr/bin/env bash</span>
+<span class="hljs-built_in">exec</span> /opt/app/bin/app --config <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">${@:2}</span>&quot;</span>
+EOF
+
+<span class="hljs-comment"># &lt;&lt;- strips LEADING TABS so you can indent inside a function</span>
+<span class="hljs-function"><span class="hljs-title">deploy</span></span>() {
+	ssh app-1 bash -s &lt;&lt;-<span class="hljs-string">&#x27;EOF&#x27;</span>
+		<span class="hljs-built_in">set</span> -euo pipefail
+		systemctl --user restart api
+		systemctl --user is-active api
+	EOF
+}
+
+<span class="hljs-comment"># Here-string into a command expecting stdin</span>
+jq -r .name &lt;&lt;&lt; <span class="hljs-string">&quot;<span class="hljs-variable">$json_response</span>&quot;</span></code></pre>
+
+<h3>Process substitution</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">diff &lt;(ssh app-1 <span class="hljs-string">&#x27;sha256sum /opt/app/config.yaml&#x27;</span>) \
+     &lt;(ssh app-2 <span class="hljs-string">&#x27;sha256sum /opt/app/config.yaml&#x27;</span>)
+
+diff &lt;(<span class="hljs-built_in">sort</span> a.txt) &lt;(<span class="hljs-built_in">sort</span> b.txt)
+<span class="hljs-built_in">comm</span> -3 &lt;(rpm -qa | <span class="hljs-built_in">sort</span>) &lt;(ssh other <span class="hljs-string">&#x27;rpm -qa&#x27;</span> | <span class="hljs-built_in">sort</span>)   <span class="hljs-comment"># package drift between hosts</span>
+
+<span class="hljs-comment"># Feed a command&#x27;s output to something that only accepts a FILE path</span>
+grep -f &lt;(<span class="hljs-built_in">cut</span> -d, -f1 ids.csv) app.log
+
+<span class="hljs-comment"># Output process substitution: tee into two different pipelines</span>
+./build.sh &gt; &gt;(gzip &gt; build.log.gz) 2&gt;&amp;1</code></pre>
+<div class="callout warn"><span class="t">The subshell variable trap</span><code>cat f | while read l; do n=$((n+1)); done; echo $n</code> prints nothing useful, because the right side of a pipe runs in a subshell and its variable changes are discarded. Use <code>while read l; do …; done &lt; f</code> or <code>done &lt; &lt;(cmd)</code> instead. This is one of the top three bash bugs in production scripts.</div>
+
+<h2 id="bash-scripting-that-does-not-break">Bash Scripting That Does Not Break</h2>
+<p class="lead">The script you write on a customer engagement outlives you. It will be run by someone else, on a different host, with a path containing a space, when the network is flaky. Defensive bash is a small set of habits that eliminate entire bug classes.</p>
+
+<h3>The preamble</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+IFS=$<span class="hljs-string">&#x27;\n\t&#x27;</span></code></pre>
+<table>
+<tr><th>Flag</th><th>Effect</th><th>Gotcha</th></tr>
+<tr><td><code>-e</code></td><td>Exit on any non-zero status</td><td>Not applied inside <code>if</code>, <code>&amp;&amp;</code>, <code>||</code> or <code>!</code> conditions — by design</td></tr>
+<tr><td><code>-u</code></td><td>Error on unset variable</td><td>Use <code>"${VAR:-default}"</code> for optional vars; <code>"${arr[@]:-}"</code> for possibly-empty arrays</td></tr>
+<tr><td><code>-o pipefail</code></td><td>Pipeline fails if any stage fails</td><td>Makes <code>cmd | head</code> fail with SIGPIPE; guard with <code>|| true</code> where intended</td></tr>
+<tr><td><code>-x</code></td><td>Trace every command</td><td>Add temporarily, or gate on <code>${DEBUG:-}</code>. Will leak secrets into logs</td></tr>
+</table>
+<p><code>#!/usr/bin/env bash</code> rather than <code>#!/bin/bash</code> finds bash wherever it lives (<code>/usr/local/bin/bash</code> on BSD, Nix paths, Homebrew on macOS). And never write <code>#!/bin/sh</code> if you use arrays, <code>[[ ]]</code>, or <code>local</code> — on Debian that is dash and it will fail at runtime, not parse time.</p>
+
+<h3>Quoting: the rule</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">rm</span> <span class="hljs-variable">$file</span>          <span class="hljs-comment"># BROKEN: word-splits on spaces, then globs</span>
+<span class="hljs-built_in">rm</span> <span class="hljs-string">&quot;<span class="hljs-variable">$file</span>&quot;</span>        <span class="hljs-comment"># correct</span>
+<span class="hljs-built_in">cp</span> <span class="hljs-string">&quot;<span class="hljs-variable">$src</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$dst</span>&quot;</span>
+<span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> <span class="hljs-string">&quot;<span class="hljs-variable">${files[@]}</span>&quot;</span>; <span class="hljs-keyword">do</span> …; <span class="hljs-keyword">done</span>    <span class="hljs-comment"># quoted [@] preserves element boundaries</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;<span class="hljs-variable">${arr[*]}</span>&quot;</span>  <span class="hljs-comment"># single string joined by the first char of IFS - usually NOT what you want</span>
+
+[[ -z <span class="hljs-string">&quot;<span class="hljs-variable">${VAR:-}</span>&quot;</span> ]] &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;empty or unset&quot;</span>
+[[ <span class="hljs-string">&quot;<span class="hljs-variable">$a</span>&quot;</span> == <span class="hljs-string">&quot;<span class="hljs-variable">$b</span>&quot;</span> ]]          <span class="hljs-comment"># string equality (no word splitting inside [[ ]])</span>
+[[ <span class="hljs-string">&quot;<span class="hljs-variable">$s</span>&quot;</span> == pre* ]]          <span class="hljs-comment"># glob match - do NOT quote the right side</span>
+[[ <span class="hljs-string">&quot;<span class="hljs-variable">$s</span>&quot;</span> =~ ^v[0-9]+\.[0-9]+$ ]]   <span class="hljs-comment"># regex; captures land in ${BASH_REMATCH[@]}</span>
+(( count &gt; <span class="hljs-number">10</span> ))            <span class="hljs-comment"># arithmetic context - no $ needed on variables</span></code></pre>
+<div class="callout tip"><span class="t">Run shellcheck on everything</span><code>shellcheck deploy.sh</code> catches unquoted expansions, useless <code>cat</code>, subshell variable loss, and dozens of other real bugs. Wire it into CI. If you cannot install it on the customer box, run it locally before you ship the script — it is the single highest-value tool in bash development.</div>
+
+<h3>Arrays, parameter expansion, and argument parsing</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">args=(--verbose --config /etc/app.yaml)
+args+=(--dry-run)
+<span class="hljs-string">&quot;<span class="hljs-variable">${#args[@]}</span>&quot;</span>                      <span class="hljs-comment"># length</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${args[@]:1:2}</span>&quot;</span>                   <span class="hljs-comment"># slice</span>
+<span class="hljs-built_in">mapfile</span> -t lines &lt; file.txt        <span class="hljs-comment"># read a file into an array, no splitting bugs</span>
+<span class="hljs-built_in">readarray</span> -t pods &lt; &lt;(kubectl get po -o name)
+
+<span class="hljs-string">&quot;<span class="hljs-variable">${VAR:-fallback}</span>&quot;</span>       <span class="hljs-comment"># use fallback if unset or empty</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${VAR:?must be set}</span>&quot;</span>    <span class="hljs-comment"># abort with a message if unset - great for required config</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${VAR:+--flag $VAR}</span>&quot;</span>    <span class="hljs-comment"># emit only if set</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${PATH//:/$&#x27;\n&#x27;}</span>&quot;</span>       <span class="hljs-comment"># global substitution</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${file%.tar.gz}</span>&quot;</span>        <span class="hljs-comment"># strip shortest suffix match</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${file##*/}</span>&quot;</span>            <span class="hljs-comment"># basename</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${file%/*}</span>&quot;</span>             <span class="hljs-comment"># dirname</span>
+<span class="hljs-string">&quot;<span class="hljs-variable">${name^^}</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">${name,,}</span>&quot;</span>  <span class="hljs-comment"># upper / lower (bash 4+)</span></code></pre>
+
+<h3>Traps and cleanup</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">tmp=<span class="hljs-string">&quot;<span class="hljs-subst">$(mktemp -d)</span>&quot;</span>
+<span class="hljs-function"><span class="hljs-title">cleanup</span></span>() {
+  <span class="hljs-built_in">local</span> rc=$?
+  <span class="hljs-built_in">rm</span> -rf <span class="hljs-string">&quot;<span class="hljs-variable">$tmp</span>&quot;</span>
+  [[ -n <span class="hljs-string">&quot;<span class="hljs-variable">${tunnel_pid:-}</span>&quot;</span> ]] &amp;&amp; <span class="hljs-built_in">kill</span> <span class="hljs-string">&quot;<span class="hljs-variable">$tunnel_pid</span>&quot;</span> 2&gt;/dev/null || <span class="hljs-literal">true</span>
+  (( rc != <span class="hljs-number">0</span> )) &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;FAILED at line <span class="hljs-variable">$LINENO</span> (rc=<span class="hljs-variable">$rc</span>)&quot;</span> &gt;&amp;2
+  <span class="hljs-built_in">return</span> <span class="hljs-variable">$rc</span>
+}
+<span class="hljs-built_in">trap</span> cleanup EXIT              <span class="hljs-comment"># runs on normal exit AND on error with set -e</span>
+<span class="hljs-built_in">trap</span> <span class="hljs-string">&#x27;echo interrupted; exit 130&#x27;</span> INT TERM
+<span class="hljs-built_in">trap</span> <span class="hljs-string">&#x27;echo &quot;error on line $LINENO: $BASH_COMMAND&quot; &gt;&amp;2&#x27;</span> ERR</code></pre>
+
+<h3>A production-grade script</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-meta">#!/usr/bin/env bash</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># deploy.sh - release an artifact to an app host via an atomic symlink swap.</span>
+<span class="hljs-comment"># Usage: deploy.sh -e prod -v 1.4.2 [-H app-1,app-2] [-n] [-h]</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-built_in">set</span> -euo pipefail
+
+<span class="hljs-built_in">readonly</span> SCRIPT_NAME=<span class="hljs-string">&quot;<span class="hljs-variable">${0##*/}</span>&quot;</span>
+<span class="hljs-built_in">readonly</span> RELEASE_ROOT=<span class="hljs-string">&quot;/opt/inference-api/releases&quot;</span>
+<span class="hljs-built_in">readonly</span> CURRENT_LINK=<span class="hljs-string">&quot;/opt/inference-api/current&quot;</span>
+<span class="hljs-built_in">readonly</span> ARTIFACT_REPO=<span class="hljs-string">&quot;https://nexus.corp/repository/releases&quot;</span>
+
+ENVIRONMENT=<span class="hljs-string">&quot;&quot;</span> ; VERSION=<span class="hljs-string">&quot;&quot;</span> ; DRY_RUN=0
+HOSTS=<span class="hljs-string">&quot;app-1,app-2&quot;</span>
+LOG_PREFIX=<span class="hljs-string">&quot;[<span class="hljs-variable">$SCRIPT_NAME</span>]&quot;</span>
+
+<span class="hljs-function"><span class="hljs-title">log</span></span>()  { <span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;%s %s %s\n&#x27;</span> <span class="hljs-string">&quot;<span class="hljs-subst">$(date -Is)</span>&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$LOG_PREFIX</span>&quot;</span> <span class="hljs-string">&quot;$*&quot;</span> &gt;&amp;2; }
+<span class="hljs-function"><span class="hljs-title">die</span></span>()  { <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;ERROR: $*&quot;</span>; <span class="hljs-built_in">exit</span> 1; }
+<span class="hljs-function"><span class="hljs-title">run</span></span>()  { <span class="hljs-keyword">if</span> (( DRY_RUN )); <span class="hljs-keyword">then</span> <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;DRY-RUN: $*&quot;</span>; <span class="hljs-keyword">else</span> <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;+ $*&quot;</span>; <span class="hljs-string">&quot;<span class="hljs-variable">$@</span>&quot;</span>; <span class="hljs-keyword">fi</span>; }
+
+<span class="hljs-function"><span class="hljs-title">usage</span></span>() {
+  sed -n <span class="hljs-string">&#x27;2,6p&#x27;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$0</span>&quot;</span> | sed <span class="hljs-string">&#x27;s/^# \{0,1\}//&#x27;</span>
+  <span class="hljs-built_in">exit</span> <span class="hljs-string">&quot;<span class="hljs-variable">${1:-0}</span>&quot;</span>
+}
+
+<span class="hljs-function"><span class="hljs-title">parse_args</span></span>() {
+  <span class="hljs-keyword">while</span> <span class="hljs-built_in">getopts</span> <span class="hljs-string">&#x27;:e:v:H:nh&#x27;</span> opt; <span class="hljs-keyword">do</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;<span class="hljs-variable">$opt</span>&quot;</span> <span class="hljs-keyword">in</span>
+      e) ENVIRONMENT=<span class="hljs-string">&quot;<span class="hljs-variable">$OPTARG</span>&quot;</span> ;;
+      v) VERSION=<span class="hljs-string">&quot;<span class="hljs-variable">$OPTARG</span>&quot;</span> ;;
+      H) HOSTS=<span class="hljs-string">&quot;<span class="hljs-variable">$OPTARG</span>&quot;</span> ;;
+      n) DRY_RUN=1 ;;
+      h) usage 0 ;;
+      :) die <span class="hljs-string">&quot;option -<span class="hljs-variable">$OPTARG</span> requires an argument&quot;</span> ;;
+      \?) die <span class="hljs-string">&quot;unknown option -<span class="hljs-variable">$OPTARG</span> (try -h)&quot;</span> ;;
+    <span class="hljs-keyword">esac</span>
+  <span class="hljs-keyword">done</span>
+  [[ -n <span class="hljs-string">&quot;<span class="hljs-variable">$ENVIRONMENT</span>&quot;</span> ]] || die <span class="hljs-string">&quot;missing -e &lt;environment&gt;&quot;</span>
+  [[ -n <span class="hljs-string">&quot;<span class="hljs-variable">$VERSION</span>&quot;</span> ]]     || die <span class="hljs-string">&quot;missing -v &lt;version&gt;&quot;</span>
+  [[ <span class="hljs-string">&quot;<span class="hljs-variable">$VERSION</span>&quot;</span> =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die <span class="hljs-string">&quot;version must be semver, got &#x27;<span class="hljs-variable">$VERSION</span>&#x27;&quot;</span>
+  [[ <span class="hljs-string">&quot;<span class="hljs-variable">$ENVIRONMENT</span>&quot;</span> =~ ^(dev|staging|prod)$ ]] || die <span class="hljs-string">&quot;env must be dev|staging|prod&quot;</span>
+}
+
+<span class="hljs-function"><span class="hljs-title">require_tools</span></span>() {
+  <span class="hljs-built_in">local</span> missing=()
+  <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> curl <span class="hljs-built_in">sha256sum</span> ssh tar; <span class="hljs-keyword">do</span>
+    <span class="hljs-built_in">command</span> -v <span class="hljs-string">&quot;<span class="hljs-variable">$t</span>&quot;</span> &gt;/dev/null 2&gt;&amp;1 || missing+=(<span class="hljs-string">&quot;<span class="hljs-variable">$t</span>&quot;</span>)
+  <span class="hljs-keyword">done</span>
+  (( <span class="hljs-variable">${#missing[@]}</span> == <span class="hljs-number">0</span> )) || die <span class="hljs-string">&quot;missing required tools: <span class="hljs-variable">${missing[*]}</span>&quot;</span>
+}
+
+WORKDIR=<span class="hljs-string">&quot;&quot;</span>
+<span class="hljs-function"><span class="hljs-title">cleanup</span></span>() {
+  <span class="hljs-built_in">local</span> rc=$?
+  [[ -n <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>&quot;</span> &amp;&amp; -d <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>&quot;</span> ]] &amp;&amp; <span class="hljs-built_in">rm</span> -rf <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>&quot;</span>
+  (( rc == <span class="hljs-number">0</span> )) &amp;&amp; <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;done&quot;</span> || <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;aborted with status <span class="hljs-variable">$rc</span>&quot;</span>
+  <span class="hljs-built_in">exit</span> <span class="hljs-variable">$rc</span>
+}
+<span class="hljs-built_in">trap</span> cleanup EXIT
+<span class="hljs-built_in">trap</span> <span class="hljs-string">&#x27;die &quot;interrupted&quot;&#x27;</span> INT TERM
+
+<span class="hljs-function"><span class="hljs-title">fetch_artifact</span></span>() {
+  <span class="hljs-built_in">local</span> url=<span class="hljs-string">&quot;<span class="hljs-variable">$ARTIFACT_REPO</span>/api-<span class="hljs-variable">${VERSION}</span>.tar.gz&quot;</span>
+  WORKDIR=<span class="hljs-string">&quot;<span class="hljs-subst">$(mktemp -d -t deploy.XXXXXX)</span>&quot;</span>
+  <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;fetching <span class="hljs-variable">$url</span>&quot;</span>
+  curl -fsSL --retry 3 --retry-delay 2 --max-time 300 \
+       -o <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>/api.tar.gz&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$url</span>&quot;</span> \
+    || die <span class="hljs-string">&quot;download failed - check HTTPS_PROXY and that <span class="hljs-variable">$VERSION</span> was published&quot;</span>
+  curl -fsSL <span class="hljs-string">&quot;<span class="hljs-variable">$url</span>.sha256&quot;</span> -o <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>/api.tar.gz.sha256&quot;</span> || die <span class="hljs-string">&quot;no checksum published&quot;</span>
+  ( <span class="hljs-built_in">cd</span> <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>&quot;</span> &amp;&amp; <span class="hljs-built_in">sha256sum</span> -c api.tar.gz.sha256 ) || die <span class="hljs-string">&quot;checksum mismatch - refusing&quot;</span>
+  <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;artifact verified (<span class="hljs-subst">$(stat -c%s <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>/api.tar.gz&quot;</span>)</span> bytes)&quot;</span>
+}
+
+<span class="hljs-function"><span class="hljs-title">deploy_host</span></span>() {
+  <span class="hljs-built_in">local</span> host=<span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> target=<span class="hljs-string">&quot;<span class="hljs-variable">$RELEASE_ROOT</span>/<span class="hljs-variable">$VERSION</span>&quot;</span>
+  <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;=== <span class="hljs-variable">$host</span> ===&quot;</span>
+  run scp -q <span class="hljs-string">&quot;<span class="hljs-variable">$WORKDIR</span>/api.tar.gz&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>:/tmp/api-<span class="hljs-variable">$VERSION</span>.tar.gz&quot;</span>
+  run ssh <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>&quot;</span> <span class="hljs-string">&quot;mkdir -p &#x27;<span class="hljs-variable">$target</span>&#x27; &amp;&amp; tar xzf /tmp/api-<span class="hljs-variable">$VERSION</span>.tar.gz -C &#x27;<span class="hljs-variable">$target</span>&#x27;&quot;</span>
+  run ssh <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>&quot;</span> <span class="hljs-string">&quot;ln -sfn &#x27;<span class="hljs-variable">$target</span>&#x27; &#x27;<span class="hljs-variable">$CURRENT_LINK</span>&#x27;&quot;</span>
+  run ssh <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>&quot;</span> <span class="hljs-string">&quot;sudo systemctl restart inference-api&quot;</span>
+
+  <span class="hljs-built_in">local</span> attempt
+  <span class="hljs-keyword">for</span> attempt <span class="hljs-keyword">in</span> 1 2 3 4 5 6 7 8 9 10; <span class="hljs-keyword">do</span>
+    <span class="hljs-keyword">if</span> (( DRY_RUN )); <span class="hljs-keyword">then</span> <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;DRY-RUN: health check&quot;</span>; <span class="hljs-built_in">return</span> 0; <span class="hljs-keyword">fi</span>
+    <span class="hljs-keyword">if</span> ssh <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>&quot;</span> <span class="hljs-string">&quot;curl -fsS --max-time 3 http://127.0.0.1:8080/healthz&quot;</span> &gt;/dev/null 2&gt;&amp;1; <span class="hljs-keyword">then</span>
+      <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;<span class="hljs-variable">$host</span> healthy after <span class="hljs-variable">${attempt}</span>s&quot;</span>; <span class="hljs-built_in">return</span> 0
+    <span class="hljs-keyword">fi</span>
+    <span class="hljs-built_in">sleep</span> 1
+  <span class="hljs-keyword">done</span>
+  <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;<span class="hljs-variable">$host</span> FAILED health check - rolling back&quot;</span>
+  <span class="hljs-built_in">local</span> previous
+  previous=<span class="hljs-string">&quot;<span class="hljs-subst">$(ssh <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>&quot;</span> <span class="hljs-string">&quot;ls -1dt &#x27;<span class="hljs-variable">$RELEASE_ROOT</span>&#x27;/*/ | sed -n 2p&quot;</span>)</span>&quot;</span>
+  [[ -n <span class="hljs-string">&quot;<span class="hljs-variable">$previous</span>&quot;</span> ]] || die <span class="hljs-string">&quot;no previous release on <span class="hljs-variable">$host</span> - manual intervention needed&quot;</span>
+  ssh <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>&quot;</span> <span class="hljs-string">&quot;ln -sfn &#x27;<span class="hljs-variable">${previous%/}</span>&#x27; &#x27;<span class="hljs-variable">$CURRENT_LINK</span>&#x27; &amp;&amp; sudo systemctl restart inference-api&quot;</span>
+  die <span class="hljs-string">&quot;rolled <span class="hljs-variable">$host</span> back to <span class="hljs-variable">${previous%/}</span>&quot;</span>
+}
+
+<span class="hljs-function"><span class="hljs-title">main</span></span>() {
+  parse_args <span class="hljs-string">&quot;<span class="hljs-variable">$@</span>&quot;</span>
+  require_tools
+  <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;deploying api <span class="hljs-variable">$VERSION</span> to <span class="hljs-variable">$ENVIRONMENT</span> (hosts: <span class="hljs-variable">$HOSTS</span>, dry-run=<span class="hljs-variable">$DRY_RUN</span>)&quot;</span>
+  fetch_artifact
+  <span class="hljs-built_in">local</span> IFS=<span class="hljs-string">&#x27;,&#x27;</span>
+  <span class="hljs-keyword">for</span> host <span class="hljs-keyword">in</span> <span class="hljs-variable">$HOSTS</span>; <span class="hljs-keyword">do</span>
+    deploy_host <span class="hljs-string">&quot;<span class="hljs-variable">$host</span>&quot;</span>
+  <span class="hljs-keyword">done</span>
+  <span class="hljs-built_in">log</span> <span class="hljs-string">&quot;all hosts updated to <span class="hljs-variable">$VERSION</span>&quot;</span>
+}
+
+main <span class="hljs-string">&quot;<span class="hljs-variable">$@</span>&quot;</span></code></pre>
+<ul class="checklist">
+<li><code>set -euo pipefail</code> and a trap-based cleanup that always runs</li>
+<li>Every variable quoted; validation of every user-supplied input before use</li>
+<li><code>--dry-run</code> so the customer can see exactly what will happen first</li>
+<li>Checksum verification before anything is written to a target host</li>
+<li>Health check with bounded retries and an automatic rollback path</li>
+<li>Timestamped logs on stderr so stdout stays clean for piping</li>
+<li>Meaningful exit codes: 0 success, non-zero with a message explaining what to do</li>
+</ul>
+
+<h2 id="networking-from-the-shell">Networking From the Shell</h2>
+<p class="lead">"It can't reach the API" is the single most common sentence of an FDE engagement. Resolve it methodically — layer by layer — and you will find the answer in four commands instead of four hours of guessing.</p>
+
+<div class="pipeline">
+  <span class="step">DNS resolves?</span><span class="arrow">&rarr;</span>
+  <span class="step">Route exists?</span><span class="arrow">&rarr;</span>
+  <span class="step">TCP connects?</span><span class="arrow">&rarr;</span>
+  <span class="step">TLS handshakes?</span><span class="arrow">&rarr;</span>
+  <span class="step">HTTP responds?</span><span class="arrow">&rarr;</span>
+  <span class="step">App returns 200?</span>
+</div>
+
+<h3>Layer 1–3: interfaces, addresses, routes</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">ip -brief addr                 <span class="hljs-comment"># compact: iface, state, addresses</span>
+ip addr show eth0
+ip -brief <span class="hljs-built_in">link</span>                 <span class="hljs-comment"># UP/DOWN and MAC</span>
+ip route                       <span class="hljs-comment"># routing table; &quot;default via ...&quot; is your gateway</span>
+ip route get 10.20.9.4         <span class="hljs-comment"># WHICH route and source IP will be used for this dest</span>
+ip neigh                       <span class="hljs-comment"># ARP cache</span>
+ip -s <span class="hljs-built_in">link</span> show eth0           <span class="hljs-comment"># RX/TX errors and drops</span></code></pre>
+<p><code>ip route get</code> is underrated: it answers "will this traffic go out the VPN interface or the default one" definitively, which matters a lot in split-tunnel customer networks.</p>
+
+<h3>DNS</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">cat</span> /etc/resolv.conf                       <span class="hljs-comment"># nameservers and search domains</span>
+dig api.internal +short
+dig api.internal @10.20.0.2 +short         <span class="hljs-comment"># bypass the configured resolver</span>
+dig api.internal ANY +noall +answer
+dig -x 10.20.9.4 +short                    <span class="hljs-comment"># reverse lookup</span>
+getent hosts api.internal                  <span class="hljs-comment"># uses NSSWITCH - includes /etc/hosts</span>
+resolvectl status                          <span class="hljs-comment"># systemd-resolved: per-link DNS, DNSSEC state</span>
+host api.internal ; nslookup api.internal  <span class="hljs-comment"># when dig is absent</span></code></pre>
+<div class="callout warn"><span class="t"><code>dig</code> and <code>getent</code> can disagree</span><code>dig</code> talks straight to a DNS server. <code>getent hosts</code> (and therefore your application) goes through NSS: <code>/etc/hosts</code> first, then mDNS, then DNS, per <code>/etc/nsswitch.conf</code>. If <code>dig</code> works but the app does not, check <code>/etc/hosts</code> for a stale override and check <code>search</code> domains — <code>api</code> may be resolving as <code>api.corp.local</code>.</div>
+
+<h3>Layer 4: sockets and connectivity</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">ss -tulpn                       <span class="hljs-comment"># TCP+UDP listeners with process names (needs root for names)</span>
+ss -tn state established         <span class="hljs-comment"># current connections</span>
+ss -tn <span class="hljs-string">&#x27;dport = :5432&#x27;</span>           <span class="hljs-comment"># filter by destination port</span>
+ss -s                            <span class="hljs-comment"># summary counts - spot socket exhaustion</span>
+ss -ti                           <span class="hljs-comment"># per-socket TCP info: rtt, cwnd, retransmits</span>
+
+nc -zv db.internal 5432          <span class="hljs-comment"># is the port open? (-z scan, -v verbose)</span>
+nc -zv -w3 api.internal 443      <span class="hljs-comment"># with a 3 s timeout</span>
+<span class="hljs-built_in">timeout</span> 3 bash -c <span class="hljs-string">&#x27;&gt;/dev/tcp/db.internal/5432&#x27;</span> &amp;&amp; <span class="hljs-built_in">echo</span> open || <span class="hljs-built_in">echo</span> closed   <span class="hljs-comment"># NO TOOLS NEEDED</span>
+
+traceroute -T -p 443 api.internal    <span class="hljs-comment"># TCP traceroute - ICMP is usually blocked</span>
+mtr -rwc 20 api.internal             <span class="hljs-comment"># continuous traceroute with loss stats</span>
+ping -c4 10.20.0.1                   <span class="hljs-comment"># often blocked entirely in enterprise networks</span></code></pre>
+<p>That <code>/dev/tcp</code> trick is a bash built-in and works on hosts where <code>nc</code>, <code>telnet</code> and <code>curl</code> have all been removed by the hardening baseline. It is the one connectivity test you can always perform.</p>
+
+<h3>Layer 7: curl like you mean it</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">curl -v https://api.internal/v1/health            <span class="hljs-comment"># headers + TLS details</span>
+curl -sS -o /dev/null -w <span class="hljs-string">&#x27;%{http_code} dns=%{time_namelookup}s tcp=%{time_connect}s \
+tls=%{time_appconnect}s ttfb=%{time_starttransfer}s total=%{time_total}s\n&#x27;</span> \
+  https://api.internal/v1/health
+curl -fsSL -H <span class="hljs-string">&#x27;Authorization: Bearer &#x27;</span><span class="hljs-string">&quot;<span class="hljs-variable">$TOKEN</span>&quot;</span> https://api/v1/items | jq .
+curl -X POST -H <span class="hljs-string">&#x27;Content-Type: application/json&#x27;</span> -d @body.json https://api/v1/items
+curl --resolve api.internal:443:10.20.9.4 https://api.internal/   <span class="hljs-comment"># bypass DNS, keep SNI</span>
+curl -k https://api.internal/                      <span class="hljs-comment"># skip TLS verify - DIAGNOSIS ONLY</span>
+curl --cacert /etc/ssl/corp-root.pem https://api.internal/
+curl -x http://proxy.corp:3128 https://api.internal/
+curl --retry 3 --retry-connrefused --max-time 20 …
+curl -I https://api.internal/                      <span class="hljs-comment"># HEAD only</span></code></pre>
+<p>The <code>-w</code> timing breakdown is the fastest way to localise slowness: a large <code>time_namelookup</code> is DNS, a large <code>time_connect</code> is network or firewall backlog, a large <code>time_appconnect</code> is TLS (often an OCSP or CRL fetch timing out through a proxy), and a large <code>time_starttransfer</code> with everything else fast is the application itself.</p>
+
+<h3>TLS inspection</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">openssl s_client -connect api.internal:443 -servername api.internal &lt; /dev/null
+openssl s_client -connect api.internal:443 -showcerts &lt; /dev/null \
+  | openssl x509 -noout -subject -issuer -dates
+<span class="hljs-built_in">echo</span> | openssl s_client -connect api.internal:443 2&gt;/dev/null \
+  | openssl x509 -noout -enddate            <span class="hljs-comment"># expiry - check this before blaming code</span>
+openssl x509 -<span class="hljs-keyword">in</span> /etc/ssl/corp-root.pem -noout -text | <span class="hljs-built_in">head</span> -20
+openssl verify -CAfile /etc/ssl/corp-root.pem server.pem</code></pre>
+<div class="callout danger"><span class="t">"x509: certificate signed by unknown authority"</span>The customer's TLS-inspecting proxy is re-signing traffic with a corporate root your tool does not trust. Fix it properly per runtime: system store via <code>update-ca-certificates</code>/<code>update-ca-trust</code>; Python via <code>REQUESTS_CA_BUNDLE</code> / <code>SSL_CERT_FILE</code> or <code>pip config set global.cert</code>; Node via <code>NODE_EXTRA_CA_CERTS</code>; Java via <code>keytool -importcert</code> into the cacerts truststore; Go via the system store. Disabling verification is never the answer you leave in place.</div>
+
+<h3>Proxies</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">export</span> HTTP_PROXY=http://proxy.corp:3128
+<span class="hljs-built_in">export</span> HTTPS_PROXY=http://proxy.corp:3128      <span class="hljs-comment"># yes, http:// for the proxy itself</span>
+<span class="hljs-built_in">export</span> NO_PROXY=localhost,127.0.0.1,.internal,.svc,.cluster.local,10.0.0.0/8,169.254.169.254
+<span class="hljs-built_in">export</span> http_proxy=<span class="hljs-string">&quot;<span class="hljs-variable">$HTTP_PROXY</span>&quot;</span> https_proxy=<span class="hljs-string">&quot;<span class="hljs-variable">$HTTPS_PROXY</span>&quot;</span> no_proxy=<span class="hljs-string">&quot;<span class="hljs-variable">$NO_PROXY</span>&quot;</span></code></pre>
+<table>
+<tr><th>Symptom</th><th>Likely proxy cause</th></tr>
+<tr><td>Internal service calls hang for 30 s then fail</td><td>Missing from <code>NO_PROXY</code> — traffic is being sent to the proxy, which cannot route internally</td></tr>
+<tr><td>Works in your shell, fails under systemd</td><td>Units do not read your profile; add <code>Environment=</code> or an <code>EnvironmentFile=</code></td></tr>
+<tr><td>Works for you, fails under <code>sudo</code></td><td><code>env_reset</code>; use <code>sudo -E</code> or add <code>env_keep</code> in sudoers</td></tr>
+<tr><td>AWS/Azure metadata calls fail</td><td><code>169.254.169.254</code> must be in <code>NO_PROXY</code></td></tr>
+<tr><td>Kubernetes in-cluster calls fail</td><td><code>.svc</code>, <code>.cluster.local</code> and the pod/service CIDRs must be in <code>NO_PROXY</code></td></tr>
+<tr><td>Some tools honour it, others do not</td><td>Case sensitivity: Go reads both, some libraries only read lowercase. Set both</td></tr>
+</table>
+
+<h3>/etc/hosts and packet capture</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Temporary override to test against a specific backend before DNS is updated</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;10.20.9.44  api.internal&#x27;</span> | <span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> -a /etc/hosts
+getent hosts api.internal        <span class="hljs-comment"># confirm it took effect</span>
+
+<span class="hljs-comment"># tcpdump: when you need proof about what left the box</span>
+<span class="hljs-built_in">sudo</span> tcpdump -i any -nn port 5432 -c 50
+<span class="hljs-built_in">sudo</span> tcpdump -i any -nn host 10.20.9.4 and port 443 -w /tmp/cap.pcap
+<span class="hljs-built_in">sudo</span> tcpdump -i any -nn -A <span class="hljs-string">&#x27;tcp port 8080 and (((ip[2:2]-((ip[0]&amp;0xf)&lt;&lt;2))-((tcp[12]&amp;0xf0)&gt;&gt;2))!=0)&#x27;</span></code></pre>
+<p>Reading a capture: <code>SYN</code> with no <code>SYN-ACK</code> means a firewall is dropping (silently) or the service is not listening; <code>SYN</code> followed by <code>RST</code> means something actively refused — usually nothing bound to that port or a firewall configured to reject rather than drop. That distinction tells the customer's network team exactly where to look.</p>
+<div class="callout note"><span class="t">Always clean up /etc/hosts</span>A forgotten hosts entry is a time bomb that fires weeks later when the real IP changes. Note every edit you make to a customer system in your handover document, and remove temporary ones before you leave.</div>
+
+<h2 id="performance-and-resource-triage">Performance and Resource Triage</h2>
+<p class="lead">Something is slow or something stopped. You have access, no dashboards, and a customer on a call. These commands, in this order, localise the problem to CPU, memory, disk or network within two minutes.</p>
+
+<h3>Load average, correctly understood</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">uptime</span>
+<span class="hljs-comment">#  14:22:11 up 42 days,  3:11,  2 users,  load average: 8.41, 6.02, 3.88</span>
+<span class="hljs-built_in">nproc</span>              <span class="hljs-comment"># 4  -&gt; load of 8.41 on 4 cores is a deep run queue</span>
+<span class="hljs-built_in">cat</span> /proc/pressure/cpu /proc/pressure/io /proc/pressure/memory   <span class="hljs-comment"># PSI, kernel 4.20+</span></code></pre>
+<p>Load average on Linux counts processes in <strong>R</strong> (runnable) <em>and</em> <strong>D</strong> (uninterruptible I/O wait). That is why a host with idle CPUs can show a load of 30 — the queue is blocked on a failing NFS mount, not on compute. The three numbers are 1-, 5- and 15-minute averages: rising means the problem is getting worse, falling means it peaked already. PSI (<code>/proc/pressure/*</code>) is far more precise when available — it reports the percentage of time tasks were stalled on each resource.</p>
+
+<h3>CPU</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">vmstat 1 5
+<span class="hljs-comment"># procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----</span>
+<span class="hljs-comment">#  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st</span>
+<span class="hljs-comment">#  9  2      0 421364  18244 2302120    0    0  1240  3300 8211 15002 41  9 15 35  0</span>
+
+mpstat -P ALL 1 3            <span class="hljs-comment"># per-core (sysstat package)</span>
+pidstat -u 1 5               <span class="hljs-comment"># per-process CPU over time</span>
+top -b -n1 -o %CPU | <span class="hljs-built_in">head</span> -15   <span class="hljs-comment"># batch mode - scriptable snapshot</span></code></pre>
+<p>Read the <code>r</code> column (runnable) against core count, <code>b</code> (blocked) for I/O trouble, <code>cs</code> (context switches) for thrashing, and <code>st</code> (steal) — non-zero steal on a cloud VM means the hypervisor is giving your cycles to someone else, which is a capacity conversation with the customer's cloud team, not a code problem.</p>
+
+<h3>Memory and the OOM killer</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">free -h
+<span class="hljs-comment">#                total   used   free  shared  buff/cache   available</span>
+<span class="hljs-comment"># Mem:            15Gi   12Gi  412Mi    64Mi       2.2Gi      1.1Gi</span>
+<span class="hljs-comment"># Swap:          2.0Gi  1.8Gi  200Mi</span></code></pre>
+<p>Ignore <code>free</code>; read <strong>available</strong>. Linux deliberately uses spare RAM for page cache and will evict it on demand. Low <code>available</code> with high swap usage means real pressure.</p>
+<div class="code-label">BASH</div><pre><code class="hljs">ps -eo pid,user,rss,vsz,<span class="hljs-built_in">comm</span> --<span class="hljs-built_in">sort</span>=-rss | <span class="hljs-built_in">head</span> -10
+smem -rs rss 2&gt;/dev/null || <span class="hljs-literal">true</span>          <span class="hljs-comment"># PSS accounting, better for shared memory</span>
+<span class="hljs-built_in">cat</span> /proc/meminfo | grep -E <span class="hljs-string">&#x27;MemAvailable|Dirty|Writeback|Slab&#x27;</span>
+
+<span class="hljs-comment"># Did the OOM killer fire?</span>
+dmesg -T | grep -i -E <span class="hljs-string">&#x27;out of memory|killed process|oom&#x27;</span>
+journalctl -k --since -24h | grep -i oom
+grep -i <span class="hljs-string">&#x27;killed process&#x27;</span> /var/log/messages /var/log/syslog 2&gt;/dev/null
+
+<span class="hljs-comment"># Per-process OOM tuning</span>
+<span class="hljs-built_in">cat</span> /proc/4821/oom_score /proc/4821/oom_score_adj
+<span class="hljs-built_in">echo</span> -500 | <span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> /proc/4821/oom_score_adj     <span class="hljs-comment"># make it less likely to be chosen</span></code></pre>
+<div class="code-label">TEXT</div><pre><code class="hljs">[Mar11 02:14] Out of memory: Killed process 4821 (python3) total-vm:9843212kB,
+              anon-rss:7120448kB, file-rss:0kB, shmem-rss:0kB, UID:1001 pgtables:15104kB</code></pre>
+<p>That kernel line is conclusive: the process was not buggy in a way that produced a stack trace — the kernel shot it. <code>anon-rss:7120448kB</code> tells you it had reached 7.1 GB. Next step is either raising <code>MemoryMax</code>, adding RAM, or fixing the leak — but you now know <em>which</em> conversation to have.</p>
+
+<h3>Disk</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">df</span> -h                      <span class="hljs-comment"># space</span>
+<span class="hljs-built_in">df</span> -i                      <span class="hljs-comment"># INODES - a separate exhaustion mode entirely</span>
+<span class="hljs-built_in">du</span> -xh --max-depth=1 /var 2&gt;/dev/null | <span class="hljs-built_in">sort</span> -h | <span class="hljs-built_in">tail</span>
+iostat -xz 1 5             <span class="hljs-comment"># per-device: %util, await, r/s, w/s</span>
+iotop -oPa                 <span class="hljs-comment"># per-process I/O (needs root)</span>
+lsblk -f                   <span class="hljs-comment"># devices, filesystems, mountpoints, UUIDs</span>
+mount | column -t
+findmnt -D                 <span class="hljs-comment"># mounts with space, tree form</span></code></pre>
+<p>In <code>iostat -xz</code>, <code>%util</code> near 100 with high <code>await</code> (ms per I/O) means the device is saturated. On SSD/NVMe, <code>await</code> above ~10 ms is suspicious; on network-attached storage (EBS, NFS) it routinely means you hit a throughput or IOPS limit the customer provisioned.</p>
+
+<h3>Runbook: "disk full at 2am"</h3>
+<ol class="steps">
+<li><b>Confirm which filesystem</b><code>df -h | sort -k5 -rn | head</code>. Also run <code>df -i</code> — millions of tiny session files can exhaust inodes while space looks fine, and the error message is identical.</li>
+<li><b>Find the weight</b><code>sudo du -xh --max-depth=2 /var 2&gt;/dev/null | sort -h | tail -20</code>. Start at the mountpoint that is full; <code>-x</code> prevents wandering onto other filesystems.</li>
+<li><b>Check deleted-but-open files</b><code>sudo lsof +L1</code> or <code>sudo lsof | grep deleted</code>. If <code>du</code> and <code>df</code> disagree by gigabytes, this is why. Restarting the holding process reclaims the space instantly.</li>
+<li><b>The usual suspects</b><code>/var/log</code> (unrotated app logs), <code>/var/log/journal</code> (<code>journalctl --vacuum-size=500M</code>), <code>/var/lib/docker</code> (<code>docker system df</code> then <code>docker system prune -a --volumes</code> — confirm with the owner first), <code>/tmp</code>, core dumps in <code>/var/lib/systemd/coredump</code>, old releases under <code>/opt/app/releases</code>, package caches (<code>apt clean</code>, <code>dnf clean all</code>).</li>
+<li><b>Buy time safely</b>Truncate rather than delete an active log: <code>sudo truncate -s 0 /var/log/app/app.log</code> keeps the inode so the writer does not lose its descriptor. <code>rm</code> on an open log frees nothing until restart.</li>
+<li><b>Verify and prevent</b>Re-check <code>df -h</code>, then fix the cause: logrotate config, a <code>SizeMaxUse=</code> in journald, a retention cron. Write it into the handover so it does not recur next month.</li>
+</ol>
+<div class="callout danger"><span class="t">Never <code>rm -rf</code> to free space under pressure</span>At 2am on someone else's production host, <code>rm -rf /var/lib/&lt;something&gt;</code> is how an incident becomes a data-loss incident. Identify, confirm ownership with the customer, prefer truncate and rotate, and keep a record of everything you removed.</div>
+
+<h2 id="logs-where-they-live-and-how-to-read-them">Logs: Where They Live and How to Read Them</h2>
+<p class="lead">Logs are the only evidence you have about what happened before you arrived. Knowing the layout of a stranger's logging setup in under a minute is a differentiating skill.</p>
+
+<table>
+<tr><th>Path</th><th>Debian/Ubuntu</th><th>RHEL family</th><th>Contains</th></tr>
+<tr><td>General syslog</td><td><code>/var/log/syslog</code></td><td><code>/var/log/messages</code></td><td>Everything not routed elsewhere</td></tr>
+<tr><td>Auth</td><td><code>/var/log/auth.log</code></td><td><code>/var/log/secure</code></td><td>SSH logins, sudo, PAM, failed attempts</td></tr>
+<tr><td>Kernel</td><td colspan="2"><code>/var/log/kern.log</code>, <code>dmesg</code>, <code>journalctl -k</code></td><td>OOM kills, disk errors, network drivers</td></tr>
+<tr><td>Boot</td><td colspan="2"><code>journalctl -b</code>, <code>/var/log/boot.log</code></td><td>Why a service did not start at boot</td></tr>
+<tr><td>Journal</td><td colspan="2"><code>/var/log/journal/</code> (binary) or <code>/run/log/journal</code> (volatile)</td><td>All systemd-captured stdout/stderr</td></tr>
+<tr><td>Packages</td><td><code>/var/log/dpkg.log</code>, <code>apt/history.log</code></td><td><code>/var/log/dnf.log</code>, <code>rpm -qa --last</code></td><td>"What changed last Tuesday?"</td></tr>
+<tr><td>Web</td><td colspan="2"><code>/var/log/nginx/</code>, <code>/var/log/httpd/</code></td><td>access + error logs</td></tr>
+<tr><td>Containers</td><td colspan="2"><code>/var/lib/docker/containers/&lt;id&gt;/&lt;id&gt;-json.log</code></td><td>What <code>docker logs</code> reads</td></tr>
+</table>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># The &quot;what changed&quot; question, answered three ways</span>
+grep -E <span class="hljs-string">&#x27; (install|upgrade|remove) &#x27;</span> /var/log/dpkg.log | <span class="hljs-built_in">tail</span> -30
+rpm -qa --last | <span class="hljs-built_in">head</span> -30
+journalctl --since <span class="hljs-string">&#x27;3 days ago&#x27;</span> -u <span class="hljs-string">&#x27;*&#x27;</span> -p warning --no-pager | <span class="hljs-built_in">head</span> -50
+<span class="hljs-built_in">ls</span> -lt /etc | <span class="hljs-built_in">head</span> -20            <span class="hljs-comment"># most recently modified config files</span>
+<span class="hljs-built_in">sudo</span> find /etc -mtime -7 -<span class="hljs-built_in">type</span> f  <span class="hljs-comment"># anything edited in the last week</span></code></pre>
+
+<h3>Tailing and filtering under pressure</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">tail</span> -f /var/log/app/app.log
+<span class="hljs-built_in">tail</span> -F /var/log/app/app.log               <span class="hljs-comment"># survives logrotate (reopens by name)</span>
+<span class="hljs-built_in">tail</span> -n 500 app.log | grep -i error
+multitail /var/log/a.log /var/log/b.log    <span class="hljs-comment"># if available</span>
+journalctl -u api -u worker -f             <span class="hljs-comment"># follow several units at once</span>
+journalctl -f | grep --line-buffered ERROR <span class="hljs-comment"># --line-buffered or grep buffers 4 KB first</span>
+<span class="hljs-built_in">stdbuf</span> -oL -eL ./noisy_tool | grep WARN    <span class="hljs-comment"># force line buffering on a stubborn program</span>
+less +F /var/log/app/app.log               <span class="hljs-comment"># Ctrl-C to stop following, / to search, F to resume</span></code></pre>
+<div class="callout tip"><span class="t">less beats tail for investigation</span>In <code>less</code>: <code>/pattern</code> searches forward, <code>?pattern</code> backward, <code>n</code>/<code>N</code> cycles, <code>&amp;pattern</code> shows <em>only</em> matching lines (like an interactive grep), <code>G</code> jumps to the end, <code>g</code> to the start, <code>-S</code> stops line wrapping. <code>&amp;</code> alone is worth learning — it turns a 2 GB log into a filtered view instantly without re-reading the file.</div>
+
+<h3>logrotate</h3>
+<div class="code-label">TEXT</div><pre><code class="hljs"># /etc/logrotate.d/inference-api
+/var/log/inference-api/*.log {
+    daily
+    rotate 14
+    size 100M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 svc_api app
+    sharedscripts
+    postrotate
+        systemctl kill -s HUP inference-api.service 2&gt;/dev/null || true
+    endscript
+}</code></pre>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">sudo</span> logrotate -d /etc/logrotate.d/inference-api    <span class="hljs-comment"># DEBUG: show what would happen</span>
+<span class="hljs-built_in">sudo</span> logrotate -f /etc/logrotate.d/inference-api    <span class="hljs-comment"># force a rotation now</span>
+<span class="hljs-built_in">cat</span> /var/lib/logrotate/status                        <span class="hljs-comment"># when each file last rotated</span></code></pre>
+<p>Use <code>copytruncate</code> only if the application cannot reopen its log on SIGHUP — it is simpler but races, and you can lose lines written between the copy and the truncate.</p>
+
+<h2 id="working-remotely-for-days-tmux-dotfiles-persistence">Working Remotely for Days: tmux, Dotfiles, Persistence</h2>
+<p class="lead">Engagements are measured in weeks. Your VPN will drop mid-migration. Your laptop will sleep. A terminal multiplexer turns those from incidents into non-events, and a portable dotfile setup means your tenth customer host feels like your first.</p>
+
+<h3>tmux</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">tmux new -s acme              <span class="hljs-comment"># named session</span>
+tmux <span class="hljs-built_in">ls</span>                        <span class="hljs-comment"># list sessions</span>
+tmux attach -t acme            <span class="hljs-comment"># reattach after the VPN drops</span>
+tmux attach -d -t acme         <span class="hljs-comment"># detach other clients first</span>
+tmux kill-session -t acme
+tmux new -s acme -d <span class="hljs-string">&#x27;tail -F /var/log/app/app.log&#x27;</span>   <span class="hljs-comment"># start detached, running something</span></code></pre>
+<table>
+<tr><th>Keys (prefix <span class="kbd">Ctrl</span>+<span class="kbd">B</span>)</th><th>Action</th><th>Keys</th><th>Action</th></tr>
+<tr><td><span class="kbd">d</span></td><td>Detach (session keeps running)</td><td><span class="kbd">c</span></td><td>New window</td></tr>
+<tr><td><span class="kbd">"</span> / <span class="kbd">%</span></td><td>Split horizontal / vertical</td><td><span class="kbd">0</span>–<span class="kbd">9</span></td><td>Jump to window</td></tr>
+<tr><td>Arrow keys</td><td>Move between panes</td><td><span class="kbd">z</span></td><td>Zoom pane to full screen (toggle)</td></tr>
+<tr><td><span class="kbd">[</span></td><td>Copy/scroll mode (<kbd>q</kbd> exits)</td><td><span class="kbd">,</span></td><td>Rename window</td></tr>
+<tr><td><span class="kbd">x</span></td><td>Kill pane</td><td><span class="kbd">s</span></td><td>Session picker</td></tr>
+</table>
+<div class="code-label">TEXT</div><pre><code class="hljs"># ~/.tmux.conf - portable, minimal, no plugins required
+set -g mouse on
+set -g history-limit 100000
+set -g base-index 1
+setw -g pane-base-index 1
+set -g status-right &#x27;#(whoami)@#H  %Y-%m-%d %H:%M&#x27;
+bind r source-file ~/.tmux.conf \; display &quot;reloaded&quot;
+bind | split-window -h
+bind - split-window -v
+set -sg escape-time 10</code></pre>
+<div class="callout note"><span class="t">GNU screen is the fallback</span>Some locked-down images ship <code>screen</code> but not <code>tmux</code>. Minimum viable: <code>screen -S acme</code> to start, <span class="kbd">Ctrl</span>+<span class="kbd">A</span> <span class="kbd">d</span> to detach, <code>screen -r acme</code> to reattach, <code>screen -ls</code> to list. Know both.</div>
+
+<h3>Persistence without a multiplexer</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-built_in">nohup</span> ./long_migration.sh &gt; migration.log 2&gt;&amp;1 &amp;
+<span class="hljs-built_in">echo</span> $! &gt; /tmp/migration.pid
+<span class="hljs-built_in">disown</span>                                        <span class="hljs-comment"># detach from this shell</span>
+
+setsid ./job.sh &gt; job.log 2&gt;&amp;1 &lt; /dev/null &amp;  <span class="hljs-comment"># fully detached, new session leader</span>
+
+<span class="hljs-comment"># Best option when systemd is available and you have the rights:</span>
+systemd-run --user --unit=migration --working-directory=/opt/app ./long_migration.sh
+journalctl --user -u migration -f</code></pre>
+<p><code>systemd-run</code> is the cleanest: the job survives logout, is supervised, gets a cgroup, and its output goes to the journal automatically — no stray log files to clean up.</p>
+
+<h3>Dotfiles that travel</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># A single idempotent bootstrap you can paste into any customer shell</span>
+<span class="hljs-built_in">cat</span> &gt;&gt; ~/.bashrc &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span>
+<span class="hljs-built_in">export</span> HISTSIZE=50000 HISTFILESIZE=100000
+<span class="hljs-built_in">export</span> HISTCONTROL=ignoreboth:erasedups
+<span class="hljs-built_in">export</span> HISTTIMEFORMAT=<span class="hljs-string">&#x27;%F %T  &#x27;</span>
+<span class="hljs-built_in">shopt</span> -s histappend checkwinsize globstar cdspell
+<span class="hljs-built_in">export</span> EDITOR=vim PAGER=less LESS=<span class="hljs-string">&#x27;-R -S -i -M&#x27;</span>
+<span class="hljs-built_in">alias</span> ll=<span class="hljs-string">&#x27;ls -alhF&#x27;</span> la=<span class="hljs-string">&#x27;ls -A&#x27;</span> l=<span class="hljs-string">&#x27;ls -CF&#x27;</span>
+<span class="hljs-built_in">alias</span> ..=<span class="hljs-string">&#x27;cd ..&#x27;</span> ...=<span class="hljs-string">&#x27;cd ../..&#x27;</span>
+<span class="hljs-built_in">alias</span> grep=<span class="hljs-string">&#x27;grep --color=auto&#x27;</span>
+<span class="hljs-built_in">alias</span> <span class="hljs-built_in">df</span>=<span class="hljs-string">&#x27;df -h&#x27;</span> <span class="hljs-built_in">du</span>=<span class="hljs-string">&#x27;du -h&#x27;</span>
+<span class="hljs-built_in">alias</span> ports=<span class="hljs-string">&#x27;ss -tulpn&#x27;</span>
+<span class="hljs-built_in">alias</span> psg=<span class="hljs-string">&#x27;ps -eo pid,ppid,user,%cpu,%mem,etime,cmd --sort=-%cpu | head -20&#x27;</span>
+PS1=<span class="hljs-string">&#x27;\[\e[1;31m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ &#x27;</span>   <span class="hljs-comment"># red user@host = NOT my laptop</span>
+EOF</code></pre>
+<div class="callout tip"><span class="t">Make customer hosts look different</span>A red prompt on every host that is not yours is the cheapest possible guard against running a destructive command in the wrong window. Pair it with a distinctive tmux status bar per engagement. People who have pasted a <code>DROP TABLE</code> into the wrong pane never skip this again.</div>
+<div class="callout warn"><span class="t">Ask before you install</span>Cloning a dotfiles repo onto a customer host means pulling code from the internet onto their system. On a regulated engagement that may be a policy violation. Prefer a short inline heredoc like the one above, confined to your own home directory, and mention it in your handover.</div>
+
+<h2 id="the-fde-field-kit">The FDE Field Kit</h2>
+<p class="lead">One table to keep open, and one procedure to run every single time you land on a host you have never seen.</p>
+
+<h3>Command cheat sheet</h3>
+<table>
+<tr><th>Question</th><th>Command</th></tr>
+<tr><td>What OS and version is this?</td><td><code>cat /etc/os-release; uname -a; hostnamectl</code></td></tr>
+<tr><td>Who am I and what can I do?</td><td><code>id; sudo -l; groups</code></td></tr>
+<tr><td>What is running?</td><td><code>systemctl list-units --type=service --state=running</code></td></tr>
+<tr><td>What is broken?</td><td><code>systemctl --failed; journalctl -p err -b --no-pager | tail -50</code></td></tr>
+<tr><td>What is listening?</td><td><code>ss -tulpn</code></td></tr>
+<tr><td>What is eating CPU/RAM?</td><td><code>ps -eo pid,user,%cpu,%mem,rss,cmd --sort=-%cpu | head</code></td></tr>
+<tr><td>Where did the disk go?</td><td><code>df -h; df -i; du -xh --max-depth=1 /var | sort -h | tail</code></td></tr>
+<tr><td>Can I reach X?</td><td><code>timeout 3 bash -c '&gt;/dev/tcp/host/port' &amp;&amp; echo open</code></td></tr>
+<tr><td>Why is DNS wrong?</td><td><code>cat /etc/resolv.conf; dig +short host; getent hosts host</code></td></tr>
+<tr><td>Is it the proxy?</td><td><code>env | grep -i proxy; curl -v --noproxy '*' URL</code></td></tr>
+<tr><td>Is it the certificate?</td><td><code>openssl s_client -connect host:443 -servername host &lt;/dev/null</code></td></tr>
+<tr><td>What changed recently?</td><td><code>rpm -qa --last \| head</code> / <code>tail /var/log/dpkg.log</code>; <code>find /etc -mtime -7</code></td></tr>
+<tr><td>Who logged in?</td><td><code>last -20; lastb -20; journalctl -u sshd --since -1d</code></td></tr>
+<tr><td>What is this process doing?</td><td><code>strace -f -p PID</code>; <code>cat /proc/PID/{status,limits,environ}</code></td></tr>
+<tr><td>Which files are open?</td><td><code>lsof -p PID; lsof -i :PORT</code></td></tr>
+<tr><td>Find config/secret files</td><td><code>find / -xdev -name '*.conf' -newer /etc/hostname 2&gt;/dev/null</code></td></tr>
+<tr><td>Top error strings</td><td><code>grep -oE 'ERROR.*' app.log \| sort \| uniq -c \| sort -rn \| head</code></td></tr>
+<tr><td>Status code histogram</td><td><code>awk '{c[$9]++} END{for(k in c) print c[k],k}' access.log \| sort -rn</code></td></tr>
+<tr><td>Keep a session alive</td><td><code>tmux new -s work</code> / <code>tmux attach -t work</code></td></tr>
+<tr><td>Diff two hosts</td><td><code>diff &lt;(ssh a 'cmd') &lt;(ssh b 'cmd')</code></td></tr>
+</table>
+
+<h3>First 15 minutes on an unfamiliar server</h3>
+<ol class="steps">
+<li><b>Start a recorded, persistent session</b><code>tmux new -s acme</code>, then <code>script -a ~/session-$(date +%F).log</code> if policy allows. You will want the transcript later, and so will the customer's ticket.</li>
+<li><b>Identify the box</b><code>hostnamectl; cat /etc/os-release; uname -r; nproc; free -h; df -h</code>. Write distro, version, kernel, core count, RAM and free disk into your notes before touching anything.</li>
+<li><b>Identify yourself</b><code>id; sudo -l; groups</code>. Know your blast radius before you need it, not while an outage is running. If <code>sudo -l</code> prompts for a password you do not have, find that out now.</li>
+<li><b>Check health</b><code>uptime; systemctl --failed; journalctl -p err -b --no-pager | tail -40; dmesg -T | tail -30</code>. Note anything already broken so you are not blamed for it.</li>
+<li><b>Map the network posture</b><code>ip -brief addr; ip route; cat /etc/resolv.conf; env | grep -i proxy; ss -tulpn</code>. Determine immediately whether there is egress: <code>timeout 5 curl -sI https://example.com | head -1</code>.</li>
+<li><b>Find the application</b><code>systemctl list-units --type=service --state=running</code>, then <code>systemctl cat &lt;unit&gt;</code> for the exact <code>ExecStart</code>, user, working directory and environment file. That one command tells you where the code, config and logs are.</li>
+<li><b>Locate the evidence</b><code>ls -lt /var/log | head</code>; identify the app's log directory and whether the journal is persistent (<code>ls /var/log/journal</code>).</li>
+<li><b>Check what is installed</b><code>for t in git curl jq python3 docker kubectl podman rsync tmux; do command -v $t || echo "MISSING $t"; done</code>. Decide now whether you need to request packages or bring static binaries.</li>
+<li><b>Establish a workspace</b><code>mkdir -p ~/work &amp;&amp; cd ~/work</code>. Keep everything you create in one directory so cleanup at the end of the engagement is a single <code>rm -rf</code> you can describe precisely.</li>
+<li><b>Snapshot before you change anything</b><code>sudo cp -a /etc/app /etc/app.bak-$(date +%F)</code> for any config you plan to edit; <code>rpm -qa | sort &gt; ~/work/packages-before.txt</code>. Being able to diff and revert is what separates a consultant from a liability.</li>
+</ol>
+<div class="callout ok"><span class="t">Leave a trail</span>Keep a running <code>~/work/CHANGELOG.md</code>: timestamp, command, reason, rollback. At the end of the engagement that file becomes the handover document, and during the engagement it is what you read out when someone asks "what did you change at 14:30?"</div>
+
+<h2 id="interview-questions">Interview Questions</h2>
+<p class="lead">Expect these in any FDE, SRE, platform or solutions-engineering loop. The answers below are the depth an interviewer is listening for — mechanism first, then the practical consequence.</p>
+
+<div class="qa"><div class="q">Walk me through what happens when you type <code>ls -l | grep foo</code> and press Enter.</div><div class="a">Bash parses the line into a pipeline of two commands and performs expansions (brace, tilde, parameter, command substitution, arithmetic, then word splitting and globbing) on each. It creates a pipe with <code>pipe()</code>, giving a read and a write file descriptor. It forks twice. In the first child it dups the pipe's write end onto fd 1, closes the unused read end, and calls <code>execve("/bin/ls", …)</code> after resolving <code>ls</code> through PATH. In the second child it dups the read end onto fd 0 and execs <code>grep</code>. The parent closes both pipe ends — important, or <code>grep</code> would never see EOF — and waits. Both processes run concurrently; <code>ls</code> blocks when the 64 KB pipe buffer fills until <code>grep</code> drains it. The shell reports the exit status of the last command unless <code>pipefail</code> is set. Crucially, globbing happened in the <em>shell</em> before exec, which is why you quote patterns you want the command to interpret.</div></div>
+
+<div class="qa"><div class="q">A customer says "the API can't reach the database." You have SSH on the API host. What do you do?</div><div class="a">I work up the stack and stop at the first layer that fails. First, does the name resolve — <code>getent hosts db.internal</code> and <code>dig +short db.internal</code>, checking both because the application goes through NSS while dig does not, and a stale <code>/etc/hosts</code> entry would show the difference. Second, is there a route — <code>ip route get &lt;ip&gt;</code>. Third, does TCP connect — <code>timeout 3 bash -c '&gt;/dev/tcp/db.internal/5432'</code>, which needs no tools. If that hangs, a firewall is dropping; if it is refused immediately, nothing is listening or a firewall is rejecting. Fourth, if TLS is involved, <code>openssl s_client -connect db:5432 -starttls postgres</code> to check certificate and expiry. Fifth, application layer: credentials, the actual connection string the app is using (<code>tr '\0' '\n' &lt; /proc/&lt;pid&gt;/environ</code>), and whether the connection pool is exhausted. In parallel I check <code>env | grep -i proxy</code>, because an internal host missing from <code>NO_PROXY</code> produces exactly this symptom with a 30-second hang. I also check from the database side with <code>ss -tn state established 'sport = :5432'</code> to see whether connections are arriving at all — that single fact tells the customer's network team whether the problem is in front of or behind the firewall.</div></div>
+
+<div class="qa"><div class="q"><code>df</code> says the disk is 100% full but <code>du</code> only accounts for 40%. Explain.</div><div class="a">Almost certainly a deleted-but-still-open file. When a process holds a file descriptor and the file is unlinked, the directory entry disappears — so <code>du</code>, which walks the directory tree, cannot see it — but the inode and its blocks stay allocated until the last descriptor closes. A log file rotated with <code>rm</code> instead of truncate, while the writer still holds it open, is the classic cause. I confirm with <code>sudo lsof +L1</code> or <code>lsof | grep deleted</code>, which shows the holding PID and the size. The fix is to restart or SIGHUP the process so it reopens its log, or truncate through the descriptor with <code>: &gt; /proc/&lt;pid&gt;/fd/&lt;n&gt;</code> if a restart is not acceptable. Two other possibilities worth ruling out: inode exhaustion (<code>df -i</code>), which produces "No space left on device" with plenty of free bytes; and a filesystem mounted <em>over</em> a populated directory, hiding the data underneath from <code>du</code> but not from the underlying filesystem's accounting.</div></div>
+
+<div class="qa"><div class="q">What does <code>set -euo pipefail</code> do, and where does it fail you?</div><div class="a"><code>-e</code> exits on the first command returning non-zero, <code>-u</code> treats expansion of an unset variable as an error, and <code>-o pipefail</code> makes a pipeline return the status of the rightmost failing stage rather than the last stage. Together they turn silent failures into loud ones. The gaps: <code>-e</code> is deliberately suppressed inside conditions, so <code>if cmd; then</code>, <code>cmd &amp;&amp; …</code>, <code>cmd || …</code> and <code>! cmd</code> do not abort — and that suppression propagates into functions called from those contexts, which surprises people. It also does not fire on a command whose failure is in the middle of a <code>&amp;&amp;</code> chain that ultimately succeeds. <code>-u</code> breaks on <code>"${arr[@]}"</code> for an empty array in bash below 4.4, so you write <code>"${arr[@]:-}"</code>. <code>pipefail</code> makes <code>producer | head -1</code> fail with SIGPIPE/141 once head exits, which you have to explicitly tolerate. So I use all three as the default, and I pair them with an <code>ERR</code> trap that prints <code>$LINENO</code> and <code>$BASH_COMMAND</code>, plus an <code>EXIT</code> trap for cleanup — because <code>-e</code> tells you that something failed but not what, and on a customer system that distinction matters.</div></div>
+
+<div class="qa"><div class="q">Difference between SIGTERM and SIGKILL, and why does it matter in production?</div><div class="a">SIGTERM (15) is a request: the process can install a handler, finish in-flight requests, flush buffers, close database connections, deregister from a load balancer, and exit cleanly. SIGKILL (9) is executed by the kernel — the process never runs another instruction, no handler fires, no buffer is flushed, no lock is released. The practical consequences: a web server killed with -9 drops in-flight connections and produces a burst of 502s; Postgres killed with -9 enters crash recovery on next start; a process holding a lock file leaves it stale and blocks the next start. The correct pattern is escalation — send TERM, wait a bounded grace period, then KILL only if it is still alive. That is precisely what systemd does (<code>KillSignal=</code>, <code>TimeoutStopSec=</code>, then SIGKILL) and what Kubernetes does (<code>preStop</code> hook, SIGTERM, <code>terminationGracePeriodSeconds</code>, SIGKILL). Note also that SIGKILL cannot interrupt a process in uninterruptible sleep (state D) — if a process is blocked on a hung NFS mount, even -9 will not remove it, which is a useful diagnostic in itself.</div></div>
+
+<div class="qa"><div class="q">You need to reach a Postgres that only a bastion can see, from a GUI tool on your laptop. How?</div><div class="a">An SSH local port forward: <code>ssh -N -L 5432:db.internal:5432 bastion</code>, then point the GUI at <code>127.0.0.1:5432</code>. The <code>-N</code> means no remote command, just the tunnel. The hostname <code>db.internal</code> is resolved <em>on the bastion</em>, which is the point — my laptop does not need to resolve or route to it. If the bastion itself is behind another hop I add <code>-J jump1</code>, and I put the whole thing in <code>~/.ssh/config</code> with <code>ProxyJump</code> and <code>LocalForward</code> so it is one word to reconnect. If I need many internal services, <code>ssh -D 1080</code> gives a SOCKS5 proxy and I configure the browser or use <code>curl --socks5-hostname</code>. Two caveats I would raise with the customer: forwarding must be permitted (<code>AllowTcpForwarding yes</code> in sshd_config, and many hardened bastions disable it), and this is a data path into a production database, so it needs to be sanctioned, time-boxed, and ideally read-only credentials. I would not leave a standing tunnel running.</div></div>
+
+<div class="qa"><div class="q">How do you find what is consuming memory on a host, and how do you prove an OOM kill happened?</div><div class="a">I start with <code>free -h</code> and read the <strong>available</strong> column, not free — Linux uses idle RAM for page cache and reclaims it on demand, so low "free" is normal. Then <code>ps -eo pid,user,rss,vsz,comm --sort=-rss | head</code> for the biggest resident sets; RSS over-counts shared pages across processes, so for a fork-heavy app like gunicorn or Chrome I prefer <code>smem</code> and its PSS figure. For a proof of an OOM kill I check the kernel ring buffer: <code>dmesg -T | grep -i 'killed process'</code> or <code>journalctl -k --since -24h | grep -i oom</code>. The kernel prints the victim's PID, name, <code>total-vm</code> and <code>anon-rss</code> at kill time, which both confirms the event and gives you the size it reached. In containers and under systemd it may be a cgroup limit rather than global pressure — then I check <code>systemctl show app -p MemoryMax -p MemoryCurrent</code> or <code>/sys/fs/cgroup/.../memory.events</code> for a non-zero <code>oom_kill</code> counter. That distinction matters: global OOM means the host is undersized, cgroup OOM means the limit is wrong or the app leaks.</div></div>
+
+<div class="qa"><div class="q">Hard link versus symbolic link.</div><div class="a">A hard link is an additional directory entry pointing at the same inode. There is no "original" — the inode has a link count, the data persists until the count reaches zero and no process holds it open. Hard links cannot cross filesystems (inode numbers are only meaningful within one) and by convention cannot be made to directories, because that would permit cycles the tree-walking tools cannot handle. A symbolic link is a distinct inode whose content is a path string, resolved at access time. It can cross filesystems, can point at directories, can point at something that does not exist yet (dangling), and tools can choose to follow it or not — hence <code>ls -L</code>, <code>cp -P</code>, <code>find -L</code>. Operationally I use symlinks for release management: deploy to <code>releases/&lt;version&gt;</code> and atomically repoint <code>current</code> with <code>ln -sfn</code>, so rollback is one syscall. I use hard links for deduplicated backups and for rsync's <code>--link-dest</code>. And I remember that <code>rm</code> of a symlink removes the link, while <code>rm symlink/</code> with a trailing slash may follow it — a distinction that has deleted real data.</div></div>
+
+<div class="qa"><div class="q">What is the difference between <code>&gt;file 2&gt;&amp;1</code> and <code>2&gt;&amp;1 &gt;file</code>?</div><div class="a">Redirections are processed left to right and <code>2&gt;&amp;1</code> means "point fd 2 at whatever fd 1 currently points at" — it is a copy of the current target, not a permanent alias. In <code>&gt;file 2&gt;&amp;1</code>, stdout is first pointed at the file, then stderr is pointed at the same file; both end up in the file. In <code>2&gt;&amp;1 &gt;file</code>, stderr is first pointed at the terminal (where stdout currently points), and only then is stdout moved to the file — so errors still appear on your screen and only normal output is captured. The second form is occasionally what you want: <code>cmd 2&gt;&amp;1 &gt;/dev/null | grep -i error</code> pipes stderr while discarding stdout, because the pipe is established before the redirections are applied. This trips people up constantly when they wonder why their captured log file contains no error messages.</div></div>
+
+<div class="qa"><div class="q">A systemd service fails to start. Walk me through your diagnosis.</div><div class="a"><code>systemctl status app</code> first — it gives the state, the exit code or signal, and the last few journal lines, which is often enough. Then <code>journalctl -u app -n 200 --no-pager</code> for the full output, and <code>journalctl -u app -b</code> if the failure was at boot. Next <code>systemctl cat app</code> to see the effective unit including drop-ins, and I check the obvious: does the <code>ExecStart</code> binary actually exist and is it executable (<code>Type=exec</code> catches this where <code>Type=simple</code> would not), does the <code>User=</code> exist, does <code>WorkingDirectory=</code> exist and is it readable by that user, does the <code>EnvironmentFile=</code> exist (without a leading <code>-</code> an absent file is fatal). Common non-obvious causes: the unit was edited but <code>systemctl daemon-reload</code> was never run; <code>Restart=always</code> hit <code>StartLimitBurst</code> and the unit is now refusing to start until <code>systemctl reset-failed</code>; a hardening directive like <code>ProtectSystem=strict</code> is blocking a write path not listed in <code>ReadWritePaths=</code>; or an SELinux denial, which I confirm with <code>ausearch -m avc -ts recent</code>. To isolate application from environment I run the exact <code>ExecStart</code> line manually as the service user with <code>sudo -u svc_app env -i …</code> — if it works interactively but not under systemd, the difference is environment, namespacing or permissions, and I have narrowed it to three candidates.</div></div>
+
+<div class="qa"><div class="q">How would you install software on a host with no internet access?</div><div class="a">First I establish what "no internet" means — often there is an internal mirror (Nexus, Artifactory, Satellite) that is the sanctioned path, and the right answer is to point the package manager at it rather than to smuggle files in. If it is genuinely air-gapped, I use a connected machine with the <em>same distro, version and architecture</em> — easiest as a container of the matching base image — and resolve the full dependency set there: <code>dnf download --resolve --alldeps</code>, or <code>apt-get install --download-only</code>, or <code>pip download --platform manylinux2014_x86_64 --only-binary=:all:</code>. For RPM I build a local repo with <code>createrepo_c</code> so dnf can resolve offline. I checksum the bundle, record the hash in the change ticket, transfer via the approved channel, and install with the remote repos explicitly disabled (<code>dnf --disablerepo='*' --enablerepo=offline</code>). Then I verify (<code>rpm -V</code>, a version flag, a smoke test) and document exactly what was added. Where possible I avoid the problem entirely by shipping a statically linked binary or a container image moved with <code>docker save</code>/<code>load</code> — one artifact, no dependency resolution, one approval. The non-technical half matters just as much: getting the artifact through the customer's security review usually takes longer than the installation does, so I start that conversation on day one.</div></div>
+
+<div class="qa"><div class="q">What is the difference between a login shell and a non-login shell, and why does it break cron jobs?</div><div class="a">A login shell reads <code>/etc/profile</code> and then the first existing of <code>~/.bash_profile</code>, <code>~/.bash_login</code>, <code>~/.profile</code>. An interactive non-login shell reads <code>/etc/bash.bashrc</code> and <code>~/.bashrc</code>. A non-interactive shell — which is what <code>ssh host 'cmd'</code>, cron, systemd and CI all use — reads neither; it only sources <code>$BASH_ENV</code> if that is set. So every PATH entry, alias, <code>nvm</code>/<code>pyenv</code> initialisation and proxy export you put in <code>.bashrc</code> is invisible to cron. The symptom is always the same: "command not found" or the wrong interpreter version, for a command that works perfectly when you SSH in and type it. The fix is to stop relying on shell initialisation in automated contexts — use absolute paths in crontabs and units, set <code>PATH=</code> explicitly at the top of the crontab, and put environment into a systemd <code>EnvironmentFile=</code> rather than a dotfile. Structurally, I keep environment in <code>~/.profile</code>, interactive-only settings in <code>~/.bashrc</code>, and have <code>~/.bash_profile</code> source <code>~/.bashrc</code> so interactive logins get both.</div></div>
+
+<h2 id="practice-drills-and-a-14-day-fluency-plan">Practice Drills and a 14-Day Fluency Plan</h2>
+<p class="lead">Reading about the shell builds recognition; typing builds speed. Work through this on a throwaway VM or container (<code>docker run -it --rm ubuntu:22.04 bash</code> is enough for most of it) and time yourself. The goal is that none of these require thought under pressure.</p>
+
+<h3>Daily drills (15 minutes)</h3>
+<ul class="checklist">
+<li>Navigate to three directories using only <code>cd -</code>, <code>pushd</code>/<code>popd</code> and tab completion — no full paths typed</li>
+<li>Reconstruct yesterday's longest command from history using <span class="kbd">Ctrl</span>+<span class="kbd">R</span> only</li>
+<li>Write one pipeline that answers a question about a log file, in under 60 seconds</li>
+<li>Explain out loud what each flag in a command you copied actually does; look up any you cannot</li>
+<li>Pick one command you use daily and read its <code>--help</code> in full, looking for a flag you did not know</li>
+</ul>
+
+<h3>The 14-day plan</h3>
+<table>
+<tr><th>Day</th><th>Focus</th><th>Deliverable you must produce</th></tr>
+<tr><td>1</td><td>Navigation, FHS, readline</td><td>Map <code>/etc</code>, <code>/var</code>, <code>/opt</code> on two different distros; list five differences</td></tr>
+<tr><td>2</td><td>find + xargs</td><td>Find all files &gt;10 MB modified in 7 days, excluding one subtree, and total their size</td></tr>
+<tr><td>3</td><td>Permissions, umask, setgid</td><td>Build a shared group directory where new files are automatically group-writable</td></tr>
+<tr><td>4</td><td>Processes, signals, lsof</td><td>Start a process, find its port with <code>lsof</code>, HUP it, then kill it by pattern</td></tr>
+<tr><td>5</td><td>systemd units</td><td>Write, enable and debug a service unit for a Python HTTP server, with <code>MemoryMax</code> and auto-restart</td></tr>
+<tr><td>6</td><td>systemd timers + journalctl</td><td>Convert a crontab entry to a timer; prove it caught up after a simulated downtime</td></tr>
+<tr><td>7</td><td>Package management</td><td>Install nginx offline into a network-disabled container from artifacts you staged</td></tr>
+<tr><td>8</td><td>SSH config + tunnels</td><td>Reach a container-only Postgres from your host through a two-hop <code>ProxyJump</code> chain</td></tr>
+<tr><td>9</td><td>grep / sed / awk</td><td>Produce a top-10 endpoint latency report from a raw access log in one pipeline</td></tr>
+<tr><td>10</td><td>jq</td><td>Turn a 5 MB Kubernetes JSON dump into a TSV of name, phase, restart count, node</td></tr>
+<tr><td>11</td><td>Redirection, FDs, here-docs</td><td>Write a script that logs stdout and stderr to separate files while still printing both</td></tr>
+<tr><td>12</td><td>Bash scripting</td><td>Write a 100-line script with arg parsing, traps, dry-run and rollback; pass <code>shellcheck</code> clean</td></tr>
+<tr><td>13</td><td>Networking</td><td>Break DNS, break routing and break TLS in a lab, then diagnose each from scratch in under 3 minutes</td></tr>
+<tr><td>14</td><td>Full simulation</td><td>Have someone sabotage a VM (full disk, failed unit, wrong permission, bad proxy); fix it with notes</td></tr>
+</table>
+
+<h3>Lab scenarios worth building</h3>
+<details><summary>Scenario 1 — The service that will not start</summary><div class="body">
+<p>Set up a systemd unit with four independent faults layered on: the <code>EnvironmentFile</code> path is wrong, <code>WorkingDirectory</code> is owned by root with mode 700 while <code>User=</code> is a service account, <code>ProtectSystem=strict</code> is set without a matching <code>ReadWritePaths</code> for the log directory, and the unit file was edited without <code>daemon-reload</code>. Fix them one at a time, and after each fix predict the next error message before running <code>systemctl start</code>. You are training the loop of hypothesis &rarr; test &rarr; next hypothesis, which is the whole job.</p>
+</div></details>
+
+<details><summary>Scenario 2 — Disk full at 2am</summary><div class="body">
+<p>Create the three distinct failure modes and practise distinguishing them in under 90 seconds each: (a) one genuinely huge file under <code>/var/log</code>; (b) a deleted-but-open 2 GB file held by a running process — create it, <code>tail -f</code> it, then <code>rm</code> it, and observe <code>df</code> and <code>du</code> disagreeing; (c) inode exhaustion from <code>for i in $(seq 1 400000); do touch /data/f$i; done</code> on a small filesystem, where <code>df -h</code> shows plenty of space and writes still fail. Each has a different fix and the error messages are nearly identical.</p>
+</div></details>
+
+<details><summary>Scenario 3 — It cannot reach the API</summary><div class="body">
+<p>In a container network, inject each fault separately: a wrong entry in <code>/etc/hosts</code>; a <code>DROP</code> iptables rule on the destination port (hang) versus a <code>REJECT</code> rule (instant refusal); a self-signed certificate without the CA installed; and a <code>HTTP_PROXY</code> set without the internal domain in <code>NO_PROXY</code>. For each, write down the exact symptom — timeout versus connection refused versus TLS error versus 30-second hang — and the single command that identifies it. That symptom-to-cause mapping is what lets you answer a customer in one minute instead of thirty.</p>
+</div></details>
+
+<details><summary>Scenario 4 — Air-gapped deployment end to end</summary><div class="body">
+<p>Run two containers on the same host: one with network access, one started with <code>--network none</code>. Deploy a Python FastAPI service with three third-party dependencies, plus nginx as a reverse proxy, into the isolated one. You must stage wheels and packages on the connected side, transfer only through a shared volume, verify checksums, install offline, write a systemd-style supervision (or a supervised process manager, since systemd is absent in the container), and produce a one-page handover listing every file you created and how to remove it. This single exercise rehearses most of what a first week at a regulated customer actually involves.</p>
+</div></details>
+
+<div class="callout ok"><span class="t">The standard to aim for</span>You should be able to land on an unfamiliar Linux host and, without reaching for a search engine, determine the distro, your privileges, what is running, what is broken, what is listening, where the logs are, and whether you have egress — in under five minutes. Everything else in this guide is in service of that one capability.</div>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

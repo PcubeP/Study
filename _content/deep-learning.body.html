@@ -1,0 +1,512 @@
+<p class="lead">Deep learning is the practice of composing many layers of simple, differentiable building blocks into functions rich enough to learn images, language, audio and more directly from raw data — trained end-to-end by gradient descent. This guide takes you from a single neuron to transformers, with the intuition, the math that matters, idiomatic code, and the interview answers.</p>
+
+<div class="callout note"><span class="t">Who this is for</span> An engineer who can code and wants a working, interview-ready mental model of neural networks — not a proofs course. We favor intuition plus runnable PyTorch, then show where each idea is used in production.</div>
+
+<h2>1. What it is and why it matters</h2>
+
+<p>A neural network is a <strong>parameterized function</strong> <code>y = f(x; θ)</code> built by stacking layers. Each layer applies a linear transform (a matrix multiply plus bias) followed by a nonlinear <em>activation</em>. Stack enough of them and the network becomes a <strong>universal function approximator</strong>: given enough capacity and data, it can approximate essentially any continuous mapping from inputs to outputs.</p>
+
+<p>What makes it "deep" is the composition of many layers, which lets the model build a <strong>hierarchy of features</strong> — edges to textures to object parts to objects in vision; characters to words to phrases to meaning in language. Crucially, these features are <em>learned</em>, not hand-engineered. That is the central shift from classical machine learning.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="0" y="0" width="760" height="300" fill="#ffffff"/>
+  <!-- input layer -->
+  <text x="60" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Input x</text>
+  <circle cx="60" cy="80" r="16" fill="#eff4ff" stroke="#2563eb"/>
+  <circle cx="60" cy="150" r="16" fill="#eff4ff" stroke="#2563eb"/>
+  <circle cx="60" cy="220" r="16" fill="#eff4ff" stroke="#2563eb"/>
+  <!-- hidden 1 -->
+  <text x="260" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Hidden (ReLU)</text>
+  <circle cx="260" cy="60" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="260" cy="130" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="260" cy="200" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="260" cy="270" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <!-- hidden 2 -->
+  <text x="470" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Hidden (ReLU)</text>
+  <circle cx="470" cy="90" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="470" cy="160" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="470" cy="230" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <!-- output -->
+  <text x="680" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Output y&#770;</text>
+  <circle cx="680" cy="130" r="16" fill="#eff4ff" stroke="#1e3a8a"/>
+  <circle cx="680" cy="200" r="16" fill="#eff4ff" stroke="#1e3a8a"/>
+  <!-- a few representative edges -->
+  <g stroke="#94a3b8" stroke-width="1">
+    <line x1="76" y1="80" x2="244" y2="60"/><line x1="76" y1="80" x2="244" y2="130"/>
+    <line x1="76" y1="150" x2="244" y2="130"/><line x1="76" y1="150" x2="244" y2="200"/>
+    <line x1="76" y1="220" x2="244" y2="200"/><line x1="76" y1="220" x2="244" y2="270"/>
+    <line x1="276" y1="130" x2="454" y2="90"/><line x1="276" y1="200" x2="454" y2="160"/>
+    <line x1="276" y1="60" x2="454" y2="90"/><line x1="276" y1="270" x2="454" y2="230"/>
+    <line x1="486" y1="90" x2="664" y2="130"/><line x1="486" y1="160" x2="664" y2="130"/>
+    <line x1="486" y1="230" x2="664" y2="200"/>
+  </g>
+  <line x1="700" y1="165" x2="745" y2="165" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+</svg><div class="cap">Fig 1. A feed-forward network: data flows left to right; each edge is a learnable weight, each neuron sums its inputs and applies a nonlinearity.</div></div>
+
+<div class="grid c3">
+  <div class="card"><h4>Representation learning</h4>Features emerge from data instead of being hand-crafted. One architecture, many domains.</div>
+  <div class="card"><h4>Scales with data &amp; compute</h4>Performance keeps improving with more parameters, data, and GPU hours — the basis of modern "foundation models".</div>
+  <div class="card"><h4>End-to-end differentiable</h4>Every piece is differentiable, so the whole pipeline is optimized jointly by backprop.</div>
+</div>
+
+<h2>2. Setup &amp; getting started</h2>
+
+<p>PyTorch is the de-facto research and production framework in 2026; JAX and TensorFlow/Keras remain common. We use PyTorch throughout.</p>
+
+<pre><code class="language-bash"># Create an isolated environment
+python -m venv .venv &amp;&amp; source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# Install PyTorch (CPU build shown; see pytorch.org for the exact CUDA command)
+pip install torch torchvision torchaudio
+
+# Common companions
+pip install numpy matplotlib scikit-learn tensorboard</code></pre>
+
+<pre><code class="language-python">import torch
+
+# Pick the best available accelerator (CUDA, Apple MPS, else CPU)
+device = (
+    "cuda" if torch.cuda.is_available()
+    else "mps" if torch.backends.mps.is_available()
+    else "cpu"
+)
+print("Using", device, "| torch", torch.__version__)
+
+x = torch.randn(3, 4, device=device)   # a 3x4 tensor on the device
+print(x.shape, x.dtype)                 # torch.Size([3, 4]) torch.float32</code></pre>
+
+<div class="callout tip"><span class="t">Tensors</span> A tensor is just an n-dimensional array that tracks gradients and lives on a device. Scalars are 0-D, vectors 1-D, matrices 2-D, a batch of RGB images is 4-D: <code>[N, C, H, W]</code>.</div>
+
+<h2>3. The neuron, layers &amp; activations</h2>
+
+<p>A single neuron computes a weighted sum of its inputs plus a bias, then applies an activation <code>a = φ(w·x + b)</code>. A <strong>layer</strong> is many neurons sharing the same inputs, which vectorizes to a matrix multiply: <code>z = Wx + b</code>, <code>a = φ(z)</code>.</p>
+
+<div class="diagram"><svg viewBox="0 0 620 230" width="620" height="230">
+  <defs><marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <rect width="620" height="230" fill="#ffffff"/>
+  <circle cx="60" cy="50" r="14" fill="#eff4ff" stroke="#2563eb"/><text x="30" y="55" font-size="12" fill="#1a2233">x1</text>
+  <circle cx="60" cy="115" r="14" fill="#eff4ff" stroke="#2563eb"/><text x="30" y="120" font-size="12" fill="#1a2233">x2</text>
+  <circle cx="60" cy="180" r="14" fill="#eff4ff" stroke="#2563eb"/><text x="30" y="185" font-size="12" fill="#1a2233">x3</text>
+  <text x="150" y="40" font-size="12" fill="#b45309">w1</text>
+  <text x="150" y="110" font-size="12" fill="#b45309">w2</text>
+  <text x="150" y="175" font-size="12" fill="#b45309">w3</text>
+  <line x1="74" y1="50" x2="300" y2="110" stroke="#94a3b8"/>
+  <line x1="74" y1="115" x2="300" y2="115" stroke="#94a3b8"/>
+  <line x1="74" y1="180" x2="300" y2="120" stroke="#94a3b8"/>
+  <circle cx="330" cy="115" r="30" fill="#ecfdf5" stroke="#059669"/>
+  <text x="330" y="112" font-size="12" fill="#1a2233" text-anchor="middle">&#931; + b</text>
+  <text x="330" y="128" font-size="12" fill="#1a2233" text-anchor="middle">&#966;</text>
+  <line x1="360" y1="115" x2="470" y2="115" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="520" y="120" font-size="13" fill="#1a2233" text-anchor="middle">output a</text>
+</svg><div class="cap">Fig 2. One neuron: weighted sum of inputs plus bias, passed through activation φ.</div></div>
+
+<h3>Why activations must be nonlinear</h3>
+<p>Without a nonlinearity, stacking layers collapses: a composition of linear maps is itself a single linear map, so depth buys nothing. The activation is what gives the network the ability to bend decision boundaries and model complex functions.</p>
+
+<table>
+  <tr><th>Activation</th><th>Formula</th><th>Range</th><th>Use when</th><th>Watch out for</th></tr>
+  <tr><td>ReLU</td><td>max(0, z)</td><td>[0, ∞)</td><td>Default hidden-layer choice</td><td>"Dead" neurons stuck at 0</td></tr>
+  <tr><td>Leaky ReLU / GELU</td><td>small slope &lt; 0 / smooth</td><td>(-∞, ∞)</td><td>Avoid dead units; GELU in transformers</td><td>Slightly more compute</td></tr>
+  <tr><td>Sigmoid</td><td>1 / (1 + e⁻ᶻ)</td><td>(0, 1)</td><td>Binary output probability</td><td>Saturates → vanishing gradient</td></tr>
+  <tr><td>Tanh</td><td>(eᶻ-e⁻ᶻ)/(eᶻ+e⁻ᶻ)</td><td>(-1, 1)</td><td>Zero-centered hidden units (RNNs)</td><td>Also saturates</td></tr>
+  <tr><td>Softmax</td><td>eᶻⁱ / Σ eᶻʲ</td><td>(0, 1), sums to 1</td><td>Multi-class output layer</td><td>Not for hidden layers</td></tr>
+</table>
+
+<pre><code class="language-python">import torch.nn as nn
+
+# A small multilayer perceptron (MLP) for 28x28 images -> 10 classes
+mlp = nn.Sequential(
+    nn.Flatten(),            # [N,1,28,28] -> [N,784]
+    nn.Linear(784, 256),     # learnable W (256x784) + b (256)
+    nn.ReLU(),               # nonlinearity
+    nn.Dropout(0.2),         # regularization (see section 8)
+    nn.Linear(256, 10),      # logits for 10 classes (no softmax here)
+)
+# nn.CrossEntropyLoss applies log-softmax internally, so output raw logits.</code></pre>
+
+<h2>4. Forward pass, loss &amp; backpropagation</h2>
+
+<p>Training repeats a four-step loop. The <strong>forward pass</strong> computes predictions and a scalar <strong>loss</strong>. <strong>Backpropagation</strong> computes the gradient of the loss with respect to every parameter by applying the chain rule layer by layer, from output back to input. The <strong>optimizer</strong> then nudges each parameter in the direction that reduces the loss.</p>
+
+<div class="pipeline"><span class="step">forward: y&#770; = f(x;θ)</span><span class="arrow">-&gt;</span><span class="step">loss L(y&#770;, y)</span><span class="arrow">-&gt;</span><span class="step">backward: ∂L/∂θ</span><span class="arrow">-&gt;</span><span class="step">optimizer step</span></div>
+
+<div class="diagram"><svg viewBox="0 0 740 220" width="740" height="220">
+  <defs>
+    <marker id="fwd" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+    <marker id="bwd" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#b45309"/></marker>
+  </defs>
+  <rect width="740" height="220" fill="#ffffff"/>
+  <g font-size="12" fill="#1a2233" text-anchor="middle">
+    <rect x="30" y="80" width="90" height="50" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="110">x</text>
+    <rect x="190" y="80" width="110" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="245" y="104">Layer 1</text><text x="245" y="120">z1=W1x</text>
+    <rect x="370" y="80" width="110" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="425" y="104">Layer 2</text><text x="425" y="120">z2=W2a1</text>
+    <rect x="550" y="80" width="110" height="50" rx="6" fill="#eff4ff" stroke="#1e3a8a"/><text x="605" y="104">Loss</text><text x="605" y="120">L(y&#770;,y)</text>
+  </g>
+  <!-- forward arrows -->
+  <line x1="120" y1="95" x2="188" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#fwd)"/>
+  <line x1="300" y1="95" x2="368" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#fwd)"/>
+  <line x1="480" y1="95" x2="548" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#fwd)"/>
+  <!-- backward arrows -->
+  <line x1="548" y1="120" x2="480" y2="120" stroke="#b45309" stroke-width="2" marker-end="url(#bwd)"/>
+  <line x1="368" y1="120" x2="300" y2="120" stroke="#b45309" stroke-width="2" marker-end="url(#bwd)"/>
+  <line x1="188" y1="120" x2="120" y2="120" stroke="#b45309" stroke-width="2" marker-end="url(#bwd)"/>
+  <text x="110" y="60" font-size="12" fill="#2563eb">forward (activations)</text>
+  <text x="470" y="165" font-size="12" fill="#b45309">backward (gradients via chain rule)</text>
+</svg><div class="cap">Fig 3. Backprop reuses cached forward activations to compute ∂L/∂W at each layer, moving right to left.</div></div>
+
+<p>Autograd makes this automatic: every tensor op is recorded on a graph, and <code>loss.backward()</code> walks it in reverse.</p>
+
+<pre><code class="language-python">import torch
+
+# Manual illustration of autograd on a tiny computation
+w = torch.tensor(2.0, requires_grad=True)
+b = torch.tensor(1.0, requires_grad=True)
+x = torch.tensor(3.0)
+
+y_hat = w * x + b          # forward: 7.0
+loss = (y_hat - 10.0) ** 2  # squared error vs target 10  -> 9.0
+loss.backward()            # backward: fills .grad
+
+# dL/dw = 2*(y_hat-10)*x = 2*(-3)*3 = -18 ;  dL/db = 2*(-3) = -6
+print(w.grad, b.grad)      # tensor(-18.) tensor(-6.)</code></pre>
+
+<div class="callout warn"><span class="t">Vanishing &amp; exploding gradients</span> In deep stacks, repeated multiplication of small (&lt;1) derivatives shrinks gradients toward zero; large ones blow up. Cures: ReLU/GELU activations, residual connections, normalization, careful initialization (He/Xavier), and gradient clipping.</div>
+
+<h2>5. Optimizers &amp; the training loop</h2>
+
+<p>Gradient descent updates parameters as <code>θ ← θ − η · ∂L/∂θ</code>, where <code>η</code> is the learning rate. We rarely use the full dataset per step; <strong>mini-batch SGD</strong> estimates the gradient from a small batch, trading a little noise for huge speedups and better generalization.</p>
+
+<table>
+  <tr><th>Optimizer</th><th>Idea</th><th>Pros</th><th>Typical use</th></tr>
+  <tr><td>SGD</td><td>Plain gradient step</td><td>Simple, strong generalization</td><td>Vision with schedules</td></tr>
+  <tr><td>SGD + Momentum</td><td>Accumulate a velocity</td><td>Dampens oscillation, faster</td><td>CNNs, ResNets</td></tr>
+  <tr><td>RMSProp</td><td>Per-param adaptive scaling</td><td>Handles non-stationary objectives</td><td>RNNs</td></tr>
+  <tr><td>Adam / AdamW</td><td>Momentum + adaptive scaling</td><td>Robust default, fast convergence</td><td>Transformers, most models</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">AdamW is the safe default</span> AdamW decouples weight decay from the gradient update and is the standard choice for transformers and most modern training. Pair it with a learning-rate warmup then cosine decay.</div>
+
+<pre><code class="language-python">import torch, torch.nn as nn
+from torch.utils.data import DataLoader
+
+def train_one_epoch(model, loader: DataLoader, optimizer, device):
+    model.train()                                  # enable dropout/batchnorm training mode
+    loss_fn = nn.CrossEntropyLoss()
+    running = 0.0
+    for xb, yb in loader:
+        xb, yb = xb.to(device), yb.to(device)
+        optimizer.zero_grad()                      # clear old gradients
+        logits = model(xb)                         # forward
+        loss = loss_fn(logits, yb)                 # scalar loss
+        loss.backward()                            # backprop: fill .grad
+        nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # guard against explosions
+        optimizer.step()                           # update parameters
+        running += loss.item() * xb.size(0)
+    return running / len(loader.dataset)
+
+# optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)</code></pre>
+
+<div class="callout danger"><span class="t">The #1 beginner bug</span> Forgetting <code>optimizer.zero_grad()</code>. PyTorch <em>accumulates</em> gradients by default, so without zeroing, each step uses the sum of all previous gradients and training diverges or stalls.</div>
+
+<h2>6. Convolutional networks (vision)</h2>
+
+<p>Fully-connected layers ignore spatial structure and explode in parameters on images. A <strong>convolutional layer</strong> slides a small learnable filter across the image, computing the same weighted sum everywhere. This gives two superpowers: <strong>parameter sharing</strong> (one filter, whole image) and <strong>translation equivariance</strong> (a cat is a cat wherever it appears).</p>
+
+<div class="diagram"><svg viewBox="0 0 720 240" width="720" height="240">
+  <defs><marker id="ahc" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect width="720" height="240" fill="#ffffff"/>
+  <!-- input grid -->
+  <g stroke="#94a3b8" fill="#eff4ff">
+    <rect x="30" y="60" width="120" height="120"/>
+    <line x1="70" y1="60" x2="70" y2="180" stroke="#94a3b8"/><line x1="110" y1="60" x2="110" y2="180"/>
+    <line x1="30" y1="100" x2="150" y2="100"/><line x1="30" y1="140" x2="150" y2="140"/>
+  </g>
+  <rect x="30" y="60" width="40" height="40" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="90" y="205" font-size="12" fill="#1a2233" text-anchor="middle">input (H×W×C)</text>
+  <line x1="160" y1="120" x2="230" y2="120" stroke="#2563eb" stroke-width="2" marker-end="url(#ahc)"/>
+  <text x="195" y="108" font-size="11" fill="#b45309" text-anchor="middle">filter</text>
+  <!-- feature map -->
+  <rect x="240" y="75" width="90" height="90" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="285" y="190" font-size="12" fill="#1a2233" text-anchor="middle">feature map</text>
+  <line x1="340" y1="120" x2="400" y2="120" stroke="#2563eb" stroke-width="2" marker-end="url(#ahc)"/>
+  <text x="370" y="108" font-size="11" fill="#1a2233" text-anchor="middle">pool</text>
+  <rect x="410" y="90" width="55" height="55" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="437" y="175" font-size="12" fill="#1a2233" text-anchor="middle">downsampled</text>
+  <line x1="475" y1="120" x2="535" y2="120" stroke="#2563eb" stroke-width="2" marker-end="url(#ahc)"/>
+  <rect x="545" y="70" width="30" height="100" fill="#ecfdf5" stroke="#059669"/>
+  <text x="640" y="110" font-size="12" fill="#1a2233" text-anchor="middle">flatten +</text>
+  <text x="640" y="128" font-size="12" fill="#1a2233" text-anchor="middle">dense → class</text>
+</svg><div class="cap">Fig 4. A CNN: stacks of conv + pooling shrink spatial size while growing channel depth, then dense layers classify.</div></div>
+
+<pre><code class="language-python">import torch.nn as nn
+
+class SmallCNN(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3, padding=1),  # [N,32,28,28]
+            nn.BatchNorm2d(32), nn.ReLU(),
+            nn.MaxPool2d(2),                              # [N,32,14,14]
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64), nn.ReLU(),
+            nn.MaxPool2d(2),                              # [N,64,7,7]
+        )
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(64 * 7 * 7, 128), nn.ReLU(), nn.Dropout(0.3),
+            nn.Linear(128, num_classes),
+        )
+
+    def forward(self, x):
+        return self.classifier(self.features(x))</code></pre>
+
+<p>Key hyperparameters of a conv layer: <strong>kernel size</strong> (receptive field), <strong>stride</strong> (step size / downsampling), <strong>padding</strong> (preserve spatial size), and <strong>channels</strong> (number of filters = features learned). Landmark architectures to know: LeNet, AlexNet, VGG, <strong>ResNet</strong> (residual connections enabling very deep nets), and EfficientNet. Vision Transformers (ViT) now rival or beat CNNs at scale.</p>
+
+<h2>7. Sequence models: RNN, LSTM &amp; GRU</h2>
+
+<p>For ordered data (text, time series, audio) a <strong>recurrent network</strong> processes one element at a time, carrying a <strong>hidden state</strong> that summarizes everything seen so far: <code>h_t = φ(W_x x_t + W_h h_{t-1} + b)</code>. The same weights are reused at every timestep.</p>
+
+<p>Plain RNNs struggle with long-range dependencies because gradients vanish over many steps. <strong>LSTMs</strong> and <strong>GRUs</strong> add gating — learnable valves that decide what to keep, forget, and output — letting a cell state carry information across long sequences.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Forget gate</h4>Decides how much of the previous cell state to discard.</div>
+  <div class="card"><h4>Input gate</h4>Decides what new information to write into the cell state.</div>
+  <div class="card"><h4>Output gate</h4>Decides what to expose from the cell state as the hidden output.</div>
+</div>
+
+<pre><code class="language-python">import torch, torch.nn as nn
+
+class TextClassifier(nn.Module):
+    def __init__(self, vocab_size, emb=128, hidden=256, classes=2):
+        super().__init__()
+        self.embed = nn.Embedding(vocab_size, emb)          # token id -> vector
+        self.lstm = nn.LSTM(emb, hidden, batch_first=True,  # [N, T, emb] -> ...
+                            bidirectional=True)
+        self.head = nn.Linear(hidden * 2, classes)          # *2 for bidirectional
+
+    def forward(self, x):                 # x: [N, T] of token ids
+        e = self.embed(x)                 # [N, T, emb]
+        out, (h, c) = self.lstm(e)        # out: [N, T, 2*hidden]
+        pooled = out.mean(dim=1)          # average over time
+        return self.head(pooled)</code></pre>
+
+<div class="callout note"><span class="t">The shift to attention</span> RNNs are inherently sequential (step t needs step t-1), limiting parallelism and still fading over very long contexts. Transformers removed recurrence entirely and now dominate NLP, vision, audio, and multimodal work.</div>
+
+<h2>8. Attention &amp; transformers</h2>
+
+<p>The core idea of <strong>attention</strong>: for each position, compute a weighted blend of all positions, where the weights say "how relevant is each other token to me right now?" Each token emits a <strong>query</strong>, a <strong>key</strong>, and a <strong>value</strong>. The query is matched against all keys (dot product) to produce attention weights, which blend the values.</p>
+
+<p>Scaled dot-product attention: <code>Attention(Q,K,V) = softmax(QKᵀ / √d_k) · V</code>. The <code>√d_k</code> scaling keeps the dot products from growing large and saturating the softmax.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 260" width="700" height="260">
+  <defs><marker id="aht" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect width="700" height="260" fill="#ffffff"/>
+  <g font-size="12" fill="#1a2233" text-anchor="middle">
+    <rect x="40" y="30" width="70" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="55">Q</text>
+    <rect x="40" y="110" width="70" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="135">K</text>
+    <rect x="40" y="190" width="70" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="215">V</text>
+    <rect x="210" y="70" width="120" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="270" y="94">QKᵀ / √d_k</text>
+    <rect x="400" y="70" width="110" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="455" y="94">softmax</text>
+    <rect x="400" y="170" width="110" height="40" rx="6" fill="#eff4ff" stroke="#1e3a8a"/><text x="455" y="194">weights·V</text>
+    <rect x="580" y="170" width="90" height="40" rx="6" fill="#eff4ff" stroke="#1e3a8a"/><text x="625" y="194">output</text>
+  </g>
+  <line x1="110" y1="50" x2="208" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="110" y1="130" x2="208" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="330" y1="90" x2="398" y2="90" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="455" y1="110" x2="455" y2="168" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="110" y1="210" x2="398" y2="195" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="510" y1="190" x2="578" y2="190" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+</svg><div class="cap">Fig 5. Scaled dot-product attention. Multi-head attention runs several of these in parallel on different learned projections.</div></div>
+
+<p>A <strong>transformer block</strong> stacks: multi-head self-attention, a position-wise feed-forward network, residual connections around each, and layer normalization. Because attention is order-agnostic, <strong>positional encodings</strong> (sinusoidal or learned, now often rotary/RoPE) inject sequence position. Stacking these blocks gives BERT (encoder), GPT-family (decoder), and T5 (encoder-decoder).</p>
+
+<pre><code class="language-python">import torch, torch.nn as nn, torch.nn.functional as F
+
+def scaled_dot_product_attention(q, k, v, mask=None):
+    # q,k,v: [batch, heads, seq, d_k]
+    d_k = q.size(-1)
+    scores = (q @ k.transpose(-2, -1)) / d_k ** 0.5   # [.., seq, seq]
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, float("-inf"))
+    weights = F.softmax(scores, dim=-1)               # attention distribution
+    return weights @ v                                # blended values
+
+# In practice, prefer the fused, memory-efficient built-in:
+# out = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+# or nn.TransformerEncoderLayer / nn.MultiheadAttention.</code></pre>
+
+<div class="callout tip"><span class="t">Why transformers won</span> Self-attention relates any two positions in O(1) sequential steps and is massively parallel on GPUs. Combined with huge datasets, this is what makes modern LLMs and foundation models possible.</div>
+
+<h2>9. Embeddings &amp; representation</h2>
+
+<p>Neural nets need numeric vectors. An <strong>embedding</strong> is a learned, dense, low-dimensional vector for a discrete item (a word, product, user, or category). Items that behave similarly end up close together in the vector space, so geometric distance becomes semantic similarity — the backbone of search, recommendation, and retrieval-augmented generation (RAG).</p>
+
+<pre><code class="language-python">import torch, torch.nn as nn
+
+emb = nn.Embedding(num_embeddings=10_000, embedding_dim=64)  # 10k tokens -> 64-D
+ids = torch.tensor([[1, 42, 7]])        # a batch of one sequence of 3 tokens
+vecs = emb(ids)                          # [1, 3, 64] learned vectors
+
+# Cosine similarity between two learned vectors (semantic closeness)
+a, b = vecs[0, 0], vecs[0, 1]
+cos = torch.cosine_similarity(a, b, dim=0)
+print(cos.item())</code></pre>
+
+<h2>10. Regularization &amp; normalization</h2>
+
+<p>Deep nets have enough capacity to <strong>memorize</strong> training data (overfit). Regularization closes the gap between training and validation performance.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Dropout</h4>Randomly zero a fraction of activations each step during training, forcing redundancy. Disabled at inference. Typical p = 0.1–0.5.</div>
+  <div class="card"><h4>Weight decay (L2)</h4>Penalize large weights, encouraging simpler functions. In AdamW it is decoupled from the gradient step.</div>
+  <div class="card"><h4>Batch normalization</h4>Normalize each layer's activations per mini-batch, stabilizing and speeding training. Standard in CNNs.</div>
+  <div class="card"><h4>Layer normalization</h4>Normalize across features per sample (batch-size independent). The norm of choice in transformers and RNNs.</div>
+  <div class="card"><h4>Early stopping</h4>Stop when validation loss stops improving; keep the best checkpoint.</div>
+  <div class="card"><h4>Data augmentation</h4>Flips, crops, color jitter, mixup, cutout — cheap "new" data that improves robustness.</div>
+</div>
+
+<div class="callout warn"><span class="t">BatchNorm &amp; small batches</span> BatchNorm statistics are noisy with tiny batches and leak across examples in some settings. For small batches, long sequences, or online inference, prefer LayerNorm or GroupNorm. Always call <code>model.eval()</code> at inference so BatchNorm uses running statistics and Dropout is turned off.</div>
+
+<h2>11. Transfer learning &amp; fine-tuning</h2>
+
+<p>Training from scratch needs lots of data and compute. <strong>Transfer learning</strong> reuses a model pretrained on a large corpus and adapts it to your task. This is the dominant workflow in 2026: start from a foundation model, then fine-tune.</p>
+
+<div class="pipeline"><span class="step">Pretrained backbone</span><span class="arrow">-&gt;</span><span class="step">freeze or adapt</span><span class="arrow">-&gt;</span><span class="step">new head</span><span class="arrow">-&gt;</span><span class="step">fine-tune on your data</span></div>
+
+<pre><code class="language-python">import torch.nn as nn
+from torchvision import models
+
+# Start from an ImageNet-pretrained ResNet, retarget to 5 classes
+net = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+for p in net.parameters():
+    p.requires_grad = False               # freeze the backbone
+
+net.fc = nn.Linear(net.fc.in_features, 5)  # new trainable head
+# Train only net.fc first; optionally unfreeze top blocks later with a small LR.</code></pre>
+
+<div class="callout tip"><span class="t">PEFT &amp; LoRA</span> For large language models, full fine-tuning is expensive. Parameter-efficient methods like <strong>LoRA</strong> train tiny low-rank adapter matrices while freezing the base weights — a fraction of the cost and memory, with near-full-fine-tune quality.</div>
+
+<h2>12. A worked mini-example: end-to-end training</h2>
+
+<p>This puts the loop together: data, model, optimizer, train/validate, and the critical <code>eval()</code>/<code>no_grad()</code> discipline.</p>
+
+<pre><code class="language-python">import torch, torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Synthetic 2-class problem: 20 features
+X = torch.randn(2000, 20)
+y = (X[:, :5].sum(dim=1) &gt; 0).long()      # label depends on first 5 features
+train_ds = TensorDataset(X[:1600], y[:1600])
+val_ds   = TensorDataset(X[1600:], y[1600:])
+train_dl = DataLoader(train_ds, batch_size=64, shuffle=True)
+val_dl   = DataLoader(val_ds, batch_size=256)
+
+model = nn.Sequential(
+    nn.Linear(20, 64), nn.ReLU(), nn.Dropout(0.2),
+    nn.Linear(64, 2),
+).to(device)
+
+opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-2)
+loss_fn = nn.CrossEntropyLoss()
+
+@torch.no_grad()                           # no gradients during evaluation
+def accuracy(dl):
+    model.eval()
+    correct = total = 0
+    for xb, yb in dl:
+        xb, yb = xb.to(device), yb.to(device)
+        preds = model(xb).argmax(dim=1)
+        correct += (preds == yb).sum().item()
+        total += yb.size(0)
+    return correct / total
+
+for epoch in range(10):
+    model.train()
+    for xb, yb in train_dl:
+        xb, yb = xb.to(device), yb.to(device)
+        opt.zero_grad()
+        loss = loss_fn(model(xb), yb)
+        loss.backward()
+        opt.step()
+    print(f"epoch {epoch}: val acc = {accuracy(val_dl):.3f}")</code></pre>
+
+<h2>13. Cheat-sheet &amp; comparisons</h2>
+
+<table>
+  <tr><th>Task</th><th>Output layer</th><th>Loss function</th></tr>
+  <tr><td>Binary classification</td><td>1 logit (+ sigmoid)</td><td>BCEWithLogitsLoss</td></tr>
+  <tr><td>Multi-class (single label)</td><td>C logits</td><td>CrossEntropyLoss</td></tr>
+  <tr><td>Multi-label</td><td>C logits (+ sigmoid)</td><td>BCEWithLogitsLoss</td></tr>
+  <tr><td>Regression</td><td>linear</td><td>MSELoss / L1Loss / HuberLoss</td></tr>
+</table>
+
+<table>
+  <tr><th>Architecture</th><th>Best for</th><th>Key mechanism</th><th>Weakness</th></tr>
+  <tr><td>MLP</td><td>Tabular, small vectors</td><td>Dense layers</td><td>Ignores structure; parameter-heavy</td></tr>
+  <tr><td>CNN</td><td>Images, local patterns</td><td>Conv + pooling</td><td>Weaker on long-range / global context</td></tr>
+  <tr><td>RNN / LSTM</td><td>Short-medium sequences</td><td>Recurrent hidden state</td><td>Sequential; fades on long context</td></tr>
+  <tr><td>Transformer</td><td>Text, vision, multimodal</td><td>Self-attention</td><td>O(n²) attention; data/compute hungry</td></tr>
+</table>
+
+<details><summary>Show hyperparameter starting points</summary><div class="body">
+<table>
+  <tr><th>Knob</th><th>Reasonable start</th></tr>
+  <tr><td>Learning rate (AdamW)</td><td>3e-4 (transformers), 1e-3 (small nets)</td></tr>
+  <tr><td>Batch size</td><td>Largest that fits memory (32–512 common)</td></tr>
+  <tr><td>Weight decay</td><td>0.01–0.1</td></tr>
+  <tr><td>Dropout</td><td>0.1 (transformers) – 0.5 (dense heads)</td></tr>
+  <tr><td>LR schedule</td><td>Warmup → cosine decay</td></tr>
+  <tr><td>Grad clip norm</td><td>1.0</td></tr>
+</table>
+</div></details>
+
+<h2>14. Best practices &amp; common pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Overfit a tiny batch first (loss → ~0) to prove the model + loss + data pipeline work. Split data before any preprocessing to avoid leakage. Track train and val curves together. Set seeds for reproducibility. Checkpoint the best model. Normalize inputs.</div>
+
+<div class="callout tip"><span class="t">Debugging order</span> If training won't learn: (1) check data/labels and shapes, (2) verify loss decreases on one batch, (3) lower the learning rate, (4) check for <code>zero_grad</code> and <code>train()</code>/<code>eval()</code> mode, (5) inspect gradient norms.</div>
+
+<div class="callout danger"><span class="t">Data leakage</span> Fitting a scaler/encoder on the full dataset (including validation/test) inflates scores and fails in production. Fit transforms on train only, then apply to val/test.</div>
+
+<div class="callout warn"><span class="t">When deep learning is NOT the answer</span> On small tabular datasets, gradient-boosted trees (XGBoost, LightGBM) usually win with less tuning. If you have little data, no GPU budget, need full interpretability, or a simple baseline already meets the bar — don't reach for a deep net. Deep learning shines with large, high-dimensional, unstructured data (images, text, audio) and ample compute.</div>
+
+<h2>15. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">Why do neural networks need nonlinear activation functions?</div><div class="a">Without them, a stack of linear layers composes to a single linear transformation, so the network can only model linear relationships regardless of depth. Nonlinearities let the model approximate complex, non-linear functions and curved decision boundaries.</div></div>
+
+<div class="qa"><div class="q">Explain backpropagation in one paragraph.</div><div class="a">It is the chain rule applied efficiently over the computation graph. The forward pass caches each layer's activations. The backward pass starts from the loss and propagates the gradient of the loss with respect to each intermediate value from output to input, reusing cached values so each gradient is computed once. The result is ∂L/∂θ for every parameter, which the optimizer uses to update weights.</div></div>
+
+<div class="qa"><div class="q">What causes vanishing/exploding gradients and how do you fix them?</div><div class="a">Repeated multiplication of layer Jacobians in deep nets; if their magnitudes are consistently below one, gradients vanish; above one, they explode. Fixes: ReLU/GELU activations, residual (skip) connections, batch/layer normalization, proper initialization (He/Xavier), gradient clipping, and gating (LSTM/GRU) for sequences.</div></div>
+
+<div class="qa"><div class="q">Batch size and learning rate — how are they related?</div><div class="a">Larger batches give lower-variance gradient estimates, so you can often use a larger learning rate; a common heuristic is linear scaling (double the batch, roughly double the LR) with a warmup. Very large batches can hurt generalization, so a schedule and warmup matter.</div></div>
+
+<div class="qa"><div class="q">Dropout vs. BatchNorm — what do they do and when are they active?</div><div class="a">Dropout is regularization: it randomly zeroes activations during training to prevent co-adaptation, and is turned off at inference. BatchNorm normalizes activations using batch statistics to stabilize and accelerate training; at inference it uses running (population) statistics. Both behave differently in train vs. eval mode, which is why calling <code>model.eval()</code> matters.</div></div>
+
+<div class="qa"><div class="q">Why did transformers replace RNNs for most sequence tasks?</div><div class="a">RNNs are inherently sequential (step t depends on t−1), limiting GPU parallelism and still losing long-range information. Self-attention relates any two positions directly with a constant number of sequential operations and parallelizes across the sequence, so it trains far faster on large data and captures long-range dependencies better.</div></div>
+
+<div class="qa"><div class="q">What is the role of the √d_k scaling in attention?</div><div class="a">Dot products of high-dimensional query/key vectors grow with dimension, pushing softmax into saturated regions with tiny gradients. Dividing by √d_k keeps the variance of the scores roughly constant so the softmax stays in a well-conditioned range.</div></div>
+
+<div class="qa"><div class="q">How do you tell overfitting from underfitting, and what do you do about each?</div><div class="a">Underfitting: both training and validation loss are high → increase capacity, train longer, reduce regularization, improve features. Overfitting: training loss is low but validation loss is high and rising → add regularization (dropout, weight decay, augmentation), get more data, or reduce capacity / use early stopping.</div></div>
+
+<div class="qa"><div class="q">What is transfer learning and when do you freeze vs. fine-tune?</div><div class="a">Reusing a model pretrained on a large corpus for a new task. With little data or a similar domain, freeze the backbone and train only a new head. With more data or a distant domain, unfreeze upper layers and fine-tune with a small learning rate. For LLMs, parameter-efficient methods like LoRA adapt the model cheaply.</div></div>
+
+<div class="qa"><div class="q">Why use cross-entropy instead of MSE for classification?</div><div class="a">Cross-entropy pairs with softmax to produce well-calibrated probabilities and gives strong, non-saturating gradients when predictions are confidently wrong, speeding learning. MSE on softmax outputs yields small gradients in saturated regions and treats the problem as regression, which converges slower and less reliably.</div></div>
+
+<div class="qa"><div class="q">When would you NOT use deep learning?</div><div class="a">Small or purely tabular datasets (gradient-boosted trees often win), strict interpretability or latency/compute constraints, or when a simple model already meets requirements. Deep learning pays off with large, unstructured, high-dimensional data and sufficient compute.</div></div>
+
+<div class="qa"><div class="q">What does a residual (skip) connection do?</div><div class="a">It adds a layer's input to its output (<code>y = x + F(x)</code>), creating a gradient "highway" so signals bypass layers. This mitigates vanishing gradients and lets networks go very deep (ResNets, transformers) by letting each block learn a residual correction rather than a full transformation.</div></div>
+
+<h2>16. Further learning</h2>
+
+<ul>
+  <li>Build intuition: Andrej Karpathy's "Neural Networks: Zero to Hero" (micrograd → GPT from scratch).</li>
+  <li>Foundations: the <em>Deep Learning</em> book (Goodfellow, Bengio, Courville) and the <em>Dive into Deep Learning</em> (d2l.ai) interactive text.</li>
+  <li>Papers to read in order: "ImageNet Classification with Deep CNNs" (AlexNet), "Deep Residual Learning" (ResNet), "Attention Is All You Need" (transformer), "BERT", and "LoRA".</li>
+  <li>Practice: reproduce a CNN on CIFAR-10 and a small character-level transformer; then fine-tune a pretrained model on your own dataset.</li>
+  <li>Production next steps: mixed-precision training, learning-rate schedules, distributed/data-parallel training, quantization, and serving — see the MLOps guide.</li>
+</ul>

@@ -1,0 +1,1533 @@
+<h2>Why the Command Line Is the FDE's Primary Instrument</h2>
+<p class="lead">A Forward Deployed Engineer is dropped into someone else's infrastructure with a laptop, an SSH key, and a deadline. There is no IDE on the jump host, no Docker Desktop, no browser that can reach the internet. What there is — always — is a shell. Fluency here is not a nice-to-have; it is the difference between diagnosing a broken deployment in eleven minutes and escalating to a customer's platform team and losing three days.</p>
+
+<div class="facts">
+  <div class="f"><b>~60</b><span>COMMANDS THAT COVER 95% OF WORK</span></div>
+  <div class="f"><b>0</b><span>GUIS GUARANTEED ON A CUSTOMER BOX</span></div>
+  <div class="f"><b>1973</b><span>YEAR PIPES SHIPPED IN UNIX V3</span></div>
+  <div class="f"><b>2h</b><span>TYPICAL TIME UNTIL THE DEMO</span></div>
+</div>
+
+<h3>What actually happens on a customer engagement</h3>
+<p>You get a bastion host. It runs a distro you did not choose — RHEL 8 at a bank, Ubuntu 22.04 at a startup, SLES 15 at a manufacturer, Amazon Linux 2023 in an AWS account. Your account has no root. Outbound traffic goes through a proxy that requires a corporate CA bundle. The container registry is an internal Artifactory mirror. The Python package index is a Nexus proxy that lags upstream by six weeks. Nothing you learned from a laptop-only workflow transfers cleanly. What transfers is the shell.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Composability</h4><p>Every tool reads text on stdin and writes text on stdout. That contract means you can assemble a diagnostic that nobody wrote in advance — <code>journalctl -u api --since -1h | grep 502 | awk '{print $NF}' | sort | uniq -c | sort -rn</code> — in twenty seconds.</p></div>
+  <div class="card"><h4>Ubiquity</h4><p>Bash, coreutils, grep, sed and awk are present on essentially every Linux host built since 1995. Your fancy TUI tool is not. Learn the baseline, then layer niceties on top only where you control the image.</p></div>
+  <div class="card"><h4>Reproducibility</h4><p>A command is a record. You can paste it into the customer's ticket, into a runbook, into a CI job. A sequence of mouse clicks in a web console is an anecdote.</p></div>
+</div>
+
+<div class="callout warn"><span class="t">Assume you are a guest</span>Everything you type on a customer system is potentially logged, audited, and attributed to you. Never run a destructive command you have not read twice. Never <code>curl | sudo bash</code> on someone else's box. Prefer read-only investigation until you have explicit written approval to change state.</div>
+
+<h3>Shell vs terminal vs console — get the vocabulary right</h3>
+<table>
+<tr><th>Term</th><th>What it actually is</th><th>Why you care</th></tr>
+<tr><td>Terminal emulator</td><td>The GUI app (iTerm2, Windows Terminal, GNOME Terminal) that draws characters and handles key input</td><td>Controls colour, scrollback, and whether <span class="kbd">Alt</span> sends Meta</td></tr>
+<tr><td>TTY / PTY</td><td>Kernel device pair providing the character stream. <code>tty</code> prints yours; <code>ls /dev/pts</code> lists them</td><td>Scripts behave differently without a TTY — that is why Docker needs <code>-t</code></td></tr>
+<tr><td>Shell</td><td>The program interpreting your commands: bash, zsh, dash, ksh, ash (BusyBox)</td><td><code>/bin/sh</code> on Debian is <strong>dash</strong>, not bash. Bash-isms silently fail</td></tr>
+<tr><td>Console</td><td>The physical/virtual system console (<code>/dev/console</code>, Ctrl+Alt+F2)</td><td>Where kernel panics go when SSH is already dead</td></tr>
+</table>
+
+<h3>Login, non-login, interactive, non-interactive</h3>
+<p>This quadrant explains ninety percent of "it works when I SSH in but not from cron."</p>
+<table>
+<tr><th>Invocation</th><th>Files read</th><th>Typical case</th></tr>
+<tr><td>Interactive login</td><td><code>/etc/profile</code>, then first of <code>~/.bash_profile</code> / <code>~/.bash_login</code> / <code>~/.profile</code></td><td><code>ssh host</code></td></tr>
+<tr><td>Interactive non-login</td><td><code>/etc/bash.bashrc</code>, <code>~/.bashrc</code></td><td>Opening a new tab locally, <code>bash</code> inside a session</td></tr>
+<tr><td>Non-interactive</td><td>Only <code>$BASH_ENV</code> if set — <strong>not</strong> <code>.bashrc</code></td><td><code>ssh host 'cmd'</code>, cron, systemd, CI</td></tr>
+</table>
+<div class="callout tip"><span class="t">The canonical fix</span>Put environment (PATH, exports) in <code>~/.profile</code>; put interactive niceties (aliases, prompt) in <code>~/.bashrc</code>; have <code>~/.bash_profile</code> contain <code>[ -f ~/.bashrc ] &amp;&amp; . ~/.bashrc</code>. When cron fails with "command not found", it is almost always because cron's PATH is <code>/usr/bin:/bin</code> and nothing else.</div>
+
+<h3>Readline: the keystrokes that compound</h3>
+<table>
+<tr><th>Keys</th><th>Action</th><th>Keys</th><th>Action</th></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">R</span></td><td>Reverse-search history (press again to cycle)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">A</span> / <span class="kbd">E</span></td><td>Start / end of line</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">W</span></td><td>Delete previous word</td><td><span class="kbd">Ctrl</span>+<span class="kbd">U</span> / <span class="kbd">K</span></td><td>Cut to start / end</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">Y</span></td><td>Paste what you cut</td><td><span class="kbd">Alt</span>+<span class="kbd">.</span></td><td>Insert last argument of previous command</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">L</span></td><td>Clear screen (keeps the line)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">X</span> <span class="kbd">Ctrl</span>+<span class="kbd">E</span></td><td>Open current line in <code>$EDITOR</code></td></tr>
+</table>
+<p>History expansion earns its keep too: <code>!!</code> repeats the last command, <code>sudo !!</code> repeats it with privilege, <code>!$</code> is the last argument, <code>^old^new</code> re-runs with a substitution. Set <code>HISTCONTROL=ignoreboth</code> and <code>HISTSIZE=50000</code> so your history is actually useful.</p>
+
+<h2>The Filesystem Hierarchy and How to Navigate It</h2>
+<p class="lead">Linux has one tree. Everything — disks, processes, kernel knobs, USB devices — is a file somewhere under <code>/</code>. The Filesystem Hierarchy Standard (FHS) tells you where to look before you have to search, and on a customer's unfamiliar host that knowledge is worth minutes you do not have.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg">
+  <rect x="330" y="10" width="100" height="34" rx="6" fill="#1e3a8a" stroke="#1e3a8a"/>
+  <text x="380" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">/</text>
+
+  <line x1="380" y1="44" x2="380" y2="60" stroke="#6b7688" stroke-width="2"/>
+  <line x1="60" y1="60" x2="700" y2="60" stroke="#6b7688" stroke-width="2"/>
+
+  <line x1="60" y1="60" x2="60" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="220" y1="60" x2="220" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="380" y1="60" x2="380" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="540" y1="60" x2="540" y2="80" stroke="#6b7688" stroke-width="2"/>
+  <line x1="700" y1="60" x2="700" y2="80" stroke="#6b7688" stroke-width="2"/>
+
+  <rect x="10" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="60" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/etc</text>
+  <text x="60" y="116" text-anchor="middle" font-size="10" fill="#2563eb">config, text only</text>
+
+  <rect x="170" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="220" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/var</text>
+  <text x="220" y="116" text-anchor="middle" font-size="10" fill="#2563eb">logs, spool, state</text>
+
+  <rect x="330" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="380" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/usr</text>
+  <text x="380" y="116" text-anchor="middle" font-size="10" fill="#2563eb">distro binaries</text>
+
+  <rect x="490" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="540" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/opt</text>
+  <text x="540" y="116" text-anchor="middle" font-size="10" fill="#2563eb">your software</text>
+
+  <rect x="650" y="80" width="100" height="46" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="700" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">/proc</text>
+  <text x="700" y="116" text-anchor="middle" font-size="10" fill="#0891b2">kernel, virtual</text>
+
+  <rect x="10" y="150" width="340" height="120" rx="6" fill="#ffffff" stroke="#e3e8ef" stroke-width="2"/>
+  <text x="26" y="172" font-size="11" font-weight="700" fill="#1e3a8a">Read-only-ish, package-owned</text>
+  <text x="26" y="192" font-size="11" fill="#6b7688">/usr/bin  /usr/lib  /usr/share  /usr/local</text>
+  <text x="26" y="210" font-size="11" fill="#6b7688">/bin and /sbin are symlinks into /usr on</text>
+  <text x="26" y="226" font-size="11" fill="#6b7688">modern distros (usrmerge, since ~2012)</text>
+  <text x="26" y="248" font-size="11" fill="#6b7688">Never edit here by hand — the next</text>
+  <text x="26" y="264" font-size="11" fill="#6b7688">package upgrade will overwrite you.</text>
+
+  <rect x="400" y="150" width="350" height="120" rx="6" fill="#ffffff" stroke="#e3e8ef" stroke-width="2"/>
+  <text x="416" y="172" font-size="11" font-weight="700" fill="#1e3a8a">Mutable, machine-specific</text>
+  <text x="416" y="192" font-size="11" fill="#6b7688">/etc        editable config, back it up</text>
+  <text x="416" y="210" font-size="11" fill="#6b7688">/var/log    where the evidence lives</text>
+  <text x="416" y="226" font-size="11" fill="#6b7688">/var/lib    databases, container state</text>
+  <text x="416" y="248" font-size="11" fill="#6b7688">/tmp        wiped on reboot, world-writable</text>
+  <text x="416" y="264" font-size="11" fill="#6b7688">/home, /root, /srv, /mnt, /media</text>
+</svg>
+<div class="cap">The FHS top level: immutable distro content on the left, machine state on the right.</div>
+</div>
+
+<h3>Directory-by-directory, with the FDE angle</h3>
+<table>
+<tr><th>Path</th><th>Contents</th><th>What you do there on day one</th></tr>
+<tr><td><code>/etc</code></td><td>System-wide configuration, all plain text</td><td><code>/etc/os-release</code>, <code>/etc/hosts</code>, <code>/etc/resolv.conf</code>, <code>/etc/ssl/certs</code>, <code>/etc/systemd/system</code></td></tr>
+<tr><td><code>/var/log</code></td><td>Logs: <code>syslog</code>/<code>messages</code>, <code>auth.log</code>/<code>secure</code>, app dirs, <code>journal/</code></td><td>First place you look after a failed deploy</td></tr>
+<tr><td><code>/var/lib</code></td><td>Persistent service state: <code>docker/</code>, <code>containerd/</code>, <code>postgresql/</code>, <code>kubelet/</code></td><td>Where the disk actually went when <code>/</code> fills up</td></tr>
+<tr><td><code>/usr/local</code></td><td>Software compiled or installed outside the package manager</td><td>Safe place to drop a static binary you brought with you</td></tr>
+<tr><td><code>/opt</code></td><td>Self-contained third-party packages, one directory each</td><td>Corporate agents live here — CrowdStrike, Splunk, Dynatrace</td></tr>
+<tr><td><code>/proc</code></td><td>Virtual filesystem exposing kernel &amp; process state</td><td><code>/proc/cpuinfo</code>, <code>/proc/meminfo</code>, <code>/proc/&lt;pid&gt;/environ</code>, <code>/proc/&lt;pid&gt;/limits</code></td></tr>
+<tr><td><code>/sys</code></td><td>Device/driver model, cgroups v2 knobs</td><td><code>/sys/fs/cgroup/memory.max</code> inside containers</td></tr>
+<tr><td><code>/dev</code></td><td>Device nodes plus <code>null</code>, <code>zero</code>, <code>urandom</code>, <code>/dev/tcp</code> (bash built-in)</td><td><code>echo &gt; /dev/tcp/host/443</code> tests reachability with no tools installed</td></tr>
+<tr><td><code>/run</code></td><td>tmpfs for runtime data: PID files, sockets</td><td><code>/run/docker.sock</code>, <code>/run/systemd/</code></td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Identify the host in three commands</span><code>cat /etc/os-release</code> for distro and version, <code>uname -r</code> for kernel, <code>hostnamectl</code> for a combined view including virtualization type. If <code>hostnamectl</code> says <code>Virtualization: kvm</code> you are on a VM; <code>docker</code> or <code>wsl</code> tells you something entirely different about what you can expect to work.</div>
+
+<h3>Navigating without wasting keystrokes</h3>
+<pre><code class="language-bash"># Jump back to where you were
+cd -                      # toggle between last two directories
+pushd /var/log; popd      # directory stack when you need three or four
+
+# Where am I really? (resolves symlinks)
+pwd -P
+
+# Tree view without installing tree
+find . -maxdepth 2 -type d | sort
+
+# What is this file?
+file /usr/bin/python3
+stat -c '%A %U:%G %s bytes  mtime=%y  %n' /etc/hosts
+
+# Biggest things under here, fast
+du -xh --max-depth=1 . 2&gt;/dev/null | sort -h | tail -15
+</code></pre>
+<p>The <code>-x</code> on <code>du</code> keeps it on one filesystem, which stops you from walking an NFS mount for four minutes. <code>2&gt;/dev/null</code> suppresses the permission-denied noise you will get as a non-root user.</p>
+
+<h2>Files, Links, Globbing, find, and the xargs Pattern</h2>
+<p class="lead">Finding things is the core FDE skill. The customer says "the config is somewhere under <code>/opt</code>"; you have five minutes. <code>find</code> plus <code>xargs</code> is the instrument that answers almost any "where is it / which ones match / do this to all of them" question.</p>
+
+<h3>Hard links vs symbolic links</h3>
+<p>A hard link is another directory entry pointing at the same inode — same file, two names, no "original". A symlink is a tiny file containing a path. Delete the target and the symlink dangles; delete one hard link and the data survives until the last link goes.</p>
+<pre><code class="language-bash">ln  /data/model.bin  /opt/app/model.bin      # hard link: same inode, same filesystem only
+ln -s /data/model.bin /opt/app/model.bin     # symlink: a pointer, can cross filesystems
+ls -li                                        # first column is the inode number
+readlink -f /opt/app/current                  # resolve a chain of symlinks fully
+</code></pre>
+<div class="callout note"><span class="t">The blue/green symlink trick</span>Deploy releases to <code>/opt/app/releases/2026-03-11T0930</code> and point <code>/opt/app/current</code> at it with <code>ln -sfn</code>. Rollback becomes one atomic symlink swap plus a service restart — no copy, no downtime window, no "which version is live?" ambiguity. The <code>-n</code> matters: without it, <code>ln -sf</code> creates a link <em>inside</em> the existing directory symlink.</div>
+
+<h3>Globbing is the shell, not the command</h3>
+<pre><code class="language-bash">*.log            # any chars
+report-?.csv     # exactly one char
+log-[0-9][0-9]   # character class
+{api,worker}.yaml   # brace expansion (not a glob - expands even if no file exists)
+
+shopt -s globstar
+ls **/*.py       # recursive, bash 4+
+
+shopt -s nullglob  # unmatched glob expands to nothing instead of the literal string
+shopt -s dotglob   # include hidden files
+</code></pre>
+<p>If a glob matches nothing, bash by default passes the literal pattern to the command — which is why <code>rm *.bak</code> in an empty directory complains about a file named <code>*.bak</code>. In scripts, <code>nullglob</code> plus an explicit emptiness check avoids a whole class of bugs.</p>
+
+<h3>find: the twelve expressions worth memorising</h3>
+<pre><code class="language-bash">find /opt -name '*.yaml'                     # by name (quote it! or the shell expands first)
+find /opt -iname 'Config*'                   # case-insensitive
+find /var/log -type f -size +100M            # files over 100 MB
+find /var/log -type f -mtime -1              # modified in the last 24 h
+find /var/log -type f -mmin -15              # modified in the last 15 minutes
+find / -xdev -type f -perm -4000 2&gt;/dev/null # setuid binaries, one filesystem
+find . -type d -name node_modules -prune -o -type f -print   # skip a subtree
+find . -newer /tmp/marker                    # changed since a reference file
+find /data -type f -user svc_app -group app  # ownership
+find . -empty -type f                        # zero-byte files
+find . -name '*.tmp' -delete                 # built-in delete, no xargs needed
+find . -type f -printf '%s\t%p\n' | sort -rn | head   # GNU-only: size then path
+</code></pre>
+<div class="callout warn"><span class="t">BSD vs GNU find</span><code>-printf</code>, <code>-mmin</code> and <code>-delete</code> are GNU extensions. macOS and some minimal images ship BSD or BusyBox find where they do not exist. On a customer box, test with a harmless case before relying on a flag in a script.</div>
+
+<h3>The xargs pattern</h3>
+<p><code>find ... -print0 | xargs -0</code> is the safe idiom: NUL-separated so filenames with spaces, quotes or newlines cannot break the pipeline.</p>
+<pre><code class="language-bash"># Grep only inside YAML files, safely, in parallel
+find /opt/app -name '*.yaml' -print0 | xargs -0 grep -l 'imagePullSecrets'
+
+# -n1 one argument per invocation; -P4 four processes in parallel
+find . -name '*.json' -print0 | xargs -0 -n1 -P4 jq -e . &gt;/dev/null
+
+# -I{} when the argument is not last
+find /backup -name '*.sql.gz' -print0 | xargs -0 -I{} sh -c 'echo "== {}"; zcat {} | head -3'
+
+# Preview before you destroy: -t prints each command, -p prompts
+find /tmp -name 'core.*' -print0 | xargs -0 -t rm -f
+</code></pre>
+<p><code>find -exec cmd {} +</code> does the same batching without a pipe and is marginally safer because there is no quoting hand-off: <code>find . -name '*.log' -exec gzip {} +</code>. Use <code>\;</code> instead of <code>+</code> when the command can only take one file at a time.</p>
+
+<h3>locate, which, type, and friends</h3>
+<pre><code class="language-bash">sudo updatedb &amp;&amp; locate nginx.conf   # instant, but only as fresh as the database
+type -a python3                       # shows aliases, functions, AND all PATH hits
+command -v kubectl                    # POSIX, script-safe "is it installed?"
+which -a java                         # all matches on PATH
+readlink -f "$(command -v java)"      # the real binary behind the alternatives symlink
+ldd /usr/bin/curl                     # shared library dependencies
+strings /opt/vendor/agent | grep -i version   # when there is no --version flag
+</code></pre>
+<div class="callout tip"><span class="t">Use <code>command -v</code> in scripts</span><code>which</code> is an external binary with inconsistent exit codes across distros, and is absent from some minimal images. <code>command -v tool &gt;/dev/null || { echo "need tool"; exit 1; }</code> is portable and correct.</div>
+
+<h2>Users, Groups, Permissions, sudo, and ACLs</h2>
+<p class="lead">On a customer system you will almost never be root, and that constraint shapes everything. Knowing precisely what an octal mode means, what <code>sudo -l</code> tells you about your own blast radius, and why your service can read a file but not the directory containing it, is non-negotiable.</p>
+
+<h3>Reading <code>ls -l</code> correctly</h3>
+<pre><code class="language-text">-rwxr-x---  1 deploy  app   4096 Mar 11 09:30 run.sh
+│└┬┘└┬┘└┬┘  │   │      │
+│ │  │  └── other: ---  (0)
+│ │  └───── group: r-x  (5)
+│ └──────── owner: rwx  (7)
+└────────── type: - file, d dir, l symlink, s socket, c char dev, b block dev, p fifo
+</code></pre>
+<table>
+<tr><th>Bit</th><th>On a file</th><th>On a directory</th></tr>
+<tr><td><code>r</code> (4)</td><td>Read contents</td><td>List names (but not stat them)</td></tr>
+<tr><td><code>w</code> (2)</td><td>Modify contents</td><td>Create/delete/rename entries</td></tr>
+<tr><td><code>x</code> (1)</td><td>Execute</td><td>Traverse — needed to access anything inside</td></tr>
+</table>
+<div class="callout note"><span class="t">The classic confusion</span>Deleting a file depends on the <strong>directory's</strong> write bit, not the file's. A read-only file in a writable directory can be removed by anyone with write access to that directory — which is exactly why <code>/tmp</code> carries the sticky bit.</div>
+
+<h3>Octal, symbolic, and umask</h3>
+<pre><code class="language-bash">chmod 750 deploy.sh        # rwx r-x ---
+chmod u+x,g-w,o= file      # symbolic form
+chmod -R u+rwX,go+rX dir   # capital X = execute only where it already is, or on dirs
+chown -R svc_app:app /opt/app
+chgrp app /var/log/app
+
+umask                      # 0022 typical -> new files 644, new dirs 755
+umask 0027                 # new files 640, dirs 750 - group-readable, world-blind
+</code></pre>
+<p>umask is subtractive from 666 for files and 777 for directories; it never grants execute to a regular file. Set it in the systemd unit (<code>UMask=0027</code>) rather than in a shell rc file, because services do not read your rc files.</p>
+
+<h3>setuid, setgid, sticky</h3>
+<table>
+<tr><th>Bit</th><th>Octal</th><th>Effect</th><th>Example</th></tr>
+<tr><td>setuid</td><td>4000</td><td>Binary runs as its <em>owner</em>, not the caller</td><td><code>/usr/bin/passwd</code> (<code>-rwsr-xr-x</code>)</td></tr>
+<tr><td>setgid</td><td>2000</td><td>On a binary: runs as owning group. On a <strong>directory</strong>: new files inherit the directory's group</td><td>Shared team directory</td></tr>
+<tr><td>sticky</td><td>1000</td><td>In a directory, only the file owner may delete</td><td><code>/tmp</code> (<code>drwxrwxrwt</code>)</td></tr>
+</table>
+<pre><code class="language-bash"># Shared drop directory where everything lands in group "analytics"
+sudo install -d -m 2770 -o root -g analytics /srv/dropbox
+ls -ld /srv/dropbox      # drwxrws--- 
+
+# Audit for unexpected setuid binaries (a real finding on a hardening review)
+find / -xdev \( -perm -4000 -o -perm -2000 \) -type f -printf '%M %u %p\n' 2&gt;/dev/null
+</code></pre>
+
+<h3>Users, groups, and identity</h3>
+<pre><code class="language-bash">id                                 # uid, gid, all supplementary groups
+id -nG svc_app                     # group names for another user
+getent passwd deploy               # works with LDAP/SSSD, unlike grep /etc/passwd
+getent group docker
+groups                             # your groups in the CURRENT session
+
+sudo useradd -r -s /usr/sbin/nologin -d /opt/app -M svc_app   # service account
+sudo usermod -aG docker "$USER"    # -a is mandatory, without it you REPLACE groups
+newgrp docker                      # pick up the new group without logging out
+</code></pre>
+<div class="callout danger"><span class="t"><code>usermod -G</code> without <code>-a</code></span>This replaces all supplementary groups. Running <code>sudo usermod -G docker alice</code> can remove alice from <code>sudo</code>, <code>wheel</code> and every other group in one keystroke. Always <code>-aG</code>. Always check <code>id alice</code> before and after.</div>
+
+<h3>sudo: know your own blast radius</h3>
+<pre><code class="language-bash">sudo -l                            # EXACTLY what you are permitted to run
+sudo -u svc_app -- /opt/app/bin/health   # run as a service account
+sudo -i                            # full login shell as root (loads root's env)
+sudo -E env | grep -i proxy        # preserve YOUR environment (often blocked)
+sudo visudo -f /etc/sudoers.d/deploy     # always edit via visudo - it validates
+</code></pre>
+<pre><code class="language-text"># /etc/sudoers.d/deploy  — least privilege, not blanket ALL
+Cmnd_Alias APPCTL = /bin/systemctl restart app, /bin/systemctl status app, \
+                    /usr/bin/journalctl -u app *
+%deploy ALL=(root) NOPASSWD: APPCTL
+Defaults:%deploy  env_keep += "HTTP_PROXY HTTPS_PROXY NO_PROXY"
+</code></pre>
+<p>Note <code>env_reset</code> is the default: sudo strips your environment, which is why <code>sudo pip install</code> suddenly cannot reach the proxy. The <code>env_keep</code> line above is the fix, and it is a change you will request from a customer's platform team more than once.</p>
+
+<h3>POSIX ACLs when owner/group/other is not enough</h3>
+<pre><code class="language-bash">getfacl /srv/shared
+setfacl -m u:alice:rwx /srv/shared              # grant one user
+setfacl -m g:auditors:rx /srv/shared            # grant one group
+setfacl -d -m g:analytics:rwx /srv/shared       # DEFAULT acl: applies to new children
+setfacl -x u:alice /srv/shared                  # remove
+setfacl -b /srv/shared                          # strip all ACLs
+</code></pre>
+<p>A trailing <code>+</code> in <code>ls -l</code> (<code>drwxrwx---+</code>) means ACLs are present. If permissions look right but access still fails, check <code>getfacl</code> — and then check SELinux.</p>
+<div class="callout warn"><span class="t">RHEL: it is probably SELinux</span>On RHEL/CentOS/Rocky/Amazon Linux, "Permission denied" with perfect-looking permissions usually means an SELinux denial. Check <code>getenforce</code>, then <code>sudo ausearch -m avc -ts recent</code> or <code>sudo journalctl -t setroubleshoot</code>. Fix with the right context (<code>semanage fcontext -a -t httpd_sys_content_t '/srv/web(/.*)?' &amp;&amp; restorecon -Rv /srv/web</code>) — never by telling the customer to run <code>setenforce 0</code>.</div>
+
+<h2>Processes, Signals, Job Control, and Inspection</h2>
+<p class="lead">"The service is up but requests hang." Answering that means reading process state, finding which process holds which port, seeing what syscall it is stuck in, and knowing which signal to send. These tools turn a vague complaint into a specific cause.</p>
+
+<h3>Seeing what runs</h3>
+<pre><code class="language-bash">ps aux                              # BSD syntax: everything, user-oriented
+ps -ef                              # System V syntax: same idea, different columns
+ps -eo pid,ppid,user,%cpu,%mem,rss,etime,stat,cmd --sort=-%cpu | head -20
+ps -eLf                             # include threads
+pgrep -af gunicorn                  # PIDs + full command line, pattern match
+pstree -pa 1                        # process tree with PIDs and args
+</code></pre>
+<table>
+<tr><th>STAT</th><th>Meaning</th><th>FDE reading</th></tr>
+<tr><td><code>R</code></td><td>Running or runnable</td><td>Burning CPU</td></tr>
+<tr><td><code>S</code></td><td>Interruptible sleep</td><td>Normal — waiting on I/O or a timer</td></tr>
+<tr><td><code>D</code></td><td>Uninterruptible sleep</td><td>Blocked on disk/NFS. Cannot be killed. Suspect storage</td></tr>
+<tr><td><code>Z</code></td><td>Zombie</td><td>Exited, parent never reaped. Many zombies = buggy parent (common PID-1 problem in containers)</td></tr>
+<tr><td><code>T</code></td><td>Stopped</td><td>Someone pressed <span class="kbd">Ctrl</span>+<span class="kbd">Z</span> and walked away</td></tr>
+<tr><td><code>&lt;</code> / <code>N</code></td><td>High / low priority</td><td>Someone niced it</td></tr>
+</table>
+
+<h3>top and htop in anger</h3>
+<pre><code class="language-text">top - 14:22:11 up 42 days,  3:11,  2 users,  load average: 8.41, 6.02, 3.88
+Tasks: 312 total,   3 running, 308 sleeping,   0 stopped,   1 zombie
+%Cpu(s): 41.2 us,  9.8 sy,  0.0 ni, 12.4 id, 35.9 wa,  0.0 hi,  0.7 si
+MiB Mem :  15894.0 total,    412.3 free,  13201.8 used,   2279.9 buff/cache
+</code></pre>
+<p>Read it top-down: load average 8.41 on (check <code>nproc</code>) 4 cores means a deep run queue. <code>35.9 wa</code> is iowait — the CPU is idle waiting on storage, so this is a disk problem, not a CPU problem. <code>412 MiB free</code> with low <code>buff/cache</code> means memory pressure is real and the OOM killer is close.</p>
+<p>Inside <code>top</code>: <span class="kbd">1</span> shows per-core, <span class="kbd">M</span> sorts by memory, <span class="kbd">P</span> by CPU, <span class="kbd">c</span> shows full command lines, <span class="kbd">H</span> toggles threads, <span class="kbd">e</span> changes units. <code>htop</code> adds tree view (<span class="kbd">F5</span>), filtering (<span class="kbd">F4</span>) and per-process strace, but is not installed everywhere — know plain <code>top</code>.</p>
+
+<h3>Signals</h3>
+<table>
+<tr><th>Signal</th><th>No.</th><th>Default</th><th>When you send it</th></tr>
+<tr><td>SIGHUP</td><td>1</td><td>Terminate</td><td>Reload config without restart (nginx, sshd, rsyslog)</td></tr>
+<tr><td>SIGINT</td><td>2</td><td>Terminate</td><td><span class="kbd">Ctrl</span>+<span class="kbd">C</span></td></tr>
+<tr><td>SIGQUIT</td><td>3</td><td>Core dump</td><td>Java: dumps all thread stacks to stdout — invaluable for hangs</td></tr>
+<tr><td>SIGKILL</td><td>9</td><td>Die, uncatchable</td><td>Last resort. No cleanup, no flush, corrupt state possible</td></tr>
+<tr><td>SIGTERM</td><td>15</td><td>Terminate</td><td>The polite default. <code>kill</code> with no flag sends this</td></tr>
+<tr><td>SIGUSR1/2</td><td>10/12</td><td>Terminate</td><td>App-defined: log rotation, debug toggles</td></tr>
+<tr><td>SIGSTOP/CONT</td><td>19/18</td><td>Pause/resume</td><td>Freeze a runaway process without losing its state</td></tr>
+</table>
+<pre><code class="language-bash">kill -TERM 4821          # by name, clearer than -15
+kill -0 4821             # does the process exist / can I signal it? (no signal sent)
+pkill -f 'gunicorn.*api' # pattern against the full command line
+killall -u svc_app       # everything owned by a user
+kill -QUIT $(pgrep -f java)   # thread dump to the JVM's stdout
+</code></pre>
+<div class="callout tip"><span class="t">Escalate, do not jump</span>Send SIGTERM, wait 10–30 s, then SIGKILL only if needed. A SIGKILL on Postgres means crash recovery on next start; on a Java app it means no shutdown hooks, no connection drain, and a burst of 502s at the load balancer.</div>
+
+<h3>Job control</h3>
+<pre><code class="language-bash">long_task &amp;              # start in background
+jobs -l                  # list with PIDs
+fg %1                    # bring job 1 forward
+bg %1                    # resume a stopped job in the background
+Ctrl+Z                   # suspend the foreground job (SIGTSTP)
+disown -h %1             # detach from the shell so SIGHUP on logout won't kill it
+nohup long_task &gt; out.log 2&gt;&amp;1 &amp;   # immune to HUP from the start
+wait                     # block until all background jobs finish
+wait -n                  # block until the NEXT one finishes (bash 4.3+)
+</code></pre>
+
+<h3>Priority and limits</h3>
+<pre><code class="language-bash">nice -n 10 ./reindex.sh              # start lower priority (-20 highest .. 19 lowest)
+renice -n 5 -p 4821                  # change a running process
+ionice -c3 -p 4821                   # idle I/O class - huge for backup jobs
+ulimit -a                            # your limits
+ulimit -n 65535                      # file descriptors for this shell
+cat /proc/4821/limits                # the real, effective limits of a running process
+</code></pre>
+<div class="callout note"><span class="t">"Too many open files"</span>The soft limit is often 1024. Raising it needs all three: <code>/etc/security/limits.conf</code> for login sessions, <code>LimitNOFILE=</code> in the systemd unit for services, and sometimes <code>fs.file-max</code> via sysctl. Verify with <code>cat /proc/&lt;pid&gt;/limits</code>, not with <code>ulimit -n</code> in your own shell — they are different contexts.</div>
+
+<h3>lsof: who has the file, who has the port</h3>
+<pre><code class="language-bash">lsof -i :8080                    # who is listening on / connected to 8080
+lsof -i -P -n | grep LISTEN      # all listeners, numeric, no DNS lag
+lsof -p 4821                     # everything this PID has open
+lsof /var/log/app/app.log        # which processes hold this file
+lsof +D /opt/app                 # everything under a directory (slow)
+lsof | grep deleted              # deleted-but-open files eating disk
+lsof -u svc_app                  # by user
+</code></pre>
+<p>That <code>grep deleted</code> line solves a real incident: <code>df</code> says the disk is 100% full, <code>du</code> says only 40% is used. A process is holding a deleted 60 GB log file open, so the space is not reclaimed until the process closes the descriptor or restarts.</p>
+
+<h3>strace and friends when nothing else explains it</h3>
+<pre><code class="language-bash">strace -f -p 4821                              # attach, follow forks
+strace -f -e trace=openat,stat -p 4821         # only file-lookup syscalls
+strace -f -e trace=network -p 4821             # connect/send/recv
+strace -c -p 4821                              # summary: which syscall dominates
+strace -f -tt -T -o /tmp/trace.txt ./app       # timestamps + per-call duration
+ltrace -p 4821                                 # library calls instead of syscalls
+</code></pre>
+<p>Typical outcome: you attach to a hanging process and see it stuck on <code>connect(3, {sa_family=AF_INET, sin_port=htons(443), sin_addr=10.4.2.19}, 16</code> for sixty seconds — now you know it is a blocked egress to a specific IP, not an application bug.</p>
+<div class="callout warn"><span class="t">strace may be blocked</span>It needs <code>CAP_SYS_PTRACE</code>, and many hardened hosts set <code>kernel.yama.ptrace_scope=1</code> or higher. Check with <code>cat /proc/sys/kernel/yama/ptrace_scope</code>. If it is blocked, fall back to <code>/proc/&lt;pid&gt;/stack</code>, <code>/proc/&lt;pid&gt;/wchan</code>, <code>ss -tnp</code> and application-level debug logging.</div>
+
+<h2>systemd: Units, systemctl, journalctl, and Timers</h2>
+<p class="lead">On any mainstream distro since roughly 2015, systemd is PID 1. It starts services, supervises them, captures their logs, enforces resource limits, and replaces half of cron. If you are shipping software into a customer VM rather than a cluster, a well-written unit file is your deployment artifact.</p>
+
+<h3>The commands that matter</h3>
+<pre><code class="language-bash">systemctl status app                 # state + recent log lines + the exact ExecStart
+systemctl start|stop|restart app
+systemctl reload app                 # if the unit defines ExecReload
+systemctl enable --now app           # start now AND at boot
+systemctl disable --now app
+systemctl is-active app; systemctl is-enabled app     # script-friendly, exit codes
+systemctl cat app                    # full unit file including drop-ins
+systemctl edit app                   # create an override drop-in (the right way)
+systemctl show app -p MainPID -p MemoryCurrent -p NRestarts
+systemctl daemon-reload              # ALWAYS after editing unit files on disk
+systemctl list-units --failed        # the first thing to run on a sick host
+systemctl list-dependencies app
+systemd-analyze blame                # slowest units at boot
+</code></pre>
+<div class="callout danger"><span class="t">Edit overrides, never the vendor file</span>Changing <code>/usr/lib/systemd/system/app.service</code> means the next package upgrade silently reverts you. Use <code>systemctl edit app</code>, which creates <code>/etc/systemd/system/app.service.d/override.conf</code>. That file wins, survives upgrades, and shows up clearly in <code>systemctl cat</code>.</div>
+
+<h3>A production-grade service unit</h3>
+<pre><code class="language-text"># /etc/systemd/system/inference-api.service
+[Unit]
+Description=Inference API (FastAPI + uvicorn)
+Documentation=https://wiki.internal/runbooks/inference-api
+After=network-online.target postgresql.service
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=svc_api
+Group=app
+WorkingDirectory=/opt/inference-api/current
+Environment="PYTHONUNBUFFERED=1"
+EnvironmentFile=-/etc/inference-api/env        # leading - = tolerate absence
+ExecStartPre=/opt/inference-api/current/bin/preflight.sh
+ExecStart=/opt/inference-api/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8080 --workers 4
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+KillSignal=SIGTERM
+UMask=0027
+
+# Resource ceilings - the customer's SRE team will ask about these
+MemoryMax=6G
+MemoryHigh=5G
+CPUQuota=200%
+LimitNOFILE=65535
+TasksMax=512
+
+# Hardening - cheap, and it makes security review go quickly
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/inference-api /var/log/inference-api
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<table>
+<tr><th>Type=</th><th>systemd considers it started when…</th><th>Use for</th></tr>
+<tr><td><code>simple</code></td><td>Immediately after fork (legacy default)</td><td>Rarely — prefer <code>exec</code></td></tr>
+<tr><td><code>exec</code></td><td>After <code>execve()</code> succeeds</td><td>Most modern services; catches "binary not found"</td></tr>
+<tr><td><code>forking</code></td><td>Parent exits; needs <code>PIDFile=</code></td><td>Old daemons that background themselves</td></tr>
+<tr><td><code>notify</code></td><td>Service calls <code>sd_notify(READY=1)</code></td><td>Accurate readiness ordering</td></tr>
+<tr><td><code>oneshot</code></td><td>Process exits; pair with <code>RemainAfterExit=yes</code></td><td>Migrations, setup tasks</td></tr>
+</table>
+
+<h3>journalctl queries you will actually type</h3>
+<pre><code class="language-bash">journalctl -u inference-api -f                  # follow
+journalctl -u inference-api --since '30 min ago'
+journalctl -u inference-api --since '2026-03-11 09:00' --until '2026-03-11 09:30'
+journalctl -u inference-api -p err              # priority err and worse (0-7)
+journalctl -u inference-api -n 200 --no-pager
+journalctl -u inference-api -o json-pretty | jq -r '.MESSAGE'
+journalctl -b            # this boot;  -b -1  previous boot
+journalctl -k            # kernel ring buffer (= dmesg)
+journalctl _PID=4821 ; journalctl _UID=1001
+journalctl --disk-usage ; sudo journalctl --vacuum-size=500M
+journalctl -u inference-api --grep 'Timeout|5[0-9]{2}'   # regex, systemd 237+
+</code></pre>
+<div class="callout warn"><span class="t">Volatile journals lose your evidence</span>If <code>/var/log/journal</code> does not exist, the journal is memory-only and vanishes on reboot. Create it (<code>sudo mkdir -p /var/log/journal &amp;&amp; sudo systemd-tmpfiles --create --prefix /var/log/journal</code>) or set <code>Storage=persistent</code> in <code>/etc/systemd/journald.conf</code> — otherwise the crash you are investigating left no trace.</div>
+
+<h3>Timers vs cron</h3>
+<pre><code class="language-text"># /etc/systemd/system/reindex.service
+[Unit]
+Description=Nightly vector reindex
+[Service]
+Type=oneshot
+User=svc_api
+ExecStart=/opt/inference-api/bin/reindex.sh
+
+# /etc/systemd/system/reindex.timer
+[Unit]
+Description=Run reindex nightly
+[Timer]
+OnCalendar=*-*-* 02:30:00
+RandomizedDelaySec=600        # jitter so 400 VMs don't stampede the DB
+Persistent=true               # run on boot if the machine was off at 02:30
+AccuracySec=1min
+Unit=reindex.service
+[Install]
+WantedBy=timers.target
+</code></pre>
+<pre><code class="language-bash">sudo systemctl enable --now reindex.timer
+systemctl list-timers --all            # NEXT, LEFT, LAST, PASSED - all in one view
+systemd-analyze calendar 'Mon *-*-* 06:00:00'   # verify an OnCalendar expression
+sudo systemctl start reindex.service   # test the job immediately, without waiting
+</code></pre>
+<table>
+<tr><th>Concern</th><th>cron</th><th>systemd timer</th></tr>
+<tr><td>Logs</td><td>Mailed, or lost</td><td>In the journal, per-unit, queryable</td></tr>
+<tr><td>Missed runs</td><td>Skipped silently</td><td><code>Persistent=true</code> catches up</td></tr>
+<tr><td>Overlap</td><td>Runs concurrently unless you add flock</td><td>Blocked by default (one instance per unit)</td></tr>
+<tr><td>Environment</td><td>Minimal PATH, no profile</td><td>Explicit <code>Environment=</code>/<code>EnvironmentFile=</code></td></tr>
+<tr><td>Resource limits</td><td>None</td><td>Full cgroup controls</td></tr>
+<tr><td>Availability</td><td>Everywhere, including containers</td><td>Needs systemd as PID 1</td></tr>
+</table>
+<p>Cron still wins in containers and on minimal images. When you do use it, remember <code>%</code> must be escaped in crontabs, set <code>PATH=</code> and <code>SHELL=</code> at the top, redirect output explicitly (<code>&gt;&gt; /var/log/job.log 2&gt;&amp;1</code>), and wrap with <code>flock -n /var/lock/job.lock</code> to prevent overlap.</p>
+
+<h2>Package Management Across Distros and Air-Gapped Installs</h2>
+<p class="lead">You will not get to pick the distro. You will get a RHEL 8 box at one customer and an Alpine container at the next, and in both cases somebody will ask "can you just install it?" while the host has no route to the internet. Know the four package families and the offline workflow for each.</p>
+
+<h3>Identify first</h3>
+<pre><code class="language-bash">cat /etc/os-release
+# ID=rhel  VERSION_ID="8.9"       -> dnf/yum, RPM
+# ID=ubuntu VERSION_ID="22.04"    -> apt, DEB
+# ID=sles  VERSION_ID="15.5"      -> zypper, RPM
+# ID=alpine VERSION_ID="3.19"     -> apk
+# ID=amzn  VERSION_ID="2023"      -> dnf, RPM
+
+command -v apt dnf yum zypper apk pacman 2&gt;/dev/null
+</code></pre>
+
+<h3>The cross-distro command table</h3>
+<table>
+<tr><th>Task</th><th>apt (Debian/Ubuntu)</th><th>dnf / yum (RHEL family)</th><th>zypper (SUSE)</th><th>apk (Alpine)</th></tr>
+<tr><td>Refresh metadata</td><td><code>apt update</code></td><td><code>dnf makecache</code></td><td><code>zypper refresh</code></td><td><code>apk update</code></td></tr>
+<tr><td>Install</td><td><code>apt install -y nginx</code></td><td><code>dnf install -y nginx</code></td><td><code>zypper -n in nginx</code></td><td><code>apk add nginx</code></td></tr>
+<tr><td>Remove</td><td><code>apt remove</code> / <code>purge</code></td><td><code>dnf remove</code></td><td><code>zypper rm</code></td><td><code>apk del</code></td></tr>
+<tr><td>Search</td><td><code>apt search</code> / <code>apt-cache search</code></td><td><code>dnf search</code></td><td><code>zypper se</code></td><td><code>apk search</code></td></tr>
+<tr><td>Info</td><td><code>apt show nginx</code></td><td><code>dnf info nginx</code></td><td><code>zypper info</code></td><td><code>apk info -a</code></td></tr>
+<tr><td>What provides file X?</td><td><code>dpkg -S /usr/sbin/nginx</code></td><td><code>dnf provides */nginx</code></td><td><code>zypper se --provides</code></td><td><code>apk info --who-owns</code></td></tr>
+<tr><td>List installed</td><td><code>dpkg -l</code> / <code>apt list --installed</code></td><td><code>rpm -qa</code></td><td><code>rpm -qa</code></td><td><code>apk info</code></td></tr>
+<tr><td>Files in a package</td><td><code>dpkg -L nginx</code></td><td><code>rpm -ql nginx</code></td><td><code>rpm -ql nginx</code></td><td><code>apk info -L</code></td></tr>
+<tr><td>Download only</td><td><code>apt install --download-only</code></td><td><code>dnf download --resolve</code></td><td><code>zypper --pkg-cache-dir . in -d</code></td><td><code>apk fetch -R</code></td></tr>
+<tr><td>Install local file</td><td><code>dpkg -i x.deb; apt -f install</code></td><td><code>dnf install ./x.rpm</code></td><td><code>zypper in ./x.rpm</code></td><td><code>apk add --allow-untrusted x.apk</code></td></tr>
+<tr><td>Hold version</td><td><code>apt-mark hold nginx</code></td><td><code>dnf versionlock add</code></td><td><code>zypper al nginx</code></td><td>pin in repo file</td></tr>
+<tr><td>Upgrade all</td><td><code>apt upgrade</code></td><td><code>dnf upgrade</code></td><td><code>zypper up</code></td><td><code>apk upgrade</code></td></tr>
+</table>
+
+<h3>Repositories, mirrors, and the corporate proxy</h3>
+<pre><code class="language-bash"># Debian/Ubuntu
+cat /etc/apt/sources.list /etc/apt/sources.list.d/*.list
+echo 'Acquire::http::Proxy "http://proxy.corp:3128";' | sudo tee /etc/apt/apt.conf.d/95proxy
+
+# RHEL family
+ls /etc/yum.repos.d/
+dnf repolist ; dnf config-manager --set-enabled powertools
+sudo sed -i '/^\[main\]/a proxy=http://proxy.corp:3128' /etc/dnf/dnf.conf
+
+# Point at the customer's internal mirror instead of upstream
+sudo sed -i 's|http://archive.ubuntu.com|https://nexus.corp/repository/ubuntu|g' \
+  /etc/apt/sources.list
+</code></pre>
+<div class="callout warn"><span class="t">GPG and the corporate TLS-inspecting proxy</span>Many enterprises terminate TLS at the proxy with their own CA. Package tools then fail with certificate errors. The correct fix is to install the corporate CA into the system trust store — <code>sudo cp corp-root.crt /usr/local/share/ca-certificates/ &amp;&amp; sudo update-ca-certificates</code> on Debian, or <code>sudo cp corp-root.crt /etc/pki/ca-trust/source/anchors/ &amp;&amp; sudo update-ca-trust</code> on RHEL. Never disable verification as a workaround you leave behind.</div>
+
+<h3>Air-gapped install: the pattern</h3>
+<p>You have a connected staging machine of the <em>same distro, version and architecture</em>, and a target with no egress. Resolve dependencies on the connected box, carry the artifacts, install offline.</p>
+<ol class="steps">
+<li><b>Match the environment</b>Same <code>VERSION_ID</code> and <code>uname -m</code>. A container of the matching base image is the cleanest way: <code>docker run --rm -it -v "$PWD/out:/out" rockylinux:8 bash</code>.</li>
+<li><b>Download with dependencies</b>RHEL: <code>dnf download --resolve --alldeps --destdir /out nginx</code>. Debian: <code>apt-get install --download-only -o Dir::Cache::archives=/out nginx</code>. Alpine: <code>apk fetch -R -o /out nginx</code>.</li>
+<li><b>Build a local repo (RPM) or just copy (DEB)</b><code>createrepo_c /out</code> produces repodata so <code>dnf</code> can resolve offline.</li>
+<li><b>Transfer</b><code>tar czf bundle.tgz out/</code>, then <code>sha256sum bundle.tgz</code> and record the hash in the change ticket. Move via the approved channel (SFTP drop, removable media with scan, artifact promotion).</li>
+<li><b>Install on target</b>RPM: add a <code>baseurl=file:///srv/offline</code> repo file and <code>dnf --disablerepo='*' --enablerepo=offline install nginx</code>. DEB: <code>sudo dpkg -i *.deb || sudo apt-get -f install --no-download</code>.</li>
+<li><b>Verify</b><code>rpm -V nginx</code> / <code>debsums nginx</code>, then <code>nginx -v</code> and a smoke test. Record what you installed in the handover note.</li>
+</ol>
+
+<pre><code class="language-bash"># Language ecosystems have the same pattern
+pip download -r requirements.txt -d wheels/ --platform manylinux2014_x86_64 \
+    --python-version 311 --only-binary=:all:
+pip install --no-index --find-links=wheels/ -r requirements.txt
+
+npm ci --omit=dev &amp;&amp; tar czf node_modules.tgz node_modules   # or use `npm pack`/Verdaccio
+# Containers: docker save / docker load
+docker pull myreg/api:1.4.2 &amp;&amp; docker save myreg/api:1.4.2 | gzip &gt; api-1.4.2.tar.gz
+gunzip -c api-1.4.2.tar.gz | docker load
+</code></pre>
+<div class="callout tip"><span class="t">Static binaries are your friend</span>For single-purpose tools, a statically linked binary (Go, Rust, or a musl build) is one <code>scp</code> and a <code>chmod +x</code> away from working — no dependency resolution, no package approval. Keep a personal kit of <code>jq</code>, <code>yq</code>, <code>ripgrep</code>, <code>fd</code>, <code>kubectl</code>, <code>busybox</code> as static amd64 and arm64 binaries. Verify checksums against upstream and get them approved once, not every engagement.</div>
+
+<h2>SSH Deep Dive</h2>
+<p class="lead">SSH is the FDE's transport layer. It is how you reach the host, how you tunnel to a database behind a firewall, how you copy a 4 GB model file, and how you get a browser onto an internal dashboard. Most engineers use ten percent of it. The other ninety percent is what gets you unblocked without filing a network ticket.</p>
+
+<h3>Keys</h3>
+<pre><code class="language-bash">ssh-keygen -t ed25519 -C "pranit@fde-laptop" -f ~/.ssh/id_ed25519_acme
+# ed25519: small, fast, modern. Use RSA 4096 only if the customer's tooling demands it:
+ssh-keygen -t rsa -b 4096 -C "..." -f ~/.ssh/id_rsa_legacy
+
+ssh-copy-id -i ~/.ssh/id_ed25519_acme.pub deploy@bastion.acme.internal
+# No ssh-copy-id? Do it by hand:
+cat ~/.ssh/id_ed25519_acme.pub | ssh deploy@host \
+  'umask 077; mkdir -p ~/.ssh; cat &gt;&gt; ~/.ssh/authorized_keys'
+
+ssh-keygen -lf ~/.ssh/id_ed25519_acme.pub      # fingerprint, to confirm with the customer
+ssh-keygen -p -f ~/.ssh/id_ed25519_acme        # change the passphrase
+</code></pre>
+<div class="callout danger"><span class="t">Permissions kill SSH silently</span><code>~/.ssh</code> must be <code>700</code>, private keys <code>600</code>, <code>authorized_keys</code> <code>600</code>, and your <strong>home directory must not be group-writable</strong>. StrictModes rejects anything looser and the client-side error is just "Permission denied (publickey)". Debug with <code>ssh -vvv</code> on the client and <code>sudo journalctl -u sshd -f</code> on the server.</div>
+
+<h3>~/.ssh/config — the highest-leverage file you own</h3>
+<pre><code class="language-text">Host *
+    ServerAliveInterval 30
+    ServerAliveCountMax 4
+    TCPKeepAlive yes
+    ControlMaster auto
+    ControlPath ~/.ssh/cm-%r@%h:%p
+    ControlPersist 10m
+    HashKnownHosts no
+    AddKeysToAgent yes
+
+Host bastion-acme
+    HostName bastion.acme.example.com
+    User pranit.deshpande
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519_acme
+    IdentitiesOnly yes
+
+# Every private host reached THROUGH the bastion, by one rule
+Host 10.20.*.* app-* db-*
+    User deploy
+    IdentityFile ~/.ssh/id_ed25519_acme
+    IdentitiesOnly yes
+    ProxyJump bastion-acme
+
+Host gpu-node
+    HostName 10.20.4.17
+    ProxyJump bastion-acme
+    LocalForward 8888 127.0.0.1:8888      # Jupyter
+    LocalForward 5432 10.20.9.4:5432      # Postgres behind the same network
+    RequestTTY yes
+</code></pre>
+<p><code>ControlMaster</code> multiplexes: the second and subsequent connections to the same host reuse the first TCP session and skip the handshake entirely — on a high-latency VPN that turns a 3-second connect into 50 ms. <code>IdentitiesOnly yes</code> stops the agent from offering every key you own, which matters when a customer's server has <code>MaxAuthTries 3</code> and locks you out after three wrong keys.</p>
+
+<h3>Agent and agent forwarding</h3>
+<pre><code class="language-bash">eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519_acme
+ssh-add -l                      # loaded keys
+ssh-add -t 3600 ~/.ssh/key      # auto-expire after an hour
+ssh -A bastion                  # forward the agent
+</code></pre>
+<div class="callout warn"><span class="t">Prefer ProxyJump to agent forwarding</span><code>-A</code> exposes your agent socket to anyone with root on the intermediate host; they can use your key for as long as you are connected. <code>ssh -J bastion target</code> (or <code>ProxyJump</code>) keeps the authentication on your laptop and only tunnels the TCP stream. Use <code>-A</code> only when you genuinely need to authenticate <em>from</em> the remote host (e.g. <code>git clone</code> on the server) and the customer permits it.</div>
+
+<h3>Port forwarding — the three directions</h3>
+<div class="diagram">
+<svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="24" font-size="12" font-weight="700" fill="#1e3a8a">-L  LOCAL FORWARD   ssh -L 5432:db.internal:5432 bastion</text>
+  <rect x="20" y="36" width="130" height="40" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="85" y="61" text-anchor="middle" font-size="11" fill="#1e3a8a">your laptop :5432</text>
+  <line x1="150" y1="56" x2="300" y2="56" stroke="#2563eb" stroke-width="2"/>
+  <text x="225" y="50" text-anchor="middle" font-size="10" fill="#6b7688">encrypted tunnel</text>
+  <rect x="300" y="36" width="130" height="40" rx="6" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="365" y="61" text-anchor="middle" font-size="11" fill="#1e3a8a">bastion</text>
+  <line x1="430" y1="56" x2="580" y2="56" stroke="#6b7688" stroke-width="2"/>
+  <rect x="580" y="36" width="160" height="40" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="660" y="61" text-anchor="middle" font-size="11" fill="#1e3a8a">db.internal:5432</text>
+
+  <text x="20" y="114" font-size="12" font-weight="700" fill="#1e3a8a">-R  REMOTE FORWARD   ssh -R 9000:localhost:3000 bastion</text>
+  <rect x="20" y="126" width="130" height="40" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="85" y="151" text-anchor="middle" font-size="11" fill="#1e3a8a">your app :3000</text>
+  <line x1="150" y1="146" x2="300" y2="146" stroke="#2563eb" stroke-width="2"/>
+  <text x="225" y="140" text-anchor="middle" font-size="10" fill="#6b7688">reverse</text>
+  <rect x="300" y="126" width="130" height="40" rx="6" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="365" y="151" text-anchor="middle" font-size="11" fill="#1e3a8a">bastion :9000</text>
+  <line x1="430" y1="146" x2="580" y2="146" stroke="#6b7688" stroke-width="2"/>
+  <rect x="580" y="126" width="160" height="40" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="660" y="151" text-anchor="middle" font-size="11" fill="#1e3a8a">customer tester</text>
+
+  <text x="20" y="204" font-size="12" font-weight="700" fill="#1e3a8a">-D  DYNAMIC (SOCKS5)   ssh -D 1080 bastion</text>
+  <rect x="20" y="214" width="130" height="30" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="85" y="234" text-anchor="middle" font-size="11" fill="#1e3a8a">browser -&gt; :1080</text>
+  <line x1="150" y1="229" x2="300" y2="229" stroke="#2563eb" stroke-width="2"/>
+  <rect x="300" y="214" width="130" height="30" rx="6" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="365" y="234" text-anchor="middle" font-size="11" fill="#1e3a8a">bastion</text>
+  <line x1="430" y1="229" x2="580" y2="229" stroke="#6b7688" stroke-width="2"/>
+  <rect x="580" y="214" width="160" height="30" rx="6" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="660" y="234" text-anchor="middle" font-size="11" fill="#1e3a8a">any internal host</text>
+</svg>
+<div class="cap">Local brings a remote service to you; remote exposes your service to them; dynamic turns SSH into a SOCKS proxy for everything.</div>
+</div>
+
+<pre><code class="language-bash"># Local: reach a Postgres that only the bastion can see
+ssh -N -L 5432:db.internal:5432 bastion-acme
+psql -h 127.0.0.1 -p 5432 -U app appdb
+
+# Multiple at once, in the background, no shell
+ssh -f -N -L 8080:app-1:8080 -L 9090:prometheus:9090 -L 5432:db.internal:5432 bastion-acme
+
+# Remote: let a customer tester hit the demo running on your laptop
+ssh -N -R 9000:localhost:3000 bastion-acme
+# (needs GatewayPorts yes on the server for non-loopback binding)
+
+# Dynamic SOCKS5 proxy for a browser or curl
+ssh -f -N -D 1080 bastion-acme
+curl --socks5-hostname 127.0.0.1:1080 http://grafana.internal:3000/api/health
+
+# Manage forwards on a live session: press Enter, then ~C for the ssh prompt
+# ~. drops a hung session; ~? lists all escape sequences
+</code></pre>
+
+<h3>Copying files: scp vs rsync</h3>
+<pre><code class="language-bash">scp -C model.bin deploy@app-1:/opt/app/           # -C compresses; fine for one small file
+scp -r ./dist deploy@app-1:/opt/app/releases/
+scp -3 host-a:/f host-b:/f                        # relay through your machine
+
+# rsync is what you actually want for anything repeated or large
+rsync -avz --partial --progress ./dist/ deploy@app-1:/opt/app/current/
+rsync -avz --delete --exclude '.git' --exclude 'node_modules' ./src/ app-1:/opt/app/src/
+rsync -avz -e 'ssh -J bastion-acme' ./dist/ app-1:/opt/app/     # through a jump host
+rsync -avz --bwlimit=5000 bigfile host:/data/                   # 5 MB/s cap, be a good guest
+rsync -avzn --delete ./a/ host:/b/                              # -n = DRY RUN. Always first.
+</code></pre>
+<div class="callout tip"><span class="t">Trailing slashes in rsync</span><code>rsync -a src/ dst/</code> copies the <em>contents</em> of src into dst. <code>rsync -a src dst/</code> creates <code>dst/src</code>. This single character has caused more misplaced deployments than any other rsync feature. And <code>--delete</code> plus a wrong path is how you erase a customer's directory — run with <code>-n</code> first, every time.</div>
+
+<h3>Server-side hardening you may be asked to review</h3>
+<pre><code class="language-text"># /etc/ssh/sshd_config.d/99-hardening.conf
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries 3
+AllowGroups ssh-users
+ClientAliveInterval 300
+ClientAliveCountMax 2
+X11Forwarding no
+AllowTcpForwarding yes          # FDEs need this; justify it rather than lose it
+LogLevel VERBOSE
+</code></pre>
+<p>Validate before restarting — <code>sudo sshd -t</code> — and keep your existing session open while you restart, so a mistake does not lock you out.</p>
+
+<h2>Text Processing: grep, sed, awk, cut, sort, jq</h2>
+<p class="lead">Logs, configs and API responses are all text. The ability to go from a 2 GB log file to "these 7 request IDs failed, all from one upstream" in a single pipeline is the most visible skill you have in front of a customer.</p>
+
+<h3>grep and the regex you need</h3>
+<pre><code class="language-bash">grep -r 'apiKey' /opt/app --include='*.py'     # recursive, filtered by glob
+grep -ri 'timeout' -n /etc/nginx               # case-insensitive, line numbers
+grep -c ERROR app.log                          # count matching LINES
+grep -v DEBUG app.log                          # invert
+grep -w id app.log                             # whole word - not "uuid", not "identity"
+grep -A3 -B3 'Traceback' app.log               # context after / before
+grep -C5 'OOM' /var/log/syslog                 # 5 lines either side
+grep -l 'LoadBalancer' *.yaml                  # just the filenames
+grep -o 'req_id=[a-f0-9]\{12\}' app.log        # print only the match
+grep -E '5[0-9]{2} ' access.log                # ERE: no backslashes needed
+grep -F '$special[chars]' file                 # fixed string, no regex
+grep -P '(?&lt;=user=)\w+' app.log                # PCRE lookbehind (GNU only)
+</code></pre>
+<table>
+<tr><th>Pattern</th><th>Matches</th><th>Pattern</th><th>Matches</th></tr>
+<tr><td><code>^</code> <code>$</code></td><td>Line start / end</td><td><code>\b</code></td><td>Word boundary</td></tr>
+<tr><td><code>.</code></td><td>Any single char</td><td><code>[^abc]</code></td><td>Any char except a, b, c</td></tr>
+<tr><td><code>*</code> <code>+</code> <code>?</code></td><td>0+, 1+, 0 or 1</td><td><code>{2,5}</code></td><td>Between 2 and 5 repeats</td></tr>
+<tr><td><code>(a|b)</code></td><td>Alternation (ERE)</td><td><code>\d \w \s</code></td><td>Digit, word char, whitespace (PCRE)</td></tr>
+</table>
+<div class="callout tip"><span class="t">ripgrep when it exists</span><code>rg 'pattern' --type py -C3</code> is 5–20× faster than <code>grep -r</code>, respects <code>.gitignore</code>, and defaults to recursive. But it is not installed on customer boxes, so keep GNU grep in your fingers and treat <code>rg</code> as a local luxury.</div>
+
+<h3>sed: stream edits</h3>
+<pre><code class="language-bash">sed 's/localhost/db.internal/' config.ini          # first occurrence per line
+sed 's/old/new/g' config.ini                       # all occurrences
+sed -i.bak 's/DEBUG/INFO/g' app.conf               # in place, keeping app.conf.bak
+sed -n '120,140p' huge.log                         # print a line range only
+sed -n '/BEGIN/,/END/p' dump.txt                   # range between two patterns
+sed '/^#/d; /^$/d' nginx.conf                      # strip comments and blank lines
+sed '3i\Inserted before line 3' file
+sed 's|/old/path|/new/path|g' file                 # alternate delimiter for paths
+sed -E 's/([0-9]{4})-([0-9]{2})/\2\/\1/' dates.txt # ERE with capture groups
+</code></pre>
+<div class="callout danger"><span class="t"><code>sed -i</code> is not portable and is not reversible</span>GNU sed accepts <code>-i</code> with an optional suffix; BSD/macOS sed <em>requires</em> an argument (<code>sed -i '' 's/a/b/'</code>). On a customer host, always use a suffix (<code>-i.bak</code>) so you have a rollback, and preview without <code>-i</code> first. One mistyped regex across <code>/etc</code> is an outage.</div>
+
+<h3>awk: the pocket language</h3>
+<pre><code class="language-bash">awk '{print $1, $7}' access.log                    # fields; $0 is the whole line, NF the count
+awk -F: '{print $1}' /etc/passwd                   # custom separator
+awk -F'\t' 'NR&gt;1 {print $3}' data.tsv              # skip header
+awk '$9 &gt;= 500 {print $7}' access.log              # filter then project
+awk '{s+=$10} END {print s/1048576 " MB"}' access.log   # sum bytes column
+awk '{c[$9]++} END {for (k in c) print c[k], k}' access.log | sort -rn   # status histogram
+awk '{t[$7]+=$NF; n[$7]++} END {for (u in t) printf "%8.3f %5d %s\n", t[u]/n[u], n[u], u}' \
+    timings.log | sort -rn | head
+awk 'length($0) &gt; 200' app.log                     # abnormally long lines
+awk '/BEGIN_TX/,/END_TX/' app.log                  # range patterns
+awk 'BEGIN{OFS=","} {print $1,$4,$9}' access.log   # retabulate as CSV
+</code></pre>
+<p>That status-histogram one-liner is the single most useful awk you will write: it turns an opaque access log into "487 × 200, 61 × 499, 12 × 502" in under a second, and it works on any log format once you know the column index.</p>
+
+<h3>cut, sort, uniq, tr, column, and the counting idiom</h3>
+<pre><code class="language-bash">cut -d, -f1,3 data.csv            # by delimiter and field
+cut -c1-19 app.log                # by character position - great for timestamps
+sort -u list.txt                  # sort + dedupe
+sort -t, -k3,3nr -k1,1 data.csv   # 3rd field numeric descending, then 1st ascending
+sort -h                           # human sizes: 1K 23M 4G
+uniq -c                           # count runs - REQUIRES sorted input
+uniq -d                           # only duplicates
+tr -d '\r' &lt; win.txt &gt; unix.txt   # strip CRLF
+tr '[:upper:]' '[:lower:]'
+tr -s ' '                         # squeeze repeated spaces
+paste -d, a.txt b.txt             # join files side by side
+comm -13 old.txt new.txt          # lines only in new (both must be sorted)
+join -t, -1 1 -2 1 a.csv b.csv    # relational join on a key
+column -t -s, data.csv            # align into readable columns
+nl -ba file                       # number every line
+</code></pre>
+<div class="callout note"><span class="t">The universal frequency pipeline</span><code>… | sort | uniq -c | sort -rn | head -20</code>. Top IPs hitting your API, most common error strings, busiest endpoints, repeated stack frames — all the same four stages. Commit it to muscle memory.</div>
+
+<h3>jq: JSON is now the default log format</h3>
+<pre><code class="language-bash">curl -s https://api.internal/v1/pods | jq .
+jq -r '.items[].metadata.name' pods.json              # -r drops the quotes
+jq '.items[] | select(.status.phase != "Running")' pods.json
+jq -r '.items[] | [.metadata.name, .status.phase] | @tsv' pods.json | column -t
+jq 'map(.latency_ms) | add/length' timings.json       # mean
+jq -s 'group_by(.level) | map({level: .[0].level, n: length})' app.jsonl
+jq -c '.' pretty.json                                 # compact, one line
+jq -e '.status == "ok"' resp.json &gt;/dev/null          # EXIT CODE for scripts
+jq --arg env prod '.envs[$env]' config.json           # inject a shell variable safely
+jq -r 'to_entries[] | "\(.key)=\(.value)"' env.json   # JSON object -> KEY=VALUE
+cat app.jsonl | jq -r 'select(.level=="error") | "\(.ts) \(.req_id) \(.msg)"'
+</code></pre>
+<p>For YAML, <code>yq</code> (the Go rewrite by mikefarah) uses the same expression language: <code>yq '.spec.template.spec.containers[0].image' deploy.yaml</code>. If neither is installed and you have Python, <code>python3 -c 'import sys,json;d=json.load(sys.stdin);print(d["items"][0]["metadata"]["name"])'</code> always works.</p>
+
+<h3>A worked investigation</h3>
+<pre><code class="language-bash"># "The API got slow around 14:00." Access log is combined format, $NF = upstream time.
+awk '$4 ~ /11\/Mar\/2026:14:/' access.log \
+  | awk '{print $7, $NF}' \
+  | sort -k2 -rn | head -20
+# -> /v1/search dominates with 8-12 s responses
+
+# Which upstream?  Count status codes for just that endpoint
+grep ' /v1/search' access.log | awk '{print $9}' | sort | uniq -c | sort -rn
+#  412 200
+#   97 499     <- client gave up: timeouts, not errors
+
+# Correlate with the app's own structured log
+jq -r 'select(.path=="/v1/search" and .duration_ms&gt;5000)
+       | "\(.ts) \(.req_id) \(.db_ms) \(.vector_ms)"' app.jsonl | head
+# -> vector_ms is 7800 of the 8200 ms.  The vector store is the bottleneck.
+</code></pre>
+
+<h2>Pipes, Redirection, File Descriptors, and Here-Docs</h2>
+<p class="lead">Every mysterious "my script logs nothing" or "the error disappeared" bug comes down to misunderstanding file descriptors. Three numbers, one ordering rule, and a handful of operators cover the whole topic.</p>
+
+<table>
+<tr><th>FD</th><th>Name</th><th>Default</th></tr>
+<tr><td>0</td><td>stdin</td><td>Keyboard / previous command in a pipe</td></tr>
+<tr><td>1</td><td>stdout</td><td>Terminal — normal output</td></tr>
+<tr><td>2</td><td>stderr</td><td>Terminal — errors and diagnostics, unbuffered</td></tr>
+</table>
+
+<pre><code class="language-bash">cmd &gt; out.txt            # stdout, truncate
+cmd &gt;&gt; out.txt           # stdout, append
+cmd 2&gt; err.txt           # stderr only
+cmd &gt; out.txt 2&gt;&amp;1       # both to out.txt   (ORDER MATTERS)
+cmd &amp;&gt; out.txt           # bash shorthand for the same
+cmd 2&gt;&amp;1 &gt; out.txt       # WRONG: stderr goes to the TERMINAL, stdout to the file
+cmd &gt; /dev/null 2&gt;&amp;1     # silence everything
+cmd 2&gt;/dev/null          # keep output, drop the permission-denied noise
+cmd &lt; input.txt          # stdin from a file
+cmd &lt;&lt;&lt; "inline string"  # here-string
+</code></pre>
+<p>The ordering rule: redirections are applied left to right, and <code>2&gt;&amp;1</code> means "make fd 2 a copy of wherever fd 1 points <em>right now</em>". So you must redirect stdout first, then duplicate.</p>
+
+<pre><code class="language-bash"># Pipe stderr instead of stdout
+cmd 2&gt;&amp;1 &gt;/dev/null | grep -i error
+
+# Both to the terminal AND a file
+cmd 2&gt;&amp;1 | tee deploy.log
+cmd 2&gt;&amp;1 | tee -a deploy.log      # append
+
+# Capture stdout and stderr to separate files while still seeing both
+cmd &gt; &gt;(tee out.log) 2&gt; &gt;(tee err.log &gt;&amp;2)
+
+# Custom descriptors (useful when you need a side channel in a script)
+exec 3&gt; /var/log/audit-trail.log
+echo "starting deploy $(date -Is)" &gt;&amp;3
+exec 3&gt;&amp;-                          # close it
+
+# Pipeline exit status
+false | true; echo $?              # 0 - you got the LAST command's status
+set -o pipefail; false | true; echo $?   # 1 - what you actually wanted
+echo "${PIPESTATUS[@]}"            # per-stage statuses: "1 0"
+</code></pre>
+
+<h3>Here-docs and here-strings</h3>
+<pre><code class="language-bash"># Variables EXPAND
+cat &gt; /etc/app/config.yaml &lt;&lt;EOF
+environment: ${ENV}
+endpoint: https://${HOST}:8443
+EOF
+
+# Quoted delimiter: NOTHING expands - essential for scripts containing $ and `
+cat &gt; /usr/local/bin/wrapper.sh &lt;&lt;'EOF'
+#!/usr/bin/env bash
+exec /opt/app/bin/app --config "$1" "${@:2}"
+EOF
+
+# <<- strips LEADING TABS so you can indent inside a function
+deploy() {
+	ssh app-1 bash -s &lt;&lt;-'EOF'
+		set -euo pipefail
+		systemctl --user restart api
+		systemctl --user is-active api
+	EOF
+}
+
+# Here-string into a command expecting stdin
+jq -r .name &lt;&lt;&lt; "$json_response"
+</code></pre>
+
+<h3>Process substitution</h3>
+<pre><code class="language-bash">diff &lt;(ssh app-1 'sha256sum /opt/app/config.yaml') \
+     &lt;(ssh app-2 'sha256sum /opt/app/config.yaml')
+
+diff &lt;(sort a.txt) &lt;(sort b.txt)
+comm -3 &lt;(rpm -qa | sort) &lt;(ssh other 'rpm -qa' | sort)   # package drift between hosts
+
+# Feed a command's output to something that only accepts a FILE path
+grep -f &lt;(cut -d, -f1 ids.csv) app.log
+
+# Output process substitution: tee into two different pipelines
+./build.sh &gt; &gt;(gzip &gt; build.log.gz) 2&gt;&amp;1
+</code></pre>
+<div class="callout warn"><span class="t">The subshell variable trap</span><code>cat f | while read l; do n=$((n+1)); done; echo $n</code> prints nothing useful, because the right side of a pipe runs in a subshell and its variable changes are discarded. Use <code>while read l; do …; done &lt; f</code> or <code>done &lt; &lt;(cmd)</code> instead. This is one of the top three bash bugs in production scripts.</div>
+
+<h2>Bash Scripting That Does Not Break</h2>
+<p class="lead">The script you write on a customer engagement outlives you. It will be run by someone else, on a different host, with a path containing a space, when the network is flaky. Defensive bash is a small set of habits that eliminate entire bug classes.</p>
+
+<h3>The preamble</h3>
+<pre><code class="language-bash">#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+</code></pre>
+<table>
+<tr><th>Flag</th><th>Effect</th><th>Gotcha</th></tr>
+<tr><td><code>-e</code></td><td>Exit on any non-zero status</td><td>Not applied inside <code>if</code>, <code>&amp;&amp;</code>, <code>||</code> or <code>!</code> conditions — by design</td></tr>
+<tr><td><code>-u</code></td><td>Error on unset variable</td><td>Use <code>"${VAR:-default}"</code> for optional vars; <code>"${arr[@]:-}"</code> for possibly-empty arrays</td></tr>
+<tr><td><code>-o pipefail</code></td><td>Pipeline fails if any stage fails</td><td>Makes <code>cmd | head</code> fail with SIGPIPE; guard with <code>|| true</code> where intended</td></tr>
+<tr><td><code>-x</code></td><td>Trace every command</td><td>Add temporarily, or gate on <code>${DEBUG:-}</code>. Will leak secrets into logs</td></tr>
+</table>
+<p><code>#!/usr/bin/env bash</code> rather than <code>#!/bin/bash</code> finds bash wherever it lives (<code>/usr/local/bin/bash</code> on BSD, Nix paths, Homebrew on macOS). And never write <code>#!/bin/sh</code> if you use arrays, <code>[[ ]]</code>, or <code>local</code> — on Debian that is dash and it will fail at runtime, not parse time.</p>
+
+<h3>Quoting: the rule</h3>
+<pre><code class="language-bash">rm $file          # BROKEN: word-splits on spaces, then globs
+rm "$file"        # correct
+cp "$src" "$dst"
+for f in "${files[@]}"; do …; done    # quoted [@] preserves element boundaries
+echo "${arr[*]}"  # single string joined by the first char of IFS - usually NOT what you want
+
+[[ -z "${VAR:-}" ]] &amp;&amp; echo "empty or unset"
+[[ "$a" == "$b" ]]          # string equality (no word splitting inside [[ ]])
+[[ "$s" == pre* ]]          # glob match - do NOT quote the right side
+[[ "$s" =~ ^v[0-9]+\.[0-9]+$ ]]   # regex; captures land in ${BASH_REMATCH[@]}
+(( count &gt; 10 ))            # arithmetic context - no $ needed on variables
+</code></pre>
+<div class="callout tip"><span class="t">Run shellcheck on everything</span><code>shellcheck deploy.sh</code> catches unquoted expansions, useless <code>cat</code>, subshell variable loss, and dozens of other real bugs. Wire it into CI. If you cannot install it on the customer box, run it locally before you ship the script — it is the single highest-value tool in bash development.</div>
+
+<h3>Arrays, parameter expansion, and argument parsing</h3>
+<pre><code class="language-bash">args=(--verbose --config /etc/app.yaml)
+args+=(--dry-run)
+"${#args[@]}"                      # length
+"${args[@]:1:2}"                   # slice
+mapfile -t lines &lt; file.txt        # read a file into an array, no splitting bugs
+readarray -t pods &lt; &lt;(kubectl get po -o name)
+
+"${VAR:-fallback}"       # use fallback if unset or empty
+"${VAR:?must be set}"    # abort with a message if unset - great for required config
+"${VAR:+--flag $VAR}"    # emit only if set
+"${PATH//:/$'\n'}"       # global substitution
+"${file%.tar.gz}"        # strip shortest suffix match
+"${file##*/}"            # basename
+"${file%/*}"             # dirname
+"${name^^}" "${name,,}"  # upper / lower (bash 4+)
+</code></pre>
+
+<h3>Traps and cleanup</h3>
+<pre><code class="language-bash">tmp="$(mktemp -d)"
+cleanup() {
+  local rc=$?
+  rm -rf "$tmp"
+  [[ -n "${tunnel_pid:-}" ]] &amp;&amp; kill "$tunnel_pid" 2&gt;/dev/null || true
+  (( rc != 0 )) &amp;&amp; echo "FAILED at line $LINENO (rc=$rc)" &gt;&amp;2
+  return $rc
+}
+trap cleanup EXIT              # runs on normal exit AND on error with set -e
+trap 'echo interrupted; exit 130' INT TERM
+trap 'echo "error on line $LINENO: $BASH_COMMAND" &gt;&amp;2' ERR
+</code></pre>
+
+<h3>A production-grade script</h3>
+<pre><code class="language-bash">#!/usr/bin/env bash
+#
+# deploy.sh - release an artifact to an app host via an atomic symlink swap.
+# Usage: deploy.sh -e prod -v 1.4.2 [-H app-1,app-2] [-n] [-h]
+#
+set -euo pipefail
+
+readonly SCRIPT_NAME="${0##*/}"
+readonly RELEASE_ROOT="/opt/inference-api/releases"
+readonly CURRENT_LINK="/opt/inference-api/current"
+readonly ARTIFACT_REPO="https://nexus.corp/repository/releases"
+
+ENVIRONMENT="" ; VERSION="" ; DRY_RUN=0
+HOSTS="app-1,app-2"
+LOG_PREFIX="[$SCRIPT_NAME]"
+
+log()  { printf '%s %s %s\n' "$(date -Is)" "$LOG_PREFIX" "$*" &gt;&amp;2; }
+die()  { log "ERROR: $*"; exit 1; }
+run()  { if (( DRY_RUN )); then log "DRY-RUN: $*"; else log "+ $*"; "$@"; fi; }
+
+usage() {
+  sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//'
+  exit "${1:-0}"
+}
+
+parse_args() {
+  while getopts ':e:v:H:nh' opt; do
+    case "$opt" in
+      e) ENVIRONMENT="$OPTARG" ;;
+      v) VERSION="$OPTARG" ;;
+      H) HOSTS="$OPTARG" ;;
+      n) DRY_RUN=1 ;;
+      h) usage 0 ;;
+      :) die "option -$OPTARG requires an argument" ;;
+      \?) die "unknown option -$OPTARG (try -h)" ;;
+    esac
+  done
+  [[ -n "$ENVIRONMENT" ]] || die "missing -e &lt;environment&gt;"
+  [[ -n "$VERSION" ]]     || die "missing -v &lt;version&gt;"
+  [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "version must be semver, got '$VERSION'"
+  [[ "$ENVIRONMENT" =~ ^(dev|staging|prod)$ ]] || die "env must be dev|staging|prod"
+}
+
+require_tools() {
+  local missing=()
+  for t in curl sha256sum ssh tar; do
+    command -v "$t" &gt;/dev/null 2&gt;&amp;1 || missing+=("$t")
+  done
+  (( ${#missing[@]} == 0 )) || die "missing required tools: ${missing[*]}"
+}
+
+WORKDIR=""
+cleanup() {
+  local rc=$?
+  [[ -n "$WORKDIR" &amp;&amp; -d "$WORKDIR" ]] &amp;&amp; rm -rf "$WORKDIR"
+  (( rc == 0 )) &amp;&amp; log "done" || log "aborted with status $rc"
+  exit $rc
+}
+trap cleanup EXIT
+trap 'die "interrupted"' INT TERM
+
+fetch_artifact() {
+  local url="$ARTIFACT_REPO/api-${VERSION}.tar.gz"
+  WORKDIR="$(mktemp -d -t deploy.XXXXXX)"
+  log "fetching $url"
+  curl -fsSL --retry 3 --retry-delay 2 --max-time 300 \
+       -o "$WORKDIR/api.tar.gz" "$url" \
+    || die "download failed - check HTTPS_PROXY and that $VERSION was published"
+  curl -fsSL "$url.sha256" -o "$WORKDIR/api.tar.gz.sha256" || die "no checksum published"
+  ( cd "$WORKDIR" &amp;&amp; sha256sum -c api.tar.gz.sha256 ) || die "checksum mismatch - refusing"
+  log "artifact verified ($(stat -c%s "$WORKDIR/api.tar.gz") bytes)"
+}
+
+deploy_host() {
+  local host="$1" target="$RELEASE_ROOT/$VERSION"
+  log "=== $host ==="
+  run scp -q "$WORKDIR/api.tar.gz" "$host:/tmp/api-$VERSION.tar.gz"
+  run ssh "$host" "mkdir -p '$target' &amp;&amp; tar xzf /tmp/api-$VERSION.tar.gz -C '$target'"
+  run ssh "$host" "ln -sfn '$target' '$CURRENT_LINK'"
+  run ssh "$host" "sudo systemctl restart inference-api"
+
+  local attempt
+  for attempt in 1 2 3 4 5 6 7 8 9 10; do
+    if (( DRY_RUN )); then log "DRY-RUN: health check"; return 0; fi
+    if ssh "$host" "curl -fsS --max-time 3 http://127.0.0.1:8080/healthz" &gt;/dev/null 2&gt;&amp;1; then
+      log "$host healthy after ${attempt}s"; return 0
+    fi
+    sleep 1
+  done
+  log "$host FAILED health check - rolling back"
+  local previous
+  previous="$(ssh "$host" "ls -1dt '$RELEASE_ROOT'/*/ | sed -n 2p")"
+  [[ -n "$previous" ]] || die "no previous release on $host - manual intervention needed"
+  ssh "$host" "ln -sfn '${previous%/}' '$CURRENT_LINK' &amp;&amp; sudo systemctl restart inference-api"
+  die "rolled $host back to ${previous%/}"
+}
+
+main() {
+  parse_args "$@"
+  require_tools
+  log "deploying api $VERSION to $ENVIRONMENT (hosts: $HOSTS, dry-run=$DRY_RUN)"
+  fetch_artifact
+  local IFS=','
+  for host in $HOSTS; do
+    deploy_host "$host"
+  done
+  log "all hosts updated to $VERSION"
+}
+
+main "$@"
+</code></pre>
+<ul class="checklist">
+<li><code>set -euo pipefail</code> and a trap-based cleanup that always runs</li>
+<li>Every variable quoted; validation of every user-supplied input before use</li>
+<li><code>--dry-run</code> so the customer can see exactly what will happen first</li>
+<li>Checksum verification before anything is written to a target host</li>
+<li>Health check with bounded retries and an automatic rollback path</li>
+<li>Timestamped logs on stderr so stdout stays clean for piping</li>
+<li>Meaningful exit codes: 0 success, non-zero with a message explaining what to do</li>
+</ul>
+
+<h2>Networking From the Shell</h2>
+<p class="lead">"It can't reach the API" is the single most common sentence of an FDE engagement. Resolve it methodically — layer by layer — and you will find the answer in four commands instead of four hours of guessing.</p>
+
+<div class="pipeline">
+  <span class="step">DNS resolves?</span><span class="arrow">&rarr;</span>
+  <span class="step">Route exists?</span><span class="arrow">&rarr;</span>
+  <span class="step">TCP connects?</span><span class="arrow">&rarr;</span>
+  <span class="step">TLS handshakes?</span><span class="arrow">&rarr;</span>
+  <span class="step">HTTP responds?</span><span class="arrow">&rarr;</span>
+  <span class="step">App returns 200?</span>
+</div>
+
+<h3>Layer 1–3: interfaces, addresses, routes</h3>
+<pre><code class="language-bash">ip -brief addr                 # compact: iface, state, addresses
+ip addr show eth0
+ip -brief link                 # UP/DOWN and MAC
+ip route                       # routing table; "default via ..." is your gateway
+ip route get 10.20.9.4         # WHICH route and source IP will be used for this dest
+ip neigh                       # ARP cache
+ip -s link show eth0           # RX/TX errors and drops
+</code></pre>
+<p><code>ip route get</code> is underrated: it answers "will this traffic go out the VPN interface or the default one" definitively, which matters a lot in split-tunnel customer networks.</p>
+
+<h3>DNS</h3>
+<pre><code class="language-bash">cat /etc/resolv.conf                       # nameservers and search domains
+dig api.internal +short
+dig api.internal @10.20.0.2 +short         # bypass the configured resolver
+dig api.internal ANY +noall +answer
+dig -x 10.20.9.4 +short                    # reverse lookup
+getent hosts api.internal                  # uses NSSWITCH - includes /etc/hosts
+resolvectl status                          # systemd-resolved: per-link DNS, DNSSEC state
+host api.internal ; nslookup api.internal  # when dig is absent
+</code></pre>
+<div class="callout warn"><span class="t"><code>dig</code> and <code>getent</code> can disagree</span><code>dig</code> talks straight to a DNS server. <code>getent hosts</code> (and therefore your application) goes through NSS: <code>/etc/hosts</code> first, then mDNS, then DNS, per <code>/etc/nsswitch.conf</code>. If <code>dig</code> works but the app does not, check <code>/etc/hosts</code> for a stale override and check <code>search</code> domains — <code>api</code> may be resolving as <code>api.corp.local</code>.</div>
+
+<h3>Layer 4: sockets and connectivity</h3>
+<pre><code class="language-bash">ss -tulpn                       # TCP+UDP listeners with process names (needs root for names)
+ss -tn state established         # current connections
+ss -tn 'dport = :5432'           # filter by destination port
+ss -s                            # summary counts - spot socket exhaustion
+ss -ti                           # per-socket TCP info: rtt, cwnd, retransmits
+
+nc -zv db.internal 5432          # is the port open? (-z scan, -v verbose)
+nc -zv -w3 api.internal 443      # with a 3 s timeout
+timeout 3 bash -c '&gt;/dev/tcp/db.internal/5432' &amp;&amp; echo open || echo closed   # NO TOOLS NEEDED
+
+traceroute -T -p 443 api.internal    # TCP traceroute - ICMP is usually blocked
+mtr -rwc 20 api.internal             # continuous traceroute with loss stats
+ping -c4 10.20.0.1                   # often blocked entirely in enterprise networks
+</code></pre>
+<p>That <code>/dev/tcp</code> trick is a bash built-in and works on hosts where <code>nc</code>, <code>telnet</code> and <code>curl</code> have all been removed by the hardening baseline. It is the one connectivity test you can always perform.</p>
+
+<h3>Layer 7: curl like you mean it</h3>
+<pre><code class="language-bash">curl -v https://api.internal/v1/health            # headers + TLS details
+curl -sS -o /dev/null -w '%{http_code} dns=%{time_namelookup}s tcp=%{time_connect}s \
+tls=%{time_appconnect}s ttfb=%{time_starttransfer}s total=%{time_total}s\n' \
+  https://api.internal/v1/health
+curl -fsSL -H 'Authorization: Bearer '"$TOKEN" https://api/v1/items | jq .
+curl -X POST -H 'Content-Type: application/json' -d @body.json https://api/v1/items
+curl --resolve api.internal:443:10.20.9.4 https://api.internal/   # bypass DNS, keep SNI
+curl -k https://api.internal/                      # skip TLS verify - DIAGNOSIS ONLY
+curl --cacert /etc/ssl/corp-root.pem https://api.internal/
+curl -x http://proxy.corp:3128 https://api.internal/
+curl --retry 3 --retry-connrefused --max-time 20 …
+curl -I https://api.internal/                      # HEAD only
+</code></pre>
+<p>The <code>-w</code> timing breakdown is the fastest way to localise slowness: a large <code>time_namelookup</code> is DNS, a large <code>time_connect</code> is network or firewall backlog, a large <code>time_appconnect</code> is TLS (often an OCSP or CRL fetch timing out through a proxy), and a large <code>time_starttransfer</code> with everything else fast is the application itself.</p>
+
+<h3>TLS inspection</h3>
+<pre><code class="language-bash">openssl s_client -connect api.internal:443 -servername api.internal &lt; /dev/null
+openssl s_client -connect api.internal:443 -showcerts &lt; /dev/null \
+  | openssl x509 -noout -subject -issuer -dates
+echo | openssl s_client -connect api.internal:443 2&gt;/dev/null \
+  | openssl x509 -noout -enddate            # expiry - check this before blaming code
+openssl x509 -in /etc/ssl/corp-root.pem -noout -text | head -20
+openssl verify -CAfile /etc/ssl/corp-root.pem server.pem
+</code></pre>
+<div class="callout danger"><span class="t">"x509: certificate signed by unknown authority"</span>The customer's TLS-inspecting proxy is re-signing traffic with a corporate root your tool does not trust. Fix it properly per runtime: system store via <code>update-ca-certificates</code>/<code>update-ca-trust</code>; Python via <code>REQUESTS_CA_BUNDLE</code> / <code>SSL_CERT_FILE</code> or <code>pip config set global.cert</code>; Node via <code>NODE_EXTRA_CA_CERTS</code>; Java via <code>keytool -importcert</code> into the cacerts truststore; Go via the system store. Disabling verification is never the answer you leave in place.</div>
+
+<h3>Proxies</h3>
+<pre><code class="language-bash">export HTTP_PROXY=http://proxy.corp:3128
+export HTTPS_PROXY=http://proxy.corp:3128      # yes, http:// for the proxy itself
+export NO_PROXY=localhost,127.0.0.1,.internal,.svc,.cluster.local,10.0.0.0/8,169.254.169.254
+export http_proxy="$HTTP_PROXY" https_proxy="$HTTPS_PROXY" no_proxy="$NO_PROXY"
+</code></pre>
+<table>
+<tr><th>Symptom</th><th>Likely proxy cause</th></tr>
+<tr><td>Internal service calls hang for 30 s then fail</td><td>Missing from <code>NO_PROXY</code> — traffic is being sent to the proxy, which cannot route internally</td></tr>
+<tr><td>Works in your shell, fails under systemd</td><td>Units do not read your profile; add <code>Environment=</code> or an <code>EnvironmentFile=</code></td></tr>
+<tr><td>Works for you, fails under <code>sudo</code></td><td><code>env_reset</code>; use <code>sudo -E</code> or add <code>env_keep</code> in sudoers</td></tr>
+<tr><td>AWS/Azure metadata calls fail</td><td><code>169.254.169.254</code> must be in <code>NO_PROXY</code></td></tr>
+<tr><td>Kubernetes in-cluster calls fail</td><td><code>.svc</code>, <code>.cluster.local</code> and the pod/service CIDRs must be in <code>NO_PROXY</code></td></tr>
+<tr><td>Some tools honour it, others do not</td><td>Case sensitivity: Go reads both, some libraries only read lowercase. Set both</td></tr>
+</table>
+
+<h3>/etc/hosts and packet capture</h3>
+<pre><code class="language-bash"># Temporary override to test against a specific backend before DNS is updated
+echo '10.20.9.44  api.internal' | sudo tee -a /etc/hosts
+getent hosts api.internal        # confirm it took effect
+
+# tcpdump: when you need proof about what left the box
+sudo tcpdump -i any -nn port 5432 -c 50
+sudo tcpdump -i any -nn host 10.20.9.4 and port 443 -w /tmp/cap.pcap
+sudo tcpdump -i any -nn -A 'tcp port 8080 and (((ip[2:2]-((ip[0]&amp;0xf)&lt;&lt;2))-((tcp[12]&amp;0xf0)&gt;&gt;2))!=0)'
+</code></pre>
+<p>Reading a capture: <code>SYN</code> with no <code>SYN-ACK</code> means a firewall is dropping (silently) or the service is not listening; <code>SYN</code> followed by <code>RST</code> means something actively refused — usually nothing bound to that port or a firewall configured to reject rather than drop. That distinction tells the customer's network team exactly where to look.</p>
+<div class="callout note"><span class="t">Always clean up /etc/hosts</span>A forgotten hosts entry is a time bomb that fires weeks later when the real IP changes. Note every edit you make to a customer system in your handover document, and remove temporary ones before you leave.</div>
+
+<h2>Performance and Resource Triage</h2>
+<p class="lead">Something is slow or something stopped. You have access, no dashboards, and a customer on a call. These commands, in this order, localise the problem to CPU, memory, disk or network within two minutes.</p>
+
+<h3>Load average, correctly understood</h3>
+<pre><code class="language-bash">uptime
+#  14:22:11 up 42 days,  3:11,  2 users,  load average: 8.41, 6.02, 3.88
+nproc              # 4  -> load of 8.41 on 4 cores is a deep run queue
+cat /proc/pressure/cpu /proc/pressure/io /proc/pressure/memory   # PSI, kernel 4.20+
+</code></pre>
+<p>Load average on Linux counts processes in <strong>R</strong> (runnable) <em>and</em> <strong>D</strong> (uninterruptible I/O wait). That is why a host with idle CPUs can show a load of 30 — the queue is blocked on a failing NFS mount, not on compute. The three numbers are 1-, 5- and 15-minute averages: rising means the problem is getting worse, falling means it peaked already. PSI (<code>/proc/pressure/*</code>) is far more precise when available — it reports the percentage of time tasks were stalled on each resource.</p>
+
+<h3>CPU</h3>
+<pre><code class="language-bash">vmstat 1 5
+# procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+#  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+#  9  2      0 421364  18244 2302120    0    0  1240  3300 8211 15002 41  9 15 35  0
+
+mpstat -P ALL 1 3            # per-core (sysstat package)
+pidstat -u 1 5               # per-process CPU over time
+top -b -n1 -o %CPU | head -15   # batch mode - scriptable snapshot
+</code></pre>
+<p>Read the <code>r</code> column (runnable) against core count, <code>b</code> (blocked) for I/O trouble, <code>cs</code> (context switches) for thrashing, and <code>st</code> (steal) — non-zero steal on a cloud VM means the hypervisor is giving your cycles to someone else, which is a capacity conversation with the customer's cloud team, not a code problem.</p>
+
+<h3>Memory and the OOM killer</h3>
+<pre><code class="language-bash">free -h
+#                total   used   free  shared  buff/cache   available
+# Mem:            15Gi   12Gi  412Mi    64Mi       2.2Gi      1.1Gi
+# Swap:          2.0Gi  1.8Gi  200Mi
+</code></pre>
+<p>Ignore <code>free</code>; read <strong>available</strong>. Linux deliberately uses spare RAM for page cache and will evict it on demand. Low <code>available</code> with high swap usage means real pressure.</p>
+<pre><code class="language-bash">ps -eo pid,user,rss,vsz,comm --sort=-rss | head -10
+smem -rs rss 2&gt;/dev/null || true          # PSS accounting, better for shared memory
+cat /proc/meminfo | grep -E 'MemAvailable|Dirty|Writeback|Slab'
+
+# Did the OOM killer fire?
+dmesg -T | grep -i -E 'out of memory|killed process|oom'
+journalctl -k --since -24h | grep -i oom
+grep -i 'killed process' /var/log/messages /var/log/syslog 2&gt;/dev/null
+
+# Per-process OOM tuning
+cat /proc/4821/oom_score /proc/4821/oom_score_adj
+echo -500 | sudo tee /proc/4821/oom_score_adj     # make it less likely to be chosen
+</code></pre>
+<pre><code class="language-text">[Mar11 02:14] Out of memory: Killed process 4821 (python3) total-vm:9843212kB,
+              anon-rss:7120448kB, file-rss:0kB, shmem-rss:0kB, UID:1001 pgtables:15104kB
+</code></pre>
+<p>That kernel line is conclusive: the process was not buggy in a way that produced a stack trace — the kernel shot it. <code>anon-rss:7120448kB</code> tells you it had reached 7.1 GB. Next step is either raising <code>MemoryMax</code>, adding RAM, or fixing the leak — but you now know <em>which</em> conversation to have.</p>
+
+<h3>Disk</h3>
+<pre><code class="language-bash">df -h                      # space
+df -i                      # INODES - a separate exhaustion mode entirely
+du -xh --max-depth=1 /var 2&gt;/dev/null | sort -h | tail
+iostat -xz 1 5             # per-device: %util, await, r/s, w/s
+iotop -oPa                 # per-process I/O (needs root)
+lsblk -f                   # devices, filesystems, mountpoints, UUIDs
+mount | column -t
+findmnt -D                 # mounts with space, tree form
+</code></pre>
+<p>In <code>iostat -xz</code>, <code>%util</code> near 100 with high <code>await</code> (ms per I/O) means the device is saturated. On SSD/NVMe, <code>await</code> above ~10 ms is suspicious; on network-attached storage (EBS, NFS) it routinely means you hit a throughput or IOPS limit the customer provisioned.</p>
+
+<h3>Runbook: "disk full at 2am"</h3>
+<ol class="steps">
+<li><b>Confirm which filesystem</b><code>df -h | sort -k5 -rn | head</code>. Also run <code>df -i</code> — millions of tiny session files can exhaust inodes while space looks fine, and the error message is identical.</li>
+<li><b>Find the weight</b><code>sudo du -xh --max-depth=2 /var 2&gt;/dev/null | sort -h | tail -20</code>. Start at the mountpoint that is full; <code>-x</code> prevents wandering onto other filesystems.</li>
+<li><b>Check deleted-but-open files</b><code>sudo lsof +L1</code> or <code>sudo lsof | grep deleted</code>. If <code>du</code> and <code>df</code> disagree by gigabytes, this is why. Restarting the holding process reclaims the space instantly.</li>
+<li><b>The usual suspects</b><code>/var/log</code> (unrotated app logs), <code>/var/log/journal</code> (<code>journalctl --vacuum-size=500M</code>), <code>/var/lib/docker</code> (<code>docker system df</code> then <code>docker system prune -a --volumes</code> — confirm with the owner first), <code>/tmp</code>, core dumps in <code>/var/lib/systemd/coredump</code>, old releases under <code>/opt/app/releases</code>, package caches (<code>apt clean</code>, <code>dnf clean all</code>).</li>
+<li><b>Buy time safely</b>Truncate rather than delete an active log: <code>sudo truncate -s 0 /var/log/app/app.log</code> keeps the inode so the writer does not lose its descriptor. <code>rm</code> on an open log frees nothing until restart.</li>
+<li><b>Verify and prevent</b>Re-check <code>df -h</code>, then fix the cause: logrotate config, a <code>SizeMaxUse=</code> in journald, a retention cron. Write it into the handover so it does not recur next month.</li>
+</ol>
+<div class="callout danger"><span class="t">Never <code>rm -rf</code> to free space under pressure</span>At 2am on someone else's production host, <code>rm -rf /var/lib/&lt;something&gt;</code> is how an incident becomes a data-loss incident. Identify, confirm ownership with the customer, prefer truncate and rotate, and keep a record of everything you removed.</div>
+
+<h2>Logs: Where They Live and How to Read Them</h2>
+<p class="lead">Logs are the only evidence you have about what happened before you arrived. Knowing the layout of a stranger's logging setup in under a minute is a differentiating skill.</p>
+
+<table>
+<tr><th>Path</th><th>Debian/Ubuntu</th><th>RHEL family</th><th>Contains</th></tr>
+<tr><td>General syslog</td><td><code>/var/log/syslog</code></td><td><code>/var/log/messages</code></td><td>Everything not routed elsewhere</td></tr>
+<tr><td>Auth</td><td><code>/var/log/auth.log</code></td><td><code>/var/log/secure</code></td><td>SSH logins, sudo, PAM, failed attempts</td></tr>
+<tr><td>Kernel</td><td colspan="2"><code>/var/log/kern.log</code>, <code>dmesg</code>, <code>journalctl -k</code></td><td>OOM kills, disk errors, network drivers</td></tr>
+<tr><td>Boot</td><td colspan="2"><code>journalctl -b</code>, <code>/var/log/boot.log</code></td><td>Why a service did not start at boot</td></tr>
+<tr><td>Journal</td><td colspan="2"><code>/var/log/journal/</code> (binary) or <code>/run/log/journal</code> (volatile)</td><td>All systemd-captured stdout/stderr</td></tr>
+<tr><td>Packages</td><td><code>/var/log/dpkg.log</code>, <code>apt/history.log</code></td><td><code>/var/log/dnf.log</code>, <code>rpm -qa --last</code></td><td>"What changed last Tuesday?"</td></tr>
+<tr><td>Web</td><td colspan="2"><code>/var/log/nginx/</code>, <code>/var/log/httpd/</code></td><td>access + error logs</td></tr>
+<tr><td>Containers</td><td colspan="2"><code>/var/lib/docker/containers/&lt;id&gt;/&lt;id&gt;-json.log</code></td><td>What <code>docker logs</code> reads</td></tr>
+</table>
+
+<pre><code class="language-bash"># The "what changed" question, answered three ways
+grep -E ' (install|upgrade|remove) ' /var/log/dpkg.log | tail -30
+rpm -qa --last | head -30
+journalctl --since '3 days ago' -u '*' -p warning --no-pager | head -50
+ls -lt /etc | head -20            # most recently modified config files
+sudo find /etc -mtime -7 -type f  # anything edited in the last week
+</code></pre>
+
+<h3>Tailing and filtering under pressure</h3>
+<pre><code class="language-bash">tail -f /var/log/app/app.log
+tail -F /var/log/app/app.log               # survives logrotate (reopens by name)
+tail -n 500 app.log | grep -i error
+multitail /var/log/a.log /var/log/b.log    # if available
+journalctl -u api -u worker -f             # follow several units at once
+journalctl -f | grep --line-buffered ERROR # --line-buffered or grep buffers 4 KB first
+stdbuf -oL -eL ./noisy_tool | grep WARN    # force line buffering on a stubborn program
+less +F /var/log/app/app.log               # Ctrl-C to stop following, / to search, F to resume
+</code></pre>
+<div class="callout tip"><span class="t">less beats tail for investigation</span>In <code>less</code>: <code>/pattern</code> searches forward, <code>?pattern</code> backward, <code>n</code>/<code>N</code> cycles, <code>&amp;pattern</code> shows <em>only</em> matching lines (like an interactive grep), <code>G</code> jumps to the end, <code>g</code> to the start, <code>-S</code> stops line wrapping. <code>&amp;</code> alone is worth learning — it turns a 2 GB log into a filtered view instantly without re-reading the file.</div>
+
+<h3>logrotate</h3>
+<pre><code class="language-text"># /etc/logrotate.d/inference-api
+/var/log/inference-api/*.log {
+    daily
+    rotate 14
+    size 100M
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 svc_api app
+    sharedscripts
+    postrotate
+        systemctl kill -s HUP inference-api.service 2&gt;/dev/null || true
+    endscript
+}
+</code></pre>
+<pre><code class="language-bash">sudo logrotate -d /etc/logrotate.d/inference-api    # DEBUG: show what would happen
+sudo logrotate -f /etc/logrotate.d/inference-api    # force a rotation now
+cat /var/lib/logrotate/status                        # when each file last rotated
+</code></pre>
+<p>Use <code>copytruncate</code> only if the application cannot reopen its log on SIGHUP — it is simpler but races, and you can lose lines written between the copy and the truncate.</p>
+
+<h2>Working Remotely for Days: tmux, Dotfiles, Persistence</h2>
+<p class="lead">Engagements are measured in weeks. Your VPN will drop mid-migration. Your laptop will sleep. A terminal multiplexer turns those from incidents into non-events, and a portable dotfile setup means your tenth customer host feels like your first.</p>
+
+<h3>tmux</h3>
+<pre><code class="language-bash">tmux new -s acme              # named session
+tmux ls                        # list sessions
+tmux attach -t acme            # reattach after the VPN drops
+tmux attach -d -t acme         # detach other clients first
+tmux kill-session -t acme
+tmux new -s acme -d 'tail -F /var/log/app/app.log'   # start detached, running something
+</code></pre>
+<table>
+<tr><th>Keys (prefix <span class="kbd">Ctrl</span>+<span class="kbd">B</span>)</th><th>Action</th><th>Keys</th><th>Action</th></tr>
+<tr><td><span class="kbd">d</span></td><td>Detach (session keeps running)</td><td><span class="kbd">c</span></td><td>New window</td></tr>
+<tr><td><span class="kbd">"</span> / <span class="kbd">%</span></td><td>Split horizontal / vertical</td><td><span class="kbd">0</span>–<span class="kbd">9</span></td><td>Jump to window</td></tr>
+<tr><td>Arrow keys</td><td>Move between panes</td><td><span class="kbd">z</span></td><td>Zoom pane to full screen (toggle)</td></tr>
+<tr><td><span class="kbd">[</span></td><td>Copy/scroll mode (<kbd>q</kbd> exits)</td><td><span class="kbd">,</span></td><td>Rename window</td></tr>
+<tr><td><span class="kbd">x</span></td><td>Kill pane</td><td><span class="kbd">s</span></td><td>Session picker</td></tr>
+</table>
+<pre><code class="language-text"># ~/.tmux.conf - portable, minimal, no plugins required
+set -g mouse on
+set -g history-limit 100000
+set -g base-index 1
+setw -g pane-base-index 1
+set -g status-right '#(whoami)@#H  %Y-%m-%d %H:%M'
+bind r source-file ~/.tmux.conf \; display "reloaded"
+bind | split-window -h
+bind - split-window -v
+set -sg escape-time 10
+</code></pre>
+<div class="callout note"><span class="t">GNU screen is the fallback</span>Some locked-down images ship <code>screen</code> but not <code>tmux</code>. Minimum viable: <code>screen -S acme</code> to start, <span class="kbd">Ctrl</span>+<span class="kbd">A</span> <span class="kbd">d</span> to detach, <code>screen -r acme</code> to reattach, <code>screen -ls</code> to list. Know both.</div>
+
+<h3>Persistence without a multiplexer</h3>
+<pre><code class="language-bash">nohup ./long_migration.sh &gt; migration.log 2&gt;&amp;1 &amp;
+echo $! &gt; /tmp/migration.pid
+disown                                        # detach from this shell
+
+setsid ./job.sh &gt; job.log 2&gt;&amp;1 &lt; /dev/null &amp;  # fully detached, new session leader
+
+# Best option when systemd is available and you have the rights:
+systemd-run --user --unit=migration --working-directory=/opt/app ./long_migration.sh
+journalctl --user -u migration -f
+</code></pre>
+<p><code>systemd-run</code> is the cleanest: the job survives logout, is supervised, gets a cgroup, and its output goes to the journal automatically — no stray log files to clean up.</p>
+
+<h3>Dotfiles that travel</h3>
+<pre><code class="language-bash"># A single idempotent bootstrap you can paste into any customer shell
+cat &gt;&gt; ~/.bashrc &lt;&lt;'EOF'
+export HISTSIZE=50000 HISTFILESIZE=100000
+export HISTCONTROL=ignoreboth:erasedups
+export HISTTIMEFORMAT='%F %T  '
+shopt -s histappend checkwinsize globstar cdspell
+export EDITOR=vim PAGER=less LESS='-R -S -i -M'
+alias ll='ls -alhF' la='ls -A' l='ls -CF'
+alias ..='cd ..' ...='cd ../..'
+alias grep='grep --color=auto'
+alias df='df -h' du='du -h'
+alias ports='ss -tulpn'
+alias psg='ps -eo pid,ppid,user,%cpu,%mem,etime,cmd --sort=-%cpu | head -20'
+PS1='\[\e[1;31m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ '   # red user@host = NOT my laptop
+EOF
+</code></pre>
+<div class="callout tip"><span class="t">Make customer hosts look different</span>A red prompt on every host that is not yours is the cheapest possible guard against running a destructive command in the wrong window. Pair it with a distinctive tmux status bar per engagement. People who have pasted a <code>DROP TABLE</code> into the wrong pane never skip this again.</div>
+<div class="callout warn"><span class="t">Ask before you install</span>Cloning a dotfiles repo onto a customer host means pulling code from the internet onto their system. On a regulated engagement that may be a policy violation. Prefer a short inline heredoc like the one above, confined to your own home directory, and mention it in your handover.</div>
+
+<h2>The FDE Field Kit</h2>
+<p class="lead">One table to keep open, and one procedure to run every single time you land on a host you have never seen.</p>
+
+<h3>Command cheat sheet</h3>
+<table>
+<tr><th>Question</th><th>Command</th></tr>
+<tr><td>What OS and version is this?</td><td><code>cat /etc/os-release; uname -a; hostnamectl</code></td></tr>
+<tr><td>Who am I and what can I do?</td><td><code>id; sudo -l; groups</code></td></tr>
+<tr><td>What is running?</td><td><code>systemctl list-units --type=service --state=running</code></td></tr>
+<tr><td>What is broken?</td><td><code>systemctl --failed; journalctl -p err -b --no-pager | tail -50</code></td></tr>
+<tr><td>What is listening?</td><td><code>ss -tulpn</code></td></tr>
+<tr><td>What is eating CPU/RAM?</td><td><code>ps -eo pid,user,%cpu,%mem,rss,cmd --sort=-%cpu | head</code></td></tr>
+<tr><td>Where did the disk go?</td><td><code>df -h; df -i; du -xh --max-depth=1 /var | sort -h | tail</code></td></tr>
+<tr><td>Can I reach X?</td><td><code>timeout 3 bash -c '&gt;/dev/tcp/host/port' &amp;&amp; echo open</code></td></tr>
+<tr><td>Why is DNS wrong?</td><td><code>cat /etc/resolv.conf; dig +short host; getent hosts host</code></td></tr>
+<tr><td>Is it the proxy?</td><td><code>env | grep -i proxy; curl -v --noproxy '*' URL</code></td></tr>
+<tr><td>Is it the certificate?</td><td><code>openssl s_client -connect host:443 -servername host &lt;/dev/null</code></td></tr>
+<tr><td>What changed recently?</td><td><code>rpm -qa --last \| head</code> / <code>tail /var/log/dpkg.log</code>; <code>find /etc -mtime -7</code></td></tr>
+<tr><td>Who logged in?</td><td><code>last -20; lastb -20; journalctl -u sshd --since -1d</code></td></tr>
+<tr><td>What is this process doing?</td><td><code>strace -f -p PID</code>; <code>cat /proc/PID/{status,limits,environ}</code></td></tr>
+<tr><td>Which files are open?</td><td><code>lsof -p PID; lsof -i :PORT</code></td></tr>
+<tr><td>Find config/secret files</td><td><code>find / -xdev -name '*.conf' -newer /etc/hostname 2&gt;/dev/null</code></td></tr>
+<tr><td>Top error strings</td><td><code>grep -oE 'ERROR.*' app.log \| sort \| uniq -c \| sort -rn \| head</code></td></tr>
+<tr><td>Status code histogram</td><td><code>awk '{c[$9]++} END{for(k in c) print c[k],k}' access.log \| sort -rn</code></td></tr>
+<tr><td>Keep a session alive</td><td><code>tmux new -s work</code> / <code>tmux attach -t work</code></td></tr>
+<tr><td>Diff two hosts</td><td><code>diff &lt;(ssh a 'cmd') &lt;(ssh b 'cmd')</code></td></tr>
+</table>
+
+<h3>First 15 minutes on an unfamiliar server</h3>
+<ol class="steps">
+<li><b>Start a recorded, persistent session</b><code>tmux new -s acme</code>, then <code>script -a ~/session-$(date +%F).log</code> if policy allows. You will want the transcript later, and so will the customer's ticket.</li>
+<li><b>Identify the box</b><code>hostnamectl; cat /etc/os-release; uname -r; nproc; free -h; df -h</code>. Write distro, version, kernel, core count, RAM and free disk into your notes before touching anything.</li>
+<li><b>Identify yourself</b><code>id; sudo -l; groups</code>. Know your blast radius before you need it, not while an outage is running. If <code>sudo -l</code> prompts for a password you do not have, find that out now.</li>
+<li><b>Check health</b><code>uptime; systemctl --failed; journalctl -p err -b --no-pager | tail -40; dmesg -T | tail -30</code>. Note anything already broken so you are not blamed for it.</li>
+<li><b>Map the network posture</b><code>ip -brief addr; ip route; cat /etc/resolv.conf; env | grep -i proxy; ss -tulpn</code>. Determine immediately whether there is egress: <code>timeout 5 curl -sI https://example.com | head -1</code>.</li>
+<li><b>Find the application</b><code>systemctl list-units --type=service --state=running</code>, then <code>systemctl cat &lt;unit&gt;</code> for the exact <code>ExecStart</code>, user, working directory and environment file. That one command tells you where the code, config and logs are.</li>
+<li><b>Locate the evidence</b><code>ls -lt /var/log | head</code>; identify the app's log directory and whether the journal is persistent (<code>ls /var/log/journal</code>).</li>
+<li><b>Check what is installed</b><code>for t in git curl jq python3 docker kubectl podman rsync tmux; do command -v $t || echo "MISSING $t"; done</code>. Decide now whether you need to request packages or bring static binaries.</li>
+<li><b>Establish a workspace</b><code>mkdir -p ~/work &amp;&amp; cd ~/work</code>. Keep everything you create in one directory so cleanup at the end of the engagement is a single <code>rm -rf</code> you can describe precisely.</li>
+<li><b>Snapshot before you change anything</b><code>sudo cp -a /etc/app /etc/app.bak-$(date +%F)</code> for any config you plan to edit; <code>rpm -qa | sort &gt; ~/work/packages-before.txt</code>. Being able to diff and revert is what separates a consultant from a liability.</li>
+</ol>
+<div class="callout ok"><span class="t">Leave a trail</span>Keep a running <code>~/work/CHANGELOG.md</code>: timestamp, command, reason, rollback. At the end of the engagement that file becomes the handover document, and during the engagement it is what you read out when someone asks "what did you change at 14:30?"</div>
+
+<h2>Interview Questions</h2>
+<p class="lead">Expect these in any FDE, SRE, platform or solutions-engineering loop. The answers below are the depth an interviewer is listening for — mechanism first, then the practical consequence.</p>
+
+<div class="qa"><div class="q">Walk me through what happens when you type <code>ls -l | grep foo</code> and press Enter.</div><div class="a">Bash parses the line into a pipeline of two commands and performs expansions (brace, tilde, parameter, command substitution, arithmetic, then word splitting and globbing) on each. It creates a pipe with <code>pipe()</code>, giving a read and a write file descriptor. It forks twice. In the first child it dups the pipe's write end onto fd 1, closes the unused read end, and calls <code>execve("/bin/ls", …)</code> after resolving <code>ls</code> through PATH. In the second child it dups the read end onto fd 0 and execs <code>grep</code>. The parent closes both pipe ends — important, or <code>grep</code> would never see EOF — and waits. Both processes run concurrently; <code>ls</code> blocks when the 64 KB pipe buffer fills until <code>grep</code> drains it. The shell reports the exit status of the last command unless <code>pipefail</code> is set. Crucially, globbing happened in the <em>shell</em> before exec, which is why you quote patterns you want the command to interpret.</div></div>
+
+<div class="qa"><div class="q">A customer says "the API can't reach the database." You have SSH on the API host. What do you do?</div><div class="a">I work up the stack and stop at the first layer that fails. First, does the name resolve — <code>getent hosts db.internal</code> and <code>dig +short db.internal</code>, checking both because the application goes through NSS while dig does not, and a stale <code>/etc/hosts</code> entry would show the difference. Second, is there a route — <code>ip route get &lt;ip&gt;</code>. Third, does TCP connect — <code>timeout 3 bash -c '&gt;/dev/tcp/db.internal/5432'</code>, which needs no tools. If that hangs, a firewall is dropping; if it is refused immediately, nothing is listening or a firewall is rejecting. Fourth, if TLS is involved, <code>openssl s_client -connect db:5432 -starttls postgres</code> to check certificate and expiry. Fifth, application layer: credentials, the actual connection string the app is using (<code>tr '\0' '\n' &lt; /proc/&lt;pid&gt;/environ</code>), and whether the connection pool is exhausted. In parallel I check <code>env | grep -i proxy</code>, because an internal host missing from <code>NO_PROXY</code> produces exactly this symptom with a 30-second hang. I also check from the database side with <code>ss -tn state established 'sport = :5432'</code> to see whether connections are arriving at all — that single fact tells the customer's network team whether the problem is in front of or behind the firewall.</div></div>
+
+<div class="qa"><div class="q"><code>df</code> says the disk is 100% full but <code>du</code> only accounts for 40%. Explain.</div><div class="a">Almost certainly a deleted-but-still-open file. When a process holds a file descriptor and the file is unlinked, the directory entry disappears — so <code>du</code>, which walks the directory tree, cannot see it — but the inode and its blocks stay allocated until the last descriptor closes. A log file rotated with <code>rm</code> instead of truncate, while the writer still holds it open, is the classic cause. I confirm with <code>sudo lsof +L1</code> or <code>lsof | grep deleted</code>, which shows the holding PID and the size. The fix is to restart or SIGHUP the process so it reopens its log, or truncate through the descriptor with <code>: &gt; /proc/&lt;pid&gt;/fd/&lt;n&gt;</code> if a restart is not acceptable. Two other possibilities worth ruling out: inode exhaustion (<code>df -i</code>), which produces "No space left on device" with plenty of free bytes; and a filesystem mounted <em>over</em> a populated directory, hiding the data underneath from <code>du</code> but not from the underlying filesystem's accounting.</div></div>
+
+<div class="qa"><div class="q">What does <code>set -euo pipefail</code> do, and where does it fail you?</div><div class="a"><code>-e</code> exits on the first command returning non-zero, <code>-u</code> treats expansion of an unset variable as an error, and <code>-o pipefail</code> makes a pipeline return the status of the rightmost failing stage rather than the last stage. Together they turn silent failures into loud ones. The gaps: <code>-e</code> is deliberately suppressed inside conditions, so <code>if cmd; then</code>, <code>cmd &amp;&amp; …</code>, <code>cmd || …</code> and <code>! cmd</code> do not abort — and that suppression propagates into functions called from those contexts, which surprises people. It also does not fire on a command whose failure is in the middle of a <code>&amp;&amp;</code> chain that ultimately succeeds. <code>-u</code> breaks on <code>"${arr[@]}"</code> for an empty array in bash below 4.4, so you write <code>"${arr[@]:-}"</code>. <code>pipefail</code> makes <code>producer | head -1</code> fail with SIGPIPE/141 once head exits, which you have to explicitly tolerate. So I use all three as the default, and I pair them with an <code>ERR</code> trap that prints <code>$LINENO</code> and <code>$BASH_COMMAND</code>, plus an <code>EXIT</code> trap for cleanup — because <code>-e</code> tells you that something failed but not what, and on a customer system that distinction matters.</div></div>
+
+<div class="qa"><div class="q">Difference between SIGTERM and SIGKILL, and why does it matter in production?</div><div class="a">SIGTERM (15) is a request: the process can install a handler, finish in-flight requests, flush buffers, close database connections, deregister from a load balancer, and exit cleanly. SIGKILL (9) is executed by the kernel — the process never runs another instruction, no handler fires, no buffer is flushed, no lock is released. The practical consequences: a web server killed with -9 drops in-flight connections and produces a burst of 502s; Postgres killed with -9 enters crash recovery on next start; a process holding a lock file leaves it stale and blocks the next start. The correct pattern is escalation — send TERM, wait a bounded grace period, then KILL only if it is still alive. That is precisely what systemd does (<code>KillSignal=</code>, <code>TimeoutStopSec=</code>, then SIGKILL) and what Kubernetes does (<code>preStop</code> hook, SIGTERM, <code>terminationGracePeriodSeconds</code>, SIGKILL). Note also that SIGKILL cannot interrupt a process in uninterruptible sleep (state D) — if a process is blocked on a hung NFS mount, even -9 will not remove it, which is a useful diagnostic in itself.</div></div>
+
+<div class="qa"><div class="q">You need to reach a Postgres that only a bastion can see, from a GUI tool on your laptop. How?</div><div class="a">An SSH local port forward: <code>ssh -N -L 5432:db.internal:5432 bastion</code>, then point the GUI at <code>127.0.0.1:5432</code>. The <code>-N</code> means no remote command, just the tunnel. The hostname <code>db.internal</code> is resolved <em>on the bastion</em>, which is the point — my laptop does not need to resolve or route to it. If the bastion itself is behind another hop I add <code>-J jump1</code>, and I put the whole thing in <code>~/.ssh/config</code> with <code>ProxyJump</code> and <code>LocalForward</code> so it is one word to reconnect. If I need many internal services, <code>ssh -D 1080</code> gives a SOCKS5 proxy and I configure the browser or use <code>curl --socks5-hostname</code>. Two caveats I would raise with the customer: forwarding must be permitted (<code>AllowTcpForwarding yes</code> in sshd_config, and many hardened bastions disable it), and this is a data path into a production database, so it needs to be sanctioned, time-boxed, and ideally read-only credentials. I would not leave a standing tunnel running.</div></div>
+
+<div class="qa"><div class="q">How do you find what is consuming memory on a host, and how do you prove an OOM kill happened?</div><div class="a">I start with <code>free -h</code> and read the <strong>available</strong> column, not free — Linux uses idle RAM for page cache and reclaims it on demand, so low "free" is normal. Then <code>ps -eo pid,user,rss,vsz,comm --sort=-rss | head</code> for the biggest resident sets; RSS over-counts shared pages across processes, so for a fork-heavy app like gunicorn or Chrome I prefer <code>smem</code> and its PSS figure. For a proof of an OOM kill I check the kernel ring buffer: <code>dmesg -T | grep -i 'killed process'</code> or <code>journalctl -k --since -24h | grep -i oom</code>. The kernel prints the victim's PID, name, <code>total-vm</code> and <code>anon-rss</code> at kill time, which both confirms the event and gives you the size it reached. In containers and under systemd it may be a cgroup limit rather than global pressure — then I check <code>systemctl show app -p MemoryMax -p MemoryCurrent</code> or <code>/sys/fs/cgroup/.../memory.events</code> for a non-zero <code>oom_kill</code> counter. That distinction matters: global OOM means the host is undersized, cgroup OOM means the limit is wrong or the app leaks.</div></div>
+
+<div class="qa"><div class="q">Hard link versus symbolic link.</div><div class="a">A hard link is an additional directory entry pointing at the same inode. There is no "original" — the inode has a link count, the data persists until the count reaches zero and no process holds it open. Hard links cannot cross filesystems (inode numbers are only meaningful within one) and by convention cannot be made to directories, because that would permit cycles the tree-walking tools cannot handle. A symbolic link is a distinct inode whose content is a path string, resolved at access time. It can cross filesystems, can point at directories, can point at something that does not exist yet (dangling), and tools can choose to follow it or not — hence <code>ls -L</code>, <code>cp -P</code>, <code>find -L</code>. Operationally I use symlinks for release management: deploy to <code>releases/&lt;version&gt;</code> and atomically repoint <code>current</code> with <code>ln -sfn</code>, so rollback is one syscall. I use hard links for deduplicated backups and for rsync's <code>--link-dest</code>. And I remember that <code>rm</code> of a symlink removes the link, while <code>rm symlink/</code> with a trailing slash may follow it — a distinction that has deleted real data.</div></div>
+
+<div class="qa"><div class="q">What is the difference between <code>&gt;file 2&gt;&amp;1</code> and <code>2&gt;&amp;1 &gt;file</code>?</div><div class="a">Redirections are processed left to right and <code>2&gt;&amp;1</code> means "point fd 2 at whatever fd 1 currently points at" — it is a copy of the current target, not a permanent alias. In <code>&gt;file 2&gt;&amp;1</code>, stdout is first pointed at the file, then stderr is pointed at the same file; both end up in the file. In <code>2&gt;&amp;1 &gt;file</code>, stderr is first pointed at the terminal (where stdout currently points), and only then is stdout moved to the file — so errors still appear on your screen and only normal output is captured. The second form is occasionally what you want: <code>cmd 2&gt;&amp;1 &gt;/dev/null | grep -i error</code> pipes stderr while discarding stdout, because the pipe is established before the redirections are applied. This trips people up constantly when they wonder why their captured log file contains no error messages.</div></div>
+
+<div class="qa"><div class="q">A systemd service fails to start. Walk me through your diagnosis.</div><div class="a"><code>systemctl status app</code> first — it gives the state, the exit code or signal, and the last few journal lines, which is often enough. Then <code>journalctl -u app -n 200 --no-pager</code> for the full output, and <code>journalctl -u app -b</code> if the failure was at boot. Next <code>systemctl cat app</code> to see the effective unit including drop-ins, and I check the obvious: does the <code>ExecStart</code> binary actually exist and is it executable (<code>Type=exec</code> catches this where <code>Type=simple</code> would not), does the <code>User=</code> exist, does <code>WorkingDirectory=</code> exist and is it readable by that user, does the <code>EnvironmentFile=</code> exist (without a leading <code>-</code> an absent file is fatal). Common non-obvious causes: the unit was edited but <code>systemctl daemon-reload</code> was never run; <code>Restart=always</code> hit <code>StartLimitBurst</code> and the unit is now refusing to start until <code>systemctl reset-failed</code>; a hardening directive like <code>ProtectSystem=strict</code> is blocking a write path not listed in <code>ReadWritePaths=</code>; or an SELinux denial, which I confirm with <code>ausearch -m avc -ts recent</code>. To isolate application from environment I run the exact <code>ExecStart</code> line manually as the service user with <code>sudo -u svc_app env -i …</code> — if it works interactively but not under systemd, the difference is environment, namespacing or permissions, and I have narrowed it to three candidates.</div></div>
+
+<div class="qa"><div class="q">How would you install software on a host with no internet access?</div><div class="a">First I establish what "no internet" means — often there is an internal mirror (Nexus, Artifactory, Satellite) that is the sanctioned path, and the right answer is to point the package manager at it rather than to smuggle files in. If it is genuinely air-gapped, I use a connected machine with the <em>same distro, version and architecture</em> — easiest as a container of the matching base image — and resolve the full dependency set there: <code>dnf download --resolve --alldeps</code>, or <code>apt-get install --download-only</code>, or <code>pip download --platform manylinux2014_x86_64 --only-binary=:all:</code>. For RPM I build a local repo with <code>createrepo_c</code> so dnf can resolve offline. I checksum the bundle, record the hash in the change ticket, transfer via the approved channel, and install with the remote repos explicitly disabled (<code>dnf --disablerepo='*' --enablerepo=offline</code>). Then I verify (<code>rpm -V</code>, a version flag, a smoke test) and document exactly what was added. Where possible I avoid the problem entirely by shipping a statically linked binary or a container image moved with <code>docker save</code>/<code>load</code> — one artifact, no dependency resolution, one approval. The non-technical half matters just as much: getting the artifact through the customer's security review usually takes longer than the installation does, so I start that conversation on day one.</div></div>
+
+<div class="qa"><div class="q">What is the difference between a login shell and a non-login shell, and why does it break cron jobs?</div><div class="a">A login shell reads <code>/etc/profile</code> and then the first existing of <code>~/.bash_profile</code>, <code>~/.bash_login</code>, <code>~/.profile</code>. An interactive non-login shell reads <code>/etc/bash.bashrc</code> and <code>~/.bashrc</code>. A non-interactive shell — which is what <code>ssh host 'cmd'</code>, cron, systemd and CI all use — reads neither; it only sources <code>$BASH_ENV</code> if that is set. So every PATH entry, alias, <code>nvm</code>/<code>pyenv</code> initialisation and proxy export you put in <code>.bashrc</code> is invisible to cron. The symptom is always the same: "command not found" or the wrong interpreter version, for a command that works perfectly when you SSH in and type it. The fix is to stop relying on shell initialisation in automated contexts — use absolute paths in crontabs and units, set <code>PATH=</code> explicitly at the top of the crontab, and put environment into a systemd <code>EnvironmentFile=</code> rather than a dotfile. Structurally, I keep environment in <code>~/.profile</code>, interactive-only settings in <code>~/.bashrc</code>, and have <code>~/.bash_profile</code> source <code>~/.bashrc</code> so interactive logins get both.</div></div>
+
+<h2>Practice Drills and a 14-Day Fluency Plan</h2>
+<p class="lead">Reading about the shell builds recognition; typing builds speed. Work through this on a throwaway VM or container (<code>docker run -it --rm ubuntu:22.04 bash</code> is enough for most of it) and time yourself. The goal is that none of these require thought under pressure.</p>
+
+<h3>Daily drills (15 minutes)</h3>
+<ul class="checklist">
+<li>Navigate to three directories using only <code>cd -</code>, <code>pushd</code>/<code>popd</code> and tab completion — no full paths typed</li>
+<li>Reconstruct yesterday's longest command from history using <span class="kbd">Ctrl</span>+<span class="kbd">R</span> only</li>
+<li>Write one pipeline that answers a question about a log file, in under 60 seconds</li>
+<li>Explain out loud what each flag in a command you copied actually does; look up any you cannot</li>
+<li>Pick one command you use daily and read its <code>--help</code> in full, looking for a flag you did not know</li>
+</ul>
+
+<h3>The 14-day plan</h3>
+<table>
+<tr><th>Day</th><th>Focus</th><th>Deliverable you must produce</th></tr>
+<tr><td>1</td><td>Navigation, FHS, readline</td><td>Map <code>/etc</code>, <code>/var</code>, <code>/opt</code> on two different distros; list five differences</td></tr>
+<tr><td>2</td><td>find + xargs</td><td>Find all files &gt;10 MB modified in 7 days, excluding one subtree, and total their size</td></tr>
+<tr><td>3</td><td>Permissions, umask, setgid</td><td>Build a shared group directory where new files are automatically group-writable</td></tr>
+<tr><td>4</td><td>Processes, signals, lsof</td><td>Start a process, find its port with <code>lsof</code>, HUP it, then kill it by pattern</td></tr>
+<tr><td>5</td><td>systemd units</td><td>Write, enable and debug a service unit for a Python HTTP server, with <code>MemoryMax</code> and auto-restart</td></tr>
+<tr><td>6</td><td>systemd timers + journalctl</td><td>Convert a crontab entry to a timer; prove it caught up after a simulated downtime</td></tr>
+<tr><td>7</td><td>Package management</td><td>Install nginx offline into a network-disabled container from artifacts you staged</td></tr>
+<tr><td>8</td><td>SSH config + tunnels</td><td>Reach a container-only Postgres from your host through a two-hop <code>ProxyJump</code> chain</td></tr>
+<tr><td>9</td><td>grep / sed / awk</td><td>Produce a top-10 endpoint latency report from a raw access log in one pipeline</td></tr>
+<tr><td>10</td><td>jq</td><td>Turn a 5 MB Kubernetes JSON dump into a TSV of name, phase, restart count, node</td></tr>
+<tr><td>11</td><td>Redirection, FDs, here-docs</td><td>Write a script that logs stdout and stderr to separate files while still printing both</td></tr>
+<tr><td>12</td><td>Bash scripting</td><td>Write a 100-line script with arg parsing, traps, dry-run and rollback; pass <code>shellcheck</code> clean</td></tr>
+<tr><td>13</td><td>Networking</td><td>Break DNS, break routing and break TLS in a lab, then diagnose each from scratch in under 3 minutes</td></tr>
+<tr><td>14</td><td>Full simulation</td><td>Have someone sabotage a VM (full disk, failed unit, wrong permission, bad proxy); fix it with notes</td></tr>
+</table>
+
+<h3>Lab scenarios worth building</h3>
+<details><summary>Scenario 1 — The service that will not start</summary><div class="body">
+<p>Set up a systemd unit with four independent faults layered on: the <code>EnvironmentFile</code> path is wrong, <code>WorkingDirectory</code> is owned by root with mode 700 while <code>User=</code> is a service account, <code>ProtectSystem=strict</code> is set without a matching <code>ReadWritePaths</code> for the log directory, and the unit file was edited without <code>daemon-reload</code>. Fix them one at a time, and after each fix predict the next error message before running <code>systemctl start</code>. You are training the loop of hypothesis &rarr; test &rarr; next hypothesis, which is the whole job.</p>
+</div></details>
+
+<details><summary>Scenario 2 — Disk full at 2am</summary><div class="body">
+<p>Create the three distinct failure modes and practise distinguishing them in under 90 seconds each: (a) one genuinely huge file under <code>/var/log</code>; (b) a deleted-but-open 2 GB file held by a running process — create it, <code>tail -f</code> it, then <code>rm</code> it, and observe <code>df</code> and <code>du</code> disagreeing; (c) inode exhaustion from <code>for i in $(seq 1 400000); do touch /data/f$i; done</code> on a small filesystem, where <code>df -h</code> shows plenty of space and writes still fail. Each has a different fix and the error messages are nearly identical.</p>
+</div></details>
+
+<details><summary>Scenario 3 — It cannot reach the API</summary><div class="body">
+<p>In a container network, inject each fault separately: a wrong entry in <code>/etc/hosts</code>; a <code>DROP</code> iptables rule on the destination port (hang) versus a <code>REJECT</code> rule (instant refusal); a self-signed certificate without the CA installed; and a <code>HTTP_PROXY</code> set without the internal domain in <code>NO_PROXY</code>. For each, write down the exact symptom — timeout versus connection refused versus TLS error versus 30-second hang — and the single command that identifies it. That symptom-to-cause mapping is what lets you answer a customer in one minute instead of thirty.</p>
+</div></details>
+
+<details><summary>Scenario 4 — Air-gapped deployment end to end</summary><div class="body">
+<p>Run two containers on the same host: one with network access, one started with <code>--network none</code>. Deploy a Python FastAPI service with three third-party dependencies, plus nginx as a reverse proxy, into the isolated one. You must stage wheels and packages on the connected side, transfer only through a shared volume, verify checksums, install offline, write a systemd-style supervision (or a supervised process manager, since systemd is absent in the container), and produce a one-page handover listing every file you created and how to remove it. This single exercise rehearses most of what a first week at a regulated customer actually involves.</p>
+</div></details>
+
+<div class="callout ok"><span class="t">The standard to aim for</span>You should be able to land on an unfamiliar Linux host and, without reaching for a search engine, determine the distro, your privileges, what is running, what is broken, what is listening, where the logs are, and whether you have egress — in under five minutes. Everything else in this guide is in service of that one capability.</div>

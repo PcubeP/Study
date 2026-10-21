@@ -1,0 +1,164 @@
+<h2>Arrays &amp; Strings</h2>
+<p class="lead">Contiguous, index-addressable sequences &mdash; the most common input type in interviews. Strings behave like immutable arrays of characters in most languages, including Python.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Strengths</h4>O(1) random access by index. Cache-friendly contiguous memory. Simple to reason about.</div>
+  <div class="card"><h4>Weaknesses</h4>Insertion/deletion in the middle is O(n) (shifting). Fixed-size in low-level languages; Python lists auto-grow (amortized O(1) append).</div>
+</div>
+
+<table>
+  <tr><th>Operation</th><th>Time</th><th>Note</th></tr>
+  <tr><td>Index access <code>a[i]</code></td><td>O(1)</td><td>Direct address</td></tr>
+  <tr><td>Append (end)</td><td>O(1) amortized</td><td>Occasional resize</td></tr>
+  <tr><td>Insert/delete middle</td><td>O(n)</td><td>Shift elements</td></tr>
+  <tr><td>Search (unsorted)</td><td>O(n)</td><td>Linear scan</td></tr>
+  <tr><td>Search (sorted)</td><td>O(log n)</td><td>Binary search</td></tr>
+</table>
+
+<p>In-place reversal is a canonical warm-up. It uses O(1) extra space with two indices converging from the ends.</p>
+<pre><code class="language-python">def reverse_in_place(a):
+    i, j = 0, len(a) - 1
+    while i &lt; j:
+        a[i], a[j] = a[j], a[i]
+        i += 1
+        j -= 1
+    return a
+
+# Strings are immutable in Python, so build a new one:
+def reverse_string(s):
+    return s[::-1]</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> When a problem says "sorted array", think binary search or two pointers. When it says "subarray" or "substring", think sliding window or prefix sums.</div>
+
+<h3>Prefix sums</h3>
+<p>Precomputing cumulative sums turns repeated range-sum queries from O(n) each into O(1) each.</p>
+<pre><code class="language-python">def build_prefix(nums):
+    prefix = [0] * (len(nums) + 1)
+    for i, x in enumerate(nums):
+        prefix[i + 1] = prefix[i] + x
+    return prefix
+
+def range_sum(prefix, lo, hi):   # inclusive [lo, hi]
+    return prefix[hi + 1] - prefix[lo]</code></pre>
+
+<h2>Hash Maps &amp; Sets</h2>
+<p>A hash map (dict) stores key&rarr;value pairs with average O(1) lookup, insert, and delete. It hashes the key to a bucket index; collisions are resolved by chaining or open addressing. A set is the same structure storing only keys.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 640 280" width="640" height="280">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect x="20" y="30" width="140" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="55" text-anchor="middle" font-size="13" fill="#1e3a8a">key "cat"</text>
+  <rect x="200" y="30" width="120" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="260" y="49" text-anchor="middle" font-size="12" fill="#059669">hash(key)</text>
+  <text x="260" y="64" text-anchor="middle" font-size="11" fill="#1a2233">% capacity</text>
+  <line x1="160" y1="50" x2="196" y2="50" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="320" y1="50" x2="378" y2="90" stroke="#2563eb" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="400" y="25" font-size="12" fill="#1a2233">buckets</text>
+  <g font-size="12">
+    <rect x="380" y="40" width="40" height="30" fill="#fff" stroke="#94a3b8"/><text x="400" y="60" text-anchor="middle">0</text>
+    <rect x="380" y="80" width="40" height="30" fill="#eff4ff" stroke="#94a3b8"/><text x="400" y="100" text-anchor="middle">1</text>
+    <rect x="380" y="120" width="40" height="30" fill="#fff" stroke="#94a3b8"/><text x="400" y="140" text-anchor="middle">2</text>
+    <rect x="380" y="160" width="40" height="30" fill="#eff4ff" stroke="#94a3b8"/><text x="400" y="180" text-anchor="middle">3</text>
+    <rect x="380" y="200" width="40" height="30" fill="#fff" stroke="#94a3b8"/><text x="400" y="220" text-anchor="middle">4</text>
+  </g>
+  <g font-size="11">
+    <rect x="450" y="80" width="80" height="30" rx="4" fill="#eff4ff" stroke="#2563eb"/><text x="490" y="100" text-anchor="middle" fill="#1e3a8a">cat:3</text>
+    <rect x="450" y="160" width="80" height="30" rx="4" fill="#eff4ff" stroke="#2563eb"/><text x="490" y="180" text-anchor="middle" fill="#1e3a8a">dog:7</text>
+    <rect x="548" y="160" width="80" height="30" rx="4" fill="#fff7ed" stroke="#b45309"/><text x="588" y="180" text-anchor="middle" fill="#b45309">owl:2</text>
+  </g>
+  <line x1="420" y1="95" x2="448" y2="95" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="420" y1="175" x2="448" y2="175" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="530" y1="175" x2="546" y2="175" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="588" y="212" text-anchor="middle" font-size="11" fill="#b45309">collision &rarr; chain</text>
+</svg>
+<div class="cap">Fig 3. A hash table: keys hash to bucket indices; collisions chain within a bucket.</div>
+</div>
+
+<table>
+  <tr><th>Operation</th><th>Average</th><th>Worst</th></tr>
+  <tr><td>Insert / lookup / delete</td><td>O(1)</td><td>O(n) (all keys collide)</td></tr>
+  <tr><td>Iterate all entries</td><td>O(n)</td><td>O(n)</td></tr>
+</table>
+
+<pre><code class="language-python"># Classic: two-sum in one pass with a hash map
+def two_sum(nums, target):
+    seen = {}                      # value -> index
+    for i, x in enumerate(nums):
+        need = target - x
+        if need in seen:
+            return [seen[need], i]
+        seen[x] = i
+    return []
+
+# Set for O(1) membership / de-duplication
+unique = set([1, 2, 2, 3])         # {1, 2, 3}</code></pre>
+
+<div class="callout warn"><span class="t">Watch out</span> Keys must be hashable (immutable). Lists and dicts can't be keys; use tuples or frozensets instead.</div>
+
+<h2>Stacks &amp; Queues</h2>
+<p>A <strong>stack</strong> is LIFO (last-in, first-out) &mdash; think a stack of plates. A <strong>queue</strong> is FIFO (first-in, first-out) &mdash; think a line at a counter. Both support O(1) push and pop at their respective ends.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Stack uses</h4>Undo history, matching brackets, DFS, expression evaluation, backtracking, call stacks.</div>
+  <div class="card"><h4>Queue uses</h4>BFS, task scheduling, buffering, producer/consumer pipelines, rate limiting.</div>
+</div>
+
+<pre><code class="language-python">from collections import deque
+
+stack = []
+stack.append(1)       # push
+stack.append(2)
+top = stack.pop()     # 2  (LIFO)
+
+queue = deque()
+queue.append(1)       # enqueue
+queue.append(2)
+front = queue.popleft()  # 1  (FIFO)
+
+# Valid parentheses with a stack
+def is_valid(s):
+    pairs = {')': '(', ']': '[', '}': '{'}
+    stack = []
+    for c in s:
+        if c in pairs:
+            if not stack or stack.pop() != pairs[c]:
+                return False
+        else:
+            stack.append(c)
+    return not stack</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Use <code>collections.deque</code> for queues, not a plain list &mdash; <code>list.pop(0)</code> is O(n), while <code>deque.popleft()</code> is O(1).</div>
+
+<h2>Linked Lists</h2>
+<p>A sequence of nodes where each node holds a value and a pointer to the next node. Unlike arrays, there is no random access, but insertion/deletion at a known node is O(1) because no shifting is required.</p>
+
+<table>
+  <tr><th>Operation</th><th>Array</th><th>Linked list</th></tr>
+  <tr><td>Access by index</td><td>O(1)</td><td>O(n)</td></tr>
+  <tr><td>Insert/delete at head</td><td>O(n)</td><td>O(1)</td></tr>
+  <tr><td>Insert/delete at known node</td><td>O(n)</td><td>O(1)</td></tr>
+  <tr><td>Search</td><td>O(n)</td><td>O(n)</td></tr>
+</table>
+
+<pre><code class="language-python">class ListNode:
+    def __init__(self, val=0, nxt=None):
+        self.val = val
+        self.next = nxt
+
+# Iterative reversal: the single most-asked linked-list question
+def reverse_list(head):
+    prev = None
+    cur = head
+    while cur:
+        nxt = cur.next     # save next
+        cur.next = prev    # flip pointer
+        prev = cur         # advance prev
+        cur = nxt          # advance cur
+    return prev            # new head</code></pre>
+
+<div class="callout note"><span class="t">Two-pointer tricks</span> Use <strong>slow/fast</strong> pointers to find the middle (fast moves 2x) or to detect a cycle (Floyd's tortoise and hare &mdash; they meet iff a cycle exists). Use a <strong>dummy head</strong> node to simplify edge cases when the head itself might change.</div>

@@ -1,0 +1,1047 @@
+<h2>What Is Machine Learning?</h2>
+
+<p class="lead">Machine learning (ML) is a branch of artificial intelligence in which systems learn statistical patterns from data, enabling predictions or decisions on unseen inputs — without being explicitly programmed for every individual case.</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Traditional Programming</h4>
+    <p><strong>Input:</strong> Rules + Data<br><strong>Output:</strong> Answers</p>
+    <p>The engineer encodes every decision path explicitly. Brittle when rules change.</p>
+  </div>
+  <div class="card">
+    <h4>Machine Learning</h4>
+    <p><strong>Input:</strong> Data + Answers<br><strong>Output:</strong> A model (learned rules)</p>
+    <p>The algorithm discovers the mapping function. Adapts as new data arrives.</p>
+  </div>
+  <div class="card">
+    <h4>Deep Learning</h4>
+    <p>A subset of ML using multi-layer neural networks. Learns hierarchical representations from raw inputs (pixels, tokens, waveforms) with minimal manual feature design.</p>
+  </div>
+</div>
+
+<div class="callout note"><span class="t">Key Insight</span> ML excels when rules are too complex, too numerous, or simply unknown — e.g., recognising handwriting, ranking search results, detecting fraud, or personalising recommendations. When rules are simple and stable, classical logic is usually faster and safer.</div>
+
+<div class="callout tip"><span class="t">Mental Model</span> ML is generalised curve-fitting: given enough labelled examples, an algorithm finds a mathematical function that maps inputs to outputs well enough to generalise. Generalisation — not memorisation — is the whole goal.</div>
+
+
+<h2>Types of Machine Learning</h2>
+
+<p class="lead">ML algorithms are grouped by the type of feedback signal available during training. Each paradigm suits different problem structures.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 200" width="720" height="200">
+  <!-- Supervised box -->
+  <rect x="12" y="18" width="214" height="168" rx="10" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="119" y="44" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a8a">Supervised</text>
+  <text x="119" y="64" text-anchor="middle" font-size="11" fill="#1a2233">Labelled training data</text>
+  <rect x="32" y="78" width="70" height="26" rx="4" fill="#2563eb"/>
+  <text x="67" y="95" text-anchor="middle" font-size="10" fill="white">Input X</text>
+  <text x="119" y="96" text-anchor="middle" font-size="13" fill="#2563eb">&#8594;</text>
+  <rect x="144" y="78" width="62" height="26" rx="4" fill="#1e3a8a"/>
+  <text x="175" y="95" text-anchor="middle" font-size="10" fill="white">Label y</text>
+  <text x="42" y="128" font-size="11" fill="#1a2233">&#x25cf; Classification</text>
+  <text x="42" y="146" font-size="11" fill="#1a2233">&#x25cf; Regression</text>
+  <text x="42" y="164" font-size="11" fill="#1a2233">&#x25cf; Ranking</text>
+
+  <!-- Unsupervised box -->
+  <rect x="254" y="18" width="214" height="168" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="361" y="44" text-anchor="middle" font-size="14" font-weight="700" fill="#065f46">Unsupervised</text>
+  <text x="361" y="64" text-anchor="middle" font-size="11" fill="#1a2233">No labels — find structure</text>
+  <rect x="274" y="78" width="70" height="26" rx="4" fill="#059669"/>
+  <text x="309" y="95" text-anchor="middle" font-size="10" fill="white">Input X</text>
+  <text x="361" y="96" text-anchor="middle" font-size="13" fill="#059669">&#8594;</text>
+  <rect x="386" y="78" width="62" height="26" rx="4" fill="#065f46"/>
+  <text x="417" y="95" text-anchor="middle" font-size="10" fill="white">Pattern</text>
+  <text x="284" y="128" font-size="11" fill="#1a2233">&#x25cf; Clustering</text>
+  <text x="284" y="146" font-size="11" fill="#1a2233">&#x25cf; Dimensionality red.</text>
+  <text x="284" y="164" font-size="11" fill="#1a2233">&#x25cf; Anomaly detection</text>
+
+  <!-- Reinforcement box -->
+  <rect x="496" y="18" width="214" height="168" rx="10" fill="#fffbeb" stroke="#b45309" stroke-width="2"/>
+  <text x="603" y="44" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Reinforcement</text>
+  <text x="603" y="64" text-anchor="middle" font-size="11" fill="#1a2233">Agent learns from rewards</text>
+  <rect x="516" y="78" width="56" height="26" rx="4" fill="#b45309"/>
+  <text x="544" y="95" text-anchor="middle" font-size="10" fill="white">Agent</text>
+  <text x="582" y="96" text-anchor="middle" font-size="13" fill="#b45309">&#8651;</text>
+  <rect x="604" y="78" width="86" height="26" rx="4" fill="#92400e"/>
+  <text x="647" y="95" text-anchor="middle" font-size="10" fill="white">Environment</text>
+  <text x="516" y="128" font-size="11" fill="#1a2233">&#x25cf; Game playing (AlphaGo)</text>
+  <text x="516" y="146" font-size="11" fill="#1a2233">&#x25cf; Robotics control</text>
+  <text x="516" y="164" font-size="11" fill="#1a2233">&#x25cf; RLHF for LLMs</text>
+</svg>
+<div class="cap">The three main ML paradigms differ in whether labels exist (supervised), are absent (unsupervised), or arrive as delayed reward signals (reinforcement).</div>
+</div>
+
+<h3>Semi-Supervised &amp; Self-Supervised</h3>
+<p><strong>Semi-supervised</strong> learning uses a small labelled set plus a large unlabelled set — common when labelling is expensive. <strong>Self-supervised</strong> learning generates its own supervision signal from the data structure itself (e.g., predicting masked tokens in BERT, predicting the next frame in video). Modern LLMs are pre-trained with self-supervision.</p>
+
+<div class="qa">
+  <div class="q">What is the fundamental difference between supervised and unsupervised learning?</div>
+  <div class="a">In supervised learning, every training example has a known target label; the model learns a mapping from inputs to those labels. In unsupervised learning, no labels exist — the algorithm discovers inherent structure (clusters, manifolds, latent factors) in the input distribution itself. The absence of a ground-truth signal makes unsupervised learning harder to evaluate but applicable to far more raw data.</div>
+</div>
+
+
+<h2>Features, Labels &amp; Datasets</h2>
+
+<p class="lead">Every ML workflow is built around a structured dataset. Understanding its components is foundational to every other decision.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Features (X)</h4>
+    <p>The input variables used to make a prediction. Also called <em>predictors</em>, <em>covariates</em>, or <em>attributes</em>.</p>
+    <ul>
+      <li><strong>Numerical:</strong> continuous (age, price) or discrete (count)</li>
+      <li><strong>Categorical:</strong> nominal (colour, city) or ordinal (low/medium/high)</li>
+      <li><strong>Text / Embeddings:</strong> tokenised, TF-IDF, or dense vectors</li>
+      <li><strong>Images / Audio:</strong> raw pixels or spectrograms</li>
+      <li><strong>Temporal:</strong> time-series lags, rolling statistics</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Labels (y)</h4>
+    <p>The target variable the model must predict. Shape determines task type:</p>
+    <ul>
+      <li><strong>Binary:</strong> 0/1, True/False (binary classification)</li>
+      <li><strong>Multi-class:</strong> integer class index (multi-class)</li>
+      <li><strong>Multi-label:</strong> vector of 0/1 per class</li>
+      <li><strong>Continuous:</strong> real number (regression)</li>
+      <li><strong>Sequence:</strong> token-by-token output (seq2seq)</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Dataset Quality Checklist</h3>
+
+<table>
+  <tr><th>Property</th><th>Why It Matters</th><th>How to Check</th></tr>
+  <tr><td>Size</td><td>Insufficient data causes overfitting</td><td>Learning curves; validation loss plateau</td></tr>
+  <tr><td>Representativeness</td><td>Distribution shift at inference degrades performance</td><td>Compare feature stats: train vs real traffic</td></tr>
+  <tr><td>Label quality</td><td>Noisy labels impose an irreducible error floor</td><td>Label consistency inter-annotator agreement</td></tr>
+  <tr><td>Missing values</td><td>Many algorithms cannot handle NaN natively</td><td><code>df.isnull().sum()</code></td></tr>
+  <tr><td>Duplicates</td><td>Inflate evaluation metrics; cause leakage</td><td><code>df.duplicated().sum()</code></td></tr>
+  <tr><td>Class balance</td><td>Imbalanced classes bias naive accuracy</td><td><code>y.value_counts(normalize=True)</code></td></tr>
+</table>
+
+<pre><code class="language-python">import pandas as pd
+from sklearn.datasets import load_breast_cancer
+
+data = load_breast_cancer(as_frame=True)
+df = data.frame          # 569 rows x 31 cols (30 features + target)
+X = data.data            # shape (569, 30)
+y = data.target          # shape (569,) — binary: 0=malignant, 1=benign
+
+print(X.dtypes.value_counts())   # all float64 here
+print(y.value_counts())          # 212 malignant, 357 benign
+print(X.isnull().sum().max())    # 0 — no missing values</code></pre>
+
+<div class="callout warn"><span class="t">Data Leakage</span> Never let any information from the test set (or future time steps) influence training — including feature scaling parameters, imputation statistics, or label-derived encodings. Fit all preprocessing only on training data, then transform validation and test sets.</div>
+
+<div class="qa">
+  <div class="q">What makes a feature informative, and when does adding more features help vs hurt?</div>
+  <div class="a">A feature is informative when it has predictive power for the label that is not already captured by existing features. Adding more features helps when they are genuinely predictive and the dataset is large enough to support their estimation. Uninformative or redundant features increase noise, inflate training time, and — in low-data regimes — cause the curse of dimensionality: the volume of feature space grows exponentially while data density shrinks. Regularisation (L1 / dropout) and feature selection methods help prune irrelevant inputs.</div>
+</div>
+
+
+<h2>Data Splitting &amp; Cross-Validation</h2>
+
+<p class="lead">Honest evaluation requires that the data used to assess a model was never seen during training or hyperparameter tuning. The three-way split enforces this discipline.</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Training Set (~70%)</h4>
+    <p>The model adjusts its weights/parameters to minimise loss on this split.</p>
+    <p>Risk: over-optimised to this exact sample.</p>
+  </div>
+  <div class="card">
+    <h4>Validation Set (~15%)</h4>
+    <p>Used to tune hyperparameters and select between models. Influences training <em>indirectly</em> through your choices.</p>
+    <p>Risk: repeated use slowly leaks test information.</p>
+  </div>
+  <div class="card">
+    <h4>Test Set (~15%)</h4>
+    <p>Touched exactly <em>once</em> after all decisions are finalised. Gives an unbiased estimate of real-world performance.</p>
+    <p>Risk: over-reporting if used repeatedly.</p>
+  </div>
+</div>
+
+<div class="callout danger"><span class="t">Never Peek at Test</span> Evaluating on the test set and then tweaking your model makes the test set a second validation set. Your published metric will be over-optimistic. Reserve the test set for a single final evaluation.</div>
+
+<h3>K-Fold Cross-Validation</h3>
+<p>When data is scarce, k-fold uses all samples for both training and validation. The dataset is partitioned into <em>k</em> folds; the model trains on k-1 folds and validates on the remaining fold, rotating until every fold has been the validation set once.</p>
+
+<div class="pipeline">
+  <span class="step">Fold 1 (val)</span><span class="arrow">→</span>
+  <span class="step">Fold 2 (val)</span><span class="arrow">→</span>
+  <span class="step">Fold 3 (val)</span><span class="arrow">→</span>
+  <span class="step">Average score</span>
+</div>
+
+<p><strong>Stratified k-fold</strong> preserves the class distribution within each fold — essential for imbalanced datasets. <strong>TimeSeriesSplit</strong> respects temporal order so future data is never used to predict the past.</p>
+
+<pre><code class="language-python">from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+
+# Simple 3-way split
+X_train, X_temp, y_train, y_temp = train_test_split(
+    X, y, test_size=0.30, stratify=y, random_state=42
+)
+X_val, X_test, y_val, y_test = train_test_split(
+    X_temp, y_temp, test_size=0.50, stratify=y_temp, random_state=42
+)
+
+# 5-fold cross-validation (no separate val set needed for hyperparameter search)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+scores = cross_val_score(model, X_train, y_train, cv=cv, scoring="roc_auc")
+print(f"CV AUC: {scores.mean():.3f} +/- {scores.std():.3f}")</code></pre>
+
+<div class="qa">
+  <div class="q">Why do we need a validation set separate from the test set? Isn't it wasteful?</div>
+  <div class="a">The validation set is consumed by the hyperparameter tuning process — every time you check validation performance and adjust your model, you use one "trial" of that data. After many trials the validation score becomes a biased estimate. The held-out test set, never consulted during tuning, provides a genuinely unbiased final estimate. Without this separation you would be unknowingly optimising for the test set and reporting over-inflated numbers. For small datasets the cost in data is managed with k-fold cross-validation for validation, reserving a small test set for the final step.</div>
+</div>
+
+
+<h2>Overfitting, Underfitting &amp; the Bias–Variance Tradeoff</h2>
+
+<p class="lead">The central tension in machine learning: a model must be complex enough to capture real patterns, but not so complex that it memorises noise. The bias–variance decomposition formalises this tradeoff.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Underfitting (High Bias)</h4>
+    <p>The model is too simple to capture the true relationship. Both training and validation error are high. Symptoms: linear model on non-linear data; insufficient capacity; too much regularisation.</p>
+    <p><strong>Fix:</strong> increase capacity, reduce regularisation, add features.</p>
+  </div>
+  <div class="card">
+    <h4>Overfitting (High Variance)</h4>
+    <p>The model memorises training data, including noise. Training error is very low but validation/test error is high. Symptoms: training-validation gap grows as model complexity increases.</p>
+    <p><strong>Fix:</strong> more data, regularisation, early stopping, dropout, simpler model.</p>
+  </div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 500 285" width="500" height="285">
+  <!-- Axes -->
+  <line x1="58" y1="248" x2="462" y2="248" stroke="#1a2233" stroke-width="2"/>
+  <line x1="58" y1="248" x2="58" y2="28" stroke="#1a2233" stroke-width="2"/>
+  <!-- Axis labels -->
+  <text x="260" y="272" text-anchor="middle" font-size="12" fill="#1a2233">Model Complexity &#8594;</text>
+  <text x="18" y="140" text-anchor="middle" font-size="12" fill="#1a2233" transform="rotate(-90,18,140)">Error &#8594;</text>
+  <!-- Bias² curve (blue, high-left to low-right) -->
+  <path d="M 68,228 C 140,198 210,158 280,120 S 400,84 462,68" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- Variance curve (orange, low-left to high-right) -->
+  <path d="M 68,68 C 140,72 210,82 290,106 S 400,162 462,228" fill="none" stroke="#b45309" stroke-width="2.5"/>
+  <!-- Total Error curve (teal, U-shaped) -->
+  <path d="M 68,248 C 140,204 188,168 258,158 S 368,182 462,248" fill="none" stroke="#0891b2" stroke-width="2.5" stroke-dasharray="7,4"/>
+  <!-- Sweet spot vertical line -->
+  <line x1="258" y1="42" x2="258" y2="248" stroke="#059669" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <!-- Sweet spot dot -->
+  <circle cx="258" cy="158" r="5" fill="#059669"/>
+  <!-- Region labels -->
+  <text x="100" y="42" text-anchor="middle" font-size="11" fill="#1e3a8a" font-weight="600">Underfitting</text>
+  <text x="380" y="42" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">Overfitting</text>
+  <text x="258" y="36" text-anchor="middle" font-size="11" fill="#059669" font-weight="700">Optimal</text>
+  <!-- Curve labels -->
+  <text x="90" y="210" font-size="11" fill="#2563eb" font-weight="600">Bias&#178;</text>
+  <text x="415" y="210" font-size="11" fill="#b45309" font-weight="600">Variance</text>
+  <text x="310" y="148" font-size="11" fill="#0891b2" font-weight="600">Total Error</text>
+  <!-- X axis ticks -->
+  <text x="68" y="262" text-anchor="middle" font-size="10" fill="#6b7280">Low</text>
+  <text x="462" y="262" text-anchor="middle" font-size="10" fill="#6b7280">High</text>
+</svg>
+<div class="cap">Bias–variance tradeoff: as model complexity increases, bias (training error) falls while variance (sensitivity to data noise) rises. The optimal model minimises total expected error at the sweet spot.</div>
+</div>
+
+<h3>The Bias–Variance Decomposition</h3>
+
+<p>For a squared-error loss, the expected prediction error decomposes as:</p>
+
+<pre><code class="language-python"># Conceptual decomposition — not runnable alone
+# Expected MSE = Bias² + Variance + Irreducible Noise
+#
+# Bias²  = (E[f̂(x)] - f(x))²   — how far average prediction is from truth
+# Variance = E[(f̂(x) - E[f̂(x)])²] — how much prediction varies across datasets
+# Noise = inherent randomness in y|x (cannot be reduced by any model)
+#
+# High bias:     simple model, systematic errors  → underfitting
+# High variance: complex model, unstable outputs  → overfitting</code></pre>
+
+<div class="callout tip"><span class="t">Practical Detection</span> Plot training and validation loss vs. training epochs (or dataset size). If train loss is low and val loss is high: overfitting. If both are high: underfitting. If both curves are close and both high: irreducible noise or feature insufficiency.</div>
+
+<div class="qa">
+  <div class="q">How do you detect and diagnose overfitting in practice?</div>
+  <div class="a">The canonical signal is a growing gap between training and validation loss during training. Concretely: (1) plot training and validation curves; if val loss starts increasing while train loss keeps decreasing, the model is overfitting. (2) Compare train accuracy vs. val accuracy — a large gap (e.g., 99% vs 78%) is a red flag. (3) Use learning curves: plot both metrics against training set size; overfitting models show high variance (large gap) at small sizes that closes as data grows. Remedies: early stopping, dropout, regularisation (L1/L2), data augmentation, reducing model capacity.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Explain the bias–variance tradeoff in plain language.</div>
+  <div class="a">Bias is how wrong your model is on average across many different training datasets — a biased model misses the true pattern systematically (e.g., fitting a straight line to curved data). Variance is how much your model changes when trained on different samples of the same data — a high-variance model is too sensitive to the specific training set it saw. As you increase model complexity, bias drops (the model can represent more patterns) but variance rises (the model chases noise). The tradeoff says: total error is minimised at an optimal complexity where neither bias nor variance dominates. Regularisation, ensembles, and early stopping shift this sweet spot.</div>
+</div>
+
+
+<h2>Regularisation: L1, L2 &amp; Dropout</h2>
+
+<p class="lead">Regularisation adds a complexity penalty to the loss function, discouraging the model from fitting noise. It is the primary tool for reducing variance without sacrificing model capacity.</p>
+
+<h3>L2 Regularisation (Ridge / Weight Decay)</h3>
+<p>Adds the sum of squared weights to the loss. Penalises large weights heavily; shrinks all weights towards zero but rarely to exactly zero. Preferred when all features are expected to contribute.</p>
+
+<pre><code class="language-python"># L2 loss = MSE + λ * Σ wᵢ²
+# λ (alpha) controls regularisation strength; higher α = stronger shrinkage
+
+from sklearn.linear_model import Ridge
+ridge = Ridge(alpha=1.0)          # alpha ≡ λ
+ridge.fit(X_train, y_train)
+print(ridge.coef_)                # all non-zero, but small</code></pre>
+
+<h3>L1 Regularisation (Lasso)</h3>
+<p>Adds the sum of absolute weights. Produces <em>sparse</em> models — many weights go to exactly zero, performing implicit feature selection. Preferred when you expect only a few features to be relevant.</p>
+
+<pre><code class="language-python"># L1 loss = MSE + λ * Σ |wᵢ|
+
+from sklearn.linear_model import Lasso
+lasso = Lasso(alpha=0.1)
+lasso.fit(X_train, y_train)
+n_used = (lasso.coef_ != 0).sum()
+print(f"Features used: {n_used} / {X_train.shape[1]}")</code></pre>
+
+<h3>Elastic Net</h3>
+<p>A convex combination of L1 and L2 penalties. Retains the grouping effect of L2 (correlated features get similar weights) while still producing sparsity via L1. Controlled by the <code>l1_ratio</code> parameter.</p>
+
+<h3>Dropout (Neural Networks)</h3>
+<p>During training, randomly zero out a fraction <em>p</em> of neuron activations in each forward pass. This forces the network to learn redundant representations and prevents co-adaptation between neurons. At inference, dropout is disabled and activations are scaled by <em>(1−p)</em>.</p>
+
+<table>
+  <tr><th>Technique</th><th>Penalty</th><th>Effect on Weights</th><th>Feature Selection</th><th>Best For</th></tr>
+  <tr><td>L2 (Ridge)</td><td>λ Σ w²</td><td>Uniform shrinkage towards 0</td><td>No (all kept)</td><td>Many small contributions</td></tr>
+  <tr><td>L1 (Lasso)</td><td>λ Σ |w|</td><td>Exact zeros (sparse)</td><td>Yes (implicit)</td><td>Sparse signal, feature selection</td></tr>
+  <tr><td>Elastic Net</td><td>L1 + L2</td><td>Sparse + grouped</td><td>Yes</td><td>Correlated features</td></tr>
+  <tr><td>Dropout</td><td>Stochastic masking</td><td>Implicit weight sharing</td><td>No</td><td>Neural networks</td></tr>
+  <tr><td>Early Stopping</td><td>Halt training</td><td>Reduces effective capacity</td><td>No</td><td>Deep learning, GBMs</td></tr>
+</table>
+
+<div class="qa">
+  <div class="q">When should you prefer L1 over L2 regularisation?</div>
+  <div class="a">Choose L1 (Lasso) when you believe the true signal is sparse — that only a small subset of features actually predict the target. Lasso drives irrelevant feature weights to exactly zero, which both improves generalisation and makes the model interpretable. Choose L2 (Ridge) when you expect most features to contribute somewhat — it distributes shrinkage smoothly and handles correlated features better (Lasso arbitrarily picks one from a correlated group). In practice, start with L2 unless you have a specific reason for sparsity; use Elastic Net when in doubt with many correlated predictors.</div>
+</div>
+
+
+<h2>Gradient Descent Variants</h2>
+
+<p class="lead">Most ML and all deep learning models are trained by minimising a loss function via gradient descent: iteratively moving parameters in the direction that reduces loss most steeply.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 520 280" width="520" height="280">
+  <!-- Bowl (loss surface) -->
+  <path d="M 40,248 C 80,205 170,95 260,52 C 350,95 440,205 480,248" fill="#eff4ff" stroke="#1e3a8a" stroke-width="2"/>
+  <!-- SGD zigzag path (blue) -->
+  <polyline points="110,218 94,190 128,170 100,150 132,130 108,112 140,96 158,80 183,67 218,58 260,52" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="5,3"/>
+  <!-- SGD arrow head -->
+  <polygon points="256,49 264,49 260,52" fill="#2563eb"/>
+  <!-- Momentum smooth path (green) -->
+  <path d="M 415,218 C 392,185 360,148 318,112 S 280,70 260,52" fill="none" stroke="#059669" stroke-width="2.5"/>
+  <polygon points="256,49 264,49 260,52" fill="#059669"/>
+  <!-- Adam direct path (orange) -->
+  <path d="M 194,195 C 214,148 240,90 257,55" fill="none" stroke="#b45309" stroke-width="2.5"/>
+  <polygon points="254,52 260,52 257,55" fill="#b45309"/>
+  <!-- Minimum dot -->
+  <circle cx="260" cy="52" r="6" fill="#0891b2" stroke="white" stroke-width="2"/>
+  <text x="260" y="44" text-anchor="middle" font-size="10" fill="#0891b2" font-weight="700">min</text>
+  <!-- Legend -->
+  <rect x="10" y="10" width="140" height="70" rx="4" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="18" y1="26" x2="42" y2="26" stroke="#2563eb" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="48" y="30" font-size="11" fill="#1a2233">SGD (noisy)</text>
+  <line x1="18" y1="46" x2="42" y2="46" stroke="#059669" stroke-width="2.5"/>
+  <text x="48" y="50" font-size="11" fill="#1a2233">Momentum</text>
+  <line x1="18" y1="66" x2="42" y2="66" stroke="#b45309" stroke-width="2.5"/>
+  <text x="48" y="70" font-size="11" fill="#1a2233">Adam (fast)</text>
+  <!-- Labels -->
+  <text x="280" y="268" text-anchor="start" font-size="11" fill="#6b7280">Parameter space &#8594;</text>
+  <text x="10" y="145" text-anchor="middle" font-size="11" fill="#6b7280" transform="rotate(-90,10,145)">Loss &#8593;</text>
+</svg>
+<div class="cap">Loss surface (cross-section). SGD zigzags noisily; momentum accumulates velocity for smoother descent; Adam adapts per-parameter learning rates for fast, direct convergence.</div>
+</div>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Batch GD</h4>
+    <p>Computes gradient over entire dataset. Slow per-step; very smooth updates. Impractical for large datasets.</p>
+  </div>
+  <div class="card">
+    <h4>SGD (Mini-Batch)</h4>
+    <p>Gradient over a random mini-batch (32–512 samples). Noisy updates escape local minima; GPU-parallelisable. The standard for deep learning.</p>
+  </div>
+  <div class="card">
+    <h4>Momentum</h4>
+    <p>Adds exponentially-decaying moving average of past gradients (β ≈ 0.9). Dampens oscillations; accelerates along consistent directions.</p>
+  </div>
+</div>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>RMSProp</h4>
+    <p>Divides learning rate by an exponentially-weighted RMS of recent gradients. Adapts the learning rate per-parameter. Works well for non-stationary objectives (RNNs).</p>
+  </div>
+  <div class="card">
+    <h4>Adam (Adaptive Moment Estimation)</h4>
+    <p>Combines momentum (first moment) and RMSProp (second moment). Includes bias-correction in early steps. Usually the default choice. <code>lr=1e-3, β₁=0.9, β₂=0.999, ε=1e-8</code>.</p>
+  </div>
+</div>
+
+<pre><code class="language-python">from sklearn.linear_model import SGDClassifier
+
+# SGD with momentum (via sklearn interface)
+sgd = SGDClassifier(
+    loss="log_loss",        # logistic regression
+    penalty="l2",
+    alpha=1e-4,             # regularisation strength
+    learning_rate="optimal",
+    max_iter=1000,
+    random_state=42,
+)
+sgd.fit(X_train, y_train)
+
+# For deep learning (PyTorch):
+# optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+# optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)</code></pre>
+
+<div class="callout note"><span class="t">Learning Rate</span> The most important hyperparameter. Too large: loss diverges (gradient explosion). Too small: training stalls. Use a learning rate finder or cosine annealing scheduler. A common starting point: Adam with lr=1e-3 for deep models, SGD with lr=0.01-0.1 for shallow models.</div>
+
+<div class="qa">
+  <div class="q">When would you choose SGD with momentum over Adam, and vice versa?</div>
+  <div class="a">Adam is a good default for most deep learning scenarios — it converges fast, is robust to learning rate choice, and handles sparse gradients well (NLP, embeddings). However, some research shows that SGD with momentum, when carefully tuned, generalises slightly better for image classification (the "generalisation gap" of adaptive optimisers). Choose SGD + momentum when: you have time to tune the learning rate and schedule, you care about maximum test accuracy, or you are training on well-understood architectures (CNNs for vision). Choose Adam when: training is unstable, gradients are sparse, you want fast convergence with minimal tuning, or you are experimenting/prototyping.</div>
+</div>
+
+
+<h2>Loss Functions</h2>
+
+<p class="lead">The loss function quantifies how wrong the model's predictions are. Training minimises this function. Choosing the right loss is as important as choosing the right architecture.</p>
+
+<h3>Regression Losses</h3>
+
+<table>
+  <tr><th>Loss</th><th>Formula</th><th>Outlier Sensitivity</th><th>When to Use</th></tr>
+  <tr><td>MSE (L2)</td><td>mean((y − ŷ)²)</td><td>High — squares errors</td><td>Default regression; Gaussian noise assumption</td></tr>
+  <tr><td>MAE (L1)</td><td>mean(|y − ŷ|)</td><td>Low — linear penalty</td><td>Outlier-heavy targets; median regression</td></tr>
+  <tr><td>Huber</td><td>L2 if |e|&lt;δ else L1·δ − δ²/2</td><td>Moderate — hybrid</td><td>Best of both; δ is a tunable threshold</td></tr>
+  <tr><td>MAPE</td><td>mean(|y − ŷ| / |y|) × 100</td><td>High near zero</td><td>Relative error matters; avoid when y≈0</td></tr>
+</table>
+
+<h3>Classification Losses</h3>
+
+<table>
+  <tr><th>Loss</th><th>Use Case</th><th>Notes</th></tr>
+  <tr><td>Binary Cross-Entropy</td><td>Binary classification</td><td>Assumes sigmoid output; maximises log-likelihood</td></tr>
+  <tr><td>Categorical Cross-Entropy</td><td>Multi-class (one-hot targets)</td><td>Assumes softmax output; most common for classification</td></tr>
+  <tr><td>Sparse Categorical CE</td><td>Multi-class (integer labels)</td><td>Identical mathematics; avoids one-hot memory</td></tr>
+  <tr><td>Hinge Loss</td><td>SVM / margin classifiers</td><td>max(0, 1 − y·ŷ); promotes max-margin separation</td></tr>
+  <tr><td>Focal Loss</td><td>Severe class imbalance</td><td>Downweights easy examples; α·(1−pₜ)^γ·CE</td></tr>
+  <tr><td>KL Divergence</td><td>Distribution matching, VAEs</td><td>Asymmetric; measures P from Q difference</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Cross-Entropy Intuition</span> Binary cross-entropy is −log(p) when the true label is 1 and −log(1−p) when it is 0. As the model's predicted probability for the correct class approaches 1, the loss approaches 0. Large penalties are assigned to confident wrong predictions (predicting p=0.01 when y=1 yields loss ≈ 4.6).</div>
+
+<details>
+  <summary>Why cross-entropy for classification, not MSE?</summary>
+  <div class="body">
+    <p>MSE applied to classification probability outputs suffers from two problems. First, the gradient of MSE through a sigmoid nearly vanishes when predictions are confidently wrong (sigmoid saturation), causing extremely slow learning. Cross-entropy's gradient is simply <code>(ŷ − y)</code>, remaining large even when the model is badly wrong. Second, cross-entropy has a probabilistic interpretation — it is the negative log-likelihood of a Bernoulli (or categorical) distribution — making it theoretically well-grounded for classification.</p>
+  </div>
+</details>
+
+
+<h2>Evaluation Metrics</h2>
+
+<p class="lead">A model trained on one metric may perform poorly on another. Selecting the right metric requires understanding your task, class distribution, and the relative cost of different errors.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 360 270" width="360" height="270">
+  <!-- Title -->
+  <text x="180" y="20" text-anchor="middle" font-size="14" font-weight="700" fill="#1a2233">Confusion Matrix</text>
+  <!-- Column headers -->
+  <text x="165" y="50" text-anchor="middle" font-size="11" font-weight="600" fill="#1a2233">Pred Positive</text>
+  <text x="268" y="50" text-anchor="middle" font-size="11" font-weight="600" fill="#1a2233">Pred Negative</text>
+  <!-- Row headers -->
+  <text x="68" y="108" text-anchor="middle" font-size="11" font-weight="600" fill="#1a2233">Actual</text>
+  <text x="68" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#1a2233">Positive</text>
+  <text x="68" y="195" text-anchor="middle" font-size="11" font-weight="600" fill="#1a2233">Actual</text>
+  <text x="68" y="207" text-anchor="middle" font-size="11" font-weight="600" fill="#1a2233">Negative</text>
+  <!-- TP cell (green) -->
+  <rect x="105" y="60" width="115" height="90" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="162" y="98" text-anchor="middle" font-size="18" font-weight="700" fill="#059669">TP</text>
+  <text x="162" y="116" text-anchor="middle" font-size="10" fill="#065f46">True Positive</text>
+  <text x="162" y="130" text-anchor="middle" font-size="10" fill="#065f46">Correct — hit</text>
+  <!-- FN cell (orange) -->
+  <rect x="220" y="60" width="115" height="90" rx="4" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="277" y="98" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">FN</text>
+  <text x="277" y="116" text-anchor="middle" font-size="10" fill="#92400e">False Negative</text>
+  <text x="277" y="130" text-anchor="middle" font-size="10" fill="#92400e">Miss — Type II</text>
+  <!-- FP cell (orange) -->
+  <rect x="105" y="155" width="115" height="90" rx="4" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="162" y="193" text-anchor="middle" font-size="18" font-weight="700" fill="#b45309">FP</text>
+  <text x="162" y="211" text-anchor="middle" font-size="10" fill="#92400e">False Positive</text>
+  <text x="162" y="225" text-anchor="middle" font-size="10" fill="#92400e">False alarm — Type I</text>
+  <!-- TN cell (green) -->
+  <rect x="220" y="155" width="115" height="90" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="277" y="193" text-anchor="middle" font-size="18" font-weight="700" fill="#059669">TN</text>
+  <text x="277" y="211" text-anchor="middle" font-size="10" fill="#065f46">True Negative</text>
+  <text x="277" y="225" text-anchor="middle" font-size="10" fill="#065f46">Correct — reject</text>
+</svg>
+<div class="cap">Confusion matrix: TP and TN are correct predictions; FP (false alarm, Type I) and FN (miss, Type II) are the two error types. The relative cost of FP vs FN determines which metric to optimise.</div>
+</div>
+
+<h3>Metrics Cheat-Sheet</h3>
+
+<table>
+  <tr><th>Metric</th><th>Formula</th><th>Range</th><th>When to Use</th><th>Pitfall</th></tr>
+  <tr><td><strong>Accuracy</strong></td><td>(TP+TN) / N</td><td>0–1</td><td>Balanced classes, simple baseline</td><td>Misleading on imbalanced data (99% acc on 1% positive)</td></tr>
+  <tr><td><strong>Precision</strong></td><td>TP / (TP+FP)</td><td>0–1</td><td>FP is costly (spam filter, fraud alert)</td><td>Ignores FN; can be gamed by predicting rarely</td></tr>
+  <tr><td><strong>Recall</strong> (Sensitivity)</td><td>TP / (TP+FN)</td><td>0–1</td><td>FN is costly (disease screening, safety)</td><td>Ignores FP; can be gamed by predicting always</td></tr>
+  <tr><td><strong>F1 Score</strong></td><td>2·P·R / (P+R)</td><td>0–1</td><td>Balanced FP/FN tradeoff, imbalanced classes</td><td>Ignores TN; not suitable when TN matters</td></tr>
+  <tr><td><strong>F-beta</strong></td><td>(1+β²)·P·R / (β²·P+R)</td><td>0–1</td><td>β&gt;1 weights recall; β&lt;1 weights precision</td><td>Requires explicit cost reasoning to choose β</td></tr>
+  <tr><td><strong>ROC-AUC</strong></td><td>Area under TPR vs FPR curve</td><td>0.5–1</td><td>Comparing classifiers; threshold-agnostic</td><td>Optimistic on severely imbalanced data</td></tr>
+  <tr><td><strong>PR-AUC</strong></td><td>Area under Precision-Recall curve</td><td>0–1</td><td>Imbalanced datasets; rare positive class</td><td>Harder to interpret; baseline = prevalence</td></tr>
+  <tr><td><strong>MSE</strong></td><td>mean((y−ŷ)²)</td><td>0–∞</td><td>Regression training objective</td><td>Penalises large errors quadratically; sensitive to outliers</td></tr>
+  <tr><td><strong>RMSE</strong></td><td>√MSE</td><td>0–∞</td><td>Regression reporting (same units as y)</td><td>Still outlier-sensitive; dominated by largest errors</td></tr>
+  <tr><td><strong>MAE</strong></td><td>mean(|y−ŷ|)</td><td>0–∞</td><td>Robust regression reporting</td><td>Gradient discontinuous at 0; less common as loss</td></tr>
+  <tr><td><strong>R²</strong></td><td>1 − SS_res/SS_tot</td><td>−∞–1</td><td>Explained variance fraction</td><td>Can increase by adding irrelevant features (use adj-R²)</td></tr>
+</table>
+
+<pre><code class="language-python">from sklearn.metrics import (
+    classification_report, roc_auc_score, average_precision_score,
+    confusion_matrix, mean_squared_error, mean_absolute_error, r2_score
+)
+import numpy as np
+
+# Classification
+y_pred = model.predict(X_test)
+y_proba = model.predict_proba(X_test)[:, 1]
+
+print(classification_report(y_test, y_pred))
+print(f"ROC-AUC : {roc_auc_score(y_test, y_proba):.4f}")
+print(f"PR-AUC  : {average_precision_score(y_test, y_proba):.4f}")
+
+# Regression
+rmse = np.sqrt(mean_squared_error(y_test, y_pred_reg))
+mae  = mean_absolute_error(y_test, y_pred_reg)
+r2   = r2_score(y_test, y_pred_reg)
+print(f"RMSE={rmse:.3f}  MAE={mae:.3f}  R²={r2:.3f}")</code></pre>
+
+<div class="qa">
+  <div class="q">When should you optimise for precision vs recall?</div>
+  <div class="a">Choose recall (minimise false negatives) when the cost of missing a positive is high: cancer detection (missing a tumour is dangerous), fraud detection (letting fraud pass is expensive), safety-critical alerts. Choose precision (minimise false positives) when the cost of a false alarm is high: spam filtering (a legitimate email in spam is annoying), surgical intervention (unnecessary treatment has risk), ad targeting (irrelevant ads waste budget). The F-beta score lets you quantify this tradeoff: β &gt; 1 rewards recall more, β &lt; 1 rewards precision more. In practice, always report both and plot the PR curve to understand the tradeoff at every threshold.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What does ROC-AUC measure and when is it preferable to accuracy?</div>
+  <div class="a">ROC-AUC is the probability that a randomly chosen positive example scores higher than a randomly chosen negative example. It measures the ranking quality of the model across all possible decision thresholds (0 to 1). AUC = 0.5 is random; AUC = 1.0 is perfect. It is preferable to accuracy when: (1) classes are imbalanced — accuracy can be 99% by predicting the majority class always, while AUC reveals poor discrimination; (2) the final decision threshold is not yet fixed; (3) you want to compare two classifiers irrespective of threshold. For severely imbalanced data (e.g. 0.1% positives), PR-AUC is even more informative because ROC-AUC can be optimistic about performance on the rare class.</div>
+</div>
+
+
+<h2>Feature Engineering, Normalisation &amp; Selection</h2>
+
+<p class="lead">Raw data is rarely in the form an algorithm needs. Feature engineering transforms, creates, and selects the representation that lets a model learn most efficiently.</p>
+
+<h3>Numerical Scaling</h3>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Standardisation (Z-score)</h4>
+    <p>x′ = (x − μ) / σ → zero mean, unit variance.</p>
+    <p><strong>Use when:</strong> algorithm assumes Gaussian features or uses distance/gradient (SVM, KNN, neural nets, PCA, logistic regression).</p>
+    <p><strong>Not required for:</strong> tree-based models (decision trees, random forests, GBMs).</p>
+  </div>
+  <div class="card">
+    <h4>Min-Max Normalisation</h4>
+    <p>x′ = (x − x_min) / (x_max − x_min) → maps to [0, 1].</p>
+    <p><strong>Use when:</strong> you need bounded inputs (image pixel values, neural net inputs with sigmoid output).</p>
+    <p><strong>Caution:</strong> sensitive to outliers — a single extreme value compresses all others near 0.</p>
+  </div>
+</div>
+
+<h3>Categorical Encoding</h3>
+
+<table>
+  <tr><th>Method</th><th>Output</th><th>When to Use</th></tr>
+  <tr><td>One-Hot Encoding</td><td>Binary vector (1 per category)</td><td>Nominal categories, linear models, NNs; avoid if cardinality &gt; 50</td></tr>
+  <tr><td>Ordinal Encoding</td><td>Integer 0,1,2…</td><td>Ordered categories (low/medium/high); tree-based models</td></tr>
+  <tr><td>Target Encoding</td><td>Mean of label per category</td><td>High-cardinality categories; use cross-fold to avoid leakage</td></tr>
+  <tr><td>Frequency Encoding</td><td>Count of occurrence</td><td>High-cardinality; tree models; no leakage risk</td></tr>
+  <tr><td>Embedding</td><td>Dense low-dim vector</td><td>Neural networks; very high cardinality (user IDs, words)</td></tr>
+</table>
+
+<h3>Feature Creation</h3>
+<p>Domain knowledge is the most valuable source of new features:</p>
+<ul>
+  <li><strong>Polynomial / interaction features:</strong> x₁·x₂, x₁², useful for linear models</li>
+  <li><strong>Log / sqrt transforms:</strong> compress right-skewed distributions; stabilise variance</li>
+  <li><strong>Aggregations:</strong> user-level statistics (mean purchase value, rolling 7-day activity)</li>
+  <li><strong>Date decomposition:</strong> day-of-week, hour, quarter, is_weekend</li>
+  <li><strong>Text:</strong> TF-IDF, BERT embeddings, sentence length, sentiment score</li>
+</ul>
+
+<h3>Feature Selection</h3>
+
+<pre><code class="language-python">from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.feature_selection import SelectKBest, f_classif, RFE
+from sklearn.decomposition import PCA
+
+# Standardise numerical features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)   # fit only on train!
+X_test_scaled  = scaler.transform(X_test)         # apply same transform
+
+# Univariate filter (ANOVA F-test): keep top 10 features
+selector = SelectKBest(score_func=f_classif, k=10)
+X_top10 = selector.fit_transform(X_train_scaled, y_train)
+print("Selected features:", selector.get_support(indices=True))
+
+# Recursive Feature Elimination (wrapper method)
+from sklearn.linear_model import LogisticRegression
+rfe = RFE(estimator=LogisticRegression(), n_features_to_select=10)
+rfe.fit(X_train_scaled, y_train)
+print("RFE kept:", X_train.columns[rfe.support_].tolist())
+
+# PCA for dimensionality reduction (not feature selection)
+pca = PCA(n_components=0.95)   # keep 95% of variance
+X_pca = pca.fit_transform(X_train_scaled)
+print(f"Components to retain 95% var: {pca.n_components_}")</code></pre>
+
+<div class="qa">
+  <div class="q">When is feature normalisation required and when can you skip it?</div>
+  <div class="a">Normalisation (standardisation or min-max) is required for algorithms that are sensitive to feature scale: gradient-based methods (logistic regression, neural nets, SVMs — the gradient step size depends on the magnitude of features), distance-based methods (KNN, K-means — Euclidean distance is dominated by large-scale features), and PCA (variance is scale-dependent). Tree-based algorithms (decision trees, random forests, XGBoost) are invariant to monotonic feature transforms — they only care about the relative order of values, not their absolute scale, so normalisation has no effect. As a rule of thumb: any algorithm with a cost function that sums across features, or one that uses distances, needs scaling.</div>
+</div>
+
+
+<h2>Handling Class Imbalance</h2>
+
+<p class="lead">Real-world datasets are rarely balanced. Fraud (0.1%), rare diseases, and defect detection all exhibit severe imbalance. Naive training produces models that classify everything as the majority class and report spuriously high accuracy.</p>
+
+<div class="callout warn"><span class="t">Imbalance Warning</span> Accuracy is useless on imbalanced data. A dataset with 99% negatives achieves 99% accuracy by always predicting negative. Use F1, PR-AUC, or ROC-AUC as primary metrics, and always examine per-class performance in the classification report.</div>
+
+<h3>Strategy 1: Resampling</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Oversampling (SMOTE)</h4>
+    <p>Synthetic Minority Oversampling Technique generates new minority examples by interpolating between existing ones in feature space. Better than random duplication — avoids exact overfitting to existing samples.</p>
+    <p><strong>Risk:</strong> can generate unrealistic examples if feature space is sparse.</p>
+  </div>
+  <div class="card">
+    <h4>Undersampling</h4>
+    <p>Remove majority class examples randomly (or by clustering with Tomek Links). Simple; speeds up training. Risk: discards potentially informative examples.</p>
+    <p><strong>Rule of thumb:</strong> undersample when dataset is large; oversample when small.</p>
+  </div>
+</div>
+
+<h3>Strategy 2: Class Weights</h3>
+<p>Most sklearn estimators accept <code>class_weight="balanced"</code>, which sets weight inversely proportional to class frequency. This penalises misclassification of the minority class more heavily during training — no data modification required.</p>
+
+<h3>Strategy 3: Threshold Tuning</h3>
+<p>A default probability threshold of 0.5 is arbitrary. By lowering the threshold (e.g., predict positive if p &gt; 0.3) you increase recall at the cost of precision. Use the PR curve to select a threshold matching your deployment needs.</p>
+
+<pre><code class="language-python">from imblearn.over_sampling import SMOTE
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
+import numpy as np
+
+# Strategy 1: SMOTE oversampling
+sm = SMOTE(random_state=42, k_neighbors=5)
+X_res, y_res = sm.fit_resample(X_train, y_train)
+print(f"Before: {np.bincount(y_train)}")
+print(f"After:  {np.bincount(y_res)}")
+
+# Strategy 2: class_weight
+clf = LogisticRegression(class_weight="balanced", max_iter=1000)
+clf.fit(X_train, y_train)
+print(classification_report(y_test, clf.predict(X_test)))
+
+# Strategy 3: threshold tuning
+proba = clf.predict_proba(X_test)[:, 1]
+threshold = 0.30
+y_pred_thresh = (proba &gt;= threshold).astype(int)
+print(classification_report(y_test, y_pred_thresh))</code></pre>
+
+<div class="qa">
+  <div class="q">You have a dataset with 5% positive class. What techniques and metrics would you use?</div>
+  <div class="a">First, never use accuracy — report precision, recall, F1 (or F-beta), and PR-AUC. For training: apply class_weight="balanced" as a first step (zero cost, often surprisingly effective). If performance is still poor, apply SMOTE on the training fold only (never on val/test). Consider using ensemble methods (random forest, XGBoost with scale_pos_weight parameter) as they are naturally more robust to imbalance. After training, tune the decision threshold using the precision-recall curve to match your business cost tradeoff (e.g., detecting 90% of positives at the cost of 50% precision may be acceptable for fraud screening but not for surgery recommendations). Monitor for concept drift in production — the positive rate may shift over time.</div>
+</div>
+
+
+<h2>Common Algorithms Overview</h2>
+
+<p class="lead">No single algorithm wins on all problems. Understanding the strengths, assumptions, and failure modes of each helps you choose intelligently and explain decisions to stakeholders.</p>
+
+<table>
+  <tr><th>Algorithm</th><th>Type</th><th>Task</th><th>Key Params</th><th>Strengths</th><th>Weaknesses</th><th>Best For</th></tr>
+  <tr>
+    <td><strong>Linear Regression</strong></td>
+    <td>Supervised</td>
+    <td>Regression</td>
+    <td>alpha (L2/L1)</td>
+    <td>Fast, interpretable, analytical solution</td>
+    <td>Assumes linearity &amp; homoscedasticity</td>
+    <td>Continuous target with linear signal; baseline</td>
+  </tr>
+  <tr>
+    <td><strong>Logistic Regression</strong></td>
+    <td>Supervised</td>
+    <td>Classification</td>
+    <td>C (1/λ), penalty</td>
+    <td>Probabilistic output, fast, interpretable</td>
+    <td>Linear decision boundary; poor on non-linear data</td>
+    <td>Binary/multi-class with interpretability; NLP baselines</td>
+  </tr>
+  <tr>
+    <td><strong>Decision Tree</strong></td>
+    <td>Supervised</td>
+    <td>Both</td>
+    <td>max_depth, min_samples_split</td>
+    <td>Interpretable (visualisable), handles mixed types, non-linear</td>
+    <td>High variance, overfits without pruning</td>
+    <td>Prototypes, rule extraction, explainability</td>
+  </tr>
+  <tr>
+    <td><strong>Random Forest</strong></td>
+    <td>Supervised</td>
+    <td>Both</td>
+    <td>n_estimators, max_features</td>
+    <td>Robust, implicit feature importance, handles missing values</td>
+    <td>Large memory, slower inference, black box</td>
+    <td>Tabular data, competitions, feature selection</td>
+  </tr>
+  <tr>
+    <td><strong>Gradient Boosting (XGBoost/LightGBM)</strong></td>
+    <td>Supervised</td>
+    <td>Both</td>
+    <td>n_estimators, learning_rate, max_depth</td>
+    <td>State-of-the-art on tabular; handles imbalance</td>
+    <td>Many hyperparameters; slower to train than RF</td>
+    <td>Kaggle-style structured data; production tabular</td>
+  </tr>
+  <tr>
+    <td><strong>SVM</strong></td>
+    <td>Supervised</td>
+    <td>Both</td>
+    <td>C, kernel, gamma</td>
+    <td>Effective in high-D, kernel trick for non-linearity</td>
+    <td>Slow on large datasets (O(n²)); needs scaling</td>
+    <td>Text classification, small/medium datasets, high-D</td>
+  </tr>
+  <tr>
+    <td><strong>KNN</strong></td>
+    <td>Supervised</td>
+    <td>Both</td>
+    <td>n_neighbors, metric</td>
+    <td>Non-parametric, intuitive, no training phase</td>
+    <td>Slow inference O(nd), poor scaling, needs scaling</td>
+    <td>Recommendation, anomaly detection, small datasets</td>
+  </tr>
+  <tr>
+    <td><strong>Naïve Bayes</strong></td>
+    <td>Supervised</td>
+    <td>Classification</td>
+    <td>var_smoothing (GNB)</td>
+    <td>Extremely fast, works well on text, handles missing</td>
+    <td>Strong independence assumption rarely holds exactly</td>
+    <td>Text classification, spam filtering, NLP baseline</td>
+  </tr>
+  <tr>
+    <td><strong>K-Means</strong></td>
+    <td>Unsupervised</td>
+    <td>Clustering</td>
+    <td>n_clusters, init, n_init</td>
+    <td>Simple, fast, scalable</td>
+    <td>Must choose K; assumes spherical clusters; sensitive to init</td>
+    <td>Customer segmentation, image compression, pre-processing</td>
+  </tr>
+  <tr>
+    <td><strong>PCA</strong></td>
+    <td>Unsupervised</td>
+    <td>Dim. reduction</td>
+    <td>n_components</td>
+    <td>Removes correlated features, speeds up downstream training</td>
+    <td>Components are linear combinations; interpretability lost</td>
+    <td>Visualisation, de-noising, pre-processing before ML</td>
+  </tr>
+</table>
+
+<details>
+  <summary>When does random forest outperform a single decision tree?</summary>
+  <div class="body">
+    <p>A single decision tree has high variance — small changes in training data produce very different trees. Random forest builds many trees, each on a bootstrap sample with a random subset of features (<code>max_features</code>), then averages predictions. The bootstrap sampling (bagging) reduces variance, and the feature randomisation ensures trees are decorrelated so their errors partially cancel. The result is far lower variance with only a modest increase in bias. As a rule: a random forest almost always outperforms a single tree on the same data. The exception is interpretability — a single tree is human-readable; a forest is not.</p>
+  </div>
+</details>
+
+<pre><code class="language-python">from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42),
+    "Gradient Boosting": GradientBoostingClassifier(n_estimators=200, random_rate=0.1),
+    "SVM (RBF)": SVC(probability=True, kernel="rbf"),
+    "KNN": KNeighborsClassifier(n_neighbors=5),
+}
+
+for name, clf in models.items():
+    clf.fit(X_train_scaled, y_train)
+    auc = roc_auc_score(y_test, clf.predict_proba(X_test_scaled)[:, 1])
+    print(f"{name:25s}  AUC: {auc:.4f}")</code></pre>
+
+
+<h2>The End-to-End ML Project Lifecycle</h2>
+
+<p class="lead">Successful ML projects follow a disciplined lifecycle. Model training is only a fraction of the total effort — problem framing, data work, and deployment typically dominate.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 130" width="720" height="130">
+  <!-- Step boxes and arrows -->
+  <!-- 1: Define -->
+  <rect x="10" y="35" width="76" height="52" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="48" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">Define</text>
+  <text x="48" y="72" text-anchor="middle" font-size="9" fill="#2563eb">Problem</text>
+  <text x="48" y="84" text-anchor="middle" font-size="9" fill="#2563eb">&amp; Metric</text>
+  <!-- Arrow 1 -->
+  <line x1="86" y1="61" x2="96" y2="61" stroke="#1a2233" stroke-width="1.5"/>
+  <polygon points="94,57 100,61 94,65" fill="#1a2233"/>
+  <!-- 2: Data -->
+  <rect x="100" y="35" width="76" height="52" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="138" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">Collect</text>
+  <text x="138" y="72" text-anchor="middle" font-size="9" fill="#2563eb">&amp; Label</text>
+  <text x="138" y="84" text-anchor="middle" font-size="9" fill="#2563eb">Data</text>
+  <!-- Arrow 2 -->
+  <line x1="176" y1="61" x2="186" y2="61" stroke="#1a2233" stroke-width="1.5"/>
+  <polygon points="184,57 190,61 184,65" fill="#1a2233"/>
+  <!-- 3: EDA -->
+  <rect x="190" y="35" width="76" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="228" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#065f46">EDA &amp;</text>
+  <text x="228" y="72" text-anchor="middle" font-size="9" fill="#059669">Cleaning</text>
+  <text x="228" y="84" text-anchor="middle" font-size="9" fill="#059669">Quality</text>
+  <!-- Arrow 3 -->
+  <line x1="266" y1="61" x2="276" y2="61" stroke="#1a2233" stroke-width="1.5"/>
+  <polygon points="274,57 280,61 274,65" fill="#1a2233"/>
+  <!-- 4: Feature Eng -->
+  <rect x="280" y="35" width="76" height="52" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="318" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#065f46">Feature</text>
+  <text x="318" y="72" text-anchor="middle" font-size="9" fill="#059669">Engineering</text>
+  <text x="318" y="84" text-anchor="middle" font-size="9" fill="#059669">&amp; Scaling</text>
+  <!-- Arrow 4 -->
+  <line x1="356" y1="61" x2="366" y2="61" stroke="#1a2233" stroke-width="1.5"/>
+  <polygon points="364,57 370,61 364,65" fill="#1a2233"/>
+  <!-- 5: Train -->
+  <rect x="370" y="35" width="76" height="52" rx="6" fill="#fff7ed" stroke="#b45309" stroke-width="1.5"/>
+  <text x="408" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">Train &amp;</text>
+  <text x="408" y="72" text-anchor="middle" font-size="9" fill="#b45309">Tune</text>
+  <text x="408" y="84" text-anchor="middle" font-size="9" fill="#b45309">Model</text>
+  <!-- Arrow 5 -->
+  <line x1="446" y1="61" x2="456" y2="61" stroke="#1a2233" stroke-width="1.5"/>
+  <polygon points="454,57 460,61 454,65" fill="#1a2233"/>
+  <!-- 6: Evaluate -->
+  <rect x="460" y="35" width="76" height="52" rx="6" fill="#fff7ed" stroke="#b45309" stroke-width="1.5"/>
+  <text x="498" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">Evaluate</text>
+  <text x="498" y="72" text-anchor="middle" font-size="9" fill="#b45309">on Test</text>
+  <text x="498" y="84" text-anchor="middle" font-size="9" fill="#b45309">Set</text>
+  <!-- Arrow 6 -->
+  <line x1="536" y1="61" x2="546" y2="61" stroke="#1a2233" stroke-width="1.5"/>
+  <polygon points="544,57 550,61 544,65" fill="#1a2233"/>
+  <!-- 7: Deploy -->
+  <rect x="550" y="35" width="76" height="52" rx="6" fill="#f0f9ff" stroke="#0891b2" stroke-width="1.5"/>
+  <text x="588" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#0e7490">Deploy</text>
+  <text x="588" y="72" text-anchor="middle" font-size="9" fill="#0891b2">API / Batch</text>
+  <text x="588" y="84" text-anchor="middle" font-size="9" fill="#0891b2">Service</text>
+  <!-- Arrow 7 -->
+  <line x1="626" y1="61" x2="636" y2="61" stroke="#1a2233" stroke-width="1.5"/>
+  <polygon points="634,57 640,61 634,65" fill="#1a2233"/>
+  <!-- 8: Monitor -->
+  <rect x="640" y="35" width="72" height="52" rx="6" fill="#f0f9ff" stroke="#0891b2" stroke-width="1.5"/>
+  <text x="676" y="57" text-anchor="middle" font-size="10" font-weight="700" fill="#0e7490">Monitor</text>
+  <text x="676" y="72" text-anchor="middle" font-size="9" fill="#0891b2">Drift &amp;</text>
+  <text x="676" y="84" text-anchor="middle" font-size="9" fill="#0891b2">Retrain</text>
+  <!-- Feedback arc (Monitor back to Collect) -->
+  <path d="M 676,88 Q 344,120 138,88" fill="none" stroke="#b45309" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <polygon points="141,84 135,88 141,92" fill="#b45309"/>
+  <text x="400" y="120" text-anchor="middle" font-size="9" fill="#b45309">retrain loop</text>
+</svg>
+<div class="cap">ML project lifecycle. The retrain loop (dashed orange) is often forgotten: models degrade as real-world distributions drift. Monitoring data quality and prediction quality in production is as important as initial training.</div>
+</div>
+
+<details>
+  <summary>1. Define Problem &amp; Success Metric</summary>
+  <div class="body">
+    <p>Before touching data: define the <em>business problem</em>, the <em>ML task</em> it maps to, and the <em>metric</em> that will determine success. Misaligned metrics are the leading cause of ML project failure — e.g., optimising accuracy when the business cares about recall, or optimising offline AUC while latency determines real-world adoption. Document assumptions about who uses the model, what failure looks like, and minimum acceptable performance thresholds.</p>
+  </div>
+</details>
+
+<details>
+  <summary>2. Data Collection &amp; Labelling</summary>
+  <div class="body">
+    <p>Identify data sources (databases, APIs, user logs, public datasets). Assess data volume, freshness, and label availability. For supervised tasks, plan labelling: expert annotation, crowdsourcing (Amazon MTurk), weak supervision (Snorkel), or programmatic labelling. Document data lineage for reproducibility and compliance. Budget 60-80% of project time for data work — it is where most value is created and most time is spent.</p>
+  </div>
+</details>
+
+<details>
+  <summary>3. EDA &amp; Data Cleaning</summary>
+  <div class="body">
+    <p>Exploratory Data Analysis surfaces distributions, correlations, outliers, and data quality issues. Check for: missing values (decide on imputation strategy), duplicate rows, label noise, distribution shifts between train and potential inference data, and feature importance signals via correlation with target. Clean: deduplicate, handle missing values (mean/median impute, KNN impute, or indicator columns), clip or log-transform outliers.</p>
+  </div>
+</details>
+
+<details>
+  <summary>4-5. Feature Engineering &amp; Model Training</summary>
+  <div class="body">
+    <p>Apply transformations identified during EDA. Wrap all preprocessing in a <code>sklearn.pipeline.Pipeline</code> to prevent leakage and ensure reproducibility at serving time. For model training: start with a simple baseline (majority class, mean prediction, logistic regression), iterate towards complexity, use cross-validation for hyperparameter search (<code>GridSearchCV</code> or <code>optuna</code>). Track all experiments (MLflow, Weights &amp; Biases).</p>
+  </div>
+</details>
+
+<details>
+  <summary>6-8. Evaluate, Deploy &amp; Monitor</summary>
+  <div class="body">
+    <p>Run the final model against the held-out test set exactly once. Document the evaluation protocol clearly. For deployment: wrap the model in a REST API (FastAPI + BentoML, or managed services like SageMaker). Implement feature computation identical to training. Monitor: data drift (feature distribution shift), concept drift (input-output relationship change), prediction distribution shift, and business KPIs. Set up automated retraining triggers when monitoring signals degrade past thresholds.</p>
+  </div>
+</details>
+
+<pre><code class="language-python">from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+# Build a pipeline to prevent leakage
+numeric_features = ["age", "income", "days_since_last_purchase"]
+categorical_features = ["country", "device_type"]
+
+preprocessor = ColumnTransformer([
+    ("num", StandardScaler(), numeric_features),
+    ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+])
+
+pipe = Pipeline([
+    ("preprocessor", preprocessor),
+    ("classifier",   RandomForestClassifier(random_state=42)),
+])
+
+# Hyperparameter tuning on train+val (cross-validated)
+param_grid = {
+    "classifier__n_estimators": [100, 200],
+    "classifier__max_depth": [None, 10, 20],
+}
+search = GridSearchCV(pipe, param_grid, cv=5, scoring="roc_auc", n_jobs=-1)
+search.fit(X_train, y_train)
+
+print(f"Best CV AUC: {search.best_score_:.4f}")
+print(f"Best params: {search.best_params_}")
+
+# Final evaluation — only here do we touch the test set
+from sklearn.metrics import roc_auc_score
+final_auc = roc_auc_score(y_test, search.predict_proba(X_test)[:, 1])
+print(f"Test AUC:   {final_auc:.4f}")</code></pre>
+
+
+<h2>When to Use ML, Rules, or LLMs</h2>
+
+<p class="lead">Not every problem benefits from machine learning. Choosing the wrong paradigm wastes engineering effort and introduces unnecessary risk. This section provides a practical decision framework.</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Use Rule-Based Logic When</h4>
+    <ul>
+      <li>Rules are known, stable, and small in number</li>
+      <li>Full transparency and auditability is required</li>
+      <li>Data is too scarce to train reliably</li>
+      <li>Edge cases are safety-critical and must be enumerated</li>
+      <li>Regulatory compliance requires human-readable logic</li>
+    </ul>
+    <p><em>Examples: input validation, access control, pricing formulas, deterministic routing.</em></p>
+  </div>
+  <div class="card">
+    <h4>Use Traditional ML When</h4>
+    <ul>
+      <li>Labelled training data is available at scale</li>
+      <li>The pattern is too complex for manual rules</li>
+      <li>Input is structured/tabular</li>
+      <li>Low-latency inference is required</li>
+      <li>Model explainability matters to stakeholders</li>
+    </ul>
+    <p><em>Examples: fraud detection, churn prediction, demand forecasting, image classification.</em></p>
+  </div>
+  <div class="card">
+    <h4>Use an LLM When</h4>
+    <ul>
+      <li>Task requires open-ended language generation</li>
+      <li>Instruction-following from natural language prompts is needed</li>
+      <li>Labelled training data is absent but a capable base model exists</li>
+      <li>The task is too diverse for a narrow ML model</li>
+      <li>Few-shot adaptation is sufficient</li>
+    </ul>
+    <p><em>Examples: summarisation, Q&amp;A, code generation, classification via prompting, agentic tasks.</em></p>
+  </div>
+</div>
+
+<div class="callout tip"><span class="t">Hybrid Approach</span> Production systems often combine all three: rules enforce hard constraints (data validation, safety guardrails), traditional ML handles structured prediction tasks (scoring, ranking), and an LLM handles open-ended language tasks. Each layer uses the simplest appropriate tool.</div>
+
+<table>
+  <tr><th>Dimension</th><th>Rules</th><th>Traditional ML</th><th>LLM</th></tr>
+  <tr><td>Training data needed</td><td>None</td><td>Large labelled set</td><td>None (few-shot) or large (fine-tune)</td></tr>
+  <tr><td>Inference latency</td><td>Microseconds</td><td>Milliseconds</td><td>Hundreds of ms to seconds</td></tr>
+  <tr><td>Explainability</td><td>Full</td><td>Medium (tree-based) – Low (NN)</td><td>Low (prompt-level reasoning)</td></tr>
+  <tr><td>Maintenance</td><td>High (manual updates)</td><td>Medium (retrain on drift)</td><td>Low (prompt updates)</td></tr>
+  <tr><td>Cost per call</td><td>~Zero</td><td>Low (hosted model)</td><td>Higher (API tokens)</td></tr>
+  <tr><td>Handles novel inputs</td><td>No (breaks on edge cases)</td><td>Extrapolates within distribution</td><td>Strong generalisation</td></tr>
+  <tr><td>Input type</td><td>Structured values</td><td>Structured / engineered features</td><td>Natural language, multimodal</td></tr>
+</table>
+
+<h3>Best Practices Summary</h3>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Data Hygiene</h4>
+    <ul>
+      <li>Never fit preprocessors on validation/test data</li>
+      <li>Always stratify splits when classes are imbalanced</li>
+      <li>Use Pipelines to bundle preprocessing with the model</li>
+      <li>Check for data leakage before reporting results</li>
+      <li>Track dataset versions alongside model versions</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Modelling</h4>
+    <ul>
+      <li>Start with the simplest possible baseline</li>
+      <li>Use cross-validation for small datasets; hold-out for large</li>
+      <li>Fix random seeds for reproducibility</li>
+      <li>Log every experiment (params, metrics, artifacts)</li>
+      <li>Evaluate on test set exactly once at the end</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Metrics</h4>
+    <ul>
+      <li>Choose your metric before training, not after</li>
+      <li>Report multiple metrics; never just accuracy</li>
+      <li>Disaggregate metrics by subgroup for fairness</li>
+      <li>Establish a human or rules-based baseline to compare against</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Production</h4>
+    <ul>
+      <li>Monitor data drift and prediction distribution in prod</li>
+      <li>Version your models and roll back gracefully</li>
+      <li>Set alerting thresholds on business KPIs, not just ML metrics</li>
+      <li>Plan for retraining frequency before you deploy</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout ok"><span class="t">Key Takeaway</span> Most ML failures are not model failures — they are data quality failures, metric misalignment failures, or deployment failures. Invest heavily in the non-model parts of the pipeline: data validation, robust feature engineering, honest evaluation, and production monitoring.</div>
+
+<div class="qa">
+  <div class="q">A stakeholder asks why you chose a random forest over a neural network for a tabular churn prediction task. What do you say?</div>
+  <div class="a">For tabular data at typical enterprise scales (tens of thousands to a few million rows), tree-based ensembles (random forest, gradient boosting) consistently match or outperform deep networks. They require less data, need little preprocessing (no normalisation required, handle mixed feature types naturally), train in seconds rather than hours, and provide interpretable feature importances out of the box. Neural networks excel on raw unstructured data (images, text, audio) where representation learning is valuable. For a churn model with structured CRM features, a gradient-boosted tree gives better performance for less engineering cost, and a stakeholder can understand "recency of last purchase was the top feature" in a business meeting.</div>
+</div>
+
+<div class="qa">
+  <div class="q">When would you recommend an LLM over a fine-tuned classification model for a text classification task?</div>
+  <div class="a">Use an LLM (via prompting or few-shot) when: (1) labelled data is scarce or expensive to produce — an LLM can classify with zero or a handful of examples; (2) the label taxonomy is dynamic or evolving — you can update a prompt in minutes vs retraining a model; (3) the classification requires reasoning or multi-hop context that a bag-of-words or encoder-only model struggles with; (4) the task scope is too diverse for a single narrow model. Use a fine-tuned classifier when: you have thousands of labelled examples, latency must be under 100ms, API costs at scale are prohibitive, or you need a self-hosted solution with no external data dependency. A common pattern: use an LLM to label thousands of examples cheaply, then fine-tune a small classifier on those labels for production serving.</div>
+</div>

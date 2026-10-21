@@ -1,0 +1,601 @@
+<p class="lead">TensorFlow is Google's end-to-end platform for building, training, and deploying machine learning models — from a one-line Keras classifier on your laptop to a multi-GPU training job feeding a model that runs on a phone, a browser, or a production server. This guide takes you from the humble <code>tf.Tensor</code> all the way to a SavedModel and a quantized <code>.tflite</code> binary, with the mental models and code you need for both real work and interviews.</p>
+
+<h2>1. What TensorFlow Is and Why It Matters</h2>
+
+<p>At its core TensorFlow is a library for <strong>numerical computation over multidimensional arrays (tensors)</strong>, with two super-powers layered on top: <span class="badge">automatic differentiation</span> (compute gradients of any computation) and <span class="badge g">hardware acceleration</span> (run the same code on CPU, GPU, or TPU). Keras — the high-level API bundled inside TensorFlow — gives you a clean, batteries-included way to assemble and train neural networks on top of that engine.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Eager by default</h4>Since TF 2.x, operations run immediately like NumPy. No sessions, no placeholders — you debug with <code>print()</code>.</div>
+  <div class="card"><h4>Graphs when you want them</h4><code>@tf.function</code> traces your Python into a fast, portable graph for speed and deployment — opt-in, not mandatory.</div>
+  <div class="card"><h4>Deploy everywhere</h4>SavedModel for servers, TFLite for mobile/embedded, TensorFlow.js for browsers, TF Serving for scalable APIs.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ah1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="380" y="24" text-anchor="middle" font-size="15" fill="#1e3a8a" font-weight="bold">The TensorFlow stack</text>
+
+  <rect x="40" y="45" width="680" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="380" y="73" text-anchor="middle" font-size="13" fill="#1a2233">Keras: layers, models, optimizers, losses, metrics (high-level API)</text>
+
+  <rect x="40" y="105" width="330" height="46" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="205" y="133" text-anchor="middle" font-size="13" fill="#1a2233">tf.data (input pipelines)</text>
+  <rect x="390" y="105" width="330" height="46" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="555" y="133" text-anchor="middle" font-size="13" fill="#1a2233">tf.function / Autograph (graphs)</text>
+
+  <rect x="40" y="165" width="680" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="380" y="193" text-anchor="middle" font-size="13" fill="#1a2233">Core: tf.Tensor, tf.Variable, GradientTape (autodiff), ops</text>
+
+  <rect x="40" y="225" width="210" height="46" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="145" y="253" text-anchor="middle" font-size="13" fill="#1a2233">CPU</text>
+  <rect x="275" y="225" width="210" height="46" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="380" y="253" text-anchor="middle" font-size="13" fill="#1a2233">GPU (CUDA)</text>
+  <rect x="510" y="225" width="210" height="46" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="615" y="253" text-anchor="middle" font-size="13" fill="#1a2233">TPU</text>
+
+  <line x1="380" y1="211" x2="380" y2="223" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah1)"/>
+</svg>
+<div class="cap">Fig 1. Layers of the TensorFlow stack: Keras sits on tf.data and tf.function, which sit on the core tensor engine, which maps to hardware.</div>
+</div>
+
+<div class="callout note"><span class="t">TF 1 vs TF 2</span> If you see <code>tf.Session()</code>, <code>tf.placeholder</code>, or <code>feed_dict</code> in a tutorial, it is TensorFlow 1.x. TF 2.x (current as of 2026, with the 2.x series having matured through Keras 3 multi-backend support) is eager-first and Keras-centric. This guide is pure TF 2.x.</div>
+
+<h2>2. Setup and Getting Started</h2>
+
+<p>TensorFlow ships as a pip package. The same <code>tensorflow</code> wheel includes CPU and GPU support on Linux; verify your CUDA/cuDNN drivers for GPU.</p>
+
+<pre><code class="language-bash"># Create an isolated environment (recommended)
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# Install TensorFlow (CPU + GPU on Linux via the same wheel)
+pip install --upgrade tensorflow
+
+# Verify the install and list visible GPUs
+python -c "import tensorflow as tf; print(tf.__version__); print(tf.config.list_physical_devices('GPU'))"</code></pre>
+
+<pre><code class="language-python">import tensorflow as tf
+
+print(tf.__version__)                               # e.g. 2.18.0
+print("GPUs:", tf.config.list_physical_devices("GPU"))
+print("Eager execution:", tf.executing_eagerly())   # True in TF 2.x</code></pre>
+
+<div class="callout tip"><span class="t">Reproducibility</span> Seed everything up front: <code>tf.keras.utils.set_random_seed(42)</code> seeds Python, NumPy, and TensorFlow in one call. For bit-exact GPU runs add <code>tf.config.experimental.enable_op_determinism()</code> (slower, but deterministic).</div>
+
+<h2>3. Tensors: The Core Data Structure</h2>
+
+<p>A <strong>tensor</strong> is an immutable n-dimensional array with a uniform <code>dtype</code> and a <code>shape</code>. Rank is the number of dimensions: a scalar is rank 0, a vector rank 1, a matrix rank 2, and so on.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 220" width="720" height="220">
+  <text x="360" y="22" text-anchor="middle" font-size="15" fill="#1e3a8a" font-weight="bold">Tensor rank by example</text>
+  <!-- scalar -->
+  <rect x="30" y="60" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="50" y="86" text-anchor="middle" font-size="13" fill="#1a2233">7</text>
+  <text x="50" y="125" text-anchor="middle" font-size="12" fill="#1a2233">rank 0</text>
+  <text x="50" y="142" text-anchor="middle" font-size="11" fill="#64748b">scalar ()</text>
+  <!-- vector -->
+  <g>
+    <rect x="150" y="60" width="40" height="40" fill="#ecfdf5" stroke="#059669"/>
+    <rect x="190" y="60" width="40" height="40" fill="#ecfdf5" stroke="#059669"/>
+    <rect x="230" y="60" width="40" height="40" fill="#ecfdf5" stroke="#059669"/>
+  </g>
+  <text x="210" y="125" text-anchor="middle" font-size="12" fill="#1a2233">rank 1</text>
+  <text x="210" y="142" text-anchor="middle" font-size="11" fill="#64748b">vector (3,)</text>
+  <!-- matrix -->
+  <g>
+    <rect x="350" y="45" width="34" height="34" fill="#fff7ed" stroke="#b45309"/>
+    <rect x="384" y="45" width="34" height="34" fill="#fff7ed" stroke="#b45309"/>
+    <rect x="350" y="79" width="34" height="34" fill="#fff7ed" stroke="#b45309"/>
+    <rect x="384" y="79" width="34" height="34" fill="#fff7ed" stroke="#b45309"/>
+  </g>
+  <text x="384" y="135" text-anchor="middle" font-size="12" fill="#1a2233">rank 2</text>
+  <text x="384" y="152" text-anchor="middle" font-size="11" fill="#64748b">matrix (2,2)</text>
+  <!-- rank 3 -->
+  <g>
+    <rect x="520" y="55" width="30" height="30" fill="#e0f2fe" stroke="#0891b2"/>
+    <rect x="550" y="55" width="30" height="30" fill="#e0f2fe" stroke="#0891b2"/>
+    <rect x="520" y="85" width="30" height="30" fill="#e0f2fe" stroke="#0891b2"/>
+    <rect x="550" y="85" width="30" height="30" fill="#e0f2fe" stroke="#0891b2"/>
+    <rect x="540" y="45" width="30" height="30" fill="#cffafe" stroke="#0891b2"/>
+    <rect x="570" y="45" width="30" height="30" fill="#cffafe" stroke="#0891b2"/>
+    <rect x="540" y="75" width="30" height="30" fill="#cffafe" stroke="#0891b2"/>
+    <rect x="570" y="75" width="30" height="30" fill="#cffafe" stroke="#0891b2"/>
+  </g>
+  <text x="560" y="135" text-anchor="middle" font-size="12" fill="#1a2233">rank 3</text>
+  <text x="560" y="152" text-anchor="middle" font-size="11" fill="#64748b">(2,2,2)</text>
+</svg>
+<div class="cap">Fig 2. Rank = number of axes. An image batch is typically rank 4: (batch, height, width, channels).</div>
+</div>
+
+<pre><code class="language-python">import tensorflow as tf
+
+# Create tensors
+scalar = tf.constant(7)                         # shape (), int32
+vec    = tf.constant([1.0, 2.0, 3.0])           # shape (3,), float32
+mat    = tf.constant([[1, 2], [3, 4]])          # shape (2, 2)
+
+print(mat.shape, mat.dtype, tf.rank(mat).numpy())  # (2, 2) int32 2
+
+# Element-wise ops and broadcasting (like NumPy)
+a = tf.constant([[1.0, 2.0], [3.0, 4.0]])
+b = tf.constant([10.0, 20.0])                   # broadcast across rows
+print(a + b)                                    # [[11, 22], [13, 24]]
+
+# Matrix multiply, reduction, reshape
+print(tf.matmul(a, a))                          # (2,2) @ (2,2)
+print(tf.reduce_mean(a, axis=0))                # column means -> [2., 3.]
+print(tf.reshape(a, (1, 4)))                    # (1, 4)
+
+# Interop with NumPy is zero-copy on CPU
+import numpy as np
+np_arr = a.numpy()                              # tensor -> ndarray
+back   = tf.convert_to_tensor(np_arr)           # ndarray -> tensor</code></pre>
+
+<h3>Variables: mutable, trainable state</h3>
+
+<p>Tensors are immutable. A <code>tf.Variable</code> wraps a tensor you can mutate in place — this is how model weights live and get updated.</p>
+
+<pre><code class="language-python">w = tf.Variable([[1.0, 2.0]], name="weights")   # trainable by default
+w.assign([[0.5, 0.5]])          # replace value
+w.assign_add([[0.1, 0.1]])      # in-place add -> [[0.6, 0.6]]
+print(w.trainable)              # True — tracked by GradientTape</code></pre>
+
+<div class="callout warn"><span class="t">dtype matters</span> Mixing dtypes raises errors: <code>tf.constant(1) + tf.constant(1.0)</code> fails (int32 vs float32). Cast explicitly with <code>tf.cast(x, tf.float32)</code>. Most model math uses <code>float32</code>; mixed-precision training uses <code>float16</code>/<code>bfloat16</code> for speed.</div>
+
+<h2>4. Automatic Differentiation with GradientTape</h2>
+
+<p><code>tf.GradientTape</code> records operations onto a "tape" so TensorFlow can replay them in reverse to compute gradients. This is the engine under every optimizer.</p>
+
+<pre><code class="language-python"># Minimize f(x) = x^2 - manual gradient descent
+x = tf.Variable(5.0)
+lr = 0.1
+
+for step in range(20):
+    with tf.GradientTape() as tape:
+        y = x ** 2                 # forward pass is recorded
+    dy_dx = tape.gradient(y, x)    # dy/dx = 2x
+    x.assign_sub(lr * dy_dx)       # x -= lr * grad
+
+print(round(x.numpy(), 4))         # approaches 0.0</code></pre>
+
+<pre><code class="language-python"># Gradients of a loss w.r.t. many parameters at once
+w = tf.Variable(tf.random.normal((3, 1)))
+b = tf.Variable(tf.zeros((1,)))
+X = tf.constant([[1., 2., 3.], [4., 5., 6.]])
+y = tf.constant([[1.], [0.]])
+
+with tf.GradientTape() as tape:
+    pred = tf.matmul(X, w) + b
+    loss = tf.reduce_mean((pred - y) ** 2)      # MSE
+
+grads = tape.gradient(loss, [w, b])             # list of gradients
+print(grads[0].shape, grads[1].shape)           # (3,1) (1,)</code></pre>
+
+<div class="callout tip"><span class="t">Persistent tapes</span> By default a tape is consumed after one <code>gradient()</code> call. Use <code>tf.GradientTape(persistent=True)</code> to take multiple gradients from the same tape (e.g. higher-order derivatives), and <code>del tape</code> to free it afterward. Call <code>tape.watch(t)</code> to track a constant tensor that is not a <code>Variable</code>.</div>
+
+<h2>5. tf.data: Input Pipelines That Keep the GPU Fed</h2>
+
+<p>Data loading is the most common bottleneck. <code>tf.data.Dataset</code> builds a lazy, composable pipeline that reads, transforms, shuffles, batches, and prefetches data in parallel on the CPU while the GPU trains on the previous batch.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 170" width="760" height="170">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <rect x="15" y="60" width="110" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="70" y="90" text-anchor="middle" font-size="12" fill="#1a2233">source</text>
+  <rect x="160" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="215" y="84" text-anchor="middle" font-size="12" fill="#1a2233">.map()</text>
+  <text x="215" y="100" text-anchor="middle" font-size="10" fill="#64748b">parallel</text>
+  <rect x="305" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="360" y="90" text-anchor="middle" font-size="12" fill="#1a2233">.shuffle()</text>
+  <rect x="450" y="60" width="110" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="505" y="90" text-anchor="middle" font-size="12" fill="#1a2233">.batch()</text>
+  <rect x="595" y="60" width="110" height="50" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="650" y="84" text-anchor="middle" font-size="12" fill="#1a2233">.prefetch()</text>
+  <text x="650" y="100" text-anchor="middle" font-size="10" fill="#64748b">GPU-ready</text>
+
+  <line x1="125" y1="85" x2="158" y2="85" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="270" y1="85" x2="303" y2="85" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="415" y1="85" x2="448" y2="85" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="560" y1="85" x2="593" y2="85" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="380" y="150" text-anchor="middle" font-size="12" fill="#64748b">map &rarr; shuffle &rarr; batch &rarr; prefetch: shuffle BEFORE batch; prefetch LAST</text>
+</svg>
+<div class="cap">Fig 3. A canonical tf.data pipeline. Prefetch overlaps CPU preprocessing with GPU compute so neither waits.</div>
+</div>
+
+<pre><code class="language-python">AUTOTUNE = tf.data.AUTOTUNE
+
+ds = tf.data.Dataset.from_tensor_slices((features, labels))
+
+ds = (ds
+      .shuffle(buffer_size=10_000)              # shuffle before batching
+      .map(preprocess, num_parallel_calls=AUTOTUNE)
+      .batch(32)
+      .prefetch(AUTOTUNE))                       # overlap CPU + GPU work
+
+for batch_x, batch_y in ds.take(1):
+    print(batch_x.shape, batch_y.shape)
+
+# Reading real files efficiently
+files = tf.data.Dataset.list_files("data/*.tfrecord")
+raw   = tf.data.TFRecordDataset(files, num_parallel_reads=AUTOTUNE)
+
+# Cache after expensive deterministic steps to skip recomputation each epoch
+ds = ds.cache()        # in memory, or ds.cache("/tmp/cache") on disk</code></pre>
+
+<div class="callout warn"><span class="t">Order of operations</span> Call <code>.shuffle()</code> <em>before</em> <code>.batch()</code> (otherwise you only shuffle batch order), put <code>.cache()</code> after deterministic maps but before random augmentation, and always finish with <code>.prefetch(AUTOTUNE)</code>. A buffer that is too small defeats shuffling; size it to a large fraction of the dataset when memory allows.</div>
+
+<h2>6. Building Models with the Keras API</h2>
+
+<p>Keras offers three model-building styles, trading simplicity for flexibility.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Sequential</h4>A linear stack of layers. Simplest; one input, one output, no branching.</div>
+  <div class="card"><h4>Functional</h4>A graph of layers. Supports multiple inputs/outputs, shared layers, residual connections.</div>
+  <div class="card"><h4>Subclassing</h4>Write a <code>Model</code> subclass with a custom <code>call()</code>. Maximum flexibility for research and dynamic control flow.</div>
+</div>
+
+<pre><code class="language-python">from tensorflow import keras
+from tensorflow.keras import layers
+
+# --- Sequential API ---
+model = keras.Sequential([
+    keras.Input(shape=(28, 28)),
+    layers.Flatten(),
+    layers.Dense(128, activation="relu"),
+    layers.Dropout(0.2),
+    layers.Dense(10, activation="softmax"),
+])
+model.summary()                      # prints layers, output shapes, param counts</code></pre>
+
+<pre><code class="language-python"># --- Functional API: two-branch model with a skip connection ---
+inputs = keras.Input(shape=(32,))
+x = layers.Dense(64, activation="relu")(inputs)
+y = layers.Dense(64, activation="relu")(x)
+z = layers.Add()([x, y])             # residual: combine two tensors
+outputs = layers.Dense(1)(z)
+model = keras.Model(inputs, outputs, name="residual_mlp")</code></pre>
+
+<pre><code class="language-python"># --- Subclassing API: full control over the forward pass ---
+class MLP(keras.Model):
+    def __init__(self, units=64, classes=10):
+        super().__init__()
+        self.d1 = layers.Dense(units, activation="relu")
+        self.drop = layers.Dropout(0.3)
+        self.out = layers.Dense(classes, activation="softmax")
+
+    def call(self, x, training=False):
+        x = self.d1(x)
+        x = self.drop(x, training=training)   # dropout only during training
+        return self.out(x)
+
+model = MLP()</code></pre>
+
+<h2>7. Training Models: compile / fit and Custom Loops</h2>
+
+<p>The high-level path is <code>compile()</code> + <code>fit()</code>. You specify an optimizer, a loss, and metrics; Keras runs the training loop, validation, and callbacks for you.</p>
+
+<pre><code class="language-python">model.compile(
+    optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+    loss="sparse_categorical_crossentropy",   # integer labels
+    metrics=["accuracy"],
+)
+
+callbacks = [
+    keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True),
+    keras.callbacks.ModelCheckpoint("best.keras", save_best_only=True),
+    keras.callbacks.TensorBoard(log_dir="logs/fit"),
+]
+
+history = model.fit(
+    train_ds,
+    validation_data=val_ds,
+    epochs=20,
+    callbacks=callbacks,
+)
+
+test_loss, test_acc = model.evaluate(test_ds)
+preds = model.predict(new_data)              # forward pass, no gradients</code></pre>
+
+<div class="callout note"><span class="t">Pick the right loss</span> Use <code>sparse_categorical_crossentropy</code> for integer class labels, <code>categorical_crossentropy</code> for one-hot labels, <code>binary_crossentropy</code> for 0/1 or multi-label, and <code>mse</code>/<code>mae</code> for regression. Mismatching label format and loss is a classic silent bug.</div>
+
+<h3>Custom training loops</h3>
+
+<p>When you need something <code>fit()</code> cannot express (GANs, custom gradient manipulation, reinforcement learning), write the loop yourself with <code>GradientTape</code>.</p>
+
+<pre><code class="language-python">optimizer = keras.optimizers.Adam(1e-3)
+loss_fn   = keras.losses.SparseCategoricalCrossentropy()
+train_acc = keras.metrics.SparseCategoricalAccuracy()
+
+@tf.function                              # compile the step into a graph
+def train_step(x, y):
+    with tf.GradientTape() as tape:
+        logits = model(x, training=True)
+        loss = loss_fn(y, logits)
+    grads = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(grads, model.trainable_variables))
+    train_acc.update_state(y, logits)
+    return loss
+
+for epoch in range(EPOCHS):
+    train_acc.reset_state()
+    for x, y in train_ds:
+        loss = train_step(x, y)
+    print(f"epoch {epoch}: loss={loss:.4f} acc={train_acc.result():.4f}")</code></pre>
+
+<h2>8. tf.function and AutoGraph</h2>
+
+<p><code>@tf.function</code> traces a Python function once, converting it into a static <strong>computation graph</strong> that runs without Python overhead and can be serialized for deployment. AutoGraph rewrites Python control flow (<code>if</code>, <code>for</code>, <code>while</code>) into graph ops automatically.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 740 200" width="740" height="200">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="70" width="150" height="56" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="94" text-anchor="middle" font-size="13" fill="#1a2233">Python fn</text>
+  <text x="95" y="112" text-anchor="middle" font-size="11" fill="#64748b">@tf.function</text>
+
+  <rect x="235" y="70" width="160" height="56" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="315" y="94" text-anchor="middle" font-size="13" fill="#1a2233">Trace once</text>
+  <text x="315" y="112" text-anchor="middle" font-size="11" fill="#64748b">per input signature</text>
+
+  <rect x="460" y="70" width="150" height="56" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="535" y="94" text-anchor="middle" font-size="13" fill="#1a2233">Graph</text>
+  <text x="535" y="112" text-anchor="middle" font-size="11" fill="#64748b">cached, optimized</text>
+
+  <rect x="650" y="70" width="70" height="56" rx="8" fill="#e0f2fe" stroke="#0891b2"/>
+  <text x="685" y="102" text-anchor="middle" font-size="12" fill="#1a2233">run</text>
+
+  <line x1="170" y1="98" x2="233" y2="98" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="395" y1="98" x2="458" y2="98" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="610" y1="98" x2="648" y2="98" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="370" y="165" text-anchor="middle" font-size="12" fill="#64748b">New shapes/dtypes trigger a re-trace (retracing); constants baked in at trace time</text>
+</svg>
+<div class="cap">Fig 4. tf.function traces the Python once per input signature, caches the graph, then runs the graph on later calls.</div>
+</div>
+
+<pre><code class="language-python">@tf.function
+def f(x):
+    if tf.reduce_sum(x) &gt; 0:        # AutoGraph converts this to tf.cond
+        return x * 2
+    return x - 1
+
+print(f(tf.constant([1.0, 2.0])))   # runs as a graph
+
+# Inspect the generated graph code
+print(tf.autograph.to_code(f.python_function))</code></pre>
+
+<div class="callout danger"><span class="t">Tracing pitfalls</span> Python side effects (<code>print</code>, list <code>.append</code>, incrementing a Python counter) run only <em>during tracing</em>, not on every call. Pass variable-length inputs as tensors, not Python lists, to avoid a re-trace per shape. Use <code>tf.print</code> (not <code>print</code>) to log at run time, and <code>input_signature</code> to pin shapes and prevent retracing.</div>
+
+<h2>9. GPU Usage and Performance</h2>
+
+<p>TensorFlow places ops on a GPU automatically when one is visible. You control memory and device placement explicitly for multi-GPU and shared machines.</p>
+
+<pre><code class="language-python"># Grow GPU memory on demand instead of grabbing it all at startup
+gpus = tf.config.list_physical_devices("GPU")
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
+# Pin a computation to a specific device
+with tf.device("/GPU:0"):
+    a = tf.random.normal((1000, 1000))
+    b = tf.matmul(a, a)
+
+# Mixed precision: float16 math, float32 master weights -> big speedup on modern GPUs
+keras.mixed_precision.set_global_policy("mixed_float16")
+
+# Multi-GPU data parallelism with one context manager
+strategy = tf.distribute.MirroredStrategy()
+with strategy.scope():
+    model = build_model()           # variables mirrored across GPUs
+    model.compile(optimizer="adam", loss="mse")
+model.fit(train_ds, epochs=10)      # batches split across GPUs</code></pre>
+
+<div class="callout tip"><span class="t">Keep the GPU busy</span> If GPU utilization is low, the bottleneck is usually the input pipeline. Add <code>.prefetch(AUTOTUNE)</code>, parallelize <code>.map()</code>, <code>.cache()</code>, and increase batch size. Use the TensorBoard Profiler to see the exact gap between data and compute.</div>
+
+<h2>10. TensorBoard: Visualizing Training</h2>
+
+<p>TensorBoard reads event logs written during training and renders scalars (loss/accuracy curves), histograms, the model graph, images, and profiling traces.</p>
+
+<pre><code class="language-python"># 1. Add the callback (writes to log_dir)
+tb = keras.callbacks.TensorBoard(log_dir="logs/fit", histogram_freq=1)
+model.fit(train_ds, validation_data=val_ds, epochs=10, callbacks=[tb])
+
+# 2. In a custom loop, write scalars yourself
+writer = tf.summary.create_file_writer("logs/custom")
+with writer.as_default():
+    tf.summary.scalar("loss", loss, step=epoch)</code></pre>
+
+<pre><code class="language-bash"># 3. Launch the dashboard, then open http://localhost:6006
+tensorboard --logdir logs/fit</code></pre>
+
+<h2>11. Saving and Loading Models</h2>
+
+<p>There are two things you may want to persist: the <strong>full model</strong> (architecture + weights + optimizer state) or just the <strong>weights</strong>. TF 2.x offers the native <code>.keras</code> format, the language-neutral <strong>SavedModel</strong> directory, and raw weight checkpoints.</p>
+
+<table>
+<tr><th>Format</th><th>Call</th><th>Contains</th><th>Use for</th></tr>
+<tr><td><code>.keras</code> (recommended)</td><td><code>model.save("m.keras")</code></td><td>Arch + weights + optimizer</td><td>Resume training, share Keras models</td></tr>
+<tr><td>SavedModel (dir)</td><td><code>model.export("m/")</code></td><td>Graph + weights, no Python</td><td>TF Serving, TFLite, cross-language</td></tr>
+<tr><td>Weights only</td><td><code>model.save_weights("w.h5")</code></td><td>Weights only</td><td>Transfer learning, custom code</td></tr>
+<tr><td>Checkpoints</td><td><code>tf.train.Checkpoint</code></td><td>Any trackable objects</td><td>Custom loops, fault tolerance</td></tr>
+</table>
+
+<pre><code class="language-python"># Native Keras format (single file) - best for Keras-to-Keras
+model.save("mymodel.keras")
+restored = keras.models.load_model("mymodel.keras")
+
+# SavedModel - portable graph for serving / TFLite (no Python needed)
+model.export("saved_model_dir")
+loaded = tf.saved_model.load("saved_model_dir")
+infer = loaded.signatures["serving_default"]
+
+# Weights only
+model.save_weights("weights.weights.h5")
+model.load_weights("weights.weights.h5")   # architecture must already exist</code></pre>
+
+<div class="callout note"><span class="t">Custom layers</span> If your model uses custom layers or losses, pass them when loading: <code>load_model("m.keras", custom_objects={"MyLayer": MyLayer})</code>, or decorate the class with <code>@keras.saving.register_keras_serializable()</code> so Keras finds it automatically.</div>
+
+<h2>12. Deployment: SavedModel, TF Serving, and TFLite</h2>
+
+<p>Training is half the job. Deployment turns a model into something that answers requests on a server, a phone, or an edge device.</p>
+
+<div class="pipeline">
+  <span class="step">Trained model</span><span class="arrow">-&gt;</span>
+  <span class="step">SavedModel</span><span class="arrow">-&gt;</span>
+  <span class="step">TF Serving / TFLite / TF.js</span><span class="arrow">-&gt;</span>
+  <span class="step">Predictions</span>
+</div>
+
+<h3>TF Serving (scalable server-side)</h3>
+<pre><code class="language-bash"># Serve a SavedModel over gRPC + REST with the official Docker image
+docker run -p 8501:8501 \
+  --mount type=bind,source=$(pwd)/saved_model_dir,target=/models/mymodel \
+  -e MODEL_NAME=mymodel tensorflow/serving
+
+# Query the REST endpoint
+curl -d '{"instances": [[1.0, 2.0, 3.0]]}' \
+  -X POST http://localhost:8501/v1/models/mymodel:predict</code></pre>
+
+<h3>TFLite (mobile and embedded)</h3>
+<pre><code class="language-python"># Convert a SavedModel to a compact, quantized .tflite binary
+converter = tf.lite.TFLiteConverter.from_saved_model("saved_model_dir")
+converter.optimizations = [tf.lite.Optimize.DEFAULT]   # dynamic-range quantization
+tflite_model = converter.convert()
+with open("model.tflite", "wb") as f:
+    f.write(tflite_model)
+
+# Run inference with the TFLite interpreter
+interpreter = tf.lite.Interpreter(model_path="model.tflite")
+interpreter.allocate_tensors()
+inp = interpreter.get_input_details()[0]
+out = interpreter.get_output_details()[0]
+interpreter.set_tensor(inp["index"], sample_input)
+interpreter.invoke()
+print(interpreter.get_tensor(out["index"]))</code></pre>
+
+<div class="callout tip"><span class="t">Quantization trade-off</span> Dynamic-range quantization shrinks a model ~4x and speeds up CPU inference with minimal accuracy loss. Full integer quantization (int8) is smaller and faster still but needs a representative dataset for calibration — essential for microcontrollers.</div>
+
+<h2>13. Worked Mini-Example: MNIST End to End</h2>
+
+<p>A complete, runnable classifier tying together data loading, a Keras model, training, evaluation, and export.</p>
+
+<pre><code class="language-python">import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+tf.keras.utils.set_random_seed(42)
+
+# 1. Load and normalize data
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+x_train, x_test = x_train / 255.0, x_test / 255.0
+
+# 2. Build a tf.data pipeline
+AUTOTUNE = tf.data.AUTOTUNE
+train_ds = (tf.data.Dataset.from_tensor_slices((x_train, y_train))
+            .shuffle(10_000).batch(128).prefetch(AUTOTUNE))
+test_ds  = (tf.data.Dataset.from_tensor_slices((x_test, y_test))
+            .batch(128).prefetch(AUTOTUNE))
+
+# 3. Define the model
+model = keras.Sequential([
+    keras.Input((28, 28)),
+    layers.Flatten(),
+    layers.Dense(128, activation="relu"),
+    layers.Dropout(0.2),
+    layers.Dense(10, activation="softmax"),
+])
+
+# 4. Compile and train
+model.compile(optimizer="adam",
+              loss="sparse_categorical_crossentropy",
+              metrics=["accuracy"])
+model.fit(train_ds, validation_data=test_ds, epochs=5)
+
+# 5. Evaluate and export
+loss, acc = model.evaluate(test_ds)
+print(f"test accuracy: {acc:.4f}")           # ~0.98
+model.save("mnist.keras")</code></pre>
+
+<h2>14. Cheat Sheet and Comparison</h2>
+
+<table>
+<tr><th>Task</th><th>Code</th></tr>
+<tr><td>Create constant / variable</td><td><code>tf.constant(x)</code> / <code>tf.Variable(x)</code></td></tr>
+<tr><td>Shape, rank, dtype</td><td><code>t.shape</code>, <code>tf.rank(t)</code>, <code>t.dtype</code></td></tr>
+<tr><td>Cast dtype</td><td><code>tf.cast(t, tf.float32)</code></td></tr>
+<tr><td>Reshape / expand / squeeze</td><td><code>tf.reshape</code>, <code>tf.expand_dims</code>, <code>tf.squeeze</code></td></tr>
+<tr><td>Matrix multiply</td><td><code>tf.matmul(a, b)</code> or <code>a @ b</code></td></tr>
+<tr><td>Reduce</td><td><code>tf.reduce_sum/mean/max(t, axis=...)</code></td></tr>
+<tr><td>Gradient</td><td><code>tape.gradient(loss, vars)</code></td></tr>
+<tr><td>Dataset from arrays</td><td><code>tf.data.Dataset.from_tensor_slices(...)</code></td></tr>
+<tr><td>Compile + train</td><td><code>model.compile(...)</code>; <code>model.fit(...)</code></td></tr>
+<tr><td>Save / load</td><td><code>model.save("m.keras")</code> / <code>load_model(...)</code></td></tr>
+<tr><td>List GPUs</td><td><code>tf.config.list_physical_devices("GPU")</code></td></tr>
+</table>
+
+<h4>TensorFlow vs PyTorch at a glance</h4>
+<table>
+<tr><th>Aspect</th><th>TensorFlow 2.x</th><th>PyTorch</th></tr>
+<tr><td>Execution</td><td>Eager + <code>@tf.function</code> graphs</td><td>Eager + <code>torch.compile</code></td></tr>
+<tr><td>High-level API</td><td>Keras (built in)</td><td><code>torch.nn</code> + Lightning (3rd party)</td></tr>
+<tr><td>Autodiff</td><td><code>GradientTape</code></td><td><code>loss.backward()</code> / autograd</td></tr>
+<tr><td>Mobile/edge</td><td>TFLite (mature)</td><td>ExecuTorch / PyTorch Mobile</td></tr>
+<tr><td>Serving</td><td>TF Serving</td><td>TorchServe</td></tr>
+<tr><td>Typical strength</td><td>Production, mobile, TPU</td><td>Research, flexibility</td></tr>
+</table>
+
+<h2>15. Best Practices and Common Pitfalls</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Do</h4>Use <code>tf.data</code> with <code>prefetch(AUTOTUNE)</code>; use <code>@tf.function</code> for training steps; normalize inputs; use callbacks for checkpointing and early stopping; seed with <code>set_random_seed</code>.</div>
+  <div class="card"><h4>Avoid</h4>Python loops over tensors; growing Python lists inside <code>tf.function</code>; mixing dtypes; shuffling after batching; grabbing all GPU memory on shared machines.</div>
+</div>
+
+<div class="callout ok"><span class="t">Prefer vectorized ops</span> Replace per-element Python loops with tensor ops (<code>tf.reduce_sum</code>, broadcasting, <code>tf.where</code>). Vectorized code runs on the GPU in parallel; Python loops serialize on the CPU and are often 100x slower.</div>
+
+<div class="callout warn"><span class="t">Validation data leakage</span> Fit normalization statistics (mean/std, min/max) on the <em>training</em> split only, then apply them to validation and test. Use a <code>keras.layers.Normalization</code> layer with <code>adapt()</code> on train data so the stats travel with the saved model.</div>
+
+<div class="callout danger"><span class="t">Silent shape bugs</span> Broadcasting can hide bugs: subtracting a <code>(32,)</code> tensor from a <code>(32,1)</code> tensor produces a <code>(32,32)</code> result instead of an error. Assert shapes with <code>tf.debugging.assert_shapes</code> and watch <code>model.summary()</code> output shapes.</div>
+
+<h2>16. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What changed between TensorFlow 1.x and 2.x?</div><div class="a">TF 2.x makes <strong>eager execution</strong> the default (ops run immediately, debug with Python tools), removes <code>Session</code>/<code>placeholder</code>/<code>feed_dict</code>, promotes Keras to the official high-level API, and replaces manual graph construction with opt-in <code>@tf.function</code> tracing. The result is a far more Pythonic, debuggable experience with graph performance available on demand.</div></div>
+
+<div class="qa"><div class="q">Difference between a tf.Tensor and a tf.Variable?</div><div class="a">A <code>Tensor</code> is immutable — ops produce new tensors. A <code>Variable</code> is mutable state you update in place with <code>assign</code>/<code>assign_add</code>. Model weights are <code>Variable</code>s because the optimizer must update them each step, and the <code>GradientTape</code> tracks trainable variables automatically.</div></div>
+
+<div class="qa"><div class="q">How does GradientTape compute gradients?</div><div class="a">It records every differentiable op executed inside its context onto a tape. Calling <code>tape.gradient(y, x)</code> replays the tape in reverse (reverse-mode automatic differentiation / backpropagation), applying the chain rule to accumulate <code>dy/dx</code>. By default it watches all trainable <code>Variable</code>s; use <code>tape.watch()</code> for constants and <code>persistent=True</code> for multiple gradient calls.</div></div>
+
+<div class="qa"><div class="q">What does @tf.function actually do, and when should you use it?</div><div class="a">It traces the Python function into a static TensorFlow graph (via AutoGraph for control flow), caches that graph per input signature, and runs the graph on subsequent calls — eliminating Python overhead and enabling serialization and cross-device optimization. Use it on hot paths like the training step. Beware: Python side effects run only during tracing, and new input shapes trigger expensive re-tracing.</div></div>
+
+<div class="qa"><div class="q">Why use tf.data instead of feeding NumPy arrays directly?</div><div class="a"><code>tf.data</code> builds a lazy, parallel pipeline that reads, transforms, shuffles, batches, and prefetches on the CPU while the GPU trains the previous batch. It scales beyond memory (streaming from TFRecords), parallelizes mapping with <code>AUTOTUNE</code>, and overlaps I/O with compute via <code>prefetch</code> — keeping the GPU saturated instead of idle.</div></div>
+
+<div class="qa"><div class="q">Why does prefetch go last and shuffle before batch?</div><div class="a"><code>prefetch</code> decouples producer (CPU) from consumer (GPU), so it must sit at the end to buffer finished batches. <code>shuffle</code> must come before <code>batch</code> so individual examples are randomized; shuffling after batching only reorders whole batches, leaving each batch's contents fixed and hurting training.</div></div>
+
+<div class="qa"><div class="q">When would you write a custom training loop instead of model.fit?</div><div class="a">When the standard loop cannot express your needs: GANs (two optimizers, alternating updates), reinforcement learning, custom gradient clipping or accumulation, multiple losses with per-step weighting, or research experiments. You get full control via <code>GradientTape</code> + <code>optimizer.apply_gradients</code>, at the cost of writing the loop, metrics, and checkpointing yourself.</div></div>
+
+<div class="qa"><div class="q">Sequential vs Functional vs Subclassing Keras APIs?</div><div class="a"><strong>Sequential</strong>: a simple linear stack, one input/output. <strong>Functional</strong>: a graph of layers supporting multiple inputs/outputs, shared layers, and skip connections while staticly validating shapes. <strong>Subclassing</strong>: a <code>Model</code> with a custom <code>call()</code> for dynamic/imperative logic — most flexible but no static graph checking until the first call.</div></div>
+
+<div class="qa"><div class="q">What is the difference between the .keras format and a SavedModel?</div><div class="a">The <code>.keras</code> file is a Keras-native archive (architecture + weights + optimizer state) ideal for pausing/resuming and sharing Keras models. A <strong>SavedModel</strong> is a language-neutral directory containing the serialized computation graph and weights with no Python dependency — the format TF Serving, TFLite, and other languages consume for deployment.</div></div>
+
+<div class="qa"><div class="q">How do you convert a model for mobile, and what is quantization?</div><div class="a">Use <code>tf.lite.TFLiteConverter.from_saved_model(...)</code> to produce a compact <code>.tflite</code> binary run by the lightweight interpreter. Quantization reduces weight/activation precision (e.g. float32 to int8), shrinking the model ~4x and speeding up CPU/edge inference. Dynamic-range quantization is nearly free; full-integer quantization needs a representative dataset for calibration.</div></div>
+
+<div class="qa"><div class="q">How do you train across multiple GPUs?</div><div class="a">Wrap model creation and compilation in a <code>tf.distribute.MirroredStrategy().scope()</code>. The strategy mirrors variables on each GPU, splits each global batch across devices (data parallelism), computes gradients locally, and all-reduces them to keep replicas in sync. For multi-machine training use <code>MultiWorkerMirroredStrategy</code>; for TPUs, <code>TPUStrategy</code>.</div></div>
+
+<div class="qa"><div class="q">Your GPU utilization is low during training — how do you diagnose it?</div><div class="a">Almost always the input pipeline is starving the GPU. Add <code>.prefetch(AUTOTUNE)</code>, parallelize <code>.map(num_parallel_calls=AUTOTUNE)</code>, <code>.cache()</code> deterministic work, and increase batch size. Confirm with the TensorBoard Profiler, which shows the timeline gap between input and compute. Also check for expensive Python ops inside <code>tf.function</code> or frequent retracing.</div></div>
+
+<h2>17. Further Learning</h2>
+
+<ul>
+  <li><strong>Official guides</strong> — tensorflow.org/guide: the <code>tf.data</code>, <code>tf.function</code>, and distributed training guides are excellent and current.</li>
+  <li><strong>Keras 3</strong> — the multi-backend Keras (TensorFlow, JAX, PyTorch); learn the stable API that outlives any one backend.</li>
+  <li><strong>TensorBoard Profiler</strong> — master it to find input bottlenecks and GPU idle time.</li>
+  <li><strong>Model optimization toolkit</strong> — pruning, quantization-aware training, and clustering for smaller, faster models.</li>
+  <li><strong>TFX</strong> — TensorFlow Extended for production ML pipelines (data validation, training, serving) when you move toward MLOps.</li>
+  <li><strong>Build a project</strong> — take a dataset from <code>tf.data</code> through training, TensorBoard, and a TFLite export to cement the full lifecycle.</li>
+</ul>

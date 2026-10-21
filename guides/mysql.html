@@ -1,0 +1,776 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MySQL — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Cloud & Platforms</div>
+  <h1>MySQL</h1>
+  <div class="subtitle">From the relational model to production SQL — queries, joins, indexes, normalization, ACID transactions, and connecting MySQL to Python and Node.</div>
+  <div class="tags"><span>mysql</span><span>sql</span><span>relational-database</span><span>indexes</span><span>transactions</span><span>normalization</span><span>query-optimization</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~17 min read &middot; 3,744 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-mysql-is-and-why-it-matters">What MySQL Is and Why It Matters</a></li><li><a href="#setup-and-getting-started">Setup and Getting Started</a></li><li><a href="#the-relational-model-and-data-types">The Relational Model and Data Types</a></li><li><a href="#ddl-creating-tables-keys-and-constraints">DDL: Creating Tables, Keys, and Constraints</a></li><li><a href="#sql-queries-select-where-order-by-limit">SQL Queries: SELECT, WHERE, ORDER BY, LIMIT</a></li><li><a href="#joins-combining-tables">JOINs: Combining Tables</a></li><li><a href="#aggregation-group-by-having-and-window-functions">Aggregation: GROUP BY, HAVING, and Window Functions</a></li><li><a href="#subqueries-ctes-and-views">Subqueries, CTEs, and Views</a></li><li><a href="#indexes-and-how-they-work">Indexes and How They Work</a></li><li><a href="#normalization-designing-clean-schemas">Normalization: Designing Clean Schemas</a></li><li><a href="#transactions-and-acid">Transactions and ACID</a></li><li><a href="#query-optimization-with-explain">Query Optimization with EXPLAIN</a></li><li><a href="#a-worked-mini-example-monthly-revenue-report">A Worked Mini-Example: Monthly Revenue Report</a></li><li><a href="#connecting-from-python-and-node-js">Connecting from Python and Node.js</a></li><li><a href="#cheat-sheet">Cheat Sheet</a></li><li><a href="#best-practices-and-common-pitfalls">Best Practices and Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-mysql-is-and-why-it-matters">What MySQL Is and Why It Matters</h2>
+<p class="lead">MySQL is the world's most widely deployed open-source relational database management system (RDBMS). It stores data in <strong>tables</strong> of rows and columns, enforces structure and relationships, and answers questions about that data using <strong>SQL</strong> — Structured Query Language.</p>
+
+<p>A relational database organizes information into tables that reference one another through <strong>keys</strong>. Instead of duplicating a customer's details inside every order, you store the customer once and point orders at it. This eliminates redundancy, keeps data consistent, and lets you ask complex questions by <em>joining</em> tables back together at query time.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Relational</h4>Data lives in typed tables with declared relationships, not loose documents.</div>
+  <div class="card"><h4>Transactional</h4>The default InnoDB engine gives you ACID guarantees — all-or-nothing changes.</div>
+  <div class="card"><h4>Ubiquitous</h4>Powers WordPress, countless SaaS backends, and the LAMP/LEMP stack.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="200" height="120" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="120" y="45" font-size="14" text-anchor="middle" fill="#1e3a8a" font-weight="bold">customers</text>
+  <line x1="30" y1="55" x2="210" y2="55" stroke="#94a3b8"/>
+  <text x="35" y="75" font-size="12" fill="#1a2233">id (PK)</text>
+  <text x="35" y="95" font-size="12" fill="#1a2233">name</text>
+  <text x="35" y="115" font-size="12" fill="#1a2233">email</text>
+
+  <rect x="500" y="20" width="200" height="160" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="600" y="45" font-size="14" text-anchor="middle" fill="#059669" font-weight="bold">orders</text>
+  <line x1="510" y1="55" x2="690" y2="55" stroke="#94a3b8"/>
+  <text x="515" y="75" font-size="12" fill="#1a2233">id (PK)</text>
+  <text x="515" y="95" font-size="12" fill="#1a2233">customer_id (FK)</text>
+  <text x="515" y="115" font-size="12" fill="#1a2233">total</text>
+  <text x="515" y="135" font-size="12" fill="#1a2233">created_at</text>
+
+  <path d="M220 100 C 360 100, 360 100, 500 100" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#ah)"/>
+  <text x="360" y="90" font-size="12" text-anchor="middle" fill="#1e3a8a">1 customer -&gt; many orders</text>
+
+  <rect x="260" y="210" width="400" height="70" rx="8" fill="#fff" stroke="#94a3b8"/>
+  <text x="460" y="240" font-size="13" text-anchor="middle" fill="#1a2233">SELECT c.name, o.total FROM customers c</text>
+  <text x="460" y="262" font-size="13" text-anchor="middle" fill="#1a2233">JOIN orders o ON o.customer_id = c.id;</text>
+</svg><div class="cap">Fig 1. Two tables linked by a foreign key; a JOIN recombines them at query time.</div></div>
+
+<div class="callout note"><span class="t">Note</span> MySQL and MariaDB share a common ancestry; MariaDB is a community fork created after Oracle's acquisition of MySQL. Syntax overlaps heavily, but this guide targets MySQL 8.x (current LTS line as of 2026, with 8.4 as the long-term support release).</div>
+
+<h2 id="setup-and-getting-started">Setup and Getting Started</h2>
+
+<p>Install the server and client, start the service, and connect with the <span class="kbd">mysql</span> command-line client.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># macOS (Homebrew)</span>
+brew install mysql
+brew services start mysql
+
+<span class="hljs-comment"># Debian / Ubuntu</span>
+<span class="hljs-built_in">sudo</span> apt update &amp;&amp; <span class="hljs-built_in">sudo</span> apt install mysql-server
+<span class="hljs-built_in">sudo</span> systemctl start mysql
+
+<span class="hljs-comment"># Secure the install (sets root password, removes anonymous users)</span>
+<span class="hljs-built_in">sudo</span> mysql_secure_installation
+
+<span class="hljs-comment"># Connect as root</span>
+mysql -u root -p
+
+<span class="hljs-comment"># Connect to a specific host/port/database</span>
+mysql -h db.example.com -P 3306 -u app_user -p shop_db</code></pre>
+
+<p>Once connected, these meta-commands orient you:</p>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">SHOW</span> DATABASES;            <span class="hljs-comment">-- list databases</span>
+<span class="hljs-keyword">CREATE</span> DATABASE shop_db;   <span class="hljs-comment">-- create one</span>
+USE shop_db;               <span class="hljs-comment">-- select it for subsequent commands</span>
+<span class="hljs-keyword">SHOW</span> TABLES;               <span class="hljs-comment">-- list tables in current database</span>
+<span class="hljs-keyword">DESCRIBE</span> customers;        <span class="hljs-comment">-- show a table&#x27;s columns and types</span>
+<span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE TABLE</span> orders\G <span class="hljs-comment">-- full DDL; \G formats rows vertically</span></code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Ending a statement with <span class="kbd">\G</span> instead of <span class="kbd">;</span> prints each row as a vertical key/value block — invaluable for wide tables in the terminal.</div>
+
+<h2 id="the-relational-model-and-data-types">The Relational Model and Data Types</h2>
+
+<p>A <strong>table</strong> (relation) is a set of <strong>rows</strong> (tuples). Each <strong>column</strong> (attribute) has a fixed data type. Choosing the right type matters for correctness, storage, and index performance.</p>
+
+<table>
+<tr><th>Category</th><th>Types</th><th>Use for</th></tr>
+<tr><td>Integer</td><td><code>TINYINT</code>, <code>INT</code>, <code>BIGINT</code></td><td>IDs, counts; add <code>UNSIGNED</code> when never negative</td></tr>
+<tr><td>Decimal</td><td><code>DECIMAL(p,s)</code></td><td>Money — exact, no float rounding</td></tr>
+<tr><td>Float</td><td><code>FLOAT</code>, <code>DOUBLE</code></td><td>Scientific/approximate values only</td></tr>
+<tr><td>String</td><td><code>VARCHAR(n)</code>, <code>CHAR(n)</code>, <code>TEXT</code></td><td>Names, short text; <code>TEXT</code> for large blobs</td></tr>
+<tr><td>Date/Time</td><td><code>DATE</code>, <code>DATETIME</code>, <code>TIMESTAMP</code></td><td><code>TIMESTAMP</code> is UTC-aware, range ends 2038</td></tr>
+<tr><td>Other</td><td><code>BOOLEAN</code>, <code>ENUM</code>, <code>JSON</code></td><td>Flags, fixed sets, semi-structured data</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Watch out</span> Never store money in <code>FLOAT</code>/<code>DOUBLE</code>. <code>0.1 + 0.2 != 0.3</code> in binary floating point. Use <code>DECIMAL(10,2)</code> so arithmetic stays exact.</div>
+
+<h2 id="ddl-creating-tables-keys-and-constraints">DDL: Creating Tables, Keys, and Constraints</h2>
+
+<p>Data Definition Language (DDL) defines structure: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>. Constraints enforce rules the database guarantees even when application code has bugs.</p>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">CREATE TABLE</span> customers (
+  id          <span class="hljs-type">BIGINT</span> UNSIGNED AUTO_INCREMENT <span class="hljs-keyword">PRIMARY KEY</span>,
+  name        <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">120</span>) <span class="hljs-keyword">NOT NULL</span>,
+  email       <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">UNIQUE</span>,       <span class="hljs-comment">-- no two customers share an email</span>
+  created_at  <span class="hljs-type">TIMESTAMP</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span>
+) ENGINE<span class="hljs-operator">=</span>InnoDB;
+
+<span class="hljs-keyword">CREATE TABLE</span> orders (
+  id          <span class="hljs-type">BIGINT</span> UNSIGNED AUTO_INCREMENT <span class="hljs-keyword">PRIMARY KEY</span>,
+  customer_id <span class="hljs-type">BIGINT</span> UNSIGNED <span class="hljs-keyword">NOT NULL</span>,
+  total       <span class="hljs-type">DECIMAL</span>(<span class="hljs-number">10</span>,<span class="hljs-number">2</span>) <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0.00</span>,
+  status      ENUM(<span class="hljs-string">&#x27;pending&#x27;</span>,<span class="hljs-string">&#x27;paid&#x27;</span>,<span class="hljs-string">&#x27;shipped&#x27;</span>,<span class="hljs-string">&#x27;cancelled&#x27;</span>) <span class="hljs-keyword">NOT NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;pending&#x27;</span>,
+  created_at  <span class="hljs-type">TIMESTAMP</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span>,
+  <span class="hljs-keyword">CONSTRAINT</span> fk_orders_customer
+    <span class="hljs-keyword">FOREIGN KEY</span> (customer_id) <span class="hljs-keyword">REFERENCES</span> customers(id)
+    <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> CASCADE          <span class="hljs-comment">-- deleting a customer removes their orders</span>
+) ENGINE<span class="hljs-operator">=</span>InnoDB;</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>Primary key</h4>Uniquely identifies a row. One per table. In InnoDB it also physically orders the data (clustered index).</div>
+  <div class="card"><h4>Foreign key</h4>Points at another table's primary key. Enforces referential integrity — you cannot insert an order for a customer that does not exist.</div>
+  <div class="card"><h4>UNIQUE</h4>Guarantees no duplicate values in a column or set of columns (e.g. one account per email).</div>
+  <div class="card"><h4>NOT NULL / DEFAULT</h4><code>NOT NULL</code> forbids missing values; <code>DEFAULT</code> supplies one when the client omits the column.</div>
+</div>
+
+<p>Modifying an existing table:</p>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">ALTER TABLE</span> customers <span class="hljs-keyword">ADD</span> <span class="hljs-keyword">COLUMN</span> phone <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">32</span>) <span class="hljs-keyword">NULL</span>;
+<span class="hljs-keyword">ALTER TABLE</span> customers MODIFY <span class="hljs-keyword">COLUMN</span> name <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">200</span>) <span class="hljs-keyword">NOT NULL</span>;
+<span class="hljs-keyword">ALTER TABLE</span> customers <span class="hljs-keyword">DROP</span> <span class="hljs-keyword">COLUMN</span> phone;
+<span class="hljs-keyword">ALTER TABLE</span> orders <span class="hljs-keyword">ADD</span> INDEX idx_status (status);</code></pre>
+
+<h2 id="sql-queries-select-where-order-by-limit">SQL Queries: SELECT, WHERE, ORDER BY, LIMIT</h2>
+
+<p>The <code>SELECT</code> statement is how you read data. MySQL evaluates its clauses in a logical order that differs from how you write them — understanding this explains many surprises.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 160" width="720" height="160">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <g font-size="12" text-anchor="middle">
+    <rect x="10"  y="60" width="90" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="55" y="85" fill="#1e3a8a">FROM/JOIN</text>
+    <rect x="130" y="60" width="80" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="170" y="85" fill="#1e3a8a">WHERE</text>
+    <rect x="240" y="60" width="90" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="285" y="85" fill="#1e3a8a">GROUP BY</text>
+    <rect x="360" y="60" width="80" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="400" y="85" fill="#1e3a8a">HAVING</text>
+    <rect x="470" y="60" width="80" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="510" y="85" fill="#059669">SELECT</text>
+    <rect x="580" y="60" width="60" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="610" y="85" fill="#1e3a8a">ORDER</text>
+    <rect x="660" y="60" width="50" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="685" y="85" fill="#1e3a8a">LIMIT</text>
+  </g>
+  <g stroke="#0891b2" stroke-width="2" fill="none">
+    <line x1="100" y1="80" x2="128" y2="80" marker-end="url(#ah2)"/>
+    <line x1="210" y1="80" x2="238" y2="80" marker-end="url(#ah2)"/>
+    <line x1="330" y1="80" x2="358" y2="80" marker-end="url(#ah2)"/>
+    <line x1="440" y1="80" x2="468" y2="80" marker-end="url(#ah2)"/>
+    <line x1="550" y1="80" x2="578" y2="80" marker-end="url(#ah2)"/>
+    <line x1="640" y1="80" x2="658" y2="80" marker-end="url(#ah2)"/>
+  </g>
+  <text x="360" y="30" font-size="13" text-anchor="middle" fill="#1a2233" font-weight="bold">Logical evaluation order of a SELECT</text>
+</svg><div class="cap">Fig 2. Rows are filtered (WHERE) before grouping; HAVING filters groups; SELECT runs late — which is why column aliases are usable in ORDER BY but not WHERE.</div></div>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">SELECT</span> id, name, email
+<span class="hljs-keyword">FROM</span> customers
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;A%&#x27;</span>          <span class="hljs-comment">-- starts with A</span>
+  <span class="hljs-keyword">AND</span> created_at <span class="hljs-operator">&gt;=</span> <span class="hljs-string">&#x27;2026-01-01&#x27;</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> created_at <span class="hljs-keyword">DESC</span>
+LIMIT <span class="hljs-number">20</span> <span class="hljs-keyword">OFFSET</span> <span class="hljs-number">0</span>;            <span class="hljs-comment">-- first page of 20</span>
+
+<span class="hljs-comment">-- Useful predicates</span>
+<span class="hljs-keyword">WHERE</span> status <span class="hljs-keyword">IN</span> (<span class="hljs-string">&#x27;paid&#x27;</span>,<span class="hljs-string">&#x27;shipped&#x27;</span>)
+<span class="hljs-keyword">WHERE</span> total <span class="hljs-keyword">BETWEEN</span> <span class="hljs-number">10</span> <span class="hljs-keyword">AND</span> <span class="hljs-number">100</span>
+<span class="hljs-keyword">WHERE</span> phone <span class="hljs-keyword">IS</span> <span class="hljs-keyword">NULL</span>                 <span class="hljs-comment">-- NULL needs IS, never =</span>
+<span class="hljs-keyword">WHERE</span> email <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;%@gmail.com&#x27;</span>;</code></pre>
+
+<div class="callout warn"><span class="t">NULL is not a value</span> <code>NULL = NULL</code> is <code>NULL</code> (unknown), not true. Use <code>IS NULL</code> / <code>IS NOT NULL</code>. Aggregates like <code>COUNT(col)</code> skip NULLs, while <code>COUNT(*)</code> counts rows.</div>
+
+<h2 id="joins-combining-tables">JOINs: Combining Tables</h2>
+
+<p>A JOIN matches rows across tables on a condition. The join type decides what happens to rows with no match.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 220" width="720" height="220">
+  <g font-size="12" text-anchor="middle">
+    <text x="120" y="25" font-weight="bold" fill="#1a2233">INNER JOIN</text>
+    <circle cx="95" cy="90" r="45" fill="#eff4ff" stroke="#2563eb"/>
+    <circle cx="145" cy="90" r="45" fill="#ecfdf5" stroke="#059669"/>
+    <path d="M120 52 A45 45 0 0 1 120 128 A45 45 0 0 1 120 52 Z" fill="#2563eb" opacity="0.35"/>
+    <text x="120" y="170" fill="#1a2233">only matching rows</text>
+
+    <text x="360" y="25" font-weight="bold" fill="#1a2233">LEFT JOIN</text>
+    <circle cx="335" cy="90" r="45" fill="#2563eb" opacity="0.35" stroke="#2563eb"/>
+    <circle cx="385" cy="90" r="45" fill="#ecfdf5" stroke="#059669"/>
+    <text x="360" y="170" fill="#1a2233">all left + matches</text>
+
+    <text x="600" y="25" font-weight="bold" fill="#1a2233">FULL (emulated)</text>
+    <circle cx="575" cy="90" r="45" fill="#2563eb" opacity="0.35" stroke="#2563eb"/>
+    <circle cx="625" cy="90" r="45" fill="#059669" opacity="0.3" stroke="#059669"/>
+    <text x="600" y="170" fill="#1a2233">LEFT UNION RIGHT</text>
+  </g>
+  <text x="360" y="205" font-size="12" text-anchor="middle" fill="#b45309">MySQL has no native FULL OUTER JOIN — combine LEFT and RIGHT with UNION.</text>
+</svg><div class="cap">Fig 3. Join types as set operations over two tables.</div></div>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-comment">-- INNER: customers who have at least one order</span>
+<span class="hljs-keyword">SELECT</span> c.name, o.id <span class="hljs-keyword">AS</span> order_id, o.total
+<span class="hljs-keyword">FROM</span> customers c
+<span class="hljs-keyword">INNER</span> <span class="hljs-keyword">JOIN</span> orders o <span class="hljs-keyword">ON</span> o.customer_id <span class="hljs-operator">=</span> c.id;
+
+<span class="hljs-comment">-- LEFT: every customer, even those with zero orders (NULLs for order columns)</span>
+<span class="hljs-keyword">SELECT</span> c.name, <span class="hljs-built_in">COUNT</span>(o.id) <span class="hljs-keyword">AS</span> order_count
+<span class="hljs-keyword">FROM</span> customers c
+<span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> orders o <span class="hljs-keyword">ON</span> o.customer_id <span class="hljs-operator">=</span> c.id
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> c.id, c.name;
+
+<span class="hljs-comment">-- Self join: find customers in the same city</span>
+<span class="hljs-keyword">SELECT</span> a.name, b.name
+<span class="hljs-keyword">FROM</span> customers a
+<span class="hljs-keyword">JOIN</span> customers b <span class="hljs-keyword">ON</span> a.city <span class="hljs-operator">=</span> b.city <span class="hljs-keyword">AND</span> a.id <span class="hljs-operator">&lt;</span> b.id;</code></pre>
+
+<h2 id="aggregation-group-by-having-and-window-functions">Aggregation: GROUP BY, HAVING, and Window Functions</h2>
+
+<p>Aggregate functions collapse many rows into one summary value. <code>GROUP BY</code> produces one output row per group; <code>HAVING</code> filters those groups (it runs <em>after</em> aggregation, unlike <code>WHERE</code>).</p>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">SELECT</span> status,
+       <span class="hljs-built_in">COUNT</span>(<span class="hljs-operator">*</span>)      <span class="hljs-keyword">AS</span> n,
+       <span class="hljs-built_in">SUM</span>(total)    <span class="hljs-keyword">AS</span> revenue,
+       <span class="hljs-built_in">AVG</span>(total)    <span class="hljs-keyword">AS</span> avg_order,
+       <span class="hljs-built_in">MAX</span>(total)    <span class="hljs-keyword">AS</span> biggest
+<span class="hljs-keyword">FROM</span> orders
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> status
+<span class="hljs-keyword">HAVING</span> <span class="hljs-built_in">SUM</span>(total) <span class="hljs-operator">&gt;</span> <span class="hljs-number">1000</span>       <span class="hljs-comment">-- only groups whose revenue exceeds 1000</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> revenue <span class="hljs-keyword">DESC</span>;</code></pre>
+
+<p><strong>Window functions</strong> (MySQL 8.0+) compute across a set of rows <em>without</em> collapsing them — perfect for running totals, rankings, and "top N per group".</p>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-comment">-- Rank each customer&#x27;s orders by total, keeping every row</span>
+<span class="hljs-keyword">SELECT</span>
+  customer_id,
+  total,
+  <span class="hljs-built_in">ROW_NUMBER</span>() <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> customer_id <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> total <span class="hljs-keyword">DESC</span>) <span class="hljs-keyword">AS</span> rn,
+  <span class="hljs-built_in">SUM</span>(total)   <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> customer_id)                     <span class="hljs-keyword">AS</span> customer_lifetime
+<span class="hljs-keyword">FROM</span> orders;
+
+<span class="hljs-comment">-- &quot;Latest order per customer&quot; = keep rows where rn = 1 (wrap in a subquery)</span></code></pre>
+
+<table>
+<tr><th>Function</th><th>Returns</th></tr>
+<tr><td><code>COUNT(*)</code> / <code>COUNT(col)</code></td><td>Row count / non-NULL count</td></tr>
+<tr><td><code>SUM</code> / <code>AVG</code> / <code>MIN</code> / <code>MAX</code></td><td>Numeric aggregates</td></tr>
+<tr><td><code>GROUP_CONCAT(col)</code></td><td>Concatenated string of group values</td></tr>
+<tr><td><code>ROW_NUMBER()</code> / <code>RANK()</code> / <code>DENSE_RANK()</code></td><td>Ordinal / ranking within a window</td></tr>
+<tr><td><code>LAG()</code> / <code>LEAD()</code></td><td>Value from a previous / next row</td></tr>
+</table>
+
+<h2 id="subqueries-ctes-and-views">Subqueries, CTEs, and Views</h2>
+
+<p>A <strong>subquery</strong> is a query nested inside another. A <strong>CTE</strong> (Common Table Expression, <code>WITH</code>) is a named, readable subquery. A <strong>view</strong> is a stored, reusable query that behaves like a virtual table.</p>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-comment">-- Scalar subquery: customers who spent above the overall average</span>
+<span class="hljs-keyword">SELECT</span> c.name
+<span class="hljs-keyword">FROM</span> customers c
+<span class="hljs-keyword">WHERE</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">SUM</span>(total) <span class="hljs-keyword">FROM</span> orders o <span class="hljs-keyword">WHERE</span> o.customer_id <span class="hljs-operator">=</span> c.id)
+      <span class="hljs-operator">&gt;</span> (<span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">AVG</span>(total) <span class="hljs-keyword">FROM</span> orders);
+
+<span class="hljs-comment">-- Correlated EXISTS: customers with at least one shipped order</span>
+<span class="hljs-keyword">SELECT</span> name <span class="hljs-keyword">FROM</span> customers c
+<span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">EXISTS</span> (
+  <span class="hljs-keyword">SELECT</span> <span class="hljs-number">1</span> <span class="hljs-keyword">FROM</span> orders o
+  <span class="hljs-keyword">WHERE</span> o.customer_id <span class="hljs-operator">=</span> c.id <span class="hljs-keyword">AND</span> o.status <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;shipped&#x27;</span>
+);
+
+<span class="hljs-comment">-- CTE: cleaner and composable</span>
+<span class="hljs-keyword">WITH</span> customer_revenue <span class="hljs-keyword">AS</span> (
+  <span class="hljs-keyword">SELECT</span> customer_id, <span class="hljs-built_in">SUM</span>(total) <span class="hljs-keyword">AS</span> revenue
+  <span class="hljs-keyword">FROM</span> orders <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> customer_id
+)
+<span class="hljs-keyword">SELECT</span> c.name, cr.revenue
+<span class="hljs-keyword">FROM</span> customer_revenue cr
+<span class="hljs-keyword">JOIN</span> customers c <span class="hljs-keyword">ON</span> c.id <span class="hljs-operator">=</span> cr.customer_id
+<span class="hljs-keyword">WHERE</span> cr.revenue <span class="hljs-operator">&gt;</span> <span class="hljs-number">500</span>;
+
+<span class="hljs-comment">-- View: freeze the query behind a name</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">VIEW</span> v_top_customers <span class="hljs-keyword">AS</span>
+<span class="hljs-keyword">SELECT</span> c.id, c.name, <span class="hljs-built_in">SUM</span>(o.total) <span class="hljs-keyword">AS</span> revenue
+<span class="hljs-keyword">FROM</span> customers c <span class="hljs-keyword">JOIN</span> orders o <span class="hljs-keyword">ON</span> o.customer_id <span class="hljs-operator">=</span> c.id
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> c.id, c.name;
+
+<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> v_top_customers <span class="hljs-keyword">WHERE</span> revenue <span class="hljs-operator">&gt;</span> <span class="hljs-number">1000</span>;</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Prefer <code>EXISTS</code> over <code>IN (SELECT ...)</code> for correlated existence checks on large tables — it can short-circuit on the first match and handles NULLs more predictably.</div>
+
+<h2 id="indexes-and-how-they-work">Indexes and How They Work</h2>
+
+<p>An index is an auxiliary data structure — a <strong>B+tree</strong> in InnoDB — that lets the engine find rows without scanning every one. Without an index, <code>WHERE email = ?</code> is a full table scan: O(n). With one, it is a tree descent: O(log n).</p>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <defs><marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+  <rect x="300" y="20" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="45" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 50 | 100 ]</text>
+
+  <rect x="110" y="110" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="170" y="135" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 10 | 30 ]</text>
+  <rect x="300" y="110" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="135" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 60 | 80 ]</text>
+  <rect x="490" y="110" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="550" y="135" font-size="12" text-anchor="middle" fill="#1e3a8a">[ 120 | 150 ]</text>
+
+  <g font-size="11" text-anchor="middle" fill="#059669">
+    <rect x="40"  y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="85" y="222">10 -&gt; row</text>
+    <rect x="150" y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="195" y="222">30 -&gt; row</text>
+    <rect x="300" y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="345" y="222">60 -&gt; row</text>
+    <rect x="490" y="200" width="90" height="34" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="535" y="222">120 -&gt; row</text>
+  </g>
+  <g stroke="#94a3b8" stroke-width="1.5" fill="none">
+    <line x1="340" y1="60" x2="190" y2="108" marker-end="url(#ah3)"/>
+    <line x1="360" y1="60" x2="360" y2="108" marker-end="url(#ah3)"/>
+    <line x1="390" y1="60" x2="540" y2="108" marker-end="url(#ah3)"/>
+    <line x1="150" y1="150" x2="95"  y2="198" marker-end="url(#ah3)"/>
+    <line x1="190" y1="150" x2="195" y2="198" marker-end="url(#ah3)"/>
+    <line x1="340" y1="150" x2="345" y2="198" marker-end="url(#ah3)"/>
+    <line x1="520" y1="150" x2="535" y2="198" marker-end="url(#ah3)"/>
+  </g>
+  <text x="360" y="255" font-size="11" text-anchor="middle" fill="#1a2233">Leaf nodes are linked -&gt; range scans (BETWEEN, ORDER BY) are fast too.</text>
+</svg><div class="cap">Fig 4. A B+tree index: internal nodes route the search; leaves hold keys pointing to rows.</div></div>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-comment">-- Single-column index</span>
+<span class="hljs-keyword">CREATE</span> INDEX idx_orders_customer <span class="hljs-keyword">ON</span> orders(customer_id);
+
+<span class="hljs-comment">-- Composite index: order of columns matters! Follows the &quot;leftmost prefix&quot; rule.</span>
+<span class="hljs-keyword">CREATE</span> INDEX idx_orders_cust_status <span class="hljs-keyword">ON</span> orders(customer_id, status);
+<span class="hljs-comment">-- This index helps: WHERE customer_id = 5</span>
+<span class="hljs-comment">--                   WHERE customer_id = 5 AND status = &#x27;paid&#x27;</span>
+<span class="hljs-comment">-- It does NOT help:  WHERE status = &#x27;paid&#x27;   (skips the leftmost column)</span>
+
+<span class="hljs-comment">-- Covering index: query answered entirely from the index, no row lookup</span>
+<span class="hljs-keyword">CREATE</span> INDEX idx_cover <span class="hljs-keyword">ON</span> orders(customer_id, status, total);</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>When to index</h4>Columns in <code>WHERE</code>, <code>JOIN ON</code>, and <code>ORDER BY</code>; high-selectivity columns (many distinct values).</div>
+  <div class="card"><h4>Cost of indexes</h4>Every <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code> must maintain them. They consume disk and RAM. Index deliberately, not reflexively.</div>
+</div>
+
+<div class="callout warn"><span class="t">Index killers</span> Wrapping an indexed column in a function or doing a leading wildcard defeats the index: <code>WHERE YEAR(created_at) = 2026</code> and <code>WHERE email LIKE '%@x.com'</code> both force scans. Rewrite as range predicates (<code>created_at &gt;= '2026-01-01'</code>).</div>
+
+<h2 id="normalization-designing-clean-schemas">Normalization: Designing Clean Schemas</h2>
+
+<p>Normalization is the process of structuring tables to reduce redundancy and prevent update anomalies. The first three normal forms cover the vast majority of real designs.</p>
+
+<table>
+<tr><th>Form</th><th>Rule</th><th>Fixes</th></tr>
+<tr><td><strong>1NF</strong></td><td>Atomic values; no repeating groups or arrays in a column</td><td>Comma-separated lists, repeated <code>item1,item2</code> columns</td></tr>
+<tr><td><strong>2NF</strong></td><td>1NF + every non-key column depends on the <em>whole</em> composite key</td><td>Partial dependency on part of a key</td></tr>
+<tr><td><strong>3NF</strong></td><td>2NF + no non-key column depends on another non-key column</td><td>Transitive dependencies (e.g. storing <code>zip</code> and <code>city</code> derivable from zip)</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Pragmatism</span> Normalize for correctness, then <em>selectively denormalize</em> for read performance (e.g. a cached <code>order_count</code>) when profiling proves it necessary. Analytics/reporting schemas (star schemas) are deliberately denormalized.</div>
+
+<h2 id="transactions-and-acid">Transactions and ACID</h2>
+
+<p>A transaction groups statements into an all-or-nothing unit. InnoDB guarantees <strong>ACID</strong>:</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Atomicity</h4>All statements commit, or none do. A failure rolls everything back.</div>
+  <div class="card"><h4>Consistency</h4>Constraints and foreign keys hold before and after the transaction.</div>
+  <div class="card"><h4>Isolation</h4>Concurrent transactions don't corrupt each other; the isolation level tunes how much they see.</div>
+  <div class="card"><h4>Durability</h4>Once committed, changes survive a crash (written to the redo log / disk).</div>
+</div>
+
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">START</span> TRANSACTION;
+
+<span class="hljs-keyword">UPDATE</span> accounts <span class="hljs-keyword">SET</span> balance <span class="hljs-operator">=</span> balance <span class="hljs-operator">-</span> <span class="hljs-number">100</span> <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;
+<span class="hljs-keyword">UPDATE</span> accounts <span class="hljs-keyword">SET</span> balance <span class="hljs-operator">=</span> balance <span class="hljs-operator">+</span> <span class="hljs-number">100</span> <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">2</span>;
+
+<span class="hljs-comment">-- If both succeed:</span>
+<span class="hljs-keyword">COMMIT</span>;
+<span class="hljs-comment">-- If anything is wrong:</span>
+<span class="hljs-comment">-- ROLLBACK;</span></code></pre>
+
+<p>The <strong>isolation level</strong> controls which concurrency anomalies are possible. MySQL's InnoDB default is <code>REPEATABLE READ</code>.</p>
+
+<table>
+<tr><th>Level</th><th>Dirty read</th><th>Non-repeatable read</th><th>Phantom</th></tr>
+<tr><td>READ UNCOMMITTED</td><td>Possible</td><td>Possible</td><td>Possible</td></tr>
+<tr><td>READ COMMITTED</td><td>No</td><td>Possible</td><td>Possible</td></tr>
+<tr><td>REPEATABLE READ <span class="badge g">default</span></td><td>No</td><td>No</td><td>Mostly prevented*</td></tr>
+<tr><td>SERIALIZABLE</td><td>No</td><td>No</td><td>No</td></tr>
+</table>
+<p style="font-size:0.9em">*InnoDB's gap locks largely prevent phantoms at REPEATABLE READ, going beyond the SQL standard.</p>
+
+<div class="callout danger"><span class="t">Deadlocks</span> Two transactions each holding a lock the other needs will deadlock; InnoDB detects this and kills one with error 1213. Mitigate by acquiring locks in a consistent order and keeping transactions short. Always be ready to retry a deadlocked transaction.</div>
+
+<h2 id="query-optimization-with-explain">Query Optimization with EXPLAIN</h2>
+
+<p><code>EXPLAIN</code> shows the optimizer's execution plan: which indexes it uses, how many rows it estimates, and the access method. It is your single most important tuning tool.</p>
+
+<div class="code-label">SQL</div><pre><code class="hljs">EXPLAIN <span class="hljs-keyword">SELECT</span> c.name, <span class="hljs-built_in">SUM</span>(o.total)
+<span class="hljs-keyword">FROM</span> customers c <span class="hljs-keyword">JOIN</span> orders o <span class="hljs-keyword">ON</span> o.customer_id <span class="hljs-operator">=</span> c.id
+<span class="hljs-keyword">WHERE</span> o.status <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;paid&#x27;</span>
+<span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> c.id;
+
+<span class="hljs-comment">-- EXPLAIN ANALYZE actually runs it and reports real timings (MySQL 8.0.18+)</span>
+EXPLAIN ANALYZE <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> orders <span class="hljs-keyword">WHERE</span> customer_id <span class="hljs-operator">=</span> <span class="hljs-number">42</span>;</code></pre>
+
+<table>
+<tr><th>EXPLAIN column</th><th>What to look for</th></tr>
+<tr><td><code>type</code></td><td>Access method, best to worst: <code>const</code> &gt; <code>eq_ref</code> &gt; <code>ref</code> &gt; <code>range</code> &gt; <code>index</code> &gt; <code>ALL</code>. <code>ALL</code> = full scan, a red flag on big tables.</td></tr>
+<tr><td><code>key</code></td><td>The index actually chosen (<code>NULL</code> means none).</td></tr>
+<tr><td><code>rows</code></td><td>Estimated rows examined — lower is better.</td></tr>
+<tr><td><code>Extra</code></td><td><code>Using index</code> (covering, great); <code>Using filesort</code> / <code>Using temporary</code> (often fixable with an index).</td></tr>
+</table>
+
+<div class="pipeline"><span class="step">Write query</span><span class="arrow">-&gt;</span><span class="step">EXPLAIN</span><span class="arrow">-&gt;</span><span class="step">Spot ALL / filesort</span><span class="arrow">-&gt;</span><span class="step">Add/fix index</span><span class="arrow">-&gt;</span><span class="step">Re-EXPLAIN</span></div>
+
+<h2 id="a-worked-mini-example-monthly-revenue-report">A Worked Mini-Example: Monthly Revenue Report</h2>
+
+<p>Suppose a product manager asks: "Show me the top 3 customers by revenue for paid orders in Q1 2026, with their order counts." Here is the full build-up.</p>
+
+<details><summary>Show the complete solution</summary><div class="body">
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">WITH</span> q1_paid <span class="hljs-keyword">AS</span> (
+  <span class="hljs-keyword">SELECT</span> customer_id, total
+  <span class="hljs-keyword">FROM</span> orders
+  <span class="hljs-keyword">WHERE</span> status <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;paid&#x27;</span>
+    <span class="hljs-keyword">AND</span> created_at <span class="hljs-operator">&gt;=</span> <span class="hljs-string">&#x27;2026-01-01&#x27;</span>
+    <span class="hljs-keyword">AND</span> created_at <span class="hljs-operator">&lt;</span>  <span class="hljs-string">&#x27;2026-04-01&#x27;</span>
+),
+ranked <span class="hljs-keyword">AS</span> (
+  <span class="hljs-keyword">SELECT</span>
+    customer_id,
+    <span class="hljs-built_in">COUNT</span>(<span class="hljs-operator">*</span>)   <span class="hljs-keyword">AS</span> order_count,
+    <span class="hljs-built_in">SUM</span>(total) <span class="hljs-keyword">AS</span> revenue,
+    <span class="hljs-built_in">RANK</span>() <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-built_in">SUM</span>(total) <span class="hljs-keyword">DESC</span>) <span class="hljs-keyword">AS</span> rnk
+  <span class="hljs-keyword">FROM</span> q1_paid
+  <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> customer_id
+)
+<span class="hljs-keyword">SELECT</span> c.name, r.order_count, r.revenue
+<span class="hljs-keyword">FROM</span> ranked r
+<span class="hljs-keyword">JOIN</span> customers c <span class="hljs-keyword">ON</span> c.id <span class="hljs-operator">=</span> r.customer_id
+<span class="hljs-keyword">WHERE</span> r.rnk <span class="hljs-operator">&lt;=</span> <span class="hljs-number">3</span>
+<span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> r.revenue <span class="hljs-keyword">DESC</span>;</code></pre>
+<p>Supporting index so the CTE filter and grouping stay fast:</p>
+<div class="code-label">SQL</div><pre><code class="hljs"><span class="hljs-keyword">CREATE</span> INDEX idx_orders_status_created
+  <span class="hljs-keyword">ON</span> orders(status, created_at, customer_id, total);</code></pre>
+<p>This covering index lets the <code>q1_paid</code> CTE be answered from the index alone — no table rows are read for the filter.</p>
+</div></details>
+
+<h2 id="connecting-from-python-and-node-js">Connecting from Python and Node.js</h2>
+
+<p>Applications talk to MySQL through a driver. The cardinal rule in every language: <strong>use parameterized queries</strong> so user input can never be interpreted as SQL. String-concatenating values is the classic SQL-injection vulnerability.</p>
+
+<h3>Python</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">pip install mysql-connector-python   <span class="hljs-comment"># official Oracle driver</span>
+<span class="hljs-comment"># or: pip install PyMySQL             # pure-Python alternative</span></code></pre>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> mysql.connector
+
+conn = mysql.connector.connect(
+    host=<span class="hljs-string">&quot;localhost&quot;</span>, user=<span class="hljs-string">&quot;app_user&quot;</span>,
+    password=<span class="hljs-string">&quot;secret&quot;</span>, database=<span class="hljs-string">&quot;shop_db&quot;</span>,
+)
+<span class="hljs-keyword">try</span>:
+    cur = conn.cursor(dictionary=<span class="hljs-literal">True</span>)   <span class="hljs-comment"># rows as dicts</span>
+
+    <span class="hljs-comment"># Parameterized query — %s placeholders, NEVER f-strings</span>
+    cur.execute(
+        <span class="hljs-string">&quot;SELECT id, name FROM customers WHERE email = %s&quot;</span>,
+        (<span class="hljs-string">&quot;alice@example.com&quot;</span>,),
+    )
+    <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> cur.fetchall():
+        <span class="hljs-built_in">print</span>(row[<span class="hljs-string">&quot;id&quot;</span>], row[<span class="hljs-string">&quot;name&quot;</span>])
+
+    <span class="hljs-comment"># A transaction: autocommit is off by default</span>
+    cur.execute(<span class="hljs-string">&quot;UPDATE accounts SET balance = balance - %s WHERE id = %s&quot;</span>, (<span class="hljs-number">100</span>, <span class="hljs-number">1</span>))
+    cur.execute(<span class="hljs-string">&quot;UPDATE accounts SET balance = balance + %s WHERE id = %s&quot;</span>, (<span class="hljs-number">100</span>, <span class="hljs-number">2</span>))
+    conn.commit()                         <span class="hljs-comment"># make it durable</span>
+<span class="hljs-keyword">except</span> mysql.connector.Error <span class="hljs-keyword">as</span> e:
+    conn.rollback()
+    <span class="hljs-keyword">raise</span>
+<span class="hljs-keyword">finally</span>:
+    conn.close()</code></pre>
+
+<h3>Node.js</h3>
+<div class="code-label">BASH</div><pre><code class="hljs">npm install mysql2        <span class="hljs-comment"># supports promises + prepared statements</span></code></pre>
+
+<div class="code-label">JAVASCRIPT</div><pre><code class="hljs"><span class="hljs-keyword">import</span> mysql <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;mysql2/promise&#x27;</span>;
+
+<span class="hljs-comment">// A connection pool reuses connections — essential under load.</span>
+<span class="hljs-keyword">const</span> pool = mysql.<span class="hljs-title function_">createPool</span>({
+  <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;localhost&#x27;</span>, <span class="hljs-attr">user</span>: <span class="hljs-string">&#x27;app_user&#x27;</span>,
+  <span class="hljs-attr">password</span>: <span class="hljs-string">&#x27;secret&#x27;</span>, <span class="hljs-attr">database</span>: <span class="hljs-string">&#x27;shop_db&#x27;</span>,
+  <span class="hljs-attr">connectionLimit</span>: <span class="hljs-number">10</span>,
+});
+
+<span class="hljs-comment">// Parameterized query with ? placeholders</span>
+<span class="hljs-keyword">const</span> [rows] = <span class="hljs-keyword">await</span> pool.<span class="hljs-title function_">execute</span>(
+  <span class="hljs-string">&#x27;SELECT id, name FROM customers WHERE email = ?&#x27;</span>,
+  [<span class="hljs-string">&#x27;alice@example.com&#x27;</span>],
+);
+<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(rows);
+
+<span class="hljs-comment">// Transaction with a dedicated connection</span>
+<span class="hljs-keyword">const</span> conn = <span class="hljs-keyword">await</span> pool.<span class="hljs-title function_">getConnection</span>();
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-keyword">await</span> conn.<span class="hljs-title function_">beginTransaction</span>();
+  <span class="hljs-keyword">await</span> conn.<span class="hljs-title function_">execute</span>(<span class="hljs-string">&#x27;UPDATE accounts SET balance = balance - ? WHERE id = ?&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">1</span>]);
+  <span class="hljs-keyword">await</span> conn.<span class="hljs-title function_">execute</span>(<span class="hljs-string">&#x27;UPDATE accounts SET balance = balance + ? WHERE id = ?&#x27;</span>, [<span class="hljs-number">100</span>, <span class="hljs-number">2</span>]);
+  <span class="hljs-keyword">await</span> conn.<span class="hljs-title function_">commit</span>();
+} <span class="hljs-keyword">catch</span> (err) {
+  <span class="hljs-keyword">await</span> conn.<span class="hljs-title function_">rollback</span>();
+  <span class="hljs-keyword">throw</span> err;
+} <span class="hljs-keyword">finally</span> {
+  conn.<span class="hljs-title function_">release</span>();   <span class="hljs-comment">// return it to the pool</span>
+}</code></pre>
+
+<div class="callout danger"><span class="t">SQL injection</span> Never do <code>"... WHERE email = '" + userInput + "'"</code>. One input of <code>' OR '1'='1</code> dumps your table. Placeholders (<code>%s</code> / <code>?</code>) send data separately from SQL text, closing the hole entirely.</div>
+
+<h2 id="cheat-sheet">Cheat Sheet</h2>
+
+<table>
+<tr><th>Task</th><th>Statement</th></tr>
+<tr><td>Insert</td><td><code>INSERT INTO t (a,b) VALUES (1,'x');</code></td></tr>
+<tr><td>Insert many</td><td><code>INSERT INTO t (a,b) VALUES (1,'x'),(2,'y');</code></td></tr>
+<tr><td>Update</td><td><code>UPDATE t SET b='z' WHERE id=1;</code></td></tr>
+<tr><td>Delete</td><td><code>DELETE FROM t WHERE id=1;</code></td></tr>
+<tr><td>Upsert</td><td><code>INSERT ... ON DUPLICATE KEY UPDATE b=VALUES(b);</code></td></tr>
+<tr><td>Distinct</td><td><code>SELECT DISTINCT city FROM customers;</code></td></tr>
+<tr><td>Count rows</td><td><code>SELECT COUNT(*) FROM t;</code></td></tr>
+<tr><td>Pagination</td><td><code>... ORDER BY id LIMIT 20 OFFSET 40;</code></td></tr>
+<tr><td>Conditional</td><td><code>CASE WHEN total&gt;100 THEN 'big' ELSE 'small' END</code></td></tr>
+<tr><td>Null default</td><td><code>COALESCE(phone, 'n/a')</code></td></tr>
+<tr><td>Add index</td><td><code>CREATE INDEX ix ON t(col);</code></td></tr>
+<tr><td>Show plan</td><td><code>EXPLAIN SELECT ...;</code></td></tr>
+</table>
+
+<h3>MySQL vs PostgreSQL vs SQLite (quick comparison)</h3>
+<table>
+<tr><th>Aspect</th><th>MySQL</th><th>PostgreSQL</th><th>SQLite</th></tr>
+<tr><td>Model</td><td>Client/server</td><td>Client/server</td><td>Embedded file</td></tr>
+<tr><td>Strength</td><td>Fast reads, ubiquity, replication</td><td>Standards, advanced types, extensibility</td><td>Zero-config, local apps</td></tr>
+<tr><td>JSON</td><td>Good</td><td>Excellent (JSONB)</td><td>Basic</td></tr>
+<tr><td>Window fns</td><td>8.0+</td><td>Yes</td><td>3.25+</td></tr>
+<tr><td>Typical use</td><td>Web backends, WordPress</td><td>Complex apps, analytics</td><td>Mobile, tests, prototypes</td></tr>
+</table>
+
+<h2 id="best-practices-and-common-pitfalls">Best Practices and Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Use <code>InnoDB</code> (default), declare primary and foreign keys, pick the smallest correct data type, parameterize all queries, use connection pools, and run <code>EXPLAIN</code> on any slow query before guessing.</div>
+
+<div class="callout tip"><span class="t">Do</span> Store timestamps in UTC. Set a sensible charset — <code>utf8mb4</code> (full Unicode, including emoji) rather than the legacy <code>utf8</code> which is only 3 bytes and cannot store all characters.</div>
+
+<div class="callout warn"><span class="t">Avoid</span> <code>SELECT *</code> in application code (fetches unused columns, breaks on schema change), <code>OFFSET</code> pagination on huge tables (use keyset/seek pagination), and giant <code>IN (...)</code> lists.</div>
+
+<div class="callout danger"><span class="t">Never</span> run <code>UPDATE</code>/<code>DELETE</code> without a <code>WHERE</code> clause on production, and never string-concatenate user input into SQL. Enable <code>sql_safe_updates</code> in interactive sessions as a guardrail.</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between WHERE and HAVING?</div><div class="a"><code>WHERE</code> filters individual rows before grouping and cannot reference aggregates. <code>HAVING</code> filters groups after <code>GROUP BY</code> and can use aggregates like <code>SUM()</code>. If there is no <code>GROUP BY</code>, put conditions in <code>WHERE</code> for efficiency.</div></div>
+
+<div class="qa"><div class="q">Explain the difference between INNER JOIN and LEFT JOIN.</div><div class="a"><code>INNER JOIN</code> returns only rows with a match in both tables. <code>LEFT JOIN</code> returns all rows from the left table and matched rows from the right, filling right-side columns with <code>NULL</code> where there is no match — useful for "find records with no related rows" via <code>WHERE right.id IS NULL</code>.</div></div>
+
+<div class="qa"><div class="q">What is a primary key versus a unique key?</div><div class="a">Both enforce uniqueness. A table has exactly one primary key, which cannot be NULL and (in InnoDB) determines the clustered storage order. A table can have many unique keys, and a unique key column may allow a single NULL (NULLs are treated as distinct).</div></div>
+
+<div class="qa"><div class="q">How does an index speed up queries, and what is the downside?</div><div class="a">An index is a sorted B+tree that turns a full table scan (O(n)) into a logarithmic lookup (O(log n)) and enables fast range scans and ordering. The downside: it adds storage and slows writes, since every insert/update/delete must also maintain the index. Over-indexing hurts write-heavy workloads.</div></div>
+
+<div class="qa"><div class="q">What is the leftmost prefix rule for composite indexes?</div><div class="a">An index on <code>(a, b, c)</code> can be used for predicates on <code>a</code>, <code>a,b</code>, or <code>a,b,c</code> — always starting from the left. A query filtering only on <code>b</code> or <code>c</code> cannot use it. Design composite indexes with the most selective, most frequently filtered column first.</div></div>
+
+<div class="qa"><div class="q">What are the ACID properties?</div><div class="a">Atomicity (all-or-nothing), Consistency (constraints always hold), Isolation (concurrent transactions don't interfere), Durability (committed data survives crashes). InnoDB provides all four; MyISAM does not support transactions.</div></div>
+
+<div class="qa"><div class="q">What isolation anomalies exist and what is MySQL's default?</div><div class="a">Dirty reads (seeing uncommitted data), non-repeatable reads (a row changes between reads), and phantom reads (new rows appear in a repeated range query). InnoDB defaults to <code>REPEATABLE READ</code>, which prevents dirty and non-repeatable reads and, via gap locks, largely prevents phantoms too.</div></div>
+
+<div class="qa"><div class="q">What is normalization and when would you denormalize?</div><div class="a">Normalization organizes data to eliminate redundancy and update anomalies (1NF atomic values, 2NF no partial key dependency, 3NF no transitive dependency). You denormalize deliberately for read performance — caching an aggregate, or building a star schema for analytics — once profiling shows the join cost is a real bottleneck.</div></div>
+
+<div class="qa"><div class="q">How do you prevent SQL injection?</div><div class="a">Use parameterized / prepared statements so values travel separately from the SQL text (<code>?</code> or <code>%s</code> placeholders), never string concatenation. Add least-privilege database accounts and input validation as defense in depth, but parameterization is the actual fix.</div></div>
+
+<div class="qa"><div class="q">What does EXPLAIN tell you, and what is a warning sign?</div><div class="a">It shows the execution plan: access <code>type</code>, chosen <code>key</code>, estimated <code>rows</code>, and <code>Extra</code> notes. Red flags are <code>type: ALL</code> (full scan) on large tables, <code>key: NULL</code> (no index used), and <code>Using filesort</code>/<code>Using temporary</code> where an index could satisfy the sort or grouping.</div></div>
+
+<div class="qa"><div class="q">What is the difference between DELETE, TRUNCATE, and DROP?</div><div class="a"><code>DELETE</code> removes rows (optionally filtered), is transactional and logged row-by-row. <code>TRUNCATE</code> quickly empties a whole table by recreating it — fast, not row-logged, resets AUTO_INCREMENT, and implicitly commits. <code>DROP</code> removes the table definition entirely.</div></div>
+
+<div class="qa"><div class="q">What is a covering index?</div><div class="a">An index that contains every column a query needs (in SELECT, WHERE, ORDER BY), so the engine answers entirely from the index without touching the table rows. <code>EXPLAIN</code> shows <code>Using index</code>. It is one of the most effective single-query optimizations.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li><strong>Official docs</strong>: the MySQL 8.4 Reference Manual — authoritative on syntax, functions, and the InnoDB engine.</li>
+  <li><strong>Practice</strong>: solve joins/aggregation/window problems on sites like LeetCode (Database) and HackerRank (SQL).</li>
+  <li><strong>Depth</strong>: read <em>High Performance MySQL</em> for indexing internals, replication, and tuning at scale.</li>
+  <li><strong>Adjacent skills</strong>: database replication and sharding, read replicas, an ORM (SQLAlchemy, Prisma, Sequelize), and migration tools (Flyway, Alembic, Liquibase).</li>
+  <li><strong>Next topics</strong>: query plan caching, partitioning, full-text search, and the JSON column type for semi-structured data.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

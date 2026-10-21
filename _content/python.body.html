@@ -1,0 +1,530 @@
+<h2>What Python Is &amp; Why It Matters</h2>
+<p class="lead">Python is a high-level, dynamically typed, garbage-collected language whose defining promise is that code should be as readable as pseudocode. For a data/AI engineer it is the lingua franca: the same language drives quick data exploration in a notebook, production ETL, model training, and the web service that serves the model.</p>
+
+<p>Python trades raw execution speed for programmer speed and a colossal ecosystem. The heavy numerical work (NumPy, PyTorch, pandas) runs in C/C++/CUDA under the hood; Python is the <em>glue</em> that orchestrates it. Understanding where the boundary sits — pure-Python loops are slow, vectorized library calls are fast — is the single most important mental model for performance.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="680" height="260" rx="10" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="360" y="45" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e3a8a">Your Python program (the orchestrator)</text>
+  <rect x="50" y="70" width="180" height="60" rx="8" fill="#fff" stroke="#2563eb"/>
+  <text x="140" y="98" text-anchor="middle" font-size="13" fill="#1a2233">Your .py source</text>
+  <text x="140" y="116" text-anchor="middle" font-size="11" fill="#64748b">readable, dynamic</text>
+  <rect x="270" y="70" width="180" height="60" rx="8" fill="#fff" stroke="#0891b2"/>
+  <text x="360" y="98" text-anchor="middle" font-size="13" fill="#1a2233">CPython VM</text>
+  <text x="360" y="116" text-anchor="middle" font-size="11" fill="#64748b">bytecode + GIL</text>
+  <rect x="490" y="70" width="180" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="580" y="98" text-anchor="middle" font-size="13" fill="#1a2233">C / CUDA kernels</text>
+  <text x="580" y="116" text-anchor="middle" font-size="11" fill="#64748b">NumPy, torch, BLAS</text>
+  <line x1="230" y1="100" x2="266" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="450" y1="100" x2="486" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="360" y="185" text-anchor="middle" font-size="13" fill="#1a2233">Speed rule of thumb</text>
+  <rect x="90" y="200" width="240" height="55" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="210" y="223" text-anchor="middle" font-size="12" fill="#b45309">Pure-Python for-loop</text>
+  <text x="210" y="242" text-anchor="middle" font-size="11" fill="#64748b">~1x  (slow, flexible)</text>
+  <rect x="390" y="200" width="240" height="55" rx="8" fill="#fff" stroke="#059669"/>
+  <text x="510" y="223" text-anchor="middle" font-size="12" fill="#059669">Vectorized library call</text>
+  <text x="510" y="242" text-anchor="middle" font-size="11" fill="#64748b">10-100x faster</text>
+</svg><div class="cap">Fig 1 — Python is the conductor; the compute-heavy sections delegate to compiled C/CUDA.</div></div>
+
+<div class="callout note"><span class="t">Version</span> Target <span class="badge">Python 3.12+</span> for new work in 2026 (3.13 adds an experimental free-threaded, no-GIL build). Python 2 is long dead. Prefer features available in 3.10+ (structural pattern matching, better error messages, <code>X | Y</code> type unions).</div>
+
+<h2>Setup &amp; Environment Management</h2>
+<p>The cardinal rule: <strong>never install packages into the system interpreter</strong>. Each project gets an isolated virtual environment so dependency versions never collide.</p>
+
+<pre><code class="language-bash"># Check your interpreter
+python --version            # or python3 on macOS/Linux
+
+# Create and activate a virtual environment (stdlib venv)
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# Install packages into the active venv
+pip install numpy pandas requests
+pip freeze &gt; requirements.txt      # snapshot exact versions
+pip install -r requirements.txt    # reproduce elsewhere
+
+# Modern fast alternative: uv (Rust-based, ~10-100x faster than pip)
+uv venv &amp;&amp; uv pip install pandas
+uv run script.py            # auto-manages the environment</code></pre>
+
+<div class="grid c3">
+  <div class="card"><h4>venv + pip</h4>Built in, universal, zero extra install. The safe default.</div>
+  <div class="card"><h4>uv / Poetry</h4>Lockfiles, dependency resolution, project metadata in <code>pyproject.toml</code>. Best for apps.</div>
+  <div class="card"><h4>conda</h4>Manages non-Python binaries (CUDA, MKL) too. Common in data science / Anaconda.</div>
+</div>
+
+<div class="callout tip"><span class="t">Tip</span> Add <code>.venv/</code> to <code>.gitignore</code>. Commit <code>requirements.txt</code> (or <code>pyproject.toml</code> + lockfile), never the environment folder itself.</div>
+
+<h2>Core Data Types &amp; The Object Model</h2>
+<p>Everything in Python is an object with an identity, a type, and a value. Variables are <em>names bound to objects</em>, not boxes holding values — this explains most aliasing surprises.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 240" width="700" height="240">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <rect x="30" y="30" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="55" text-anchor="middle" font-size="14" fill="#1e3a8a">a</text>
+  <rect x="30" y="100" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="125" text-anchor="middle" font-size="14" fill="#1e3a8a">b</text>
+  <rect x="400" y="65" width="230" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="515" y="86" text-anchor="middle" font-size="13" fill="#1a2233">list object [1, 2, 3]</text>
+  <text x="515" y="104" text-anchor="middle" font-size="11" fill="#64748b">id=0x7f..  type=list</text>
+  <rect x="400" y="150" width="230" height="45" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="515" y="177" text-anchor="middle" font-size="13" fill="#1a2233">int object 42 (immutable)</text>
+  <line x1="150" y1="50" x2="396" y2="80" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="150" y1="120" x2="396" y2="95" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="250" y="55" font-size="11" fill="#64748b">a = [1,2,3]</text>
+  <text x="230" y="145" font-size="11" fill="#64748b">b = a  (same object!)</text>
+</svg><div class="cap">Fig 2 — Names reference objects. <code>b = a</code> makes both names point at one list; mutating through <code>b</code> is visible via <code>a</code>.</div></div>
+
+<pre><code class="language-python"># Numbers: int has arbitrary precision, no overflow
+2 ** 100                    # 1267650600228229401496703205376
+
+# Strings are immutable Unicode; f-strings are the standard for formatting
+name, score = "Ada", 98.5
+print(f"{name} scored {score:.1f}%")   # Ada scored 98.5%
+
+# The core containers
+nums   = [1, 2, 3]              # list  - ordered, mutable
+point  = (10, 20)              # tuple - ordered, immutable (hashable)
+seen   = {1, 2, 3}             # set   - unordered, unique, fast membership
+lookup = {"a": 1, "b": 2}      # dict  - key -> value, insertion-ordered (3.7+)
+
+# Mutable vs immutable: the #1 aliasing gotcha
+a = [1, 2, 3]
+b = a               # b is the SAME list
+b.append(4)
+print(a)            # [1, 2, 3, 4]  -- surprised? see Fig 2
+c = a.copy()        # shallow copy -> independent top level</code></pre>
+
+<table>
+<tr><th>Type</th><th>Mutable?</th><th>Ordered?</th><th>Typical use</th><th>Lookup cost</th></tr>
+<tr><td><code>list</code></td><td>Yes</td><td>Yes</td><td>Sequence you grow/edit</td><td>O(n) search, O(1) index</td></tr>
+<tr><td><code>tuple</code></td><td>No</td><td>Yes</td><td>Fixed record, dict key</td><td>O(n)</td></tr>
+<tr><td><code>dict</code></td><td>Yes</td><td>Insertion</td><td>Keyed lookup</td><td>O(1) average</td></tr>
+<tr><td><code>set</code></td><td>Yes</td><td>No</td><td>Membership, dedup</td><td>O(1) average</td></tr>
+<tr><td><code>str</code></td><td>No</td><td>Yes</td><td>Text</td><td>O(n)</td></tr>
+</table>
+
+<h2>Control Flow &amp; Pattern Matching</h2>
+<pre><code class="language-python"># Truthiness: empty containers, 0, None, "" are falsy
+items = []
+if not items:
+    print("empty")
+
+# Ternary and chained comparisons
+grade = "pass" if score &gt;= 50 else "fail"
+if 0 &lt;= score &lt;= 100:            # chained, reads like math
+    pass
+
+# for-else: else runs only if the loop did NOT break
+for x in nums:
+    if x == 99:
+        break
+else:
+    print("99 not found")
+
+# Structural pattern matching (3.10+)
+def handle(event):
+    match event:
+        case {"type": "click", "x": x, "y": y}:
+            return f"click at {x},{y}"
+        case {"type": "key", "code": code}:
+            return f"key {code}"
+        case [first, *rest]:            # sequence + capture
+            return f"list starting {first}"
+        case _:                          # wildcard / default
+            return "unknown"</code></pre>
+
+<h2>Comprehensions &amp; Iteration Idioms</h2>
+<p>Comprehensions are the idiomatic, fast way to build collections. Prefer them to manual <code>append</code> loops — clearer and often quicker.</p>
+
+<pre><code class="language-python">squares   = [x*x for x in range(10)]                 # list
+evens     = [x for x in range(20) if x % 2 == 0]     # with filter
+grid      = [(r, c) for r in range(3) for c in range(3)]  # nested
+by_len    = {w: len(w) for w in ["a", "bb", "ccc"]}  # dict comp
+unique    = {x % 3 for x in range(10)}               # set comp
+
+# Generator expression: lazy, memory-efficient (parens, not brackets)
+total = sum(x*x for x in range(1_000_000))           # no giant list built
+
+# Essential built-ins for iteration
+for i, val in enumerate(nums, start=1):    # index + value
+    print(i, val)
+for a, b in zip([1, 2], ["x", "y"]):       # parallel iteration
+    print(a, b)
+from itertools import chain, groupby, count
+list(chain([1, 2], [3, 4]))                # [1,2,3,4]</code></pre>
+
+<div class="callout warn"><span class="t">Pitfall</span> Comprehensions build the whole collection in memory. For a huge or infinite stream use a <em>generator</em> expression (round parentheses) so values are produced one at a time.</div>
+
+<h2>Functions, Arguments &amp; Closures</h2>
+<pre><code class="language-python">def connect(host, port=5432, *args, timeout=30, **kwargs):
+    """positional, default, *args (extra positionals),
+       keyword-only (after *), **kwargs (extra keywords)."""
+    ...
+
+# Force keyword-only / positional-only args
+def area(width, height, *, unit="cm"):   # unit MUST be passed by name
+    return width * height
+
+def divide(a, b, /):                      # a, b are positional-only
+    return a / b
+
+# Unpacking at the call site
+opts = {"port": 6543, "timeout": 10}
+connect("db.local", **opts)
+
+# Closures capture variables by reference
+def make_counter():
+    count = 0
+    def inc():
+        nonlocal count      # rebind the enclosing variable
+        count += 1
+        return count
+    return inc
+c = make_counter(); c(); c()   # 1, 2</code></pre>
+
+<div class="callout danger"><span class="t">Classic bug</span> Never use a mutable default argument. <code>def f(items=[]):</code> shares ONE list across all calls. Use <code>def f(items=None): items = items or []</code> instead.</div>
+
+<h2>Object-Oriented Programming</h2>
+<pre><code class="language-python">from dataclasses import dataclass, field
+
+@dataclass                       # auto __init__, __repr__, __eq__
+class Point:
+    x: float
+    y: float
+    tags: list = field(default_factory=list)   # safe mutable default
+    def dist(self) -&gt; float:
+        return (self.x**2 + self.y**2) ** 0.5
+
+# Inheritance, super(), and properties
+class Animal:
+    def __init__(self, name):
+        self.name = name
+    def speak(self) -&gt; str:
+        raise NotImplementedError
+
+class Dog(Animal):
+    def speak(self):
+        return "woof"
+
+class Account:
+    def __init__(self, balance):
+        self._balance = balance
+    @property                    # computed, read like an attribute
+    def balance(self):
+        return self._balance
+    @balance.setter
+    def balance(self, value):
+        if value &lt; 0:
+            raise ValueError("negative balance")
+        self._balance = value
+
+# Dunder methods make objects behave like built-ins
+class Vec:
+    def __init__(self, x, y): self.x, self.y = x, y
+    def __add__(self, o):     return Vec(self.x+o.x, self.y+o.y)
+    def __repr__(self):       return f"Vec({self.x}, {self.y})"
+    def __len__(self):        return 2</code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>@dataclass</h4>Removes boilerplate for data-holding classes. Add <code>frozen=True</code> for immutability, <code>slots=True</code> for memory savings.</div>
+  <div class="card"><h4>@property</h4>Expose computed/validated values with attribute syntax — no <code>get_x()</code>/<code>set_x()</code> noise.</div>
+</div>
+
+<h2>Decorators &amp; Context Managers</h2>
+<p>A decorator is a function that takes a function and returns a replacement — the mechanism behind <code>@property</code>, <code>@staticmethod</code>, Flask routes, and caching.</p>
+
+<pre><code class="language-python">import functools, time
+
+def timed(func):
+    @functools.wraps(func)          # preserve name/docstring
+    def wrapper(*args, **kwargs):
+        t0 = time.perf_counter()
+        result = func(*args, **kwargs)
+        print(f"{func.__name__}: {time.perf_counter()-t0:.4f}s")
+        return result
+    return wrapper
+
+@timed
+def slow(): time.sleep(0.1)
+
+# functools.cache memoizes automatically
+@functools.cache
+def fib(n):
+    return n if n &lt; 2 else fib(n-1) + fib(n-2)
+
+# Context managers guarantee cleanup via with-blocks
+with open("data.txt") as f:         # file closed even on exception
+    text = f.read()
+
+from contextlib import contextmanager
+@contextmanager
+def timer(label):
+    t0 = time.perf_counter()
+    yield                            # body of the with-block runs here
+    print(f"{label}: {time.perf_counter()-t0:.3f}s")
+
+with timer("load"):
+    data = [x for x in range(10**6)]</code></pre>
+
+<div class="pipeline"><span class="step">@timed</span><span class="arrow">-&gt;</span><span class="step">wrap fn</span><span class="arrow">-&gt;</span><span class="step">call</span><span class="arrow">-&gt;</span><span class="step">measure + delegate</span></div>
+
+<h2>Generators, Iterators &amp; Lazy Data</h2>
+<p>Generators produce values on demand with <code>yield</code>, holding constant memory regardless of stream size — ideal for pipelines over huge datasets or files.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 200" width="700" height="200">
+  <defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs>
+  <rect x="20" y="80" width="130" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="85" y="108" text-anchor="middle" font-size="12" fill="#1e3a8a">read_lines()</text>
+  <rect x="200" y="80" width="130" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="265" y="103" text-anchor="middle" font-size="12" fill="#1e3a8a">parse()</text>
+  <text x="265" y="119" text-anchor="middle" font-size="10" fill="#64748b">yields dicts</text>
+  <rect x="380" y="80" width="130" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="445" y="103" text-anchor="middle" font-size="12" fill="#1e3a8a">filter_valid()</text>
+  <rect x="560" y="80" width="120" height="46" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="620" y="108" text-anchor="middle" font-size="12" fill="#1a2233">consume</text>
+  <line x1="150" y1="103" x2="196" y2="103" stroke="#059669" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="330" y1="103" x2="376" y2="103" stroke="#059669" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="510" y1="103" x2="556" y2="103" stroke="#059669" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="350" y="45" text-anchor="middle" font-size="12" fill="#64748b">one row flows through the whole pipeline before the next is read — O(1) memory</text>
+</svg><div class="cap">Fig 3 — A generator pipeline: each stage pulls one item at a time; nothing is fully materialized.</div></div>
+
+<pre><code class="language-python">def read_lines(path):
+    with open(path) as f:
+        for line in f:              # file object is itself a lazy iterator
+            yield line.rstrip()
+
+def parse(lines):
+    for line in lines:
+        yield {"raw": line, "len": len(line)}
+
+# Compose lazily — no intermediate lists, works on a 100GB file
+pipeline = (r for r in parse(read_lines("big.log")) if r["len"] &gt; 0)
+first = next(pipeline)              # pulls exactly one record
+
+# yield can also receive values and produce infinite streams
+def counter(start=0):
+    n = start
+    while True:
+        yield n
+        n += 1</code></pre>
+
+<h2>Type Hints &amp; Modern Typing</h2>
+<p>Hints are optional and not enforced at runtime, but they power editor autocomplete, catch bugs via <code>mypy</code>/<code>pyright</code>, and document intent. Strongly recommended for any code others will read.</p>
+
+<pre><code class="language-python">from typing import Optional, Callable, TypeVar, Protocol
+from collections.abc import Iterable, Sequence
+
+def mean(xs: Sequence[float]) -&gt; float:
+    return sum(xs) / len(xs)
+
+# 3.10+ union syntax and built-in generics
+def find(items: list[int], target: int) -&gt; int | None:
+    return items.index(target) if target in items else None
+
+# TypeVar for generic functions
+T = TypeVar("T")
+def first(xs: list[T]) -&gt; T:
+    return xs[0]
+
+# Protocol = structural typing ("duck typing" checked statically)
+class SupportsClose(Protocol):
+    def close(self) -&gt; None: ...
+
+def shutdown(resource: SupportsClose) -&gt; None:
+    resource.close()</code></pre>
+
+<pre><code class="language-bash">pip install mypy
+mypy --strict yourmodule.py     # static type check, no execution</code></pre>
+
+<h2>Errors, Exceptions &amp; Robustness</h2>
+<pre><code class="language-python">class ConfigError(Exception):
+    """Custom exceptions inherit from Exception."""
+
+def load(path):
+    try:
+        with open(path) as f:
+            return f.read()
+    except FileNotFoundError:
+        raise ConfigError(f"missing {path}") from None   # clean chain
+    except PermissionError as e:
+        raise ConfigError("no access") from e             # preserve cause
+    else:
+        print("read succeeded")     # runs if no exception
+    finally:
+        print("always runs")        # cleanup
+
+# EAFP over LBYL: "easier to ask forgiveness than permission"
+try:
+    value = config["timeout"]       # idiomatic
+except KeyError:
+    value = 30
+# ...instead of:  if "timeout" in config: ... (a race in concurrent code)
+
+# Exception groups (3.11+) for concurrent errors
+try:
+    ...
+except* ValueError as eg:           # handle a subset of grouped errors
+    ...</code></pre>
+
+<div class="callout warn"><span class="t">Never</span> write a bare <code>except:</code> — it swallows <code>KeyboardInterrupt</code> and hides bugs. Catch the narrowest exception you can handle, and always log before re-raising.</div>
+
+<h2>Concurrency: Threads, asyncio &amp; Processes</h2>
+<p>The <strong>GIL</strong> (Global Interpreter Lock) lets only one thread execute Python bytecode at a time. So threads help I/O-bound work (waiting on network/disk) but not CPU-bound work — for CPU parallelism use multiple processes.</p>
+
+<table>
+<tr><th>Workload</th><th>Tool</th><th>Why</th></tr>
+<tr><td>Many network/disk waits</td><td><code>asyncio</code> or <code>ThreadPoolExecutor</code></td><td>Overlap waiting; GIL released during I/O</td></tr>
+<tr><td>Heavy CPU (math, parsing)</td><td><code>ProcessPoolExecutor</code> / <code>multiprocessing</code></td><td>Separate processes bypass the GIL</td></tr>
+<tr><td>Thousands of concurrent sockets</td><td><code>asyncio</code></td><td>One thread, cooperative scheduling, low overhead</td></tr>
+</table>
+
+<pre><code class="language-python">import asyncio, aiohttp
+
+async def fetch(session, url):
+    async with session.get(url) as resp:
+        return await resp.text()
+
+async def main(urls):
+    async with aiohttp.ClientSession() as session:
+        # gather runs all requests concurrently on one thread
+        return await asyncio.gather(*(fetch(session, u) for u in urls))
+
+# asyncio.run(main(["https://example.com"] * 50))
+
+# CPU-bound work: use processes
+from concurrent.futures import ProcessPoolExecutor
+def heavy(n): return sum(i*i for i in range(n))
+with ProcessPoolExecutor() as pool:
+    results = list(pool.map(heavy, [10**6] * 8))   # true parallelism</code></pre>
+
+<div class="callout note"><span class="t">2026</span> Python 3.13 ships an experimental free-threaded (no-GIL) build. It is not yet the default; write GIL-aware code and choose the process/async tool that matches your workload.</div>
+
+<h2>Standard Library Essentials</h2>
+<div class="grid c3">
+  <div class="card"><h4>collections</h4><code>defaultdict</code>, <code>Counter</code>, <code>deque</code>, <code>namedtuple</code></div>
+  <div class="card"><h4>itertools</h4>lazy combinatorics: <code>product</code>, <code>combinations</code>, <code>groupby</code>, <code>islice</code></div>
+  <div class="card"><h4>functools</h4><code>cache</code>, <code>reduce</code>, <code>partial</code>, <code>wraps</code></div>
+  <div class="card"><h4>pathlib</h4>object-oriented filesystem paths — prefer over <code>os.path</code></div>
+  <div class="card"><h4>json / csv</h4>serialize and read tabular/document data</div>
+  <div class="card"><h4>datetime</h4>timezone-aware times, <code>timedelta</code> arithmetic</div>
+</div>
+
+<pre><code class="language-python">from collections import Counter, defaultdict, deque
+from pathlib import Path
+import json
+
+words = "a b a c a b".split()
+Counter(words).most_common(1)         # [('a', 3)]
+
+groups = defaultdict(list)
+for w in words:
+    groups[w[0]].append(w)            # no KeyError on first access
+
+queue = deque([1, 2, 3])
+queue.appendleft(0); queue.pop()      # O(1) at both ends
+
+# pathlib reads like English
+cfg = Path.home() / ".config" / "app.json"
+if cfg.exists():
+    data = json.loads(cfg.read_text())</code></pre>
+
+<h2>Testing with pytest</h2>
+<pre><code class="language-python"># file: test_math.py   ->   run with:  pytest -q
+import pytest
+from mymath import divide
+
+def test_divide():
+    assert divide(6, 2) == 3
+
+def test_divide_by_zero():
+    with pytest.raises(ZeroDivisionError):
+        divide(1, 0)
+
+@pytest.mark.parametrize("a,b,expected", [
+    (2, 2, 1), (9, 3, 3), (10, 5, 2),
+])
+def test_cases(a, b, expected):
+    assert divide(a, b) == expected
+
+@pytest.fixture
+def sample_data():
+    return {"users": [1, 2, 3]}       # reusable setup, injected by name
+
+def test_uses_fixture(sample_data):
+    assert len(sample_data["users"]) == 3</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Run <code>pytest --cov=mypkg</code> for coverage. Keep tests fast and deterministic; mock external services with <code>unittest.mock</code> or <code>pytest-mock</code>.</div>
+
+<h2>Cheat Sheet &amp; Comparison Reference</h2>
+<table>
+<tr><th>Task</th><th>Idiom</th></tr>
+<tr><td>Swap variables</td><td><code>a, b = b, a</code></td></tr>
+<tr><td>Merge dicts (3.9+)</td><td><code>merged = d1 | d2</code></td></tr>
+<tr><td>Reverse a list</td><td><code>xs[::-1]</code> or <code>reversed(xs)</code></td></tr>
+<tr><td>Flatten one level</td><td><code>[x for row in grid for x in row]</code></td></tr>
+<tr><td>Sort by key</td><td><code>sorted(xs, key=lambda p: p.age, reverse=True)</code></td></tr>
+<tr><td>Deduplicate, keep order</td><td><code>list(dict.fromkeys(xs))</code></td></tr>
+<tr><td>Read/write JSON file</td><td><code>json.load(f)</code> / <code>json.dump(obj, f)</code></td></tr>
+<tr><td>Time a block</td><td><code>time.perf_counter()</code> deltas</td></tr>
+<tr><td>Default for missing key</td><td><code>d.get(k, default)</code></td></tr>
+<tr><td>Numeric literal readability</td><td><code>1_000_000</code></td></tr>
+</table>
+
+<h4>list vs tuple vs set vs dict — when to reach for which</h4>
+<table>
+<tr><th>Need</th><th>Choose</th></tr>
+<tr><td>Ordered, editable sequence</td><td><code>list</code></td></tr>
+<tr><td>Fixed record / dict key / return of multiple values</td><td><code>tuple</code></td></tr>
+<tr><td>Fast "is X present?" / remove duplicates</td><td><code>set</code></td></tr>
+<tr><td>Look up a value by a key</td><td><code>dict</code></td></tr>
+</table>
+
+<h2>Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Follow PEP 8; auto-format with <code>ruff format</code> (or <code>black</code>) and lint with <code>ruff check</code>. Use descriptive names, small functions, type hints on public APIs, and f-strings for formatting.</div>
+<div class="callout ok"><span class="t">Do</span> Use <code>pathlib</code> for paths, <code>with</code> for resources, comprehensions for transforms, and <code>logging</code> (not <code>print</code>) in libraries and services.</div>
+<div class="callout danger"><span class="t">Avoid</span> Mutable default arguments, bare <code>except:</code>, modifying a list while iterating it, and <code>from module import *</code>.</div>
+<div class="callout warn"><span class="t">Watch</span> <code>is</code> tests identity, <code>==</code> tests equality — use <code>==</code> for values, <code>is</code> only for <code>None</code>/singletons. Integer caching makes <code>a is b</code> deceptively true for small ints.</div>
+
+<pre><code class="language-python"># WRONG: shared mutable default persists across calls
+def append(item, target=[]):
+    target.append(item); return target
+append(1); append(2)        # returns [1, 2] -- leaked state!
+
+# RIGHT
+def append(item, target=None):
+    target = [] if target is None else target
+    target.append(item); return target
+
+# WRONG: mutating while iterating skips elements
+for x in nums:
+    if x % 2 == 0: nums.remove(x)   # buggy
+# RIGHT: iterate a copy or build a new list
+nums = [x for x in nums if x % 2 != 0]</code></pre>
+
+<h2>Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What is the GIL and how does it affect concurrency?</div><div class="a">The Global Interpreter Lock ensures only one thread runs Python bytecode at a time in CPython. It protects internal state but means threads give no speedup for CPU-bound work — use <code>multiprocessing</code> for that. Threads still help I/O-bound work because the GIL is released while waiting on I/O. Python 3.13 introduces an experimental free-threaded build that removes it.</div></div>
+<div class="qa"><div class="q">Difference between a list and a tuple?</div><div class="a">Lists are mutable and used for homogeneous, variable-length sequences; tuples are immutable, hashable (so usable as dict keys or set members), slightly smaller/faster, and convey "fixed record." A tuple's immutability is shallow — it can still contain mutable objects.</div></div>
+<div class="qa"><div class="q">How does Python manage memory?</div><div class="a">CPython uses reference counting: each object tracks how many names reference it, and is freed when the count hits zero. A cyclic garbage collector handles reference cycles (e.g. two objects referencing each other). Memory for small objects is pooled by internal allocators.</div></div>
+<div class="qa"><div class="q">Explain <code>*args</code> and <code>**kwargs</code>.</div><div class="a"><code>*args</code> collects extra positional arguments into a tuple; <code>**kwargs</code> collects extra keyword arguments into a dict. At a call site the same operators unpack a sequence/mapping into arguments. They enable flexible, forwarding-friendly APIs.</div></div>
+<div class="qa"><div class="q">What is a decorator?</div><div class="a">A callable that takes a function (or class) and returns a replacement, letting you add behavior — timing, caching, auth, logging — without modifying the wrapped code. <code>@dec</code> above <code>def f</code> is sugar for <code>f = dec(f)</code>. Use <code>functools.wraps</code> to preserve metadata.</div></div>
+<div class="qa"><div class="q">Difference between <code>is</code> and <code>==</code>?</div><div class="a"><code>==</code> compares values (calls <code>__eq__</code>); <code>is</code> compares identity (same object in memory). Use <code>==</code> for equality, <code>is</code> only for singletons like <code>None</code>. Small-int and short-string interning can make <code>is</code> accidentally return <code>True</code>, so never rely on it for value comparison.</div></div>
+<div class="qa"><div class="q">What are generators and why use them?</div><div class="a">Functions that <code>yield</code> values lazily, producing one item at a time and suspending state between calls. They use constant memory regardless of stream length, so they are ideal for large files, infinite sequences, and streaming pipelines. A generator expression is the lazy analogue of a list comprehension.</div></div>
+<div class="qa"><div class="q">Shallow vs deep copy?</div><div class="a">A shallow copy (<code>list.copy()</code>, <code>copy.copy</code>) duplicates the top-level container but shares the nested objects. A deep copy (<code>copy.deepcopy</code>) recursively duplicates everything. Choose deep copy when nested mutable state must be independent — but note it is slower and can fail on unpicklable objects.</div></div>
+<div class="qa"><div class="q">How do you handle exceptions cleanly?</div><div class="a">Catch the narrowest exception you can handle, prefer EAFP (try/except) over pre-checking, use <code>finally</code> or context managers for cleanup, chain with <code>raise ... from e</code> to preserve cause, and never use a bare <code>except:</code>. Define custom exception classes for your domain.</div></div>
+<div class="qa"><div class="q">What does <code>if __name__ == "__main__":</code> do?</div><div class="a">When a file is run directly, its <code>__name__</code> is <code>"__main__"</code>; when imported, it is the module's name. The guard lets a file expose functions for import while also being runnable as a script, without executing the script body on import.</div></div>
+<div class="qa"><div class="q">Explain list vs generator memory trade-off with an example.</div><div class="a"><code>[x*x for x in range(10**8)]</code> allocates ~800MB up front; <code>(x*x for x in range(10**8))</code> allocates almost nothing and yields values on demand. Use the list when you need random access/reuse, the generator when you iterate once over large or streaming data.</div></div>
+<div class="qa"><div class="q">How does method resolution order (MRO) work?</div><div class="a">Python uses the C3 linearization algorithm to order base classes for attribute/method lookup under multiple inheritance. <code>ClassName.__mro__</code> shows the order; <code>super()</code> follows it, enabling cooperative multiple inheritance where each class's method calls the next in the chain exactly once.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+  <li><strong>Effective Python</strong> (Brett Slatkin) — 90 concrete best-practice items; the single best intermediate book.</li>
+  <li><strong>Fluent Python</strong> (Luciano Ramalho, 2nd ed.) — deep dive into the data model, generators, and concurrency.</li>
+  <li>Read the official <strong>docs.python.org</strong> tutorial and the <strong>PEP 8</strong> style guide end to end.</li>
+  <li>Practice DSA in Python on LeetCode/NeetCode to cement idioms under time pressure.</li>
+  <li>Adopt <strong>ruff</strong> (lint + format), <strong>mypy/pyright</strong> (types), and <strong>pytest</strong> in every project.</li>
+  <li>Next languages/tools for an AI engineer: NumPy &amp; pandas internals, then PyTorch, then <code>asyncio</code> for serving models.</li>
+</ul>

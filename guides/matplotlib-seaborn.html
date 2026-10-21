@@ -1,0 +1,629 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matplotlib & Seaborn — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Data Science</div>
+  <h1>Matplotlib & Seaborn</h1>
+  <div class="subtitle">Master the Matplotlib figure/axes model and Seaborn's statistical plots to turn raw data into clear, publication-quality visuals and to choose the right chart every time.</div>
+  <div class="tags"><span>matplotlib</span><span>seaborn</span><span>data-visualization</span><span>python</span><span>plotting</span><span>eda</span><span>charts</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~15 min read &middot; 3,281 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#1-what-they-are-and-why-they-matter">1. What They Are and Why They Matter</a></li><li><a href="#2-setup-and-getting-started">2. Setup and Getting Started</a></li><li><a href="#3-the-figure-axes-model-the-one-thing-to-understand">3. The Figure / Axes Model — the One Thing to Understand</a></li><li><a href="#4-core-chart-types-in-matplotlib">4. Core Chart Types in Matplotlib</a></li><li><a href="#5-subplots-and-layout">5. Subplots and Layout</a></li><li><a href="#6-seaborn-statistical-plots-in-one-line">6. Seaborn: Statistical Plots in One Line</a></li><li><a href="#7-worked-mini-example-an-eda-panel">7. Worked Mini-Example: An EDA Panel</a></li><li><a href="#8-choosing-the-right-chart">8. Choosing the Right Chart</a></li><li><a href="#9-cheat-sheet-reference">9. Cheat-Sheet Reference</a></li><li><a href="#10-best-practices">10. Best Practices</a></li><li><a href="#11-common-pitfalls">11. Common Pitfalls</a></li><li><a href="#12-interview-questions-amp-answers">12. Interview Questions &amp; Answers</a></li><li><a href="#13-further-learning">13. Further Learning</a></li></ol></nav>
+<p class="lead">Matplotlib is the foundational plotting library for Python — low-level, explicit, and able to draw essentially anything. Seaborn sits on top of it, trading a little control for a lot of convenience: statistical charts, sensible defaults, and tidy-data awareness in one line. Learn Matplotlib's figure/axes model once and every chart in the ecosystem (Seaborn, pandas <code>.plot()</code>, scikit-learn displays) becomes customisable, because they all return Matplotlib objects.</p>
+
+<h2 id="1-what-they-are-and-why-they-matter">1. What They Are and Why They Matter</h2>
+
+<p>A visualisation is a function from data to pixels whose job is to let a human reason about numbers faster than a table ever could. Matplotlib (first released 2003) is the <em>engine</em>: it owns the canvas, the axes, the ticks, and every line and glyph. Seaborn (first released 2014) is a <em>statistical grammar</em> layered on top — it reads tidy DataFrames, computes aggregations and confidence intervals for you, and emits attractive Matplotlib figures you can still tweak afterwards.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Matplotlib</h4>Total control, verbose. You place every element. The substrate for the whole Python viz stack.</div>
+  <div class="card"><h4>Seaborn</h4>Concise statistical charts from tidy data: distributions, relationships, categories, correlation — with themes that look good by default.</div>
+  <div class="card"><h4>They compose</h4>Seaborn draws onto a Matplotlib <code>Axes</code>. Start in Seaborn for speed, drop to Matplotlib for the last 10% of polish.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="30" y="120" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="105" y="148" text-anchor="middle" font-size="13" fill="#1a2233">Tidy DataFrame</text>
+  <text x="105" y="166" text-anchor="middle" font-size="11" fill="#1a2233">rows = observations</text>
+
+  <rect x="225" y="55" width="160" height="55" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="305" y="80" text-anchor="middle" font-size="12" fill="#1a2233">Seaborn</text>
+  <text x="305" y="97" text-anchor="middle" font-size="11" fill="#1a2233">stats + defaults</text>
+
+  <rect x="225" y="190" width="160" height="55" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="305" y="215" text-anchor="middle" font-size="12" fill="#1a2233">Matplotlib API</text>
+  <text x="305" y="232" text-anchor="middle" font-size="11" fill="#1a2233">Figure / Axes</text>
+
+  <rect x="440" y="120" width="150" height="60" rx="8" fill="#2563eb" stroke="#1e3a8a"/>
+  <text x="515" y="148" text-anchor="middle" font-size="12" fill="#fff">Renderer</text>
+  <text x="515" y="166" text-anchor="middle" font-size="11" fill="#fff">(Agg / PDF / SVG)</text>
+
+  <rect x="635" y="120" width="95" height="60" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="682" y="155" text-anchor="middle" font-size="12" fill="#fff">Pixels</text>
+
+  <line x1="180" y1="140" x2="225" y2="85" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="180" y1="160" x2="225" y2="215" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="385" y1="85" x2="430" y2="135" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="385" y1="215" x2="430" y2="165" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="590" y1="150" x2="635" y2="150" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="305" y="285" text-anchor="middle" font-size="11" fill="#b45309">Seaborn is a convenience layer; everything ultimately becomes Matplotlib artists.</text>
+</svg>
+<div class="cap">Fig 1 — Data flows through Seaborn (optional) into Matplotlib's Figure/Axes, then to a backend renderer.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of a <strong>Figure</strong> as the sheet of paper and each <strong>Axes</strong> as one chart drawn on it. Almost every plotting call ultimately adds <em>artists</em> (lines, patches, text) to an Axes.</div>
+
+<h2 id="2-setup-and-getting-started">2. Setup and Getting Started</h2>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Install into a virtual environment</span>
+python -m venv .venv
+<span class="hljs-built_in">source</span> .venv/bin/activate          <span class="hljs-comment"># Windows: .venv\Scripts\activate</span>
+pip install matplotlib seaborn pandas numpy
+
+<span class="hljs-comment"># Versions this guide targets (2026-era)</span>
+python -c <span class="hljs-string">&quot;import matplotlib, seaborn; print(matplotlib.__version__, seaborn.__version__)&quot;</span>
+<span class="hljs-comment"># e.g. 3.9.x  0.13.x</span></code></pre>
+
+<p>The canonical imports. Note Seaborn is conventionally <code>sns</code> and Matplotlib's stateful interface is <code>plt</code>:</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">import</span> pandas <span class="hljs-keyword">as</span> pd
+<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+<span class="hljs-keyword">import</span> seaborn <span class="hljs-keyword">as</span> sns
+
+<span class="hljs-comment"># A good global baseline: Seaborn theme + readable DPI</span>
+sns.set_theme(style=<span class="hljs-string">&quot;whitegrid&quot;</span>, context=<span class="hljs-string">&quot;notebook&quot;</span>)
+plt.rcParams[<span class="hljs-string">&quot;figure.dpi&quot;</span>] = <span class="hljs-number">110</span>        <span class="hljs-comment"># crisper inline figures</span>
+plt.rcParams[<span class="hljs-string">&quot;savefig.bbox&quot;</span>] = <span class="hljs-string">&quot;tight&quot;</span>  <span class="hljs-comment"># trim whitespace on export</span></code></pre>
+
+<div class="callout tip"><span class="t">Backends</span> In Jupyter, figures render inline automatically. In a plain script you need <code>plt.show()</code> to open a window, or <code>fig.savefig("out.png")</code> to write a file. On a headless server set a non-interactive backend early: <code>import matplotlib; matplotlib.use("Agg")</code>.</div>
+
+<h2 id="3-the-figure-axes-model-the-one-thing-to-understand">3. The Figure / Axes Model — the One Thing to Understand</h2>
+
+<p>Matplotlib has <strong>two interfaces</strong>, and mixing them up is the single biggest source of confusion.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>pyplot (implicit)</h4>Commands like <code>plt.plot()</code> act on a hidden "current axes". Fine for quick, one-chart throwaways. State is global and surprising with multiple plots.</div>
+  <div class="card"><h4>Object-oriented (explicit)</h4><code>fig, ax = plt.subplots()</code> then call methods on <code>ax</code>. Verbose but unambiguous. <strong>Use this</strong> for anything reusable, in functions, or with subplots.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 720 360" width="720" height="360">
+  <rect x="40" y="20" width="640" height="320" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="55" y="42" font-size="13" fill="#1e3a8a" font-weight="bold">Figure</text>
+
+  <rect x="80" y="60" width="260" height="240" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="82" font-size="12" fill="#1e3a8a" font-weight="bold">Axes (one chart)</text>
+
+  <!-- plotting region -->
+  <rect x="130" y="110" width="180" height="140" fill="#fff" stroke="#1a2233"/>
+  <!-- a line -->
+  <polyline points="135,235 175,180 215,200 255,130 305,150" fill="none" stroke="#059669" stroke-width="2.5"/>
+  <!-- axis labels -->
+  <text x="220" y="285" text-anchor="middle" font-size="11" fill="#1a2233">x-axis (xlabel, xticks)</text>
+  <text x="112" y="180" text-anchor="middle" font-size="11" fill="#1a2233" transform="rotate(-90 112 180)">y-axis</text>
+  <text x="220" y="102" text-anchor="middle" font-size="11" fill="#b45309">Title</text>
+
+  <rect x="380" y="60" width="260" height="110" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="395" y="82" font-size="12" fill="#1a2233" font-weight="bold">Axes (second chart)</text>
+  <circle cx="440" cy="130" r="4" fill="#2563eb"/><circle cx="490" cy="115" r="4" fill="#2563eb"/>
+  <circle cx="540" cy="140" r="4" fill="#2563eb"/><circle cx="590" cy="108" r="4" fill="#2563eb"/>
+
+  <rect x="380" y="190" width="260" height="110" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="395" y="212" font-size="12" fill="#1a2233" font-weight="bold">Axes (third chart)</text>
+  <rect x="420" y="250" width="22" height="40" fill="#0891b2"/><rect x="455" y="235" width="22" height="55" fill="#0891b2"/>
+  <rect x="490" y="260" width="22" height="30" fill="#0891b2"/><rect x="525" y="225" width="22" height="65" fill="#0891b2"/>
+</svg>
+<div class="cap">Fig 2 — One Figure contains one or more Axes. Each Axes owns its own data region, two Axis objects (x/y), ticks, labels, title, and legend.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># The explicit, recommended pattern</span>
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">6</span>, <span class="hljs-number">4</span>))   <span class="hljs-comment"># one Figure, one Axes</span>
+x = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * np.pi, <span class="hljs-number">200</span>)
+ax.plot(x, np.sin(x), label=<span class="hljs-string">&quot;sin&quot;</span>)
+ax.plot(x, np.cos(x), label=<span class="hljs-string">&quot;cos&quot;</span>, linestyle=<span class="hljs-string">&quot;--&quot;</span>)
+
+ax.set_title(<span class="hljs-string">&quot;Trig functions&quot;</span>)
+ax.set_xlabel(<span class="hljs-string">&quot;x (radians)&quot;</span>)
+ax.set_ylabel(<span class="hljs-string">&quot;f(x)&quot;</span>)
+ax.legend()
+ax.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)
+fig.savefig(<span class="hljs-string">&quot;trig.png&quot;</span>)   <span class="hljs-comment"># or plt.show()</span></code></pre>
+
+<div class="callout warn"><span class="t">Gotcha</span> <code>plt.plot</code> and <code>ax.plot</code> look identical but <code>plt</code> targets whatever Axes was created last. Inside a loop or a helper function this silently draws onto the wrong chart. Always carry an explicit <code>ax</code> once you have more than one plot.</div>
+
+<h2 id="4-core-chart-types-in-matplotlib">4. Core Chart Types in Matplotlib</h2>
+
+<h3>Line, scatter, bar, histogram</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">rng = np.random.default_rng(<span class="hljs-number">0</span>)
+
+fig, axes = plt.subplots(<span class="hljs-number">2</span>, <span class="hljs-number">2</span>, figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">7</span>))
+
+<span class="hljs-comment"># Line — trends over an ordered axis (time, sequence)</span>
+t = np.arange(<span class="hljs-number">0</span>, <span class="hljs-number">50</span>)
+axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].plot(t, np.cumsum(rng.normal(size=<span class="hljs-number">50</span>)), color=<span class="hljs-string">&quot;#2563eb&quot;</span>)
+axes[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Line: random walk&quot;</span>)
+
+<span class="hljs-comment"># Scatter — relationship between two numeric variables</span>
+x = rng.normal(size=<span class="hljs-number">200</span>)
+y = <span class="hljs-number">2</span> * x + rng.normal(size=<span class="hljs-number">200</span>)
+axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].scatter(x, y, s=<span class="hljs-number">18</span>, alpha=<span class="hljs-number">0.6</span>, color=<span class="hljs-string">&quot;#059669&quot;</span>)
+axes[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Scatter: y vs x&quot;</span>)
+
+<span class="hljs-comment"># Bar — compare a numeric value across categories</span>
+cats = [<span class="hljs-string">&quot;A&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>, <span class="hljs-string">&quot;C&quot;</span>, <span class="hljs-string">&quot;D&quot;</span>]
+axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].bar(cats, [<span class="hljs-number">23</span>, <span class="hljs-number">17</span>, <span class="hljs-number">35</span>, <span class="hljs-number">29</span>], color=<span class="hljs-string">&quot;#0891b2&quot;</span>)
+axes[<span class="hljs-number">1</span>, <span class="hljs-number">0</span>].set_title(<span class="hljs-string">&quot;Bar: value by category&quot;</span>)
+
+<span class="hljs-comment"># Histogram — distribution of one numeric variable</span>
+axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].hist(rng.normal(size=<span class="hljs-number">1000</span>), bins=<span class="hljs-number">30</span>, color=<span class="hljs-string">&quot;#b45309&quot;</span>, edgecolor=<span class="hljs-string">&quot;white&quot;</span>)
+axes[<span class="hljs-number">1</span>, <span class="hljs-number">1</span>].set_title(<span class="hljs-string">&quot;Histogram: distribution&quot;</span>)
+
+fig.tight_layout()   <span class="hljs-comment"># prevents overlapping labels</span></code></pre>
+
+<div class="callout tip"><span class="t">tight_layout vs constrained_layout</span> <code>fig.tight_layout()</code> adjusts spacing once. For complex grids prefer creating the figure with <code>plt.subplots(..., layout="constrained")</code>, which re-flows automatically as you add titles, legends, and colorbars.</div>
+
+<h3>Styling anatomy: colors, markers, linestyles</h3>
+
+<table>
+<tr><th>Parameter</th><th>Common values</th><th>Example</th></tr>
+<tr><td><code>color</code> / <code>c</code></td><td>name, hex, RGB tuple, "C0".."C9"</td><td><code>color="#2563eb"</code></td></tr>
+<tr><td><code>linestyle</code> / <code>ls</code></td><td><code>"-"</code> <code>"--"</code> <code>"-."</code> <code>":"</code></td><td><code>ls="--"</code></td></tr>
+<tr><td><code>linewidth</code> / <code>lw</code></td><td>points (float)</td><td><code>lw=2.5</code></td></tr>
+<tr><td><code>marker</code></td><td><code>"o" "s" "^" "x" "." "D"</code></td><td><code>marker="o"</code></td></tr>
+<tr><td><code>alpha</code></td><td>0 (transparent) to 1</td><td><code>alpha=0.5</code></td></tr>
+<tr><td><code>cmap</code></td><td><code>viridis</code>, <code>magma</code>, <code>coolwarm</code></td><td><code>cmap="viridis"</code></td></tr>
+</table>
+
+<h2 id="5-subplots-and-layout">5. Subplots and Layout</h2>
+
+<p><code>plt.subplots(nrows, ncols)</code> returns the Figure and an array of Axes. Index it to place each chart. For non-uniform grids, reach for <code>subplot_mosaic</code> — readable and flexible.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># A dashboard: one wide chart on top, two below</span>
+fig, axd = plt.subplot_mosaic(
+    <span class="hljs-string">&quot;&quot;&quot;
+    AA
+    BC
+    &quot;&quot;&quot;</span>,
+    figsize=(<span class="hljs-number">10</span>, <span class="hljs-number">6</span>), layout=<span class="hljs-string">&quot;constrained&quot;</span>,
+)
+axd[<span class="hljs-string">&quot;A&quot;</span>].plot(np.cumsum(rng.normal(size=<span class="hljs-number">100</span>)))
+axd[<span class="hljs-string">&quot;A&quot;</span>].set_title(<span class="hljs-string">&quot;Overview&quot;</span>)
+axd[<span class="hljs-string">&quot;B&quot;</span>].hist(rng.normal(size=<span class="hljs-number">500</span>), bins=<span class="hljs-number">25</span>)
+axd[<span class="hljs-string">&quot;C&quot;</span>].scatter(rng.normal(size=<span class="hljs-number">100</span>), rng.normal(size=<span class="hljs-number">100</span>), s=<span class="hljs-number">12</span>)
+
+<span class="hljs-comment"># Share axes so panels are comparable</span>
+fig2, (ax1, ax2) = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, sharey=<span class="hljs-literal">True</span>, figsize=(<span class="hljs-number">9</span>, <span class="hljs-number">3.5</span>))</code></pre>
+
+<div class="callout note"><span class="t">Shared scales</span> Use <code>sharex</code>/<code>sharey</code> when panels show the same quantity — comparing panels with different hidden scales is one of the most common ways a chart misleads.</div>
+
+<h2 id="6-seaborn-statistical-plots-in-one-line">6. Seaborn: Statistical Plots in One Line</h2>
+
+<p>Seaborn's modern API splits into <strong>figure-level</strong> functions (create their own Figure, support faceting via <code>col</code>/<code>row</code>) and <strong>axes-level</strong> functions (draw into an existing <code>ax</code>). Knowing which is which explains most "why can't I combine these?" confusion.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 260" width="760" height="260">
+  <rect x="20" y="30" width="340" height="210" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="190" y="55" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Figure-level (own the Figure)</text>
+  <text x="40" y="85" font-size="12" fill="#1a2233">relplot  — scatter / line</text>
+  <text x="40" y="110" font-size="12" fill="#1a2233">displot  — hist / kde / ecdf</text>
+  <text x="40" y="135" font-size="12" fill="#1a2233">catplot  — box / bar / violin / strip</text>
+  <text x="40" y="160" font-size="12" fill="#1a2233">lmplot   — regression</text>
+  <text x="40" y="185" font-size="12" fill="#1a2233">pairplot, jointplot</text>
+  <text x="40" y="215" font-size="11" fill="#b45309">return FacetGrid; use col= / row= to facet</text>
+
+  <rect x="400" y="30" width="340" height="210" rx="10" fill="#ecfdf5" stroke="#059669"/>
+  <text x="570" y="55" text-anchor="middle" font-size="13" fill="#1a2233" font-weight="bold">Axes-level (draw into ax)</text>
+  <text x="420" y="85" font-size="12" fill="#1a2233">scatterplot, lineplot</text>
+  <text x="420" y="110" font-size="12" fill="#1a2233">histplot, kdeplot, ecdfplot</text>
+  <text x="420" y="135" font-size="12" fill="#1a2233">boxplot, barplot, violinplot</text>
+  <text x="420" y="160" font-size="12" fill="#1a2233">heatmap, regplot</text>
+  <text x="420" y="185" font-size="12" fill="#1a2233">countplot, stripplot</text>
+  <text x="420" y="215" font-size="11" fill="#059669">accept ax=; compose with Matplotlib</text>
+</svg>
+<div class="cap">Fig 3 — Seaborn's two tiers. Each figure-level function wraps a family of axes-level kinds via its <code>kind=</code> argument.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Built-in example datasets make Seaborn easy to learn</span>
+tips = sns.load_dataset(<span class="hljs-string">&quot;tips&quot;</span>)      <span class="hljs-comment"># restaurant bills</span>
+penguins = sns.load_dataset(<span class="hljs-string">&quot;penguins&quot;</span>)
+flights = sns.load_dataset(<span class="hljs-string">&quot;flights&quot;</span>)
+
+<span class="hljs-comment"># Axes-level: draw into a Matplotlib ax you control</span>
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">6</span>, <span class="hljs-number">4</span>))
+sns.scatterplot(data=tips, x=<span class="hljs-string">&quot;total_bill&quot;</span>, y=<span class="hljs-string">&quot;tip&quot;</span>,
+                hue=<span class="hljs-string">&quot;time&quot;</span>, size=<span class="hljs-string">&quot;size&quot;</span>, ax=ax)
+ax.set_title(<span class="hljs-string">&quot;Tip vs bill&quot;</span>)
+
+<span class="hljs-comment"># Figure-level: Seaborn makes the Figure, facet with col=</span>
+g = sns.relplot(data=tips, x=<span class="hljs-string">&quot;total_bill&quot;</span>, y=<span class="hljs-string">&quot;tip&quot;</span>,
+                col=<span class="hljs-string">&quot;time&quot;</span>, hue=<span class="hljs-string">&quot;smoker&quot;</span>, kind=<span class="hljs-string">&quot;scatter&quot;</span>)
+g.set_axis_labels(<span class="hljs-string">&quot;Bill ($)&quot;</span>, <span class="hljs-string">&quot;Tip ($)&quot;</span>)</code></pre>
+
+<div class="callout warn"><span class="t">Figure-level + ax</span> You cannot pass <code>ax=</code> to <code>relplot</code>/<code>catplot</code>/<code>displot</code> — they build their own Figure. If you need to place a Seaborn chart inside your own subplot grid, use the <em>axes-level</em> twin (<code>scatterplot</code>, <code>boxplot</code>, ...).</div>
+
+<h3>The statistical workhorses</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># 1) Heatmap — matrix of values; perfect for a correlation matrix</span>
+corr = penguins.select_dtypes(<span class="hljs-string">&quot;number&quot;</span>).corr(numeric_only=<span class="hljs-literal">True</span>)
+fig, ax = plt.subplots(figsize=(<span class="hljs-number">5</span>, <span class="hljs-number">4</span>))
+sns.heatmap(corr, annot=<span class="hljs-literal">True</span>, fmt=<span class="hljs-string">&quot;.2f&quot;</span>, cmap=<span class="hljs-string">&quot;coolwarm&quot;</span>,
+            vmin=-<span class="hljs-number">1</span>, vmax=<span class="hljs-number">1</span>, center=<span class="hljs-number">0</span>, ax=ax)
+
+<span class="hljs-comment"># 2) Boxplot — distribution + outliers across categories</span>
+sns.boxplot(data=tips, x=<span class="hljs-string">&quot;day&quot;</span>, y=<span class="hljs-string">&quot;total_bill&quot;</span>, hue=<span class="hljs-string">&quot;smoker&quot;</span>)
+
+<span class="hljs-comment"># 3) Pairplot — every pairwise scatter + per-variable histograms</span>
+sns.pairplot(penguins, hue=<span class="hljs-string">&quot;species&quot;</span>, corner=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># 4) Regplot — scatter with a fitted regression line + CI band</span>
+sns.regplot(data=tips, x=<span class="hljs-string">&quot;total_bill&quot;</span>, y=<span class="hljs-string">&quot;tip&quot;</span>,
+            scatter_kws={<span class="hljs-string">&quot;alpha&quot;</span>: <span class="hljs-number">0.4</span>}, line_kws={<span class="hljs-string">&quot;color&quot;</span>: <span class="hljs-string">&quot;#b45309&quot;</span>})</code></pre>
+
+<div class="callout tip"><span class="t">Correlation heatmaps</span> Always set a <strong>diverging</strong> colormap (<code>coolwarm</code>, <code>RdBu_r</code>) with <code>center=0</code> for correlations, so positive and negative read as opposite hues and zero is neutral. A sequential map here is misleading.</div>
+
+<h3>Distributions: histogram vs KDE vs ECDF</h3>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">fig, axes = plt.subplots(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, figsize=(<span class="hljs-number">12</span>, <span class="hljs-number">3.5</span>), layout=<span class="hljs-string">&quot;constrained&quot;</span>)
+sns.histplot(data=penguins, x=<span class="hljs-string">&quot;flipper_length_mm&quot;</span>, hue=<span class="hljs-string">&quot;species&quot;</span>,
+             kde=<span class="hljs-literal">True</span>, ax=axes[<span class="hljs-number">0</span>])
+sns.kdeplot(data=penguins, x=<span class="hljs-string">&quot;flipper_length_mm&quot;</span>, hue=<span class="hljs-string">&quot;species&quot;</span>,
+            fill=<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.4</span>, ax=axes[<span class="hljs-number">1</span>])
+sns.ecdfplot(data=penguins, x=<span class="hljs-string">&quot;flipper_length_mm&quot;</span>, hue=<span class="hljs-string">&quot;species&quot;</span>, ax=axes[<span class="hljs-number">2</span>])
+<span class="hljs-keyword">for</span> a, t <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(axes, [<span class="hljs-string">&quot;hist + kde&quot;</span>, <span class="hljs-string">&quot;kde&quot;</span>, <span class="hljs-string">&quot;ecdf&quot;</span>]):
+    a.set_title(t)</code></pre>
+
+<h2 id="7-worked-mini-example-an-eda-panel">7. Worked Mini-Example: An EDA Panel</h2>
+
+<p>A realistic first pass on a dataset: understand distributions, relationships, and group differences on one page. This mixes Seaborn (for the statistics) with Matplotlib (for the layout).</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> seaborn <span class="hljs-keyword">as</span> sns, matplotlib.pyplot <span class="hljs-keyword">as</span> plt
+
+sns.set_theme(style=<span class="hljs-string">&quot;whitegrid&quot;</span>)
+df = sns.load_dataset(<span class="hljs-string">&quot;penguins&quot;</span>).dropna()
+
+fig, axd = plt.subplot_mosaic(
+    <span class="hljs-string">&quot;&quot;&quot;
+    AB
+    CD
+    &quot;&quot;&quot;</span>,
+    figsize=(<span class="hljs-number">11</span>, <span class="hljs-number">8</span>), layout=<span class="hljs-string">&quot;constrained&quot;</span>,
+)
+
+<span class="hljs-comment"># A: distribution of a key measurement by group</span>
+sns.histplot(df, x=<span class="hljs-string">&quot;body_mass_g&quot;</span>, hue=<span class="hljs-string">&quot;species&quot;</span>, kde=<span class="hljs-literal">True</span>, ax=axd[<span class="hljs-string">&quot;A&quot;</span>])
+axd[<span class="hljs-string">&quot;A&quot;</span>].set_title(<span class="hljs-string">&quot;Body mass distribution&quot;</span>)
+
+<span class="hljs-comment"># B: relationship between two measurements, colored by group</span>
+sns.scatterplot(df, x=<span class="hljs-string">&quot;flipper_length_mm&quot;</span>, y=<span class="hljs-string">&quot;body_mass_g&quot;</span>,
+                hue=<span class="hljs-string">&quot;species&quot;</span>, style=<span class="hljs-string">&quot;sex&quot;</span>, ax=axd[<span class="hljs-string">&quot;B&quot;</span>])
+axd[<span class="hljs-string">&quot;B&quot;</span>].set_title(<span class="hljs-string">&quot;Flipper vs mass&quot;</span>)
+
+<span class="hljs-comment"># C: group comparison with box + raw points overlaid</span>
+sns.boxplot(df, x=<span class="hljs-string">&quot;species&quot;</span>, y=<span class="hljs-string">&quot;bill_length_mm&quot;</span>, ax=axd[<span class="hljs-string">&quot;C&quot;</span>], fliersize=<span class="hljs-number">0</span>)
+sns.stripplot(df, x=<span class="hljs-string">&quot;species&quot;</span>, y=<span class="hljs-string">&quot;bill_length_mm&quot;</span>, ax=axd[<span class="hljs-string">&quot;C&quot;</span>],
+              color=<span class="hljs-string">&quot;black&quot;</span>, alpha=<span class="hljs-number">0.3</span>, size=<span class="hljs-number">3</span>)
+axd[<span class="hljs-string">&quot;C&quot;</span>].set_title(<span class="hljs-string">&quot;Bill length by species&quot;</span>)
+
+<span class="hljs-comment"># D: correlation structure</span>
+corr = df.select_dtypes(<span class="hljs-string">&quot;number&quot;</span>).corr()
+sns.heatmap(corr, annot=<span class="hljs-literal">True</span>, fmt=<span class="hljs-string">&quot;.2f&quot;</span>, cmap=<span class="hljs-string">&quot;coolwarm&quot;</span>,
+            center=<span class="hljs-number">0</span>, ax=axd[<span class="hljs-string">&quot;D&quot;</span>])
+axd[<span class="hljs-string">&quot;D&quot;</span>].set_title(<span class="hljs-string">&quot;Correlations&quot;</span>)
+
+fig.suptitle(<span class="hljs-string">&quot;Penguins — exploratory overview&quot;</span>, fontsize=<span class="hljs-number">15</span>)
+fig.savefig(<span class="hljs-string">&quot;eda_penguins.png&quot;</span>, dpi=<span class="hljs-number">150</span>)</code></pre>
+
+<div class="callout ok"><span class="t">Why this works</span> Four complementary views answer four questions — "how is it distributed?", "what relates to what?", "do groups differ?", "which variables move together?" — the standard opening moves of exploratory data analysis.</div>
+
+<h2 id="8-choosing-the-right-chart">8. Choosing the Right Chart</h2>
+
+<p>Pick the chart from the <em>question</em> and the <em>data types</em>, not from aesthetics. The table below is the decision shortcut.</p>
+
+<table>
+<tr><th>Your question</th><th>Data</th><th>Chart</th><th>Seaborn</th></tr>
+<tr><td>How does one variable change over an ordered axis?</td><td>numeric vs time/sequence</td><td>Line</td><td><code>lineplot</code></td></tr>
+<tr><td>Do two numeric variables relate?</td><td>numeric vs numeric</td><td>Scatter (+ regline)</td><td><code>scatterplot</code>, <code>regplot</code></td></tr>
+<tr><td>How is one variable distributed?</td><td>one numeric</td><td>Histogram / KDE / ECDF</td><td><code>histplot</code>, <code>kdeplot</code></td></tr>
+<tr><td>Compare a value across categories?</td><td>category vs numeric</td><td>Bar</td><td><code>barplot</code>, <code>countplot</code></td></tr>
+<tr><td>Compare distributions across categories?</td><td>category vs numeric</td><td>Box / Violin</td><td><code>boxplot</code>, <code>violinplot</code></td></tr>
+<tr><td>How do many variables correlate?</td><td>matrix</td><td>Heatmap</td><td><code>heatmap</code></td></tr>
+<tr><td>Explore all pairwise relationships?</td><td>several numeric</td><td>Scatter matrix</td><td><code>pairplot</code></td></tr>
+<tr><td>Part-to-whole over few categories?</td><td>category + proportion</td><td>Stacked/grouped bar (not pie)</td><td><code>barplot</code></td></tr>
+</table>
+
+<div class="pipeline"><span class="step">Question</span><span class="arrow">-&gt;</span><span class="step">Data types</span><span class="arrow">-&gt;</span><span class="step">Chart family</span><span class="arrow">-&gt;</span><span class="step">Polish</span></div>
+
+<h2 id="9-cheat-sheet-reference">9. Cheat-Sheet Reference</h2>
+
+<table>
+<tr><th>Task</th><th>Code</th></tr>
+<tr><td>Create figure + axes</td><td><code>fig, ax = plt.subplots(figsize=(6,4))</code></td></tr>
+<tr><td>Grid of axes</td><td><code>fig, axes = plt.subplots(2, 3)</code></td></tr>
+<tr><td>Set titles/labels</td><td><code>ax.set(title=..., xlabel=..., ylabel=...)</code></td></tr>
+<tr><td>Legend</td><td><code>ax.legend(loc="best")</code></td></tr>
+<tr><td>Limits / ticks</td><td><code>ax.set_xlim(0,10); ax.set_xticks([...])</code></td></tr>
+<tr><td>Log scale</td><td><code>ax.set_yscale("log")</code></td></tr>
+<tr><td>Annotate a point</td><td><code>ax.annotate("peak", xy=(x,y), xytext=(x,y+1), arrowprops={...})</code></td></tr>
+<tr><td>Save high-res</td><td><code>fig.savefig("f.png", dpi=300, bbox_inches="tight")</code></td></tr>
+<tr><td>Close figure (free memory)</td><td><code>plt.close(fig)</code></td></tr>
+<tr><td>Seaborn theme</td><td><code>sns.set_theme(style="whitegrid")</code></td></tr>
+<tr><td>Seaborn palette</td><td><code>sns.set_palette("colorblind")</code></td></tr>
+<tr><td>Facet grid</td><td><code>sns.relplot(..., col="g", row="h")</code></td></tr>
+<tr><td>Move legend outside</td><td><code>sns.move_legend(ax, "upper left", bbox_to_anchor=(1,1))</code></td></tr>
+</table>
+
+<h3>Matplotlib vs Seaborn at a glance</h3>
+
+<table>
+<tr><th>Aspect</th><th>Matplotlib</th><th>Seaborn</th></tr>
+<tr><td>Level</td><td>Low — explicit artists</td><td>High — statistical charts</td></tr>
+<tr><td>Input</td><td>arrays, anything</td><td>tidy DataFrames (best)</td></tr>
+<tr><td>Stats (CI, aggregation)</td><td>manual</td><td>built in</td></tr>
+<tr><td>Defaults</td><td>plain</td><td>attractive themes</td></tr>
+<tr><td>Faceting</td><td>manual subplots</td><td>one-line <code>col</code>/<code>row</code></tr>
+<tr><td>Final control</td><td>total</td><td>drop to Matplotlib</td></tr>
+</table>
+
+<h2 id="10-best-practices">10. Best Practices</h2>
+
+<div class="callout ok"><span class="t">Do</span> Prefer the object-oriented API (<code>fig, ax</code>). Label every axis with units. Start bar/count axes at zero. Use colorblind-safe palettes (<code>sns.set_palette("colorblind")</code> or the <code>viridis</code> family). Keep aspect ratios honest. Export vector (<code>.svg</code>/<code>.pdf</code>) for print, high-DPI PNG for screens.</div>
+
+<div class="callout tip"><span class="t">Legibility</span> Fewer than ~7 colors; direct-label lines instead of relying on a legend when you can; use <code>layout="constrained"</code> to stop labels colliding; set a <code>context</code> (<code>paper</code>/<code>notebook</code>/<code>talk</code>/<code>poster</code>) to scale fonts for the medium.</div>
+
+<div class="callout warn"><span class="t">Avoid</span> Pie charts for more than 2-3 slices (angles are hard to compare — use a bar). Dual y-axes that imply false correlation. Rainbow (<code>jet</code>) colormaps — they create perceptual banding and fail for colorblind readers.</div>
+
+<div class="callout danger"><span class="t">Deceptive axes</span> Truncating a bar-chart y-axis exaggerates differences and is a classic way to lie with data. Bars encode length, so their baseline <strong>must</strong> be zero. Line charts, which encode position, may use a non-zero baseline when justified.</div>
+
+<h2 id="11-common-pitfalls">11. Common Pitfalls</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Memory leaks in loops</h4>Creating hundreds of figures without <code>plt.close(fig)</code> keeps them all in memory. Close each one after saving in batch jobs.</div>
+  <div class="card"><h4>Wrong current axes</h4>Mixing <code>plt.*</code> and <code>ax.*</code> draws onto the last-created Axes. Commit to the explicit API with multiple plots.</div>
+  <div class="card"><h4>Overlapping labels</h4>Default layout can clip titles/ticks. Use <code>layout="constrained"</code> or <code>fig.tight_layout()</code>; rotate dense tick labels.</div>
+  <div class="card"><h4>Untidy data for Seaborn</h4>Seaborn wants long/tidy format (one row per observation). Reshape wide tables with <code>df.melt()</code> before plotting.</div>
+  <div class="card"><h4>Blurry exports</h4>Default DPI is low. Pass <code>dpi=150-300</code> and <code>bbox_inches="tight"</code>, or save vector formats.</div>
+  <div class="card"><h4>Sequential map for diverging data</h4>Correlations and signed deltas need a diverging map centered at 0, not <code>viridis</code>.</div>
+</div>
+
+<details><summary>Show: reshape a wide table to tidy for Seaborn</summary>
+<div class="body">
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Wide: one column per metric -&gt; Long: metric/value columns</span>
+wide = pd.DataFrame({<span class="hljs-string">&quot;year&quot;</span>: [<span class="hljs-number">2024</span>, <span class="hljs-number">2025</span>], <span class="hljs-string">&quot;sales&quot;</span>: [<span class="hljs-number">10</span>, <span class="hljs-number">14</span>], <span class="hljs-string">&quot;cost&quot;</span>: [<span class="hljs-number">6</span>, <span class="hljs-number">7</span>]})
+long = wide.melt(id_vars=<span class="hljs-string">&quot;year&quot;</span>, var_name=<span class="hljs-string">&quot;metric&quot;</span>, value_name=<span class="hljs-string">&quot;value&quot;</span>)
+sns.barplot(data=long, x=<span class="hljs-string">&quot;year&quot;</span>, y=<span class="hljs-string">&quot;value&quot;</span>, hue=<span class="hljs-string">&quot;metric&quot;</span>)</code></pre>
+</div>
+</details>
+
+<h2 id="12-interview-questions-amp-answers">12. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between a Figure and an Axes in Matplotlib?</div><div class="a">The Figure is the top-level container (the whole canvas); an Axes is a single plot drawn within it, with its own data region, x/y Axis objects, ticks, title, and legend. One Figure can hold many Axes. Note the terminology trap: an <em>Axes</em> is a whole subplot, while an <em>Axis</em> (singular) is one of its two coordinate axes.</div></div>
+
+<div class="qa"><div class="q">When should you use the pyplot interface vs the object-oriented interface?</div><div class="a">Use pyplot (<code>plt.plot</code>) for quick, single-chart exploration. Use the OO interface (<code>fig, ax = plt.subplots()</code> then <code>ax.method()</code>) for anything with multiple subplots, inside functions, or in production code — it is explicit about which Axes you target and avoids hidden global state.</div></div>
+
+<div class="qa"><div class="q">How does Seaborn relate to Matplotlib?</div><div class="a">Seaborn is a higher-level library built on top of Matplotlib. It computes statistics (aggregations, confidence intervals, KDEs) and applies attractive themes, but it renders by creating Matplotlib Figure/Axes objects. Axes-level Seaborn functions accept <code>ax=</code>, so you can draw a Seaborn chart and then fine-tune it with raw Matplotlib calls.</div></div>
+
+<div class="qa"><div class="q">What is the difference between figure-level and axes-level Seaborn functions?</div><div class="a">Axes-level functions (<code>scatterplot</code>, <code>boxplot</code>, <code>heatmap</code>) draw into a single provided Axes and return it. Figure-level functions (<code>relplot</code>, <code>catplot</code>, <code>displot</code>, <code>pairplot</code>) manage their own Figure, return a <code>FacetGrid</code>, and support faceting via <code>col</code>/<code>row</code> — but you cannot pass them an existing <code>ax</code>.</div></div>
+
+<div class="qa"><div class="q">When would you choose a boxplot over a histogram?</div><div class="a">Use a histogram/KDE to see the full shape of one distribution (modality, skew). Use a boxplot to compactly compare the summary (median, quartiles, outliers) of a numeric variable <em>across several categories</em> side by side. For small samples, overlay the raw points (strip/swarm) because a box can hide how few observations there are.</div></div>
+
+<div class="qa"><div class="q">Why must a bar chart's y-axis start at zero but a line chart's need not?</div><div class="a">A bar encodes value through <em>length</em>, so a non-zero baseline distorts the ratios the length is supposed to communicate. A line encodes value through <em>position</em>, so zooming the axis to the data range is legitimate and often necessary to see trends — provided the axis is clearly labelled.</div></div>
+
+<div class="qa"><div class="q">What colormap would you use for a correlation matrix and why?</div><div class="a">A diverging map such as <code>coolwarm</code> or <code>RdBu_r</code> with <code>center=0</code> and <code>vmin=-1, vmax=1</code>. Correlations are signed and symmetric around zero, so you want two opposing hues meeting at a neutral middle. A sequential map (like <code>viridis</code>) would misrepresent strong negative and strong positive values as similarly "extreme" only by intensity, losing the sign.</div></div>
+
+<div class="qa"><div class="q">What does "tidy" or "long-form" data mean for Seaborn, and why does it matter?</div><div class="a">Tidy data has one row per observation and one column per variable, so categorical variables live in their own columns to be mapped onto <code>x</code>, <code>hue</code>, <code>col</code>, etc. Seaborn's declarative API relies on this: you name columns and it does the grouping. Wide data (a column per series) must be reshaped with <code>df.melt()</code> first.</div></div>
+
+<div class="qa"><div class="q">How do you prevent a memory blow-up when generating many figures in a batch job?</div><div class="a">Each <code>plt.figure</code>/<code>subplots</code> stays registered in pyplot's state machine until closed. After saving, call <code>plt.close(fig)</code> (or <code>plt.close("all")</code>) so the figure and its artists are garbage-collected. On a headless server also set the <code>Agg</code> backend so no GUI resources are allocated.</div></div>
+
+<div class="qa"><div class="q">How do you place a legend outside the plotting area?</div><div class="a">With Matplotlib: <code>ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1))</code> and use <code>constrained</code> layout so it isn't clipped. With Seaborn axes-level plots, <code>sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))</code> is the clean one-liner; figure-level grids expose <code>g.legend</code>.</div></div>
+
+<div class="qa"><div class="q">What is the difference between <code>regplot</code> and <code>lmplot</code>?</div><div class="a">Both fit and draw a regression line with a confidence band. <code>regplot</code> is axes-level — it draws into one Axes you control. <code>lmplot</code> is figure-level — it wraps <code>regplot</code> on a FacetGrid, so it can split the regression across subplots with <code>col</code>/<code>row</code>/<code>hue</code>. Choose <code>regplot</code> to compose into a custom layout, <code>lmplot</code> for quick faceted regressions.</div></div>
+
+<div class="qa"><div class="q">How would you visualise the relationship between every pair of numeric columns quickly?</div><div class="a"><code>sns.pairplot(df, hue="group", corner=True)</code> draws a matrix of pairwise scatterplots with per-variable distributions on the diagonal; <code>hue</code> colors by a category and <code>corner=True</code> drops the redundant upper triangle. For a numeric summary of the same thing, compute <code>df.corr()</code> and show it as a <code>heatmap</code>.</div></div>
+
+<h2 id="13-further-learning">13. Further Learning</h2>
+
+<ul>
+  <li>Matplotlib official <em>Users Guide</em> and the <em>Anatomy of a Figure</em> and <em>cheatsheets</em> pages — authoritative and current.</li>
+  <li>Seaborn's <em>official tutorial</em> (especially "Overview of seaborn plotting functions" and "Data structures accepted by seaborn").</li>
+  <li>The newer <strong>seaborn.objects</strong> interface (<code>import seaborn.objects as so</code>) — a composable grammar-of-graphics API worth exploring once the basics click.</li>
+  <li>Claus Wilke, <em>Fundamentals of Data Visualization</em> (free online) — chart choice and perception, library-agnostic.</li>
+  <li>Practice: load <code>sns.get_dataset_names()</code> datasets and rebuild each chart type from memory, then recreate a chart you admire from a paper or dashboard.</li>
+  <li>Next steps in the stack: interactive plots with <strong>Plotly</strong>/<strong>Altair</strong>, and large-data rendering with <strong>datashader</strong>.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

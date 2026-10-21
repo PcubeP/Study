@@ -1,0 +1,475 @@
+<h2>What C and C++ Are, and Why They Still Matter</h2>
+<p class="lead">C is a thin, portable layer over the machine: you manage memory and the compiler trusts you completely. C++ keeps that zero-overhead philosophy but adds abstractions — classes, templates, RAII, the STL — so you can build large systems without paying for features you don't use.</p>
+
+<p>C (1972, Dennis Ritchie) is the <em>lingua franca</em> of systems programming: operating systems, embedded firmware, databases, language runtimes. C++ (1983, Bjarne Stroustrup) layers object-oriented and generic programming on top while preserving C's performance model. Both compile directly to native machine code — there is no virtual machine, no garbage collector, no interpreter standing between your code and the CPU.</p>
+
+<div class="callout note"><span class="t">Core principle</span> C++'s guiding rule is <strong>"you don't pay for what you don't use"</strong> (the zero-overhead principle). An abstraction like <span class="kbd">std::vector</span> compiles to roughly the same code you'd write by hand with raw pointers — but it manages the memory for you.</div>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker>
+  </defs>
+  <text x="360" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">From source to a running process</text>
+  <rect x="20" y="50" width="120" height="54" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="80" y="74" text-anchor="middle" font-size="13" fill="#1a2233">main.cpp</text>
+  <text x="80" y="92" text-anchor="middle" font-size="11" fill="#64748b">source + #include</text>
+  <rect x="190" y="50" width="120" height="54" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="250" y="74" text-anchor="middle" font-size="13" fill="#1a2233">Preprocessor</text>
+  <text x="250" y="92" text-anchor="middle" font-size="11" fill="#64748b">expands macros</text>
+  <rect x="360" y="50" width="120" height="54" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="420" y="74" text-anchor="middle" font-size="13" fill="#1a2233">Compiler</text>
+  <text x="420" y="92" text-anchor="middle" font-size="11" fill="#64748b">.o object file</text>
+  <rect x="530" y="50" width="120" height="54" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="590" y="74" text-anchor="middle" font-size="13" fill="#1a2233">Linker</text>
+  <text x="590" y="92" text-anchor="middle" font-size="11" fill="#64748b">+ libraries</text>
+  <rect x="360" y="170" width="120" height="54" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="420" y="194" text-anchor="middle" font-size="13" fill="#1a2233">a.out / .exe</text>
+  <text x="420" y="212" text-anchor="middle" font-size="11" fill="#64748b">native binary</text>
+  <line x1="140" y1="77" x2="186" y2="77" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="310" y1="77" x2="356" y2="77" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="480" y1="77" x2="526" y2="77" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="590" y1="104" x2="430" y2="168" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="250" y="260" text-anchor="middle" font-size="12" fill="#64748b">Each .cpp is compiled independently into an object file; the linker resolves cross-file symbols at the end.</text>
+</svg><div class="cap">Fig 1. The translation pipeline — preprocess, compile per translation unit, then link.</div></div>
+
+<h2>Setup and Getting Started</h2>
+<p>You need a compiler toolchain. GCC and Clang are the open-source standards; MSVC ships with Visual Studio on Windows.</p>
+
+<pre><code class="language-bash"># Install a toolchain
+sudo apt install build-essential   # Debian/Ubuntu: gcc, g++, make
+xcode-select --install             # macOS: clang
+# Windows: install MSVC (Visual Studio) or MSYS2/MinGW
+
+# Compile a single C++ file with warnings on and modern standard
+g++ -std=c++23 -Wall -Wextra -O2 main.cpp -o app
+./app
+
+# Compile C
+gcc -std=c17 -Wall -Wextra -O2 main.c -o app
+
+# Debug build with sanitizers — catches memory bugs at runtime
+g++ -std=c++23 -g -fsanitize=address,undefined main.cpp -o app</code></pre>
+
+<div class="callout tip"><span class="t">Always</span> compile with <span class="kbd">-Wall -Wextra</span>. During development add <span class="kbd">-fsanitize=address,undefined</span> — AddressSanitizer and UBSan catch use-after-free, buffer overflows, and undefined behavior that would otherwise be silent, intermittent crashes.</div>
+
+<pre><code class="language-cpp">// main.cpp — the canonical starting point
+#include &lt;iostream&gt;   // std::cout, std::endl
+
+int main() {
+    std::cout &lt;&lt; "Hello, systems programming\n";
+    return 0;           // 0 = success to the OS
+}</code></pre>
+
+<h2>The Memory Model: Stack, Heap, and Everything Between</h2>
+<p>Understanding where objects live is the single most important mental model in C and C++. A process has distinct memory regions, each with different lifetime and cost semantics.</p>
+
+<div class="diagram"><svg viewBox="0 0 560 360" width="560" height="360">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+  </defs>
+  <text x="280" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Process address space (low → high)</text>
+  <rect x="160" y="44" width="240" height="40" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="280" y="69" text-anchor="middle" font-size="13" fill="#1a2233">Text / Code (read-only machine code)</text>
+  <rect x="160" y="84" width="240" height="40" fill="#ecfdf5" stroke="#059669"/>
+  <text x="280" y="109" text-anchor="middle" font-size="13" fill="#1a2233">Data / BSS (globals, statics)</text>
+  <rect x="160" y="124" width="240" height="70" fill="#fff7ed" stroke="#b45309"/>
+  <text x="280" y="152" text-anchor="middle" font-size="13" fill="#1a2233">Heap</text>
+  <text x="280" y="172" text-anchor="middle" font-size="11" fill="#64748b">malloc / new — grows up</text>
+  <line x1="280" y1="194" x2="280" y2="230" stroke="#b45309" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="280" y1="300" x2="280" y2="264" stroke="#2563eb" stroke-width="2" marker-end="url(#ah2)"/>
+  <rect x="160" y="300" width="240" height="40" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="280" y="325" text-anchor="middle" font-size="13" fill="#1a2233">Stack (locals, call frames) — grows down</text>
+  <text x="470" y="150" font-size="11" fill="#64748b">dynamic,</text>
+  <text x="470" y="166" font-size="11" fill="#64748b">you free it</text>
+  <text x="455" y="315" font-size="11" fill="#64748b">automatic</text>
+</svg><div class="cap">Fig 2. Stack grows downward, heap upward; they share the free space between them.</div></div>
+
+<div class="grid c2">
+  <div class="card"><h4>Stack</h4>Automatic lifetime. Allocation is a single register adjustment — essentially free. Freed automatically when the enclosing scope exits. Limited size (often 1-8 MB). Perfect for most local variables.</div>
+  <div class="card"><h4>Heap</h4>Dynamic lifetime that you control. Allocation (<span class="kbd">malloc</span>/<span class="kbd">new</span>) is comparatively expensive and may fail. You are responsible for freeing it — forget, and you leak; free twice, and you corrupt.</div>
+</div>
+
+<pre><code class="language-cpp">void demo() {
+    int x = 42;              // stack: freed when demo() returns
+    int arr[100];            // stack: 400 bytes, freed automatically
+
+    int* p = new int(7);     // heap: p is on the stack, *p is on the heap
+    delete p;                // you MUST free it
+
+    // Prefer this — RAII cleans up automatically (see below):
+    auto up = std::make_unique&lt;int&gt;(7);
+}   // up's destructor frees the heap int here</code></pre>
+
+<h2>Pointers, Arrays, and the Address-of Operator</h2>
+<p>A pointer is a variable whose value is a memory address. This is the heart of C. Arrays decay to pointers, which is both powerful and the source of countless bugs.</p>
+
+<pre><code class="language-c">int n = 10;
+int* p = &amp;n;        // p holds the address of n
+printf("%d\n", *p);  // dereference: prints 10
+*p = 20;             // writes through the pointer; n is now 20
+
+int a[5] = {1, 2, 3, 4, 5};
+int* q = a;          // array decays to pointer to its first element
+printf("%d\n", *(q + 2));  // pointer arithmetic: prints a[2] == 3
+printf("%d\n", q[2]);      // identical — a[i] is sugar for *(a + i)
+
+// A pointer is NULL / nullptr when it points to nothing:
+int* nothing = NULL;   // C
+int* better  = nullptr; // C++ — type-safe null</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 640 220" width="640" height="220">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker>
+  </defs>
+  <text x="320" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Pointer p holds the address of n</text>
+  <rect x="60" y="60" width="130" height="60" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="125" y="84" text-anchor="middle" font-size="13" fill="#1a2233">p</text>
+  <text x="125" y="104" text-anchor="middle" font-size="12" fill="#64748b">0x7ffe10</text>
+  <rect x="430" y="60" width="150" height="60" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="505" y="84" text-anchor="middle" font-size="13" fill="#1a2233">n = 20</text>
+  <text x="505" y="104" text-anchor="middle" font-size="12" fill="#64748b">@ 0x7ffe10</text>
+  <line x1="190" y1="90" x2="426" y2="90" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="308" y="80" text-anchor="middle" font-size="12" fill="#1e3a8a">*p reads/writes here</text>
+  <text x="320" y="175" text-anchor="middle" font-size="12" fill="#64748b">&amp;n gives the address · *p follows it back to the value</text>
+</svg><div class="cap">Fig 3. The address-of (&amp;) and dereference (*) operators are inverses.</div></div>
+
+<div class="callout warn"><span class="t">Array decay</span> When you pass an array to a function, you pass a pointer — the size is lost. <code>sizeof</code> inside the function returns the pointer size, not the array size. In C++ prefer <span class="kbd">std::array</span> or <span class="kbd">std::span</span>, which carry their length.</div>
+
+<h3>const correctness</h3>
+<pre><code class="language-cpp">const int* p1;        // pointer to const int: can't change *p1, can change p1
+int* const p2 = &amp;n;   // const pointer: can change *p2, can't change p2
+const int* const p3 = &amp;n; // both fixed
+// Read right-to-left: p1 is a pointer to an int that is const.</code></pre>
+
+<h2>Structs, Classes, and the Object Model</h2>
+<p>A <code>struct</code> groups data. In C++ a <code>class</code> adds member functions, access control, constructors, and destructors. The only difference between <code>struct</code> and <code>class</code> in C++ is the default access level (public vs private).</p>
+
+<pre><code class="language-cpp">struct Point {        // C-style aggregate, still valid C++
+    double x, y;
+};
+
+class Account {
+    double balance_;              // private by default
+public:
+    explicit Account(double initial) : balance_(initial) {}  // constructor
+
+    void deposit(double amt) { balance_ += amt; }
+    double balance() const { return balance_; } // const member: promises no mutation
+
+    ~Account() { /* destructor: runs when object dies */ }
+};
+
+Account a{100.0};
+a.deposit(50);
+std::cout &lt;&lt; a.balance();  // 150</code></pre>
+
+<div class="callout tip"><span class="t">Member initializer lists</span> Initialize members with <code>: balance_(initial)</code> rather than assigning inside the constructor body. It is required for <code>const</code> and reference members, and avoids a wasteful default-construct-then-assign.</div>
+
+<h2>RAII: The Idea That Defines Modern C++</h2>
+<p class="lead">Resource Acquisition Is Initialization: tie every resource (memory, file handle, lock, socket) to the lifetime of an object. The constructor acquires; the destructor releases. Because destructors run deterministically when scope exits — even during exceptions — you cannot forget to clean up.</p>
+
+<pre><code class="language-cpp">#include &lt;fstream&gt;
+#include &lt;mutex&gt;
+
+void write_log(std::mutex&amp; m, const std::string&amp; msg) {
+    std::lock_guard&lt;std::mutex&gt; lock(m);  // acquires lock in constructor
+    std::ofstream file("log.txt", std::ios::app); // opens file (RAII)
+    file &lt;&lt; msg &lt;&lt; '\n';
+    // No manual unlock, no manual close:
+    // ~ofstream closes the file, ~lock_guard releases the mutex,
+    // AUTOMATICALLY, even if an exception is thrown above.
+}</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 680 200" width="680" height="200">
+  <text x="340" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Object lifetime drives resource lifetime</text>
+  <rect x="30" y="50" width="140" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="100" y="72" text-anchor="middle" font-size="12" fill="#1a2233">enter scope</text>
+  <text x="100" y="90" text-anchor="middle" font-size="11" fill="#64748b">constructor</text>
+  <rect x="200" y="50" width="150" height="50" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="275" y="72" text-anchor="middle" font-size="12" fill="#1a2233">acquire resource</text>
+  <text x="275" y="90" text-anchor="middle" font-size="11" fill="#64748b">lock / open / alloc</text>
+  <rect x="380" y="50" width="130" height="50" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="445" y="78" text-anchor="middle" font-size="12" fill="#1a2233">use it</text>
+  <rect x="540" y="50" width="120" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="600" y="72" text-anchor="middle" font-size="12" fill="#1a2233">leave scope</text>
+  <text x="600" y="90" text-anchor="middle" font-size="11" fill="#64748b">destructor frees</text>
+  <defs><marker id="ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker></defs>
+  <line x1="170" y1="75" x2="196" y2="75" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="350" y1="75" x2="376" y2="75" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="510" y1="75" x2="536" y2="75" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="340" y="150" text-anchor="middle" font-size="12" fill="#64748b">The destructor is guaranteed to run on every exit path — normal return, break, or thrown exception.</text>
+</svg><div class="cap">Fig 4. RAII: cleanup is attached to scope exit, making leaks structurally impossible.</div></div>
+
+<h2>References, Copy, Move, and the Rule of Five</h2>
+<p>A reference is an alias for an existing object — it cannot be null and cannot be reseated. C++11 added <em>rvalue references</em> and move semantics, letting you transfer ownership of resources instead of copying them.</p>
+
+<pre><code class="language-cpp">void inc(int&amp; r) { r++; }   // lvalue reference: modifies the caller's variable
+int v = 5; inc(v);          // v == 6
+
+void print(const std::string&amp; s); // const ref: pass big objects without copying
+
+// Move semantics: steal the guts of a temporary instead of deep-copying
+std::vector&lt;int&gt; make() {
+    std::vector&lt;int&gt; big(1'000'000, 0);
+    return big;             // moved out, not copied (also NRVO)
+}
+std::vector&lt;int&gt; data = make();      // cheap
+std::vector&lt;int&gt; copy = data;        // deep copy (expensive)
+std::vector&lt;int&gt; moved = std::move(data); // steals data's buffer; data now empty</code></pre>
+
+<div class="callout note"><span class="t">Rule of Five / Rule of Zero</span> If you define any of destructor, copy constructor, copy assignment, move constructor, or move assignment, you usually need all five. Better: the <strong>Rule of Zero</strong> — design classes so members (vectors, smart pointers) manage resources, and you write none of the five.</div>
+
+<table>
+<tr><th>Operation</th><th>Signature</th><th>When it runs</th></tr>
+<tr><td>Copy constructor</td><td><code>T(const T&amp;)</code></td><td><code>T b = a;</code></td></tr>
+<tr><td>Copy assignment</td><td><code>T&amp; operator=(const T&amp;)</code></td><td><code>b = a;</code></td></tr>
+<tr><td>Move constructor</td><td><code>T(T&amp;&amp;)</code></td><td><code>T b = std::move(a);</code></td></tr>
+<tr><td>Move assignment</td><td><code>T&amp; operator=(T&amp;&amp;)</code></td><td><code>b = std::move(a);</code></td></tr>
+<tr><td>Destructor</td><td><code>~T()</code></td><td>scope exit / <code>delete</code></td></tr>
+</table>
+
+<h2>Smart Pointers: Ownership Without Leaks</h2>
+<p>Raw <code>new</code>/<code>delete</code> is error-prone. Smart pointers encode <em>ownership</em> in the type and apply RAII to heap memory. In modern C++ you should almost never write a bare <code>delete</code>.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>unique_ptr</h4>Sole owner, zero overhead. Move-only — cannot be copied. The default choice. <code>std::make_unique&lt;T&gt;(args)</code>.</div>
+  <div class="card"><h4>shared_ptr</h4>Shared ownership via an atomic reference count. Frees when the last owner dies. Slight overhead. <code>std::make_shared&lt;T&gt;(args)</code>.</div>
+  <div class="card"><h4>weak_ptr</h4>Non-owning observer of a <code>shared_ptr</code>. Breaks reference cycles. <code>lock()</code> to get a temporary <code>shared_ptr</code>.</div>
+</div>
+
+<pre><code class="language-cpp">#include &lt;memory&gt;
+
+struct Node { int val; std::shared_ptr&lt;Node&gt; next; };
+
+auto u = std::make_unique&lt;int&gt;(42);  // sole owner
+// auto u2 = u;                      // ERROR: can't copy a unique_ptr
+auto u2 = std::move(u);              // OK: ownership transferred, u is now null
+
+auto s1 = std::make_shared&lt;Node&gt;();  // refcount = 1
+auto s2 = s1;                        // refcount = 2
+// memory freed automatically when both s1 and s2 go out of scope
+
+// Pass ownership vs. borrow:
+void consume(std::unique_ptr&lt;int&gt; owned);   // takes ownership (by value)
+void observe(const int&amp; borrowed);          // just looks, no ownership</code></pre>
+
+<div class="callout danger"><span class="t">Cyclic leak</span> Two <code>shared_ptr</code>s pointing at each other never reach refcount 0 — a leak that smart pointers alone won't catch. Break the cycle by making one direction a <code>weak_ptr</code>.</div>
+
+<h2>Templates and Generic Programming</h2>
+<p>Templates let you write code once that works for any type, resolved at compile time with no runtime cost. The STL is built entirely on them. C++20 <em>concepts</em> make template requirements explicit and error messages readable.</p>
+
+<pre><code class="language-cpp">#include &lt;concepts&gt;
+
+// Function template
+template &lt;typename T&gt;
+T max_of(T a, T b) { return a &gt; b ? a : b; }
+
+// Class template
+template &lt;typename T&gt;
+class Box {
+    T value_;
+public:
+    explicit Box(T v) : value_(std::move(v)) {}
+    const T&amp; get() const { return value_; }
+};
+
+// C++20 concept: constrain the type
+template &lt;std::integral T&gt;        // only accepts integer types
+T double_it(T x) { return x * 2; }
+
+auto m = max_of(3, 7);           // T = int
+auto s = max_of&lt;std::string&gt;("a", "b");
+Box&lt;double&gt; b{3.14};
+// double_it(3.5);               // compile error: double is not integral</code></pre>
+
+<div class="callout tip"><span class="t">Compile-time cost</span> Templates are instantiated per type, which grows binary size and compile times. That is the price for runtime zero-overhead generics — a trade C++ deliberately makes.</div>
+
+<h2>The STL: Containers, Iterators, Algorithms</h2>
+<p>The Standard Template Library is three interlocking parts: <strong>containers</strong> hold data, <strong>iterators</strong> traverse it, and <strong>algorithms</strong> operate on iterator ranges. This separation means one algorithm works across all containers.</p>
+
+<div class="diagram"><svg viewBox="0 0 680 180" width="680" height="180">
+  <defs><marker id="ah5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker></defs>
+  <text x="340" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Algorithms talk to containers through iterators</text>
+  <rect x="40" y="60" width="150" height="60" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="115" y="86" text-anchor="middle" font-size="13" fill="#1a2233">Container</text>
+  <text x="115" y="104" text-anchor="middle" font-size="11" fill="#64748b">vector, map, set…</text>
+  <rect x="265" y="60" width="150" height="60" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="340" y="86" text-anchor="middle" font-size="13" fill="#1a2233">Iterator</text>
+  <text x="340" y="104" text-anchor="middle" font-size="11" fill="#64748b">begin() … end()</text>
+  <rect x="490" y="60" width="150" height="60" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="565" y="86" text-anchor="middle" font-size="13" fill="#1a2233">Algorithm</text>
+  <text x="565" y="104" text-anchor="middle" font-size="11" fill="#64748b">sort, find, count…</text>
+  <line x1="190" y1="90" x2="261" y2="90" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah5)"/>
+  <line x1="490" y1="90" x2="419" y2="90" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah5)"/>
+  <text x="340" y="160" text-anchor="middle" font-size="12" fill="#64748b">N containers + M algorithms interoperate through one iterator interface, not N×M special cases.</text>
+</svg><div class="cap">Fig 5. The iterator abstraction decouples algorithms from container internals.</div></div>
+
+<pre><code class="language-cpp">#include &lt;vector&gt;
+#include &lt;map&gt;
+#include &lt;algorithm&gt;
+#include &lt;numeric&gt;
+
+std::vector&lt;int&gt; v{5, 2, 8, 1, 9};
+std::sort(v.begin(), v.end());               // 1 2 5 8 9
+int total = std::accumulate(v.begin(), v.end(), 0);  // 25
+auto it = std::find(v.begin(), v.end(), 8);  // iterator to 8
+
+// Range-based for (C++11) and ranges (C++20)
+for (int x : v) std::cout &lt;&lt; x &lt;&lt; ' ';
+
+#include &lt;ranges&gt;
+namespace rng = std::ranges;
+auto evens = v | std::views::filter([](int x){ return x % 2 == 0; });
+
+std::map&lt;std::string, int&gt; counts;
+counts["apple"]++;        // inserts {"apple", 1} if absent, then increments</code></pre>
+
+<table>
+<tr><th>Container</th><th>Underlying</th><th>Lookup</th><th>Insert</th><th>Ordered?</th></tr>
+<tr><td><code>vector</code></td><td>dynamic array</td><td>O(1) index</td><td>O(1) amortized push_back</td><td>insertion order</td></tr>
+<tr><td><code>deque</code></td><td>chunked array</td><td>O(1) index</td><td>O(1) both ends</td><td>insertion order</td></tr>
+<tr><td><code>list</code></td><td>doubly linked</td><td>O(n)</td><td>O(1) with iterator</td><td>insertion order</td></tr>
+<tr><td><code>map</code> / <code>set</code></td><td>red-black tree</td><td>O(log n)</td><td>O(log n)</td><td>sorted by key</td></tr>
+<tr><td><code>unordered_map</code></td><td>hash table</td><td>O(1) average</td><td>O(1) average</td><td>no</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Default to vector</span> Contiguous memory means cache-friendliness that usually beats "theoretically faster" node-based containers. Reach for <code>vector</code> first; profile before switching.</div>
+
+<h2>Worked Mini-Example: A Word-Frequency Counter</h2>
+<p>This small program ties the pieces together — streams, strings, an unordered_map, and an algorithm — in idiomatic modern C++.</p>
+
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &lt;unordered_map&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+
+int main() {
+    const std::string text =
+        "the quick brown fox the lazy dog the fox";
+
+    std::unordered_map&lt;std::string, int&gt; freq;
+    std::istringstream in(text);
+    std::string word;
+    while (in &gt;&gt; word) ++freq[word];   // operator[] default-constructs 0, then ++
+
+    // Move pairs into a vector so we can sort by count (descending)
+    std::vector&lt;std::pair&lt;std::string, int&gt;&gt; items(freq.begin(), freq.end());
+    std::sort(items.begin(), items.end(),
+              [](const auto&amp; a, const auto&amp; b){ return a.second &gt; b.second; });
+
+    for (const auto&amp; [w, c] : items)   // structured bindings (C++17)
+        std::cout &lt;&lt; w &lt;&lt; ": " &lt;&lt; c &lt;&lt; '\n';
+    // the: 3, fox: 2, quick/brown/lazy/dog: 1
+}</code></pre>
+
+<h2>Compilation and Linking in Depth</h2>
+<p>C and C++ use <em>separate compilation</em>: each <code>.cpp</code> (a translation unit) is compiled independently. Headers are copied in textually by the preprocessor. The linker stitches the resulting object files together.</p>
+
+<pre><code class="language-cpp">// math.h — declarations (the interface)
+#ifndef MATH_H          // include guard: prevents double-inclusion
+#define MATH_H
+int add(int a, int b);  // declaration only
+#endif
+
+// math.cpp — definition (the implementation)
+#include "math.h"
+int add(int a, int b) { return a + b; }
+
+// main.cpp — uses the declaration
+#include "math.h"
+int main() { return add(2, 3); }</code></pre>
+
+<pre><code class="language-bash"># Compile each unit, then link
+g++ -c math.cpp -o math.o     # -c = compile only, no link
+g++ -c main.cpp -o main.o
+g++ math.o main.o -o app      # link into executable
+# "undefined reference to add" at this stage = linker can't find a definition</code></pre>
+
+<div class="callout note"><span class="t">Declaration vs definition</span> A <strong>declaration</strong> says "this exists somewhere" (the compiler is happy). A <strong>definition</strong> provides the body (the linker needs exactly one — the One Definition Rule). The classic "undefined reference" error means you declared and used but never linked a definition.</div>
+
+<h2>Undefined Behavior: The Dragons</h2>
+<p class="lead">Undefined behavior (UB) is the defining hazard of C and C++. The standard imposes no requirements — the program may crash, produce garbage, or appear to work until it doesn't. The compiler assumes UB never happens and optimizes accordingly, so a UB bug can delete your safety checks.</p>
+
+<table>
+<tr><th>Undefined behavior</th><th>Example</th><th>Defense</th></tr>
+<tr><td>Dereferencing null/dangling</td><td><code>*p</code> after <code>delete p</code></td><td>smart pointers, set to nullptr</td></tr>
+<tr><td>Buffer overflow</td><td><code>a[10]</code> on <code>int a[10]</code></td><td><code>.at()</code>, <code>std::span</code>, ASan</td></tr>
+<tr><td>Use-after-free</td><td>returning address of a local</td><td>RAII, don't return <code>&amp;</code>local</td></tr>
+<tr><td>Uninitialized read</td><td><code>int x; use(x);</code></td><td>always initialize</td></tr>
+<tr><td>Signed overflow</td><td><code>INT_MAX + 1</code></td><td>use unsigned / check bounds</td></tr>
+<tr><td>Double free</td><td><code>delete p; delete p;</code></td><td>unique_ptr</td></tr>
+</table>
+
+<pre><code class="language-cpp">// CLASSIC BUG: returning a dangling reference
+const std::string&amp; broken() {
+    std::string local = "oops";
+    return local;             // local destroyed on return — UB to use result
+}
+
+// Dangling pointer from use-after-free
+int* p = new int(5);
+delete p;
+std::cout &lt;&lt; *p;              // UB: reading freed memory
+
+// Off-by-one buffer overflow
+int a[3];
+for (int i = 0; i &lt;= 3; ++i) a[i] = i;  // writes a[3] — out of bounds!</code></pre>
+
+<div class="callout danger"><span class="t">Never ignore UB</span> "It works on my machine" is UB's favorite disguise. A read of uninitialized memory can pass tests for months, then corrupt data in production under a new compiler or optimization level. Run ASan/UBSan in CI.</div>
+
+<h2>Cheat Sheet and C vs C++ Comparison</h2>
+<table>
+<tr><th>Task</th><th>C</th><th>C++ (modern)</th></tr>
+<tr><td>Heap alloc</td><td><code>malloc/free</code></td><td><code>make_unique</code> / <code>make_shared</code></td></tr>
+<tr><td>Dynamic array</td><td>manual <code>realloc</code></td><td><code>std::vector</code></td></tr>
+<tr><td>String</td><td><code>char*</code> + <code>strcpy</code></td><td><code>std::string</code></td></tr>
+<tr><td>Null</td><td><code>NULL</code></td><td><code>nullptr</code></td></tr>
+<tr><td>Generic code</td><td>macros / <code>void*</code></td><td>templates / concepts</td></tr>
+<tr><td>Error handling</td><td>return codes / <code>errno</code></td><td>exceptions / <code>std::expected</code></td></tr>
+<tr><td>I/O</td><td><code>printf/scanf</code></td><td><code>std::cout</code> / <code>std::format</code></td></tr>
+<tr><td>Constants</td><td><code>#define</code></td><td><code>constexpr</code></td></tr>
+</table>
+
+<div class="pipeline"><span class="step">write code</span><span class="arrow">-&gt;</span><span class="step">-Wall -Wextra</span><span class="arrow">-&gt;</span><span class="step">sanitizers</span><span class="arrow">-&gt;</span><span class="step">profile</span><span class="arrow">-&gt;</span><span class="step">optimize</span></div>
+
+<h3>Best practices</h3>
+<div class="callout ok"><span class="t">Do</span> Prefer stack and RAII; use <code>std::vector</code>/<code>std::string</code> over raw arrays and <code>char*</code>; pass big objects by <code>const&amp;</code>; mark functions and members <code>const</code> and <code>noexcept</code> where true; use <code>auto</code> for obvious types; initialize every variable; follow the Rule of Zero.</div>
+<div class="callout warn"><span class="t">Avoid</span> Raw <code>new</code>/<code>delete</code>; C-style casts (use <code>static_cast</code>); owning raw pointers; macros for constants or functions; <code>using namespace std;</code> in headers; returning references/pointers to locals.</div>
+
+<h2>Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between the stack and the heap?</div><div class="a">The stack holds automatic local variables and call frames; allocation is a cheap pointer bump and cleanup is automatic on scope exit, but size is limited. The heap is for dynamic-lifetime objects you allocate (<code>new</code>/<code>malloc</code>) and must free; allocation is slower and can fail or fragment. Prefer the stack and RAII.</div></div>
+
+<div class="qa"><div class="q">What is RAII and why is it central to C++?</div><div class="a">Resource Acquisition Is Initialization binds a resource's lifetime to an object's lifetime: the constructor acquires, the destructor releases. Because destructors run deterministically on every scope exit — including during stack unwinding from an exception — resources (memory, locks, files) can't be leaked. It is the foundation of smart pointers, <code>lock_guard</code>, and <code>fstream</code>.</div></div>
+
+<div class="qa"><div class="q">unique_ptr vs shared_ptr — when do you use each?</div><div class="a"><code>unique_ptr</code> models sole ownership with zero overhead and is move-only; it's the default. <code>shared_ptr</code> models shared ownership via an atomic reference count, with the cost of that counter and potential cycles. Use <code>shared_ptr</code> only when ownership is genuinely shared, and use <code>weak_ptr</code> to break cycles.</div></div>
+
+<div class="qa"><div class="q">What is a dangling pointer, and how do you prevent one?</div><div class="a">A pointer that refers to memory which has been freed or whose object has gone out of scope. Dereferencing it is undefined behavior. Prevent it with RAII and smart pointers, by never returning the address of a local, and by not keeping raw pointers to objects you don't own. AddressSanitizer catches most at runtime.</div></div>
+
+<div class="qa"><div class="q">Explain the Rule of Five and the Rule of Zero.</div><div class="a">If a class manages a resource and you define one of {destructor, copy ctor, copy assign, move ctor, move assign}, you likely need all five, because the compiler-generated versions won't handle the resource correctly. The Rule of Zero says: avoid this entirely by composing from members (vectors, smart pointers) that already manage their resources, so you write none of the five.</div></div>
+
+<div class="qa"><div class="q">What is move semantics and what problem does it solve?</div><div class="a">Move semantics (C++11) let you transfer ownership of a resource (like a vector's heap buffer) from a temporary or soon-dead object instead of deep-copying it. An rvalue reference (<code>T&amp;&amp;</code>) binds to such objects; the move constructor steals the pointer and nulls the source. It turns an O(n) copy of a returned container into an O(1) pointer swap.</div></div>
+
+<div class="qa"><div class="q">Why pass by const reference?</div><div class="a">Passing <code>const T&amp;</code> avoids copying a potentially large object while guaranteeing the function won't modify it. It also lets the function accept temporaries. For small, cheap-to-copy types (int, pointers) pass by value instead.</div></div>
+
+<div class="qa"><div class="q">What is undefined behavior and why is it dangerous?</div><div class="a">UB is a program construct for which the standard imposes no requirements — out-of-bounds access, signed overflow, use-after-free, uninitialized reads. The compiler assumes UB never occurs and may optimize away checks around it, so bugs are nondeterministic and can silently appear to work. There's no portable guarantee of a crash; always test with sanitizers.</div></div>
+
+<div class="qa"><div class="q">How does the compilation model work — declaration vs definition?</div><div class="a">Each translation unit is compiled independently into an object file; headers are textually included. A declaration tells the compiler a name's type exists; a definition provides its body. The One Definition Rule requires exactly one definition across the program. The linker resolves symbols across object files — a missing definition yields "undefined reference" at link time, not compile time.</div></div>
+
+<div class="qa"><div class="q">vector vs list — which and why?</div><div class="a"><code>vector</code> is a contiguous dynamic array: O(1) random access and excellent cache locality, O(1) amortized <code>push_back</code>, but O(n) middle insertion. <code>list</code> is a doubly linked list: O(1) splice/insert given an iterator but O(n) traversal and poor cache behavior. In practice <code>vector</code> wins almost always because cache locality dominates; prefer it unless you have measured a need for stable node addresses or frequent middle splicing.</div></div>
+
+<div class="qa"><div class="q">What does a virtual function do, and what is the vtable?</div><div class="a">A <code>virtual</code> function enables runtime polymorphism: the call dispatches to the derived override based on the dynamic type. Implementations use a per-class vtable (array of function pointers); each polymorphic object stores a hidden vptr to its class's vtable. Always declare a <code>virtual</code> (or protected non-virtual) destructor in a base class you delete through a base pointer, or you get UB.</div></div>
+
+<div class="qa"><div class="q">What is the difference between a pointer and a reference?</div><div class="a">A reference is an alias to an existing object: it must be initialized, can't be null, and can't be reseated. A pointer is a variable holding an address: it can be null, reassigned, and do arithmetic. Use references for "must refer to something" parameters; use pointers (ideally smart pointers) when you need nullability, reseating, or ownership transfer.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+<li>Read <em>A Tour of C++</em> (Stroustrup) for a fast, authoritative modern overview, and the <strong>C++ Core Guidelines</strong> for day-to-day rules.</li>
+<li>Keep <a>cppreference.com</a> open — it is the definitive, accurate reference for the standard library and language.</li>
+<li>Practice with sanitizers (ASan, UBSan, TSan) and Valgrind until catching UB becomes second nature.</li>
+<li>Learn CMake and a package manager (vcpkg or Conan) to build real multi-file projects and pull in dependencies.</li>
+<li>Study the newer standards incrementally: C++17 (structured bindings, <code>std::optional</code>), C++20 (concepts, ranges, modules), C++23 (<code>std::expected</code>, <code>std::print</code>).</li>
+<li>For interviews, implement classic data structures from scratch (dynamic array, hash map, LRU cache) in C++ to cement memory and ownership reasoning.</li>
+</ul>

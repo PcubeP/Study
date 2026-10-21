@@ -1,0 +1,624 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WordPress & Elementor — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Tools & Software</div>
+  <h1>WordPress & Elementor</h1>
+  <div class="subtitle">Build, design, and run a professional website with no code — from the WordPress dashboard to the Elementor visual builder.</div>
+  <div class="tags"><span>wordpress</span><span>elementor</span><span>cms</span><span>page-builder</span><span>no-code</span><span>web-design</span><span>seo</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~16 min read &middot; 3,436 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-wordpress-amp-elementor-are-amp-why-they-matter">What WordPress &amp; Elementor Are &amp; Why They Matter</a></li><li><a href="#setup-amp-getting-started">Setup &amp; Getting Started</a></li><li><a href="#the-wordpress-dashboard">The WordPress Dashboard</a></li><li><a href="#content-the-block-gutenberg-editor">Content: The Block (Gutenberg) Editor</a></li><li><a href="#themes-menus-amp-users">Themes, Menus &amp; Users</a></li><li><a href="#plugins-amp-seo-basics">Plugins &amp; SEO Basics</a></li><li><a href="#elementor-the-visual-builder">Elementor: The Visual Builder</a></li><li><a href="#responsive-editing">Responsive Editing</a></li><li><a href="#templates-theme-builder-amp-global-design">Templates, Theme Builder &amp; Global Design</a></li><li><a href="#mini-project-a-landing-page-without-code">Mini Project: A Landing Page Without Code</a></li><li><a href="#maintenance-security-amp-performance">Maintenance, Security &amp; Performance</a></li><li><a href="#cheat-sheet-amp-comparison">Cheat Sheet &amp; Comparison</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-wordpress-amp-elementor-are-amp-why-they-matter">What WordPress &amp; Elementor Are &amp; Why They Matter</h2>
+<p class="lead">WordPress is the content-management system (CMS) behind roughly 43% of all websites on the internet. Elementor is the most popular visual, drag-and-drop page builder for WordPress — together they let you design, build, and run a professional website <strong>without writing code</strong>.</p>
+
+<p>It helps to separate two very different things people call "WordPress":</p>
+
+<div class="grid c2">
+  <div class="card"><h4>WordPress.org (self-hosted)</h4>The free, open-source software you install on your own hosting. Full control: any theme, any plugin, custom code, your own database. This is what Elementor needs — and what this guide covers.</div>
+  <div class="card"><h4>WordPress.com (hosted service)</h4>A commercial SaaS run by Automattic. Easier to start, but plugins/themes (and Elementor) are only allowed on paid Business+ tiers. Less control.</div>
+</div>
+
+<p>WordPress itself is "headless" about design: it stores your content (posts, pages, media, users) in a MySQL database and renders it through a <strong>theme</strong>. Historically you edited design by writing PHP/CSS. Elementor replaces that with a live visual canvas: you drag <strong>widgets</strong> onto the page, style them in a side panel, and see the result instantly.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 320" width="760" height="320">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="220" height="90" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="130" y="50" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Browser (visitor)</text>
+  <text x="130" y="72" text-anchor="middle" font-size="12" fill="#1a2233">Requests a URL</text>
+  <text x="130" y="90" text-anchor="middle" font-size="12" fill="#1a2233">Receives HTML/CSS/JS</text>
+
+  <rect x="300" y="20" width="220" height="200" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="410" y="46" text-anchor="middle" font-size="14" fill="#059669" font-weight="bold">Web server + PHP</text>
+  <text x="410" y="70" text-anchor="middle" font-size="12" fill="#1a2233">WordPress core</text>
+  <text x="410" y="90" text-anchor="middle" font-size="12" fill="#1a2233">Theme (layout)</text>
+  <text x="410" y="110" text-anchor="middle" font-size="12" fill="#1a2233">Plugins (features)</text>
+  <text x="410" y="130" text-anchor="middle" font-size="12" fill="#1a2233">Elementor (renders pages)</text>
+  <text x="410" y="160" text-anchor="middle" font-size="12" fill="#b45309" font-weight="bold">Builds the HTML page</text>
+
+  <rect x="580" y="20" width="160" height="90" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="660" y="50" text-anchor="middle" font-size="14" fill="#b45309" font-weight="bold">MySQL database</text>
+  <text x="660" y="72" text-anchor="middle" font-size="12" fill="#1a2233">Posts, pages,</text>
+  <text x="660" y="90" text-anchor="middle" font-size="12" fill="#1a2233">users, settings</text>
+
+  <rect x="580" y="140" width="160" height="80" rx="8" fill="#f0fdfa" stroke="#0891b2"/>
+  <text x="660" y="170" text-anchor="middle" font-size="14" fill="#0891b2" font-weight="bold">File system</text>
+  <text x="660" y="192" text-anchor="middle" font-size="12" fill="#1a2233">Media uploads,</text>
+  <text x="660" y="210" text-anchor="middle" font-size="12" fill="#1a2233">theme/plugin code</text>
+
+  <line x1="240" y1="55" x2="298" y2="55" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="298" y1="85" x2="242" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="520" y1="70" x2="578" y2="70" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="520" y1="170" x2="578" y2="170" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="270" y="48" text-anchor="middle" font-size="10" fill="#64748b">GET</text>
+  <text x="270" y="105" text-anchor="middle" font-size="10" fill="#64748b">HTML</text>
+</svg><div class="cap">Fig 1. Request lifecycle — WordPress + Elementor assemble HTML on the server from content in MySQL, then send it to the browser.</div></div>
+
+<div class="callout note"><span class="t">Mental model</span> WordPress manages <strong>content and logic</strong>; the theme defines the <strong>global shell</strong> (header, footer, fonts); Elementor controls the <strong>pixel-level design of individual pages</strong>. Keep these roles distinct and the whole system stays maintainable.</div>
+
+<h2 id="setup-amp-getting-started">Setup &amp; Getting Started</h2>
+<p>You need three things: a domain, hosting with PHP + MySQL, and the WordPress software. Most hosts offer one-click WordPress installs, but it is worth knowing the manual flow and how to run it locally for development.</p>
+
+<h3>Local development with the official tool</h3>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Option A: wp-env (official, Docker-based) — great for theme/plugin dev</span>
+npm -g install @wordpress/env
+<span class="hljs-built_in">mkdir</span> my-site &amp;&amp; <span class="hljs-built_in">cd</span> my-site
+npx wp-env start          <span class="hljs-comment"># spins up WordPress at http://localhost:8888</span>
+<span class="hljs-comment"># default admin login: user &quot;admin&quot;, password &quot;password&quot;</span>
+
+<span class="hljs-comment"># Option B: WP-CLI — scripted installs and automation on a server</span>
+wp core download
+wp config create --dbname=wp --dbuser=root --dbpass=secret
+wp core install --url=example.com --title=<span class="hljs-string">&quot;My Site&quot;</span> \
+  --admin_user=admin --admin_email=me@example.com --prompt=admin_password</code></pre>
+
+<h3>Installing Elementor</h3>
+<p>Once WordPress runs, install Elementor from the plugin directory — no download needed.</p>
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Via WP-CLI (equivalent to Plugins &gt; Add New &gt; search &quot;Elementor&quot;)</span>
+wp plugin install elementor --activate
+
+<span class="hljs-comment"># A theme built for page builders (blank canvas, fast)</span>
+wp theme install hello-elementor --activate</code></pre>
+
+<div class="callout tip"><span class="t">Theme choice matters</span> Use a lightweight, builder-friendly theme like <span class="badge">Hello Elementor</span>, <span class="badge">Astra</span>, or <span class="badge">GeneratePress</span>. Heavy "multipurpose" themes fight the page builder and slow the site. Hello Elementor is a deliberately near-empty theme that lets Elementor own the design.</div>
+
+<h2 id="the-wordpress-dashboard">The WordPress Dashboard</h2>
+<p>The dashboard (<code>/wp-admin</code>) is mission control. Learn the left-hand menu and you can find everything. Here is the map of the core admin areas and what each does.</p>
+
+<table>
+  <tr><th>Menu</th><th>What it controls</th><th>You'll use it for</th></tr>
+  <tr><td>Posts</td><td>Blog articles, organized by Categories &amp; Tags</td><td>News, blog, time-based content</td></tr>
+  <tr><td>Media</td><td>Uploaded images, video, PDFs (the Media Library)</td><td>Reusing assets, alt text, cleanup</td></tr>
+  <tr><td>Pages</td><td>Static, standalone content (Home, About, Contact)</td><td>Core site structure</td></tr>
+  <tr><td>Comments</td><td>Visitor comments &amp; moderation</td><td>Approving/spam-filtering replies</td></tr>
+  <tr><td>Appearance</td><td>Themes, menus, widgets, Customizer</td><td>Global look, navigation</td></tr>
+  <tr><td>Plugins</td><td>Add-on features; install/activate/update</td><td>Extending functionality</td></tr>
+  <tr><td>Users</td><td>Accounts &amp; roles/permissions</td><td>Team access, author profiles</td></tr>
+  <tr><td>Settings</td><td>Site title, permalinks, reading, discussion</td><td>One-time configuration</td></tr>
+  <tr><td>Tools</td><td>Import/export, site health</td><td>Migrations, diagnostics</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Set permalinks first</span> Go to <strong>Settings &gt; Permalinks</strong> and choose <span class="badge g">Post name</span> (<code>/sample-post/</code>) immediately after install. The default <code>?p=123</code> URLs are ugly and bad for SEO, and changing them later breaks existing links.</div>
+
+<h3>Posts vs Pages — the single most common beginner confusion</h3>
+<div class="grid c2">
+  <div class="card"><h4>Posts</h4>Chronological, dated entries that flow into feeds, archives, and categories. The blog. They support Categories &amp; Tags (taxonomies) and RSS.</div>
+  <div class="card"><h4>Pages</h4>Timeless, hierarchical content with no date and no categories. Can have parent/child relationships (<code>/services/consulting</code>). This is your site skeleton.</div>
+</div>
+
+<div class="code-label">TEXT</div><pre><code class="hljs">Decision rule:
+  Is it dated / will there be more like it over time?  -&gt;  POST
+  Is it a fixed part of the site structure?           -&gt;  PAGE</code></pre>
+
+<h2 id="content-the-block-gutenberg-editor">Content: The Block (Gutenberg) Editor</h2>
+<p>WordPress's native editor is <strong>Gutenberg</strong>, a block editor. Even if you build pages in Elementor, you'll write blog posts here. Every piece of content — a paragraph, image, heading, button — is a <em>block</em>.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <rect x="20" y="20" width="680" height="40" rx="6" fill="#1e3a8a"/>
+  <text x="40" y="45" font-size="13" fill="#ffffff" font-weight="bold">Top bar:</text>
+  <text x="120" y="45" font-size="12" fill="#cbd5e1">+ Add block | Undo/Redo | Document outline | Settings | Publish</text>
+
+  <rect x="20" y="80" width="470" height="160" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="40" y="106" font-size="13" fill="#1a2233" font-weight="bold">Heading block</text>
+  <rect x="40" y="118" width="420" height="26" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="52" y="136" font-size="12" fill="#64748b">The main title of this section</text>
+  <text x="40" y="172" font-size="13" fill="#1a2233" font-weight="bold">Paragraph block</text>
+  <rect x="40" y="184" width="420" height="44" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="52" y="202" font-size="12" fill="#64748b">Body text. Each paragraph is its</text>
+  <text x="52" y="220" font-size="12" fill="#64748b">own independent, movable block.</text>
+
+  <rect x="510" y="80" width="190" height="160" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="605" y="104" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Settings sidebar</text>
+  <text x="605" y="130" text-anchor="middle" font-size="11" fill="#1a2233">Block vs Document tabs</text>
+  <text x="605" y="150" text-anchor="middle" font-size="11" fill="#1a2233">Typography, color</text>
+  <text x="605" y="170" text-anchor="middle" font-size="11" fill="#1a2233">Categories, tags,</text>
+  <text x="605" y="188" text-anchor="middle" font-size="11" fill="#1a2233">featured image, excerpt</text>
+  <text x="605" y="212" text-anchor="middle" font-size="11" fill="#1a2233">Visibility &amp; schedule</text>
+</svg><div class="cap">Fig 2. The Gutenberg editor layout: block canvas on the left, contextual settings on the right.</div></div>
+
+<div class="callout note"><span class="t">Gutenberg vs Elementor</span> They are two different editing systems. Gutenberg is built into WordPress and ideal for blog posts and simple pages. Elementor is a separate plugin for designing complex, pixel-controlled landing pages. A page is edited by one or the other — you'll see an "Edit with Elementor" button that switches modes.</div>
+
+<h2 id="themes-menus-amp-users">Themes, Menus &amp; Users</h2>
+<h3>Themes</h3>
+<p>A theme controls global presentation. Modern WordPress supports two kinds: <strong>Classic themes</strong> (PHP templates + Customizer) and <strong>Block themes</strong> (edited visually via Full Site Editing). For Elementor projects you typically pick a minimal classic theme and let Elementor's own Theme Builder handle headers/footers.</p>
+
+<h3>Navigation menus</h3>
+<p>Under <strong>Appearance &gt; Menus</strong>, you build navigation by adding pages, posts, categories, or custom links, then dragging them into order (indent to nest). Assign a menu to a <em>location</em> the theme exposes (Primary, Footer).</p>
+
+<h3>Users &amp; roles</h3>
+<p>WordPress ships five default roles, each a capability bundle. Grant the <em>least privilege</em> needed.</p>
+<table>
+  <tr><th>Role</th><th>Can do</th><th>Typical use</th></tr>
+  <tr><td>Administrator</td><td>Everything: plugins, themes, users, settings, code</td><td>Site owner / developer</td></tr>
+  <tr><td>Editor</td><td>Publish/edit/delete <em>any</em> post or page</td><td>Content manager</td></tr>
+  <tr><td>Author</td><td>Publish/edit/delete only their own posts</td><td>Regular contributors</td></tr>
+  <tr><td>Contributor</td><td>Write/edit own posts but cannot publish</td><td>Guest writers (needs review)</td></tr>
+  <tr><td>Subscriber</td><td>Manage own profile only; read</td><td>Members, commenters</td></tr>
+</table>
+
+<div class="callout danger"><span class="t">Never share admin accounts</span> Give each person their own account at the lowest sufficient role. A compromised Administrator account means total site takeover. Avoid the username <code>admin</code> and enable two-factor authentication.</div>
+
+<h2 id="plugins-amp-seo-basics">Plugins &amp; SEO Basics</h2>
+<p>Plugins extend WordPress. There is a plugin for nearly everything — contact forms, caching, backups, e-commerce (WooCommerce), security, SEO. Install from <strong>Plugins &gt; Add New</strong>, by uploading a <code>.zip</code>, or via WP-CLI.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>SEO</h4>Yoast SEO or Rank Math — titles, meta descriptions, sitemaps, schema.</div>
+  <div class="card"><h4>Performance</h4>WP Rocket / LiteSpeed Cache — page caching, minification, lazy-load.</div>
+  <div class="card"><h4>Security</h4>Wordfence / Solid Security — firewall, login limiting, malware scans.</div>
+  <div class="card"><h4>Forms</h4>WPForms / Fluent Forms — contact and lead-capture forms.</div>
+  <div class="card"><h4>Backups</h4>UpdraftPlus — scheduled off-site backups to cloud storage.</div>
+  <div class="card"><h4>E-commerce</h4>WooCommerce — turn the site into a full online store.</div>
+</div>
+
+<h3>On-page SEO fundamentals</h3>
+<p>Search engines rank content, not plugins. A plugin just makes the right metadata easy to set. The fundamentals you control on every page:</p>
+<table>
+  <tr><th>Element</th><th>Why it matters</th><th>Rule of thumb</th></tr>
+  <tr><td>Title tag</td><td>Headline in Google results; strong ranking signal</td><td>~50-60 chars, keyword near front</td></tr>
+  <tr><td>Meta description</td><td>Snippet under the title; affects click-through</td><td>~150-160 chars, compelling</td></tr>
+  <tr><td>URL slug</td><td>Readable, keyword-bearing permalink</td><td>Short, hyphenated, lowercase</td></tr>
+  <tr><td>H1 / headings</td><td>Structure &amp; topic signals</td><td>One H1; logical H2/H3 nesting</td></tr>
+  <tr><td>Image alt text</td><td>Accessibility + image search</td><td>Describe the image literally</td></tr>
+  <tr><td>Internal links</td><td>Spreads authority; aids crawling</td><td>Link related pages naturally</td></tr>
+</table>
+
+<div class="code-label">HTML</div><pre><code class="hljs"><span class="hljs-comment">&lt;!-- What good SEO metadata produces in the page &lt;head&gt; --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Beginner&#x27;s Guide to Composting — GreenHome<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;description&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;Learn how to start composting at home in
+      five simple steps, with a bin setup checklist and troubleshooting tips.&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">&quot;canonical&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;https://greenhome.example/composting-guide/&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">&quot;og:title&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;Beginner&#x27;s Guide to Composting&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">property</span>=<span class="hljs-string">&quot;og:image&quot;</span> <span class="hljs-attr">content</span>=<span class="hljs-string">&quot;https://greenhome.example/img/compost.jpg&quot;</span>&gt;</span></code></pre>
+
+<div class="callout warn"><span class="t">Don't drown in plugins</span> Every active plugin adds code, potential conflicts, and attack surface. Audit regularly, remove what you don't use, and prefer one well-maintained plugin over three overlapping ones.</div>
+
+<h2 id="elementor-the-visual-builder">Elementor: The Visual Builder</h2>
+<p>Click <strong>Edit with Elementor</strong> on any page and WordPress hands rendering to Elementor's live editor. The screen splits into a <strong>panel</strong> (left) of widgets and settings, and a <strong>canvas</strong> (right) showing the real page.</p>
+
+<div class="diagram"><svg viewBox="0 0 740 300" width="740" height="300">
+  <rect x="20" y="20" width="210" height="260" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="125" y="44" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Panel</text>
+  <rect x="36" y="58" width="178" height="22" rx="3" fill="#ffffff" stroke="#2563eb"/>
+  <text x="125" y="74" text-anchor="middle" font-size="11" fill="#1a2233">Widgets (drag these)</text>
+  <text x="48" y="102" font-size="11" fill="#1a2233">Content | Style | Advanced</text>
+  <rect x="36" y="112" width="178" height="150" rx="3" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="125" y="140" text-anchor="middle" font-size="11" fill="#64748b">Settings for the</text>
+  <text x="125" y="158" text-anchor="middle" font-size="11" fill="#64748b">selected element:</text>
+  <text x="125" y="180" text-anchor="middle" font-size="11" fill="#64748b">text, color, spacing,</text>
+  <text x="125" y="198" text-anchor="middle" font-size="11" fill="#64748b">background, motion</text>
+
+  <rect x="250" y="20" width="470" height="260" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="485" y="44" text-anchor="middle" font-size="13" fill="#1a2233" font-weight="bold">Canvas (live page)</text>
+  <rect x="270" y="60" width="430" height="90" rx="4" fill="#ecfdf5" stroke="#059669" stroke-dasharray="4 3"/>
+  <text x="285" y="78" font-size="11" fill="#059669" font-weight="bold">Section / Container</text>
+  <rect x="286" y="88" width="190" height="54" rx="4" fill="#ffffff" stroke="#0891b2"/>
+  <text x="381" y="118" text-anchor="middle" font-size="11" fill="#0891b2">Column A (widgets)</text>
+  <rect x="494" y="88" width="190" height="54" rx="4" fill="#ffffff" stroke="#0891b2"/>
+  <text x="589" y="118" text-anchor="middle" font-size="11" fill="#0891b2">Column B (widgets)</text>
+  <rect x="270" y="166" width="430" height="94" rx="4" fill="#fff7ed" stroke="#b45309" stroke-dasharray="4 3"/>
+  <text x="285" y="184" font-size="11" fill="#b45309" font-weight="bold">Section / Container</text>
+  <rect x="286" y="194" width="414" height="54" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="493" y="226" text-anchor="middle" font-size="11" fill="#64748b">Heading widget + Button widget</text>
+</svg><div class="cap">Fig 3. Elementor's editor: drag a widget from the panel onto the canvas; its settings open in the panel.</div></div>
+
+<h3>The structural hierarchy</h3>
+<p>Everything in Elementor nests in a strict hierarchy. In the modern <strong>Container</strong> model (which uses CSS Flexbox/Grid and replaced the old Section/Column system), it is simpler and more powerful:</p>
+
+<div class="pipeline"><span class="step">Container</span><span class="arrow">-></span><span class="step">(nested Container)</span><span class="arrow">-></span><span class="step">Widget</span></div>
+
+<table>
+  <tr><th>Element</th><th>Role</th><th>Legacy equivalent</th></tr>
+  <tr><td>Container</td><td>Flex/Grid box holding widgets or other containers</td><td>Section + Column combined</td></tr>
+  <tr><td>Widget</td><td>The actual content: heading, image, button, form</td><td>Widget (unchanged)</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Use Flexbox Containers, not Sections</span> As of recent versions, Containers are the default and recommended structure. They are lighter (less markup), map directly to CSS Flexbox/Grid, and give true responsive control. Only touch the legacy Section/Column system on old sites that already use it.</div>
+
+<h3>Widgets you'll use constantly</h3>
+<div class="grid c3">
+  <div class="card"><h4>Heading</h4>Titles with full typography control and HTML tag selection (H1-H6).</div>
+  <div class="card"><h4>Text Editor</h4>Rich body copy, like a mini word processor.</div>
+  <div class="card"><h4>Image / Gallery</h4>Single images or grids with lightbox.</div>
+  <div class="card"><h4>Button</h4>Call-to-action with link, icon, hover styles.</div>
+  <div class="card"><h4>Icon Box</h4>Icon + heading + text — perfect for feature lists.</div>
+  <div class="card"><h4>Form (Pro)</h4>Contact/lead forms with actions after submit.</div>
+  <div class="card"><h4>Spacer / Divider</h4>Control vertical rhythm and separation.</div>
+  <div class="card"><h4>Image Carousel</h4>Sliding image sets for logos or testimonials.</div>
+  <div class="card"><h4>Tabs / Accordion</h4>Condense content; FAQs, specs.</div>
+</div>
+
+<h3>The three editing tabs</h3>
+<p>Select any widget and the panel shows three tabs — this structure is identical for every element, which is why Elementor is fast to learn:</p>
+<table>
+  <tr><th>Tab</th><th>Controls</th><th>Examples</th></tr>
+  <tr><td><span class="badge">Content</span></td><td>What the element says/does</td><td>Button text, link URL, image source</td></tr>
+  <tr><td><span class="badge g">Style</span></td><td>How it looks</td><td>Typography, colors, borders, backgrounds</td></tr>
+  <tr><td><span class="badge o">Advanced</span></td><td>Positioning &amp; behavior</td><td>Margin, padding, motion, responsive, custom CSS</td></tr>
+</table>
+
+<h2 id="responsive-editing">Responsive Editing</h2>
+<p>Elementor edits visually per device. The responsive toggle switches the canvas between desktop, tablet, and mobile viewports. Most style controls show a small device icon — changes you make in a given mode <em>cascade down</em> to smaller screens unless overridden.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 230" width="720" height="230">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <rect x="30" y="40" width="200" height="140" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="130" y="66" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Desktop</text>
+  <text x="130" y="88" text-anchor="middle" font-size="11" fill="#64748b">base styles</text>
+  <rect x="55" y="100" width="70" height="60" rx="4" fill="#ffffff" stroke="#0891b2"/>
+  <rect x="135" y="100" width="70" height="60" rx="4" fill="#ffffff" stroke="#0891b2"/>
+  <text x="130" y="134" text-anchor="middle" font-size="10" fill="#64748b">2 columns</text>
+
+  <rect x="275" y="55" width="150" height="110" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="350" y="80" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">Tablet</text>
+  <text x="350" y="100" text-anchor="middle" font-size="11" fill="#64748b">&lt;=1024px</text>
+  <rect x="295" y="110" width="110" height="22" rx="4" fill="#ffffff" stroke="#0891b2"/>
+  <rect x="295" y="136" width="110" height="22" rx="4" fill="#ffffff" stroke="#0891b2"/>
+
+  <rect x="470" y="50" width="100" height="130" rx="8" fill="#fff7ed" stroke="#b45309"/>
+  <text x="520" y="74" text-anchor="middle" font-size="13" fill="#b45309" font-weight="bold">Mobile</text>
+  <text x="520" y="94" text-anchor="middle" font-size="11" fill="#64748b">&lt;=767px</text>
+  <rect x="485" y="104" width="70" height="20" rx="4" fill="#ffffff" stroke="#0891b2"/>
+  <rect x="485" y="130" width="70" height="20" rx="4" fill="#ffffff" stroke="#0891b2"/>
+  <rect x="485" y="156" width="70" height="16" rx="4" fill="#ffffff" stroke="#0891b2"/>
+
+  <line x1="230" y1="110" x2="273" y2="110" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="425" y1="110" x2="468" y2="110" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="610" y="110" font-size="11" fill="#1a2233">Styles cascade</text>
+  <text x="610" y="128" font-size="11" fill="#1a2233">downward unless</text>
+  <text x="610" y="146" font-size="11" fill="#1a2233">overridden per</text>
+  <text x="610" y="164" font-size="11" fill="#1a2233">device.</text>
+</svg><div class="cap">Fig 4. Responsive cascade — set the desktop baseline, then override only what needs to change on tablet and mobile.</div></div>
+
+<div class="callout warn"><span class="t">Edit per-device, don't fight it</span> A common mistake is setting a huge font size on desktop and forgetting mobile. Always preview every breakpoint. Hide elements per device with the Advanced &gt; Responsive visibility controls rather than deleting them.</div>
+
+<h2 id="templates-theme-builder-amp-global-design">Templates, Theme Builder &amp; Global Design</h2>
+<p>Elementor's real power is reusability. Instead of rebuilding a header on every page, you design it once and apply it everywhere.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Page/Block Templates</h4>Save any design (or import from the library) and reuse it. Great for consistent service pages or starting from a pre-made block.</div>
+  <div class="card"><h4>Theme Builder (Pro)</h4>Design the site's <strong>header, footer, single-post, archive, and 404</strong> templates visually, with display conditions ("apply to all pages", "only to blog posts").</div>
+</div>
+
+<h3>Global settings — set once, change everywhere</h3>
+<p>Under the hamburger menu &gt; <strong>Site Settings</strong>, define Global Colors and Global Fonts. Reference these everywhere instead of hard-coding hex values; change the global and the whole site updates.</p>
+
+<div class="pipeline"><span class="step">Define Global Color "Primary"</span><span class="arrow">-></span><span class="step">Apply to 50 buttons</span><span class="arrow">-></span><span class="step">Rebrand = change 1 value</span></div>
+
+<div class="callout ok"><span class="t">Best practice</span> Build a small design system first: 4-6 global colors, 3-4 global fonts (heading, body, accent). Everything you place should reference them. This is the single biggest lever for a consistent, maintainable site.</div>
+
+<h2 id="mini-project-a-landing-page-without-code">Mini Project: A Landing Page Without Code</h2>
+<p>Let's build a simple product landing page end-to-end. The steps map one-to-one to clicks in the editor.</p>
+
+<details><summary>Step-by-step build</summary><div class="body">
+<div class="code-label">TEXT</div><pre><code class="hljs">1.  Pages &gt; Add New &gt; title &quot;Launch&quot; &gt; Publish &gt; Edit with Elementor
+2.  Site Settings: set Global Colors (Primary #2563eb, Text #1a2233)
+    and Global Fonts (Headings: Poppins, Body: Inter)
+3.  Add a Container (full width). Set it to Flex, direction column, centered.
+4.  Drop a Heading widget -&gt; &quot;Ship faster with Acme&quot;
+      Style tab: use Global &quot;Primary&quot; color, size 48 (desktop) / 32 (mobile)
+5.  Drop a Text Editor under it -&gt; one-line value proposition
+6.  Drop a Button -&gt; text &quot;Start free trial&quot;, link to #signup, add hover color
+7.  New Container below, set Flex direction = row, 3 equal children
+      In each: an Icon Box widget (icon + title + short text) = features
+8.  New Container -&gt; add the Form widget (Pro) -&gt; email + submit, id &quot;signup&quot;
+9.  Responsive: switch to Mobile view, stack the 3 feature boxes vertically,
+      shrink heading, add top/bottom padding
+10. Update. Preview. Done -- zero code written.</code></pre>
+</div></details>
+
+<p>If you prefer a static, no-plugin equivalent, the exact same layout in hand-written code looks like this — useful for understanding what Elementor generates:</p>
+<div class="code-label">HTML</div><pre><code class="hljs"><span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;hero&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;hero__title&quot;</span>&gt;</span>Ship faster with Acme<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;hero__sub&quot;</span>&gt;</span>The toolkit that cuts release time in half.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;btn&quot;</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;#signup&quot;</span>&gt;</span>Start free trial<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;features&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;feature&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Fast<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Sub-second builds.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;feature&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Simple<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>No config needed.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;feature&quot;</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">h3</span>&gt;</span>Secure<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>SSO out of the box.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span></code></pre>
+
+<div class="code-label">CSS</div><pre><code class="hljs"><span class="hljs-selector-class">.hero</span> { <span class="hljs-attribute">display</span>:flex; <span class="hljs-attribute">flex-direction</span>:column; <span class="hljs-attribute">align-items</span>:center; <span class="hljs-attribute">padding</span>:<span class="hljs-number">5rem</span> <span class="hljs-number">1rem</span>; }
+<span class="hljs-selector-class">.hero__title</span> { <span class="hljs-attribute">font</span>: <span class="hljs-number">700</span> <span class="hljs-number">48px</span>/<span class="hljs-number">1.1</span> <span class="hljs-string">&quot;Poppins&quot;</span>, sans-serif; <span class="hljs-attribute">color</span>:<span class="hljs-number">#2563eb</span>; }
+<span class="hljs-selector-class">.btn</span> { <span class="hljs-attribute">background</span>:<span class="hljs-number">#2563eb</span>; <span class="hljs-attribute">color</span>:<span class="hljs-number">#fff</span>; <span class="hljs-attribute">padding</span>:.<span class="hljs-number">75rem</span> <span class="hljs-number">1.5rem</span>; <span class="hljs-attribute">border-radius</span>:<span class="hljs-number">8px</span>; }
+<span class="hljs-selector-class">.features</span> { <span class="hljs-attribute">display</span>:flex; <span class="hljs-attribute">gap</span>:<span class="hljs-number">1.5rem</span>; }
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">max-width</span>:<span class="hljs-number">767px</span>){
+  <span class="hljs-selector-class">.hero__title</span> { <span class="hljs-attribute">font-size</span>:<span class="hljs-number">32px</span>; }
+  <span class="hljs-selector-class">.features</span> { <span class="hljs-attribute">flex-direction</span>:column; }   <span class="hljs-comment">/* stack on mobile */</span>
+}</code></pre>
+
+<h2 id="maintenance-security-amp-performance">Maintenance, Security &amp; Performance</h2>
+<p>A website is a living system. These habits keep it fast, safe, and online.</p>
+<div class="grid c2">
+  <div class="card"><h4>Update regularly</h4>Keep core, theme, and plugins updated — most hacks exploit known, already-patched holes. Update on a staging copy first.</div>
+  <div class="card"><h4>Back up automatically</h4>Schedule off-site backups (database + files). A backup you've never restored is a hope, not a plan — test it.</div>
+  <div class="card"><h4>Use HTTPS</h4>Install a free SSL certificate (Let's Encrypt). It's a ranking signal and a trust necessity.</div>
+  <div class="card"><h4>Cache + optimize images</h4>Caching and modern image formats (WebP/AVIF) are the two biggest speed wins. Elementor adds markup, so performance hygiene matters.</div>
+</div>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Routine maintenance via WP-CLI (easily scriptable in a cron job)</span>
+wp core update &amp;&amp; wp core update-db
+wp plugin update --all
+wp theme update --all
+wp db <span class="hljs-built_in">export</span> backup-$(<span class="hljs-built_in">date</span> +%F).sql    <span class="hljs-comment"># quick database dump</span>
+wp cache flush                          <span class="hljs-comment"># clear object cache</span></code></pre>
+
+<div class="callout danger"><span class="t">Staging, always</span> Never update plugins or run experiments directly on a live site. Clone to a staging environment, verify, then push to production. A bad plugin update can white-screen a live store.</div>
+
+<h2 id="cheat-sheet-amp-comparison">Cheat Sheet &amp; Comparison</h2>
+<h3>Quick reference</h3>
+<table>
+  <tr><th>Task</th><th>Where / How</th></tr>
+  <tr><td>Change site URL structure</td><td>Settings &gt; Permalinks &gt; Post name</td></tr>
+  <tr><td>Add a navigation menu</td><td>Appearance &gt; Menus</td></tr>
+  <tr><td>Install a plugin</td><td>Plugins &gt; Add New (or <code>wp plugin install</code>)</td></tr>
+  <tr><td>Edit a page visually</td><td>Open page &gt; Edit with Elementor</td></tr>
+  <tr><td>Reuse a design</td><td>Elementor &gt; save as Template</td></tr>
+  <tr><td>Change brand colors globally</td><td>Elementor &gt; Site Settings &gt; Global Colors</td></tr>
+  <tr><td>Make a layout responsive</td><td>Elementor responsive toggle &gt; edit per device</td></tr>
+  <tr><td>Set SEO title/description</td><td>SEO plugin box below the editor</td></tr>
+  <tr><td>Create a header/footer</td><td>Elementor &gt; Theme Builder (Pro)</td></tr>
+</table>
+
+<h3>Elementor Free vs Pro</h3>
+<table>
+  <tr><th>Capability</th><th>Free</th><th>Pro</th></tr>
+  <tr><td>Drag-and-drop editor + Containers</td><td>Yes</td><td>Yes</td></tr>
+  <tr><td>Core widgets (heading, image, button...)</td><td>~40</td><td>100+</td></tr>
+  <tr><td>Form widget</td><td>No</td><td>Yes</td></tr>
+  <tr><td>Theme Builder (header/footer/single)</td><td>No</td><td>Yes</td></tr>
+  <tr><td>Popup Builder, WooCommerce widgets</td><td>No</td><td>Yes</td></tr>
+  <tr><td>Dynamic content / custom fields</td><td>No</td><td>Yes</td></tr>
+</table>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What's the difference between WordPress.org and WordPress.com?</div><div class="a">WordPress.org is the free, open-source, self-hosted software — you install it on your own hosting and have full control over themes, plugins, and code. WordPress.com is a commercial hosted service by Automattic; it's easier to start but restricts plugins/themes to higher paid tiers. Elementor requires the self-hosted (.org) version.</div></div>
+
+<div class="qa"><div class="q">When should content be a Post versus a Page?</div><div class="a">Use a Post for dated, chronological, recurring content (blog articles, news) — Posts support categories, tags, and RSS feeds. Use a Page for timeless, structural content (Home, About, Contact) that can be hierarchical but has no date or taxonomy.</div></div>
+
+<div class="qa"><div class="q">Explain the five default user roles.</div><div class="a">Administrator (full control), Editor (manage all content), Author (manage only their own published posts), Contributor (write but not publish), Subscriber (profile/read only). The principle is least privilege: give each user the lowest role that lets them do their job.</div></div>
+
+<div class="qa"><div class="q">What is the difference between Gutenberg and Elementor?</div><div class="a">Gutenberg is WordPress's built-in block editor, great for writing posts and simple pages. Elementor is a separate page-builder plugin offering a live, pixel-level visual canvas for complex layouts. A given page is edited by one or the other; Elementor adds an "Edit with Elementor" mode.</div></div>
+
+<div class="qa"><div class="q">In Elementor, what replaced Sections and Columns, and why does it matter?</div><div class="a">Flexbox Containers. They map directly to CSS Flexbox/Grid, produce lighter markup, nest freely, and offer far better responsive control. Containers are now the default and recommended structure; the old Section/Column model is legacy.</div></div>
+
+<div class="qa"><div class="q">How does Elementor handle responsive design?</div><div class="a">It provides a device toggle (desktop/tablet/mobile plus custom breakpoints). Styles set at a larger breakpoint cascade down to smaller ones unless explicitly overridden per device. You can also hide/show elements per device via Advanced &gt; Responsive.</div></div>
+
+<div class="qa"><div class="q">What are Global Colors and Global Fonts, and why use them?</div><div class="a">They're a central design system defined in Site Settings. Elements reference the global token instead of a hard-coded value, so changing one global color or font updates it everywhere. This gives consistency and makes rebranding a one-line change.</div></div>
+
+<div class="qa"><div class="q">What does an SEO plugin like Yoast actually do? Does it improve rankings by itself?</div><div class="a">It makes it easy to set titles, meta descriptions, canonical URLs, XML sitemaps, and structured data, and flags readability/keyword issues. It doesn't rank you by itself — content quality, relevance, backlinks, and site speed do that. The plugin just removes technical friction.</div></div>
+
+<div class="qa"><div class="q">Why can too many plugins be a problem?</div><div class="a">Each active plugin adds code (slowing load), potential conflicts with other plugins/themes, maintenance overhead, and attack surface for security. Prefer fewer, well-maintained plugins and audit regularly.</div></div>
+
+<div class="qa"><div class="q">What's the first thing you'd configure on a fresh WordPress install?</div><div class="a">Permalinks (set to "Post name" for clean, SEO-friendly URLs), because changing them later breaks existing links. Then site title/tagline, a secure non-"admin" account with 2FA, HTTPS, and a backup plugin.</div></div>
+
+<div class="qa"><div class="q">Why would you build headers and footers in Elementor's Theme Builder instead of per page?</div><div class="a">Theme Builder lets you design the header/footer/single/archive templates once and apply them site-wide via display conditions. This guarantees consistency and means a change propagates everywhere — rebuilding them per page is error-prone and unmaintainable.</div></div>
+
+<div class="qa"><div class="q">How do you keep a WordPress site secure and fast in production?</div><div class="a">Keep core/themes/plugins updated (test on staging first), use HTTPS, enforce strong unique logins with 2FA and least-privilege roles, run a security plugin/firewall, schedule off-site backups, and improve speed with caching plus optimized WebP/AVIF images and a CDN.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li>Build a full multi-page site end-to-end: home, services, blog, and a contact form with Theme Builder header/footer.</li>
+  <li>Learn WooCommerce to turn a WordPress site into a store, and style product/checkout pages with Elementor Pro's WooCommerce widgets.</li>
+  <li>Study Core Web Vitals and run Lighthouse/PageSpeed audits; practice caching, image optimization, and reducing plugin bloat.</li>
+  <li>Explore dynamic content and custom fields (ACF) to build data-driven templates in the Theme Builder.</li>
+  <li>Learn the basics of child themes, <code>functions.php</code>, and custom CSS so you can extend beyond no-code when needed.</li>
+  <li>Practice migrations and backups (WP-CLI, UpdraftPlus) and set up a proper staging-to-production workflow.</li>
+  <li>Read the official docs: WordPress Developer Handbook and the Elementor Help Center / Academy.</li>
+</ul>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

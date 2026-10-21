@@ -1,0 +1,449 @@
+<p class="lead">SAP AI Core is the engine room for AI inside the SAP Business Technology Platform (BTP). It runs your training and inference workloads on Kubernetes, serves models behind stable endpoints, and — through the <strong>Generative AI Hub</strong> and the <strong>Orchestration</strong> service — gives you one governed, auditable door to foundation models from OpenAI, Anthropic, Google, Mistral, Meta and SAP itself. If your organisation lives in S/4HANA, SuccessFactors or Ariba, AI Core is how you add AI without smuggling data out to a random vendor API.</p>
+
+<h2>1. What SAP AI Core Is and Why It Matters</h2>
+
+<p>SAP AI Core is a <strong>runtime</strong>, not a modelling tool. You do not click together neural networks in it; you hand it containerised workflows and it executes them — on demand, at scale, with isolation and lineage. It is built on open standards: <span class="badge">Argo Workflows</span> for training pipelines, <span class="badge">KServe</span> for model serving, and a GitOps model (via Argo CD) for declaring what should run. On top of that infrastructure, the <span class="badge g">Generative AI Hub</span> adds a managed proxy to the world's foundation models.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Governed access to LLMs</h4>One contract, one audit trail, EU/role-based data residency. No scattered API keys, no data leaving your BTP subaccount uncontrolled.</div>
+  <div class="card"><h4>Runs your own ML</h4>Bring a Docker image + a workflow template and AI Core trains and serves it on managed GPU/CPU — no cluster to babysit.</div>
+  <div class="card"><h4>Deep SAP integration</h4>First-class hooks into SAP HANA Cloud (vector engine), Datasphere, S/4HANA and the ABAP SDK for generative AI.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 740 300" width="740" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="46" text-anchor="middle" font-size="13" fill="#1a2233">SAP apps</text>
+  <text x="95" y="64" text-anchor="middle" font-size="11" fill="#1a2233">S/4HANA · SF · Ariba</text>
+
+  <rect x="20" y="120" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="146" text-anchor="middle" font-size="13" fill="#1a2233">Custom app</text>
+  <text x="95" y="164" text-anchor="middle" font-size="11" fill="#1a2233">CAP · UI5 · Python</text>
+
+  <rect x="20" y="220" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="246" text-anchor="middle" font-size="13" fill="#1a2233">AI Launchpad</text>
+  <text x="95" y="264" text-anchor="middle" font-size="11" fill="#1a2233">ops &amp; admin UI</text>
+
+  <rect x="250" y="70" width="200" height="160" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="350" y="98" text-anchor="middle" font-size="15" fill="#1e3a8a" font-weight="bold">SAP AI Core</text>
+  <rect x="268" y="112" width="164" height="34" rx="6" fill="#fff" stroke="#059669"/>
+  <text x="350" y="134" text-anchor="middle" font-size="12" fill="#1a2233">Orchestration + Gen AI Hub</text>
+  <rect x="268" y="152" width="164" height="30" rx="6" fill="#fff" stroke="#059669"/>
+  <text x="350" y="172" text-anchor="middle" font-size="12" fill="#1a2233">KServe (serving)</text>
+  <rect x="268" y="188" width="164" height="30" rx="6" fill="#fff" stroke="#059669"/>
+  <text x="350" y="208" text-anchor="middle" font-size="12" fill="#1a2233">Argo (training)</text>
+
+  <rect x="530" y="30" width="180" height="50" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="620" y="60" text-anchor="middle" font-size="12" fill="#1a2233">Foundation models</text>
+
+  <rect x="530" y="120" width="180" height="50" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="620" y="143" text-anchor="middle" font-size="12" fill="#1a2233">Object store (S3/…)</text>
+  <text x="620" y="159" text-anchor="middle" font-size="11" fill="#1a2233">+ Docker registry · Git</text>
+
+  <rect x="530" y="210" width="180" height="50" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="620" y="233" text-anchor="middle" font-size="12" fill="#1a2233">HANA Cloud vectors</text>
+  <text x="620" y="249" text-anchor="middle" font-size="11" fill="#1a2233">grounding / RAG</text>
+
+  <line x1="170" y1="50" x2="250" y2="110" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="170" y1="150" x2="250" y2="150" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="170" y1="250" x2="250" y2="190" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="450" y1="120" x2="530" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="450" y1="150" x2="530" y2="145" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="450" y1="190" x2="530" y2="235" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+</svg>
+<div class="cap">Fig 1 — AI Core sits between your SAP/custom apps and the AI resources (external LLMs, your object store, HANA vectors). Launchpad is the operations cockpit.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of AI Core as a <em>managed Kubernetes for AI</em> plus a <em>gateway to foundation models</em>. The AI API (a REST API) is the universal remote control; AI Launchpad is a GUI over that same API; the SDKs are a Python wrapper over it.</div>
+
+<h2>2. Where It Fits in the SAP Landscape (When to Use It)</h2>
+
+<p>AI Core is one service in the broader BTP family. Knowing the neighbours tells you when to reach for it.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Use AI Core when…</h4>You need governed access to LLMs for a custom app, you want to train/serve your own models on managed infra, or you are building RAG grounded in SAP data under enterprise compliance.</div>
+  <div class="card"><h4>Don't reach for it when…</h4>You just want a chatbot in a Fiori app with zero infra — <span class="badge o">SAP Joule</span> or prebuilt AI business services may already do it. A pure prototype on your laptop doesn't need AI Core either.</div>
+</div>
+
+<table>
+  <tr><th>Service</th><th>Role</th><th>Relationship to AI Core</th></tr>
+  <tr><td>SAP AI Core</td><td>Runtime for training/serving + LLM gateway</td><td>The subject of this guide</td></tr>
+  <tr><td>SAP AI Launchpad</td><td>Multi-tenant UI to operate AI runtimes</td><td>Front-end that calls AI Core's AI API</td></tr>
+  <tr><td>Generative AI Hub</td><td>Managed foundation-model access</td><td>A capability <em>inside</em> AI Core</td></tr>
+  <tr><td>SAP HANA Cloud</td><td>DB with native vector engine</td><td>Grounding/RAG store for orchestration</td></tr>
+  <tr><td>SAP BTP (CF/Kyma)</td><td>Platform &amp; app runtime</td><td>Where AI Core is provisioned &amp; consumed</td></tr>
+  <tr><td>SAP Joule</td><td>Copilot across SAP apps</td><td>Consumer of AI Core under the hood</td></tr>
+</table>
+
+<h2>3. Getting Started: Provisioning and Authentication</h2>
+
+<p>AI Core is consumed as a BTP service instance. You create an instance, generate a <strong>service key</strong>, and use its OAuth client credentials to get a bearer token for the AI API. The <span class="badge o">extended</span> service plan unlocks the Generative AI Hub and real training/serving; the <span class="badge">free</span>/standard plan is for exploration.</p>
+
+<pre><code class="language-bash"># Via the Cloud Foundry CLI (one common path)
+cf login -a https://api.cf.eu10.hana.ondemand.com
+cf create-service aicore extended my-ai-core
+cf create-service-key my-ai-core my-ai-core-key
+cf service-key my-ai-core my-ai-core-key   # prints the JSON below</code></pre>
+
+<pre><code class="language-json">{
+  "clientid": "sb-xxxx!b123|aicore!b456",
+  "clientsecret": "xxxxxxxx",
+  "url": "https://xxxx.authentication.eu10.hana.ondemand.com",
+  "ai_api_url": "https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com",
+  "identityzone": "mytenant",
+  "serviceurls": { "AI_API_URL": "https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com" }
+}</code></pre>
+
+<pre><code class="language-bash"># Install the Python SDKs
+pip install ai-core-sdk            # low-level: workflows, deployments, admin
+pip install ai-api-client-sdk      # the AI API client (often pulled in transitively)
+pip install generative-ai-hub-sdk  # LLM access: OpenAI-compatible + LangChain</code></pre>
+
+<pre><code class="language-python"># connect.py — authenticate and list scenarios
+from ai_core_sdk.ai_core_v2_client import AICoreV2Client
+
+client = AICoreV2Client(
+    base_url="https://api.ai.prod.eu-central-1.aws.ml.hana.ondemand.com/v2",
+    auth_url="https://xxxx.authentication.eu10.hana.ondemand.com/oauth/token",
+    client_id="sb-xxxx!b123|aicore!b456",
+    client_secret="xxxxxxxx",
+    resource_group="default",   # pick your isolation unit (see §4)
+)
+
+for s in client.scenario.query().resources:
+    print(s.id, "-", s.name)</code></pre>
+
+<div class="callout tip"><span class="t">Config over code</span> The Gen AI Hub SDK auto-reads <span class="kbd">AICORE_*</span> environment variables or <span class="kbd">~/.aicore/config.json</span>, so production code rarely hard-codes credentials. Store the service key in a BTP destination or a secrets vault, never in Git.</div>
+
+<h2>4. Core Concepts and the Entity Lifecycle</h2>
+
+<p>Everything in AI Core is a REST resource. Internalise this vocabulary — interviews and docs assume it.</p>
+
+<table>
+  <tr><th>Entity</th><th>What it is</th></tr>
+  <tr><td><strong>Resource group</strong></td><td>A tenant/isolation boundary. Scenarios, configs, deployments and secrets live inside one. Great for separating teams, projects or environments.</td></tr>
+  <tr><td><strong>Scenario</strong></td><td>A logical use case (e.g. "demand forecasting"). A container for related executables and models.</td></tr>
+  <tr><td><strong>Executable</strong></td><td>A versioned <em>template</em> (Argo workflow or KServe serving template) stored in Git. Declares inputs, outputs and the container to run.</td></tr>
+  <tr><td><strong>Configuration</strong></td><td>An executable + concrete parameter values + input artifact bindings. The reusable "recipe" you instantiate.</td></tr>
+  <tr><td><strong>Execution</strong></td><td>A finished/running <em>training</em> job created from a (training) configuration. Produces output artifacts (models).</td></tr>
+  <tr><td><strong>Deployment</strong></td><td>A running <em>serving</em> instance created from a (serving) configuration. Exposes a stable inference URL.</td></tr>
+  <tr><td><strong>Artifact</strong></td><td>A registered pointer to data/model in the object store (dataset, model, resultset).</td></tr>
+  <tr><td><strong>Resource plan</strong></td><td>Compute size (e.g. <span class="kbd">starter</span>, <span class="kbd">infer.s</span>, <span class="kbd">train.l</span>, GPU plans). Chosen per config.</td></tr>
+</table>
+
+<div class="diagram">
+<svg viewBox="0 0 740 230" width="740" height="230">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="90" width="120" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="80" y="112" text-anchor="middle" font-size="12" fill="#1a2233">Git template</text>
+  <text x="80" y="128" text-anchor="middle" font-size="11" fill="#1a2233">(executable)</text>
+
+  <rect x="180" y="90" width="120" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="240" y="112" text-anchor="middle" font-size="12" fill="#1a2233">Scenario</text>
+  <text x="240" y="128" text-anchor="middle" font-size="11" fill="#1a2233">(syncs it)</text>
+
+  <rect x="340" y="90" width="130" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="405" y="112" text-anchor="middle" font-size="12" fill="#1a2233">Configuration</text>
+  <text x="405" y="128" text-anchor="middle" font-size="11" fill="#1a2233">params+inputs</text>
+
+  <rect x="520" y="20" width="190" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="615" y="46" text-anchor="middle" font-size="13" fill="#1a2233">Execution (train)</text>
+  <text x="615" y="64" text-anchor="middle" font-size="11" fill="#1a2233">→ model artifact</text>
+
+  <rect x="520" y="150" width="190" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="615" y="176" text-anchor="middle" font-size="13" fill="#1a2233">Deployment (serve)</text>
+  <text x="615" y="194" text-anchor="middle" font-size="11" fill="#1a2233">→ inference URL</text>
+
+  <line x1="140" y1="115" x2="180" y2="115" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="300" y1="115" x2="340" y2="115" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="470" y1="105" x2="520" y2="55" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="470" y1="125" x2="520" y2="178" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+</svg>
+<div class="cap">Fig 2 — Lifecycle: a Git template becomes a scenario's executable; a configuration binds parameters; an execution trains, a deployment serves.</div>
+</div>
+
+<h2>5. SAP AI Launchpad: The Operations Cockpit</h2>
+
+<p>AI Launchpad is a separate BTP app and the human-friendly front end to the AI API. It is <strong>multi-tenant</strong>: one Launchpad can connect to several AI Core instances (dev, test, prod) via "connections". Its apps map onto the entities above.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>ML Operations</h4>Browse scenarios, create configurations, launch executions, start/stop deployments, inspect logs and metrics.</div>
+  <div class="card"><h4>Generative AI Hub</h4>A chat playground + prompt editor to compare foundation models and build orchestration flows without code.</div>
+  <div class="card"><h4>Workspaces &amp; SAP AI API</h4>Manage connections, resource groups, secrets (object store, Docker, Git) and scheduling.</div>
+</div>
+
+<div class="callout note"><span class="t">Who uses what</span> Data scientists and ops engineers tend to live in Launchpad; application developers call the AI API/SDK directly from their services. Both hit the same backend.</div>
+
+<h2>6. Running and Serving Your Own ML Workflows</h2>
+
+<p>To run custom ML you provide three things: a <strong>Docker image</strong> (in a registry AI Core can read), a <strong>workflow template</strong> (in a Git repo AI Core syncs), and <strong>secrets</strong> that let it reach your object store, registry and Git. Training uses Argo Workflows; serving uses KServe.</p>
+
+<h3>Registering infrastructure (one-time)</h3>
+<pre><code class="language-python"># Register a Git repo of templates, a Docker secret, and an object-store secret
+client.repositories.create(
+    name="my-templates",
+    url="https://github.com/acme/ai-core-templates",
+    username="acme-bot", password="ghp_xxx",
+)
+client.applications.create(
+    application_name="demand-forecast",
+    revision="HEAD", repository_url="https://github.com/acme/ai-core-templates",
+    path="workflows",   # folder of YAML templates to sync as executables
+)
+client.docker_registry_secrets.create(
+    name="docker-secret",
+    data={".dockerconfigjson": "{...base64 auth...}"},
+)</code></pre>
+
+<h3>A serving template (KServe)</h3>
+<pre><code class="language-yaml">apiVersion: ai.sap.com/v1alpha1
+kind: ServingTemplate
+metadata:
+  name: forecast-server
+  annotations:
+    scenarios.ai.sap.com/name: "demand-forecast"
+    executables.ai.sap.com/name: "forecast-server"
+  labels:
+    ai.sap.com/version: "1.0.0"
+spec:
+  inputs:
+    artifacts:
+      - name: model          # bound at configuration time
+  template:
+    apiVersion: "serving.kserve.io/v1beta1"
+    metadata:
+      labels: { ai.sap.com/resourcePlan: "infer.s" }
+    spec:
+      predictor:
+        imagePullSecrets: [ name: docker-secret ]
+        containers:
+          - name: kserve-container
+            image: "docker.io/acme/forecast:1.0.0"
+            ports: [ containerPort: 9001, protocol: TCP ]
+            env:
+              - name: STORAGE_URI
+                value: "{{inputs.artifacts.model}}"</code></pre>
+
+<h3>Create a deployment and call it</h3>
+<pre><code class="language-python"># Build config -> deployment, then invoke the model's inference endpoint
+cfg = client.configuration.create(
+    name="forecast-cfg",
+    scenario_id="demand-forecast",
+    executable_id="forecast-server",
+    input_artifact_bindings=[{"key": "model", "artifact_id": MODEL_ARTIFACT_ID}],
+)
+dep = client.deployment.create(configuration_id=cfg.id)
+# ... wait until dep.status == 'RUNNING', then AI Core exposes dep.deployment_url
+import requests
+resp = requests.post(
+    f"{dep.deployment_url}/v2/predict",
+    headers={**client.rest_client.get_token(), "AI-Resource-Group": "default"},
+    json={"instances": [[12, 4, 2026]]},
+)
+print(resp.json())</code></pre>
+
+<div class="callout warn"><span class="t">Deployments cost money while RUNNING</span> A serving deployment holds a compute slot and bills continuously until you <span class="kbd">STOP</span> it — unlike a one-shot execution that ends. Always stop idle deployments in non-prod.</div>
+
+<h2>7. Generative AI Hub: Connecting Foundation Models</h2>
+
+<p>The Generative AI Hub is the fast path most teams actually use. You deploy a foundation model (which just provisions a proxy to the provider — no GPU of yours is used), get a stable deployment URL, and call it with an OpenAI-compatible API. Model availability evolves; as of 2026 the Hub spans GPT-4o/4.1 and o-series (OpenAI), Claude (Anthropic), Gemini (Google), Mistral, Meta Llama, and SAP embedding/translation models.</p>
+
+<pre><code class="language-python"># 1) Deploy a foundation model = create a config in the 'foundation-models' scenario
+params = {"modelName": "gpt-4o", "modelVersion": "latest"}
+cfg = client.configuration.create(
+    name="gpt4o-cfg", scenario_id="foundation-models",
+    executable_id="azure-openai",   # provider-specific executable
+    parameter_bindings=[{"key": k, "value": v} for k, v in params.items()],
+)
+dep = client.deployment.create(configuration_id=cfg.id)
+# dep.deployment_url is now your model endpoint</code></pre>
+
+<pre><code class="language-python"># 2) The easy way: generative-ai-hub-sdk, OpenAI-compatible interface
+from gen_ai_hub.proxy.native.openai import chat
+
+response = chat.completions.create(
+    model="gpt-4o",   # resolves to your deployed model in the Hub
+    messages=[
+        {"role": "system", "content": "You are a terse SAP assistant."},
+        {"role": "user", "content": "Explain a resource group in one line."},
+    ],
+    temperature=0.2,
+)
+print(response.choices[0].message.content)</code></pre>
+
+<pre><code class="language-python"># 3) LangChain integration — swap providers without touching your chain
+from gen_ai_hub.proxy.langchain.init_models import init_llm
+from langchain_core.prompts import ChatPromptTemplate
+
+llm = init_llm("anthropic--claude-3.5-sonnet", temperature=0)
+prompt = ChatPromptTemplate.from_template("Summarise this ticket: {text}")
+chain = prompt | llm
+print(chain.invoke({"text": "User cannot post invoice; dump in FB60."}).content)</code></pre>
+
+<pre><code class="language-python"># 4) Embeddings for RAG — same Hub, consistent governance
+from gen_ai_hub.proxy.native.openai import embeddings
+vec = embeddings.create(model="text-embedding-3-small", input="purchase order")
+print(len(vec.data[0].embedding))   # e.g. 1536 dims</code></pre>
+
+<div class="callout tip"><span class="t">Why go through the Hub?</span> Centralised billing, per-resource-group quotas, no provider keys sprawled across teams, EU data boundary options, and the ability to switch model vendors by changing one deployment — not your code.</div>
+
+<h2>8. Orchestration: A Harmonised, Governed Inference Pipeline</h2>
+
+<p>Calling a raw model is rarely enough in an enterprise. The <strong>Orchestration</strong> service wraps a single inference call in composable modules that run in a fixed order, all configured by one JSON/YAML object. This is the recommended way to consume LLMs in production.</p>
+
+<div class="pipeline">
+  <span class="step">Input</span><span class="arrow">-&gt;</span>
+  <span class="step">Masking</span><span class="arrow">-&gt;</span>
+  <span class="step">Templating</span><span class="arrow">-&gt;</span>
+  <span class="step">Grounding</span><span class="arrow">-&gt;</span>
+  <span class="step">Model</span><span class="arrow">-&gt;</span>
+  <span class="step">Filtering</span><span class="arrow">-&gt;</span>
+  <span class="step">Output</span>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 740 210" width="740" height="210">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="15" y="80" width="90" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="60" y="108" text-anchor="middle" font-size="12" fill="#1a2233">Request</text>
+
+  <rect x="130" y="80" width="100" height="46" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="180" y="100" text-anchor="middle" font-size="11" fill="#1a2233">Data masking</text>
+  <text x="180" y="116" text-anchor="middle" font-size="10" fill="#b45309">anonymise PII</text>
+
+  <rect x="255" y="80" width="100" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="305" y="100" text-anchor="middle" font-size="11" fill="#1a2233">Templating</text>
+  <text x="305" y="116" text-anchor="middle" font-size="10" fill="#1a2233">fill prompt</text>
+
+  <rect x="380" y="80" width="100" height="46" rx="7" fill="#ecfdf5" stroke="#0891b2"/>
+  <text x="430" y="100" text-anchor="middle" font-size="11" fill="#1a2233">Grounding</text>
+  <text x="430" y="116" text-anchor="middle" font-size="10" fill="#1a2233">RAG context</text>
+
+  <rect x="505" y="80" width="90" height="46" rx="7" fill="#059669" stroke="#1e3a8a"/>
+  <text x="550" y="108" text-anchor="middle" font-size="12" fill="#fff">LLM</text>
+
+  <rect x="620" y="80" width="105" height="46" rx="7" fill="#ecfdf5" stroke="#059669"/>
+  <text x="672" y="100" text-anchor="middle" font-size="11" fill="#1a2233">Filtering</text>
+  <text x="672" y="116" text-anchor="middle" font-size="10" fill="#b45309">block toxic</text>
+
+  <line x1="105" y1="103" x2="130" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="230" y1="103" x2="255" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="355" y1="103" x2="380" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="480" y1="103" x2="505" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="595" y1="103" x2="620" y2="103" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="180" y="160" text-anchor="middle" font-size="11" fill="#64748b">input filter + de-mask also apply on the way back out</text>
+</svg>
+<div class="cap">Fig 3 — The orchestration pipeline: one request flows through optional modules; swapping the model is a one-field change.</div>
+</div>
+
+<h3>An orchestration config and call</h3>
+<pre><code class="language-python">from gen_ai_hub.orchestration.models.config import OrchestrationConfig
+from gen_ai_hub.orchestration.models.llm import LLM
+from gen_ai_hub.orchestration.models.template import Template, TemplateValue
+from gen_ai_hub.orchestration.models.message import SystemMessage, UserMessage
+from gen_ai_hub.orchestration.models.content_filtering import (
+    ContentFiltering, InputFiltering, OutputFiltering)
+from gen_ai_hub.orchestration.models.azure_content_filter import AzureContentFilter
+from gen_ai_hub.orchestration.service import OrchestrationService
+
+template = Template(messages=[
+    SystemMessage("You are a helpful SAP support agent."),
+    UserMessage("Classify the sentiment of: {{?review}}"),
+])
+llm = LLM(name="gpt-4o", parameters={"temperature": 0.1})
+cf = AzureContentFilter(hate=2, violence=2, sexual=2, self_harm=2)
+
+config = OrchestrationConfig(
+    template=template,
+    llm=llm,
+    filtering=ContentFiltering(input=InputFiltering(filters=[cf]),
+                               output=OutputFiltering(filters=[cf])),
+)
+
+svc = OrchestrationService(api_url=ORCH_DEPLOYMENT_URL, config=config)
+result = svc.run(template_values=[TemplateValue("review", "Shipment was 3 weeks late!")])
+print(result.orchestration_result.choices[0].message.content)</code></pre>
+
+<div class="callout ok"><span class="t">Grounding is built in</span> Point the grounding module at a SAP HANA Cloud vector collection or the Document Grounding service and orchestration retrieves + injects context for you — a managed RAG without hand-wiring a retriever.</div>
+
+<h2>9. Cheat-Sheet &amp; Comparison Tables</h2>
+
+<table>
+  <tr><th>Task</th><th>How</th></tr>
+  <tr><td>Get a token</td><td>OAuth client-credentials against <span class="kbd">url</span>+<span class="kbd">/oauth/token</span></td></tr>
+  <tr><td>Scope a call to a tenant</td><td>Header <span class="kbd">AI-Resource-Group</span></td></tr>
+  <tr><td>Sync templates from Git</td><td>Create an <em>Application</em> (GitOps)</td></tr>
+  <tr><td>Train a model</td><td>Configuration → Execution (Argo)</td></tr>
+  <tr><td>Serve a model</td><td>Configuration → Deployment (KServe)</td></tr>
+  <tr><td>Call an LLM (simple)</td><td>Gen AI Hub SDK, OpenAI-compatible</td></tr>
+  <tr><td>Call an LLM (governed)</td><td>Orchestration service</td></tr>
+  <tr><td>Stop billing</td><td>STOP the deployment / DELETE config</td></tr>
+</table>
+
+<table>
+  <tr><th>Dimension</th><th>Own ML workflows</th><th>Generative AI Hub</th></tr>
+  <tr><td>Compute</td><td>Your Docker image on AI Core GPU/CPU</td><td>Managed proxy to provider (no GPU of yours)</td></tr>
+  <tr><td>Primitive</td><td>Argo (train) / KServe (serve)</td><td>Model deployment + Orchestration</td></tr>
+  <tr><td>You supply</td><td>Image, template, data, secrets</td><td>Just a prompt/config</td></tr>
+  <tr><td>Typical user</td><td>Data scientist / ML engineer</td><td>App developer</td></tr>
+  <tr><td>Billing</td><td>Compute time (capacity units)</td><td>Tokens + deployment uptime</td></tr>
+</table>
+
+<h2>10. Best Practices</h2>
+
+<div class="callout ok"><span class="t">Isolate with resource groups</span> One per team/environment. They cap quotas, scope secrets and keep one project's artifacts invisible to another — cheap, strong multi-tenancy.</div>
+<div class="callout tip"><span class="t">Prefer orchestration over raw model calls</span> You get masking, content filtering, grounding and provider-swap for free, and a single auditable contract. Reserve the native OpenAI interface for quick spikes.</div>
+<div class="callout tip"><span class="t">GitOps everything</span> Keep templates in Git and let AI Core sync them. Versions are reproducible, reviewable and roll back cleanly — never create executables by hand in prod.</div>
+<div class="callout ok"><span class="t">Right-size resource plans</span> Start on the smallest plan (<span class="kbd">infer.s</span>) and scale up only on measured latency/throughput need. GPU plans are expensive.</div>
+
+<h2>11. Common Pitfalls</h2>
+
+<div class="callout danger"><span class="t">Forgetting AI-Resource-Group</span> Omitting the header (or using the wrong group) returns empty lists or 404s on resources that clearly exist — the single most common "it's broken" moment.</div>
+<div class="callout warn"><span class="t">Leaving deployments RUNNING</span> Idle serving deployments burn capacity units 24/7. Automate STOP for non-prod and monitor the metering dashboard.</div>
+<div class="callout warn"><span class="t">Hard-coding model names everywhere</span> Model versions get deprecated. Centralise the model choice in an orchestration config so a retirement is a one-line change, not a code hunt.</div>
+<div class="callout danger"><span class="t">Confusing executions and deployments</span> Executions are finite training jobs that terminate; deployments are long-lived servers. Using the wrong template kind is a frequent beginner error.</div>
+<div class="callout warn"><span class="t">Shipping PII to the model unmasked</span> Enable the data-masking module for anything touching personal data — compliance teams will ask, and it is trivial to turn on.</div>
+
+<h2>12. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is SAP AI Core and how does it differ from AI Launchpad?</div><div class="a">AI Core is the backend runtime (Kubernetes-based) that trains and serves models and gateways foundation models via the AI API. AI Launchpad is a BTP UI application that calls that same AI API to let humans operate scenarios, deployments and the Gen AI Hub. One is the engine; the other is the dashboard.</div></div>
+
+<div class="qa"><div class="q">Explain the entity chain from template to prediction.</div><div class="a">A Git template defines an <em>executable</em> synced into a <em>scenario</em>. A <em>configuration</em> binds parameters and input artifacts to that executable. From a training config you create an <em>execution</em> (Argo) that outputs a model artifact; from a serving config you create a <em>deployment</em> (KServe) that exposes an inference URL.</div></div>
+
+<div class="qa"><div class="q">What problem does a resource group solve?</div><div class="a">Multi-tenancy and isolation inside one AI Core instance. It scopes scenarios, configurations, deployments, artifacts and secrets, and lets you apply separate quotas — so teams or environments don't see or starve each other. You select it via the <span class="kbd">AI-Resource-Group</span> header.</div></div>
+
+<div class="qa"><div class="q">Why use the Generative AI Hub instead of calling OpenAI directly?</div><div class="a">Governance: one contract and audit trail, centralised billing and quotas, no sprawl of provider keys, data-residency controls, and the ability to switch model vendors without touching application code. You also gain the orchestration modules (masking, filtering, grounding).</div></div>
+
+<div class="qa"><div class="q">What does the orchestration service add over a raw model call?</div><div class="a">A composable, server-side pipeline around one inference: templating, data masking (PII anonymisation), grounding (RAG), and input/output content filtering — all declared in one config. It harmonises providers behind a single API, so swapping GPT-4o for Claude is a one-field change.</div></div>
+
+<div class="qa"><div class="q">Training uses Argo, serving uses KServe — why two?</div><div class="a">They model different workloads. Training is a finite, possibly multi-step pipeline (Argo Workflows) that runs to completion and produces artifacts. Serving is a long-lived, autoscaling inference server (KServe) exposing an endpoint. Different lifecycles, different billing, different templates.</div></div>
+
+<div class="qa"><div class="q">How does AI Core do RAG grounded in SAP data?</div><div class="a">Embeddings via the Gen AI Hub feed a vector store — typically SAP HANA Cloud's native vector engine or the Document Grounding service. The orchestration grounding module retrieves relevant chunks at query time and injects them into the prompt, so the model answers from governed enterprise data.</div></div>
+
+<div class="qa"><div class="q">What are capacity units / how is AI Core billed?</div><div class="a">Compute is metered in capacity units tied to resource plans and uptime for executions and deployments; foundation-model usage adds token-based consumption. Idle running deployments still bill, so stopping them is a real cost lever.</div></div>
+
+<div class="qa"><div class="q">How would you deploy a custom scikit-learn model on AI Core?</div><div class="a">Containerise an inference server (e.g. a Flask/KServe predictor) into a Docker image; register the registry, object-store and Git secrets; commit a ServingTemplate; sync it as an executable via an Application; create a configuration binding the model artifact; then create a deployment and call its URL with the resource-group header.</div></div>
+
+<div class="qa"><div class="q">When would you NOT use AI Core?</div><div class="a">For out-of-the-box SAP AI (Joule, embedded AI business services) where no custom infra is needed, for throwaway laptop prototypes, or when a lightweight managed LLM API with no SAP-governance requirements suffices. AI Core shines when you need enterprise governance, SAP-data grounding, or to run your own models at scale.</div></div>
+
+<div class="qa"><div class="q">How do you keep the deployment reproducible across dev/test/prod?</div><div class="a">GitOps: templates live in Git and are synced via Applications, so each environment pins a revision. Combine with separate resource groups (or instances) per environment and configuration objects that externalise parameters — promotion becomes a Git revision bump, not manual clicking.</div></div>
+
+<div class="qa"><div class="q">What is the AI-Resource-Group header and what breaks without it?</div><div class="a">It routes every AI API call to a specific resource group. Omit it or use a wrong value and you get empty query results or 404s even when resources exist, because you are effectively looking in the wrong tenant partition.</div></div>
+
+<h2>13. Further Learning</h2>
+
+<ul>
+  <li><strong>SAP Help Portal — AI Core &amp; AI Launchpad</strong>: authoritative docs for the AI API, templates and the Gen AI Hub.</li>
+  <li><strong>SAP Discovery Center / tutorials (developers.sap.com)</strong>: hands-on missions provisioning AI Core and deploying a first model.</li>
+  <li><strong>SDKs</strong>: read the source/readmes for <span class="kbd">ai-core-sdk</span>, <span class="kbd">ai-api-client-sdk</span> and <span class="kbd">generative-ai-hub-sdk</span>.</li>
+  <li><strong>Argo Workflows &amp; KServe docs</strong>: the open-source primitives beneath AI Core — understanding them demystifies templates.</li>
+  <li><strong>SAP HANA Cloud vector engine</strong>: pair with orchestration grounding to build governed RAG.</li>
+  <li><strong>Build a project</strong>: wire a CAP/Node app → orchestration (masking + grounding) → HANA vectors for an end-to-end, interview-ready portfolio piece.</li>
+</ul>

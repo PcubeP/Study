@@ -1,0 +1,919 @@
+<h2>Azure AI Services — Overview &amp; Taxonomy</h2>
+
+<p class="lead">Azure AI Services is Microsoft's unified portfolio of production-ready AI APIs, formerly known as Azure Cognitive Services. Since 2023 the umbrella explicitly includes Azure OpenAI Service, Azure AI Search, and Azure AI Foundry alongside the classic Vision, Language, Speech, Document Intelligence, and Content Safety workloads — all accessed through a single Azure resource type: <code>Microsoft.CognitiveServices/accounts</code>.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 274" width="720" height="274">
+  <rect x="0" y="0" width="720" height="274" fill="#f8fafc" rx="8"/>
+  <rect x="225" y="10" width="270" height="42" fill="#1e3a8a" rx="7"/>
+  <text x="360" y="36" fill="white" font-size="15" font-weight="bold" text-anchor="middle" font-family="sans-serif">Azure AI Services</text>
+  <line x1="360" y1="52" x2="360" y2="74" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="60" y1="74" x2="660" y2="74" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="60" y1="74" x2="60" y2="96" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="180" y1="74" x2="180" y2="96" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="300" y1="74" x2="300" y2="96" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="420" y1="74" x2="420" y2="96" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="540" y1="74" x2="540" y2="96" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="660" y1="74" x2="660" y2="96" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="10" y="96" width="100" height="42" fill="#2563eb" rx="5"/>
+  <text x="60" y="122" fill="white" font-size="12" font-weight="600" text-anchor="middle" font-family="sans-serif">Vision</text>
+  <rect x="130" y="96" width="100" height="42" fill="#2563eb" rx="5"/>
+  <text x="180" y="122" fill="white" font-size="12" font-weight="600" text-anchor="middle" font-family="sans-serif">Language</text>
+  <rect x="250" y="96" width="100" height="42" fill="#2563eb" rx="5"/>
+  <text x="300" y="122" fill="white" font-size="12" font-weight="600" text-anchor="middle" font-family="sans-serif">Speech</text>
+  <rect x="370" y="96" width="100" height="42" fill="#0891b2" rx="5"/>
+  <text x="420" y="115" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">Document</text>
+  <text x="420" y="130" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">Intelligence</text>
+  <rect x="490" y="96" width="100" height="42" fill="#b45309" rx="5"/>
+  <text x="540" y="115" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">Content</text>
+  <text x="540" y="130" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">Safety</text>
+  <rect x="610" y="96" width="100" height="42" fill="#059669" rx="5"/>
+  <text x="660" y="115" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">Azure</text>
+  <text x="660" y="130" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">OpenAI</text>
+  <line x1="60" y1="138" x2="60" y2="170" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="180" y1="138" x2="180" y2="170" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="300" y1="138" x2="300" y2="170" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="420" y1="138" x2="420" y2="170" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="540" y1="138" x2="540" y2="170" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="660" y1="138" x2="660" y2="170" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="60" y1="170" x2="660" y2="170" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="200" y1="170" x2="200" y2="192" stroke="#94a3b8" stroke-width="1"/>
+  <line x1="520" y1="170" x2="520" y2="192" stroke="#94a3b8" stroke-width="1"/>
+  <rect x="100" y="192" width="200" height="42" fill="#eff4ff" rx="5" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="200" y="218" fill="#1e3a8a" font-size="12" font-weight="600" text-anchor="middle" font-family="sans-serif">Azure AI Search</text>
+  <rect x="420" y="192" width="200" height="42" fill="#eff4ff" rx="5" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="520" y="218" fill="#1e3a8a" font-size="12" font-weight="600" text-anchor="middle" font-family="sans-serif">Azure AI Foundry</text>
+  <text x="200" y="252" fill="#64748b" font-size="9" text-anchor="middle" font-family="sans-serif">RAG · Vector · Hybrid · Semantic Ranking</text>
+  <text x="520" y="252" fill="#64748b" font-size="9" text-anchor="middle" font-family="sans-serif">Prompt Flow · Model Catalog · Evaluations</text>
+</svg>
+<div class="cap">Figure 1 — Azure AI Services platform taxonomy. Vision, Language, Speech, Document Intelligence, Content Safety and Azure OpenAI are the six leaf services; AI Search and AI Foundry are cross-cutting platform components.</div>
+</div>
+
+<table>
+  <tr><th>Aspect</th><th>Detail</th></tr>
+  <tr><td>Resource type</td><td><code>Microsoft.CognitiveServices/accounts</code> (single resource for all services, or per-service dedicated resources)</td></tr>
+  <tr><td>Auth methods</td><td>API key header <code>api-key</code> / <code>Ocp-Apim-Subscription-Key</code>, or Microsoft Entra ID bearer token</td></tr>
+  <tr><td>Endpoint pattern</td><td><code>https://&lt;resource-name&gt;.cognitiveservices.azure.com/</code></td></tr>
+  <tr><td>Multi-service resource</td><td>One key + endpoint routes to all services; per-service resources give finer quota control</td></tr>
+  <tr><td>Pricing tiers</td><td>Free (F0, heavily throttled), Standard (S0+, pay-as-you-go), Commitment tiers for predictable costs</td></tr>
+  <tr><td>Data privacy</td><td>Data is NOT used to train Microsoft models; stays in your Azure region; subject to your tenant's compliance</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Branding note</span> "Cognitive Services" is the legacy name. Since 2023 Microsoft brands everything as <strong>Azure AI Services</strong> in the portal and docs. The ARM resource type and many SDK package names still say <em>cognitiveservices</em>.</div>
+
+<h2>Azure OpenAI Service — Models &amp; Deployments</h2>
+
+<p class="lead">Azure OpenAI Service is the enterprise-grade access layer for OpenAI's models. Rather than calling api.openai.com directly, you call your own Azure-hosted endpoint with your data remaining in your tenant. You provision <strong>deployments</strong> — named instances of a specific model version — and call them by deployment name, not model ID.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 600 282" width="600" height="282">
+  <rect x="0" y="0" width="600" height="282" fill="#f8fafc" rx="8"/>
+  <rect x="8" y="8" width="584" height="266" fill="#f1f5f9" rx="8" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="20" y="27" fill="#64748b" font-size="10" font-family="sans-serif" font-weight="600">Azure Subscription</text>
+  <rect x="22" y="34" width="556" height="232" fill="#e2e8f0" rx="6" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="34" y="52" fill="#475569" font-size="10" font-family="sans-serif" font-weight="600">Resource Group: rg-ai-prod  (East US)</text>
+  <rect x="36" y="60" width="528" height="196" fill="#eff4ff" rx="5" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="48" y="78" fill="#1e3a8a" font-size="11" font-family="sans-serif" font-weight="bold">Azure OpenAI Resource — myaoai.openai.azure.com</text>
+  <text x="48" y="92" fill="#2563eb" font-size="9" font-family="sans-serif">api-key: ●●●●●●  |  api-version: 2025-04-01-preview</text>
+  <rect x="48" y="102" width="158" height="62" fill="white" rx="4" stroke="#2563eb" stroke-width="1"/>
+  <text x="58" y="118" fill="#1e3a8a" font-size="10" font-family="sans-serif" font-weight="600">gpt-4o</text>
+  <text x="58" y="132" fill="#64748b" font-size="8" font-family="sans-serif">Standard · 128K ctx</text>
+  <text x="58" y="144" fill="#64748b" font-size="8" font-family="sans-serif">TPM quota · pay-per-token</text>
+  <text x="58" y="156" fill="#059669" font-size="8" font-family="sans-serif">chat / vision / tools</text>
+  <rect x="220" y="102" width="158" height="62" fill="white" rx="4" stroke="#0891b2" stroke-width="1"/>
+  <text x="230" y="118" fill="#0e7490" font-size="10" font-family="sans-serif" font-weight="600">o4-mini</text>
+  <text x="230" y="132" fill="#64748b" font-size="8" font-family="sans-serif">Standard · 200K ctx</text>
+  <text x="230" y="144" fill="#64748b" font-size="8" font-family="sans-serif">Reasoning model · tools</text>
+  <text x="230" y="156" fill="#059669" font-size="8" font-family="sans-serif">pay-per-token</text>
+  <rect x="392" y="102" width="164" height="62" fill="white" rx="4" stroke="#059669" stroke-width="1"/>
+  <text x="402" y="118" fill="#065f46" font-size="10" font-family="sans-serif" font-weight="600">gpt-4o (PTU)</text>
+  <text x="402" y="132" fill="#64748b" font-size="8" font-family="sans-serif">Provisioned Managed</text>
+  <text x="402" y="144" fill="#64748b" font-size="8" font-family="sans-serif">Reserved throughput (PTU)</text>
+  <text x="402" y="156" fill="#b45309" font-size="8" font-family="sans-serif">hourly commitment</text>
+  <rect x="48" y="176" width="158" height="62" fill="white" rx="4" stroke="#0891b2" stroke-width="1"/>
+  <text x="58" y="192" fill="#0e7490" font-size="10" font-family="sans-serif" font-weight="600">text-embedding-3-large</text>
+  <text x="58" y="206" fill="#64748b" font-size="8" font-family="sans-serif">3072 dimensions</text>
+  <text x="58" y="218" fill="#64748b" font-size="8" font-family="sans-serif">Embedding model</text>
+  <text x="58" y="230" fill="#059669" font-size="8" font-family="sans-serif">pay-per-token</text>
+  <rect x="220" y="176" width="158" height="62" fill="white" rx="4" stroke="#b45309" stroke-width="1"/>
+  <text x="230" y="192" fill="#92400e" font-size="10" font-family="sans-serif" font-weight="600">dall-e-3</text>
+  <text x="230" y="206" fill="#64748b" font-size="8" font-family="sans-serif">Image generation</text>
+  <text x="230" y="218" fill="#64748b" font-size="8" font-family="sans-serif">1024×1024 / HD / Natural</text>
+  <text x="230" y="230" fill="#059669" font-size="8" font-family="sans-serif">pay-per-image</text>
+  <rect x="392" y="176" width="164" height="62" fill="white" rx="4" stroke="#64748b" stroke-width="1"/>
+  <text x="402" y="192" fill="#374151" font-size="10" font-family="sans-serif" font-weight="600">whisper</text>
+  <text x="402" y="206" fill="#64748b" font-size="8" font-family="sans-serif">Speech-to-text model</text>
+  <text x="402" y="218" fill="#64748b" font-size="8" font-family="sans-serif">57 languages</text>
+  <text x="402" y="230" fill="#059669" font-size="8" font-family="sans-serif">pay-per-audio-minute</text>
+</svg>
+<div class="cap">Figure 2 — One Azure OpenAI resource hosts multiple named deployments. Each deployment targets one model version and has its own quota and pricing model.</div>
+</div>
+
+<h3>Model Families Cheat Sheet</h3>
+<table>
+  <tr><th>Model Family</th><th>Key Models (2025-2026)</th><th>Best For</th><th>Context</th></tr>
+  <tr><td><span class="badge">GPT-4o</span></td><td>gpt-4o, gpt-4o-2024-11-20</td><td>Multimodal chat, vision, function calling</td><td>128K</td></tr>
+  <tr><td><span class="badge">GPT-4.1</span></td><td>gpt-4.1, gpt-4.1-mini</td><td>Long-context instruction following, coding</td><td>1M (4.1)</td></tr>
+  <tr><td><span class="badge o">o-Series</span></td><td>o3, o4-mini</td><td>Complex reasoning, math, code generation</td><td>200K</td></tr>
+  <tr><td><span class="badge">GPT-4o-mini</span></td><td>gpt-4o-mini</td><td>Fast, cost-effective tasks, classification</td><td>128K</td></tr>
+  <tr><td><span class="badge g">Embeddings</span></td><td>text-embedding-3-large, text-embedding-3-small, ada-002</td><td>Semantic search, RAG indexing</td><td>8K input</td></tr>
+  <tr><td><span class="badge">DALL-E</span></td><td>dall-e-3</td><td>Image generation from text prompt</td><td>4K prompt</td></tr>
+  <tr><td><span class="badge">Whisper</span></td><td>whisper</td><td>Audio transcription and translation</td><td>25 MB / file</td></tr>
+</table>
+
+<h3>Deployment Types</h3>
+<table>
+  <tr><th>Type</th><th>Capacity</th><th>Billing</th><th>Best For</th></tr>
+  <tr><td>Standard</td><td>Shared, may throttle at quota</td><td>Pay-per-token</td><td>Dev, variable workloads</td></tr>
+  <tr><td>Global Standard</td><td>Microsoft-routed globally</td><td>Pay-per-token</td><td>High availability, burst traffic</td></tr>
+  <tr><td>Provisioned Managed (PTU)</td><td>Reserved throughput units</td><td>Hourly commitment fee</td><td>Latency-sensitive production</td></tr>
+  <tr><td>Batch</td><td>Async processing queue</td><td>50 % discount vs Standard</td><td>Bulk inference, offline jobs</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">PTU vs Standard</span> Provisioned Throughput Units (PTU) give deterministic, low-latency responses because capacity is reserved for you. Break-even vs Standard typically occurs around 60–70 % sustained utilization. Below that, Standard is cheaper.</div>
+
+<div class="qa">
+  <div class="q">What is the difference between a model name and a deployment name in Azure OpenAI?</div>
+  <div class="a">The <strong>model name</strong> (e.g., <code>gpt-4o</code>) identifies the AI architecture and version in the catalog. The <strong>deployment name</strong> is a custom label you assign when you create a deployment in your resource (e.g., <code>my-gpt4o-prod</code>). In API calls you always reference the deployment name in the <code>model</code> field — Azure resolves it to the underlying model. This lets you swap model versions by redeploying without changing application code.</div>
+</div>
+
+<div class="qa">
+  <div class="q">When should you choose Provisioned Managed (PTU) over Standard deployment?</div>
+  <div class="a">Choose PTU when you need <strong>guaranteed, predictable latency</strong> and your workload has steady, high throughput (typically above 60–70% sustained utilization). Standard is better for variable or bursty traffic because you only pay for what you use. PTU requires an upfront capacity reservation (billed per hour per PTU) so it is cost-effective only when utilization is consistently high.</div>
+</div>
+
+<h2>Chat Completions, Embeddings &amp; Streaming API</h2>
+
+<p class="lead">Azure OpenAI exposes the same Chat Completions, Completions, Embeddings, and Images APIs as OpenAI — with the addition of an <code>azure_endpoint</code> and an <code>api_version</code> query parameter. The <code>openai</code> Python SDK v1.x supports Azure natively via <code>AzureOpenAI</code>.</p>
+
+<h3>Chat Completions — Core Structure</h3>
+<pre><code class="language-python">from openai import AzureOpenAI
+import os
+
+client = AzureOpenAI(
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),   # https://myaoai.openai.azure.com/
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    api_version="2025-04-01-preview"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",           # deployment name, NOT model family name
+    messages=[
+        {"role": "system", "content": "You are a concise technical assistant."},
+        {"role": "user",   "content": "Explain RAG in two sentences."}
+    ],
+    temperature=0.3,
+    max_tokens=512,
+    top_p=1.0,
+    frequency_penalty=0.0,
+    presence_penalty=0.0
+)
+print(response.choices[0].message.content)
+print("Tokens used:", response.usage.total_tokens)
+</code></pre>
+
+<h3>Streaming Responses</h3>
+<pre><code class="language-python">stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a haiku about cloud computing."}],
+    stream=True
+)
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content:
+        print(delta.content, end="", flush=True)
+</code></pre>
+
+<h3>Embeddings</h3>
+<pre><code class="language-python">response = client.embeddings.create(
+    model="text-embedding-3-large",   # deployment name for embedding model
+    input="Azure AI Search enables hybrid retrieval at scale."
+)
+vector = response.data[0].embedding  # list of 3072 floats
+print(f"Dimensions: {len(vector)}")
+</code></pre>
+
+<h3>Key Parameters</h3>
+<table>
+  <tr><th>Parameter</th><th>Range</th><th>Effect</th></tr>
+  <tr><td><code>temperature</code></td><td>0.0 – 2.0</td><td>Randomness; 0 = deterministic, 1+ = creative</td></tr>
+  <tr><td><code>max_tokens</code></td><td>1 – model limit</td><td>Maximum output tokens; input + output must not exceed context window</td></tr>
+  <tr><td><code>top_p</code></td><td>0.0 – 1.0</td><td>Nucleus sampling; alternative to temperature (do not tune both at once)</td></tr>
+  <tr><td><code>frequency_penalty</code></td><td>-2.0 – 2.0</td><td>Penalises token repetition proportional to frequency</td></tr>
+  <tr><td><code>presence_penalty</code></td><td>-2.0 – 2.0</td><td>Penalises any already-used token regardless of count</td></tr>
+  <tr><td><code>response_format</code></td><td><code>{"type":"json_object"}</code></td><td>Forces valid JSON output; must instruct model in system prompt too</td></tr>
+  <tr><td><code>seed</code></td><td>Integer</td><td>Reproducibility hint (not guaranteed; same seed + temperature=0 for best consistency)</td></tr>
+  <tr><td><code>stream</code></td><td>bool</td><td>Server-sent events for incremental output</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">System prompt discipline</span> For production use, always include a system prompt that (a) defines the model's persona and constraints, (b) instructs it to cite sources if using RAG, and (c) tells it to respond with "I don't know" rather than hallucinating when context is missing.</div>
+
+<h3>Function Calling / Tool Use</h3>
+<p>Pass a <code>tools</code> list of JSON Schema-described functions. The model returns a <code>tool_calls</code> array with name + arguments when it decides to call a tool. Your code executes the function and appends the result as a <code>tool</code> role message, then calls the API again to get the final answer.</p>
+
+<div class="qa">
+  <div class="q">How does token counting work in Azure OpenAI, and why does it matter for cost?</div>
+  <div class="a">Every API call is billed on <strong>input tokens + output tokens</strong>. Input tokens include the system prompt, all previous turns in the conversation, and any tool definitions — so long conversations and large system prompts accumulate cost rapidly. Use <code>tiktoken</code> to count tokens before sending. For GPT-4o, 1 image counts as a fixed number of tokens depending on resolution (auto-detail uses ~85 base + 170 per 512-px tile). Minimise cost by: (1) summarising conversation history, (2) trimming tool schemas, (3) caching static system prompts with Azure's prompt-caching feature where available.</div>
+</div>
+
+<h2>Azure AI Vision &amp; Computer Vision</h2>
+
+<p class="lead">Azure AI Vision (Image Analysis 4.0) unifies optical character recognition, object detection, image captioning, smart cropping, and background removal into a single modern API. Custom Vision adds trainable classification and object detection.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Image Analysis 4.0 Features</h4>
+    <p><strong>Caption / Dense Captions:</strong> natural-language description per image or per bounding box.</p>
+    <p><strong>Object Detection:</strong> bounding boxes + labels for 10,000+ concepts.</p>
+    <p><strong>OCR / Read:</strong> layout-aware text extraction from images and PDFs; returns word, line, and paragraph bounding polygons.</p>
+    <p><strong>Smart Crops:</strong> generates crop coordinates respecting visual saliency for any target aspect ratio.</p>
+    <p><strong>Background Removal:</strong> segmentation mask returning foreground or background as PNG.</p>
+  </div>
+  <div class="card">
+    <h4>Custom Vision &amp; Face</h4>
+    <p><strong>Custom Vision (classification):</strong> image multi-class and multi-label classifiers trained on as few as 15 images per class.</p>
+    <p><strong>Custom Vision (detection):</strong> object detection with labelled bounding boxes.</p>
+    <p><strong>Face API (Limited Access):</strong> face detection, liveness, verification, and grouping. Requires approval; identification and emotion features restricted per RAI policy.</p>
+    <p><strong>Spatial Analysis:</strong> people-counting and zone analytics for on-premises IoT Edge deployments.</p>
+  </div>
+</div>
+
+<h3>OCR vs. Document Intelligence</h3>
+<table>
+  <tr><th>Capability</th><th>Vision Read (OCR)</th><th>Document Intelligence</th></tr>
+  <tr><td>Primary use</td><td>Extract text from natural images and photos</td><td>Extract structured fields from business documents</td></tr>
+  <tr><td>Output</td><td>Words, lines, paragraphs with bounding boxes</td><td>Key-value pairs, tables, named fields, confidence scores</td></tr>
+  <tr><td>Prebuilt models</td><td>No</td><td>Yes (Invoice, Receipt, W-2, ID, Contract, Tax…)</td></tr>
+  <tr><td>Custom training</td><td>No</td><td>Yes (Neural, Template, Composed models)</td></tr>
+  <tr><td>Best for</td><td>Street signs, screenshots, handwriting in photos</td><td>Invoice automation, claims processing, KYC</td></tr>
+</table>
+
+<div class="callout note"><span class="t">API version matters</span> Image Analysis 4.0 uses the <code>/imageanalysis:analyze</code> endpoint and features GA'd in 2024. Older <code>/analyze</code> and <code>/read</code> endpoints are Image Analysis 3.x and will be retired — migrate to 4.0 for new projects.</div>
+
+<h2>Azure AI Language Services</h2>
+
+<p class="lead">Azure AI Language consolidates a broad suite of NLP capabilities — sentiment analysis, NER, key phrase extraction, summarisation, conversational understanding, custom text classification, and question answering — under one unified SDK and resource.</p>
+
+<h3>Available Capabilities</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Sentiment &amp; Opinion Mining</h4>
+    <p>Document-level and sentence-level sentiment (positive / neutral / negative) with aspect-opinion pairs. Supports 120+ languages.</p>
+  </div>
+  <div class="card">
+    <h4>Named Entity Recognition</h4>
+    <p>Identifies persons, locations, organisations, dates, phone numbers, URLs, IP addresses, and domain-specific entities (healthcare, finance) out of the box.</p>
+  </div>
+  <div class="card">
+    <h4>PII Detection &amp; Redaction</h4>
+    <p>Detects and optionally masks email addresses, SSN, credit card numbers, phone numbers, and healthcare entities in text and documents.</p>
+  </div>
+  <div class="card">
+    <h4>Summarisation</h4>
+    <p>Extractive (selects representative sentences) and abstractive (generates a new summary). Conversation summarisation available for call centre transcripts.</p>
+  </div>
+  <div class="card">
+    <h4>CLU (Conversational Language Understanding)</h4>
+    <p>Replacement for LUIS. Train intent classification and entity extraction models on your own utterances. Integrates with Bot Framework and Copilot Studio.</p>
+  </div>
+  <div class="card">
+    <h4>Custom Question Answering</h4>
+    <p>Replacement for QnA Maker. Build FAQ knowledge bases from documents, URLs, or manual Q&amp;A pairs; returns ranked answers with confidence scores.</p>
+  </div>
+</div>
+
+<pre><code class="language-python">from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
+import os
+
+client = TextAnalyticsClient(
+    endpoint=os.getenv("LANGUAGE_ENDPOINT"),
+    credential=AzureKeyCredential(os.getenv("LANGUAGE_KEY"))
+)
+
+docs = [
+    "Azure AI Search delivers blazing-fast retrieval for enterprise knowledge bases.",
+    "The deployment failed at 2:00 AM and the team was furious."
+]
+
+# Sentiment + opinion mining
+results = client.analyze_sentiment(docs, show_opinion_mining=True)
+for doc in results:
+    print(f"Overall: {doc.sentiment}")
+    for sentence in doc.sentences:
+        print(f"  Sentence sentiment: {sentence.sentiment}")
+        for opinion in sentence.mined_opinions:
+            print(f"    Aspect '{opinion.target.text}' is {opinion.target.sentiment}")
+</code></pre>
+
+<h2>Azure AI Speech Services</h2>
+
+<p class="lead">Azure AI Speech provides enterprise-grade speech recognition, synthesis, translation, and speaker recognition, with support for custom acoustic and language models tailored to domain-specific vocabulary.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Speech-to-Text (STT)</h4>
+    <p><strong>Real-time:</strong> streaming recognition from microphone or audio stream with word-level timestamps and confidence scores.</p>
+    <p><strong>Batch:</strong> asynchronous transcription of audio files in blob storage; returns JSON with detailed timestamps.</p>
+    <p><strong>Fast Transcription:</strong> low-latency file transcription (faster than real-time batch) for short audio.</p>
+    <p><strong>Whisper on Azure:</strong> OpenAI Whisper model available as an Azure OpenAI deployment for multilingual transcription.</p>
+  </div>
+  <div class="card">
+    <h4>Text-to-Speech (TTS)</h4>
+    <p><strong>Neural voices:</strong> 500+ prebuilt neural voices across 140+ locales. SSML supported for pitch, rate, emphasis, and pauses.</p>
+    <p><strong>Custom Neural Voice:</strong> fine-tune a voice from your own recorded speech samples (requires Microsoft approval).</p>
+    <p><strong>Speech Translation:</strong> real-time speech-to-speech or speech-to-text translation across 100+ language pairs.</p>
+    <p><strong>Speaker Recognition:</strong> speaker verification (is this the same person?) and speaker identification (who is speaking?).</p>
+  </div>
+</div>
+
+<h3>Python SDK Quick Start</h3>
+<pre><code class="language-python">import azure.cognitiveservices.speech as speechsdk
+import os
+
+speech_config = speechsdk.SpeechConfig(
+    subscription=os.getenv("SPEECH_KEY"),
+    region=os.getenv("SPEECH_REGION")
+)
+speech_config.speech_recognition_language = "en-US"
+
+# Microphone input
+audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
+recognizer = speechsdk.SpeechRecognizer(
+    speech_config=speech_config,
+    audio_config=audio_config
+)
+result = recognizer.recognize_once_async().get()
+if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+    print("Recognised:", result.text)
+</code></pre>
+
+<details>
+  <summary>Custom Speech — when and how</summary>
+  <div class="body">
+    <p>Custom Speech lets you adapt a base speech recognition model to improve accuracy for:</p>
+    <ul>
+      <li>Domain-specific jargon (medical, legal, financial terminology)</li>
+      <li>Unusual proper nouns (product names, brand names, people's names)</li>
+      <li>Noisy or acoustic environments different from training data</li>
+    </ul>
+    <p>Process: upload audio + transcripts to a Speech resource → create a Custom Speech project → train a custom endpoint → test WER (word error rate) → deploy and reference in your SpeechConfig via <code>endpoint_id</code>. Audio data requirements: minimum ~1 hour for noticeable improvement, 10–20 hours for significant gains.</p>
+  </div>
+</details>
+
+<h2>Azure AI Document Intelligence</h2>
+
+<p class="lead">Azure AI Document Intelligence (formerly Form Recognizer) extracts structured data — text, tables, key-value pairs, and typed fields — from PDFs, images, and Office documents using AI-powered layout analysis and prebuilt or custom models.</p>
+
+<h3>Prebuilt Models</h3>
+<table>
+  <tr><th>Model ID</th><th>Extracts</th></tr>
+  <tr><td><code>prebuilt-layout</code></td><td>Text, tables, figures, and key-value pairs from any document (the base model used internally by all others)</td></tr>
+  <tr><td><code>prebuilt-invoice</code></td><td>Vendor, customer, line items, amounts, dates, PO numbers</td></tr>
+  <tr><td><code>prebuilt-receipt</code></td><td>Merchant, transaction date, items, subtotals, tax, total</td></tr>
+  <tr><td><code>prebuilt-idDocument</code></td><td>Passport, national ID — name, DOB, document number, expiry</td></tr>
+  <tr><td><code>prebuilt-contract</code></td><td>Parties, term, jurisdiction, payment terms</td></tr>
+  <tr><td><code>prebuilt-tax.us.w2</code></td><td>US W-2 wage and tax statement fields</td></tr>
+  <tr><td><code>prebuilt-read</code></td><td>Text-only extraction with language detection; fastest and cheapest model</td></tr>
+</table>
+
+<h3>Python SDK</h3>
+<pre><code class="language-python">from azure.ai.documentintelligence import DocumentIntelligenceClient
+from azure.core.credentials import AzureKeyCredential
+import os
+
+di_client = DocumentIntelligenceClient(
+    endpoint=os.getenv("DI_ENDPOINT"),
+    credential=AzureKeyCredential(os.getenv("DI_KEY"))
+)
+
+with open("invoice.pdf", "rb") as f:
+    poller = di_client.begin_analyze_document("prebuilt-invoice", f)
+
+result = poller.result()
+for invoice in result.documents:
+    fields = invoice.fields
+    vendor = fields.get("VendorName")
+    total  = fields.get("InvoiceTotal")
+    if vendor:
+        print("Vendor:", vendor.content, "  Confidence:", vendor.confidence)
+    if total:
+        print("Total: ", total.content, "  Confidence:", total.confidence)
+</code></pre>
+
+<div class="callout tip"><span class="t">Custom models</span> When prebuilt models miss fields specific to your forms, train a custom model. Neural models handle variable layouts (recommended). Template models are faster but require consistent form structure. Compose up to 100 models for a single endpoint that auto-selects the right sub-model by document type.</div>
+
+<h2>Azure AI Search — Vector &amp; Hybrid Search</h2>
+
+<p class="lead">Azure AI Search is a fully managed enterprise search service that combines BM25 keyword retrieval, approximate nearest-neighbour (ANN) vector search, and a neural semantic ranker into a unified hybrid pipeline. It is the retrieval backbone for most enterprise RAG architectures on Azure.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 720 202" width="720" height="202">
+  <rect x="0" y="0" width="720" height="202" fill="#f8fafc" rx="8"/>
+  <rect x="10" y="78" width="98" height="44" fill="#eff4ff" rx="5" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="59" y="97" fill="#1e3a8a" font-size="11" font-weight="600" text-anchor="middle" font-family="sans-serif">User</text>
+  <text x="59" y="111" fill="#1e3a8a" font-size="11" font-weight="600" text-anchor="middle" font-family="sans-serif">Query</text>
+  <line x1="108" y1="100" x2="136" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="136" y1="60" x2="136" y2="140" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="136" y1="60" x2="166" y2="60" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="136" y1="140" x2="166" y2="140" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="166" y="38" width="130" height="44" fill="#2563eb" rx="5"/>
+  <text x="231" y="57" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">BM25</text>
+  <text x="231" y="71" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">Keyword Search</text>
+  <rect x="166" y="118" width="130" height="44" fill="#0891b2" rx="5"/>
+  <text x="231" y="137" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">Vector Search</text>
+  <text x="231" y="151" fill="white" font-size="10" text-anchor="middle" font-family="sans-serif">(HNSW · ANN)</text>
+  <line x1="296" y1="60" x2="366" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="296" y1="140" x2="366" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="366" y="78" width="110" height="44" fill="#1e3a8a" rx="5"/>
+  <text x="421" y="97" fill="white" font-size="11" text-anchor="middle" font-family="sans-serif">RRF Fusion</text>
+  <text x="421" y="111" fill="#93c5fd" font-size="9" text-anchor="middle" font-family="sans-serif">Reciprocal Rank</text>
+  <line x1="476" y1="100" x2="504" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+  <polygon points="500,95 510,100 500,105" fill="#94a3b8"/>
+  <rect x="510" y="78" width="110" height="44" fill="#059669" rx="5"/>
+  <text x="565" y="97" fill="white" font-size="11" text-anchor="middle" font-family="sans-serif">Semantic</text>
+  <text x="565" y="111" fill="white" font-size="11" text-anchor="middle" font-family="sans-serif">Ranker</text>
+  <line x1="620" y1="100" x2="648" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+  <polygon points="644,95 654,100 644,105" fill="#94a3b8"/>
+  <rect x="654" y="78" width="58" height="44" fill="#ecfdf5" rx="5" stroke="#059669" stroke-width="1.5"/>
+  <text x="683" y="97" fill="#065f46" font-size="10" text-anchor="middle" font-family="sans-serif">Top-K</text>
+  <text x="683" y="111" fill="#065f46" font-size="10" text-anchor="middle" font-family="sans-serif">Results</text>
+  <text x="231" y="30" fill="#64748b" font-size="9" text-anchor="middle" font-family="sans-serif">Lexical (exact/partial matches)</text>
+  <text x="231" y="178" fill="#64748b" font-size="9" text-anchor="middle" font-family="sans-serif">Semantic (dense vector proximity)</text>
+</svg>
+<div class="cap">Figure 3 — Azure AI Search hybrid retrieval pipeline. BM25 and vector search run in parallel; scores are merged by Reciprocal Rank Fusion (RRF); the optional semantic ranker applies a cross-encoder for final re-ranking.</div>
+</div>
+
+<h3>Index Schema Essentials</h3>
+<table>
+  <tr><th>Field Attribute</th><th>Meaning</th></tr>
+  <tr><td><code>searchable</code></td><td>Field participates in BM25 full-text search; triggers inverted index creation</td></tr>
+  <tr><td><code>filterable</code></td><td>Field can be used in OData <code>$filter</code> expressions</td></tr>
+  <tr><td><code>sortable</code></td><td>Field can be used in <code>$orderby</code></td></tr>
+  <tr><td><code>facetable</code></td><td>Field can be used for faceted navigation counts</td></tr>
+  <tr><td><code>retrievable</code></td><td>Field is returned in search results</td></tr>
+  <tr><td><code>key</code></td><td>Unique document identifier (required, exactly one per index)</td></tr>
+  <tr><td><code>dimensions</code></td><td>Vector field: number of dimensions (must match your embedding model)</td></tr>
+  <tr><td><code>vectorSearchProfile</code></td><td>Vector field: references an HNSW or exhaustive KNN algorithm config</td></tr>
+</table>
+
+<h3>Python: Hybrid Search Query</h3>
+<pre><code class="language-python">from azure.search.documents import SearchClient
+from azure.search.documents.models import VectorizedQuery
+from azure.core.credentials import AzureKeyCredential
+import os
+
+search_client = SearchClient(
+    endpoint=os.getenv("SEARCH_ENDPOINT"),
+    index_name="documents",
+    credential=AzureKeyCredential(os.getenv("SEARCH_ADMIN_KEY"))
+)
+
+def hybrid_search(user_query: str, query_vector: list, top: int = 5):
+    vector_query = VectorizedQuery(
+        vector=query_vector,
+        k_nearest_neighbors=50,    # retrieve 50 vector candidates, then fuse
+        fields="content_vector"
+    )
+    results = search_client.search(
+        search_text=user_query,           # BM25 keyword leg
+        vector_queries=[vector_query],    # vector leg
+        select=["id", "title", "content"],
+        query_type="semantic",            # enable semantic ranker
+        semantic_configuration_name="my-semantic-config",
+        top=top
+    )
+    return [dict(r) for r in results]
+</code></pre>
+
+<div class="callout note"><span class="t">Semantic ranker</span> The semantic ranker is a cross-encoder that re-reads the query against each candidate passage. It adds ~100–200 ms latency but significantly improves relevance for question-like queries. It is billed separately (per 1,000 semantic queries). Available on Basic tier and above.</div>
+
+<div class="qa">
+  <div class="q">What is Reciprocal Rank Fusion (RRF) and why does Azure AI Search use it for hybrid retrieval?</div>
+  <div class="a">RRF is a score-merging algorithm: it ranks documents by the sum of <code>1 / (k + rank)</code> across each retrieval leg, where <em>k</em> (typically 60) dampens the effect of early rankings. Because it uses rank positions rather than raw scores, it correctly merges BM25 scores (whose scale depends on term frequencies) with cosine-similarity vector scores (bounded 0–1) without rescaling. The result is that a document appearing in the top ranks of <em>both</em> legs is pushed to the top of the fused result, regardless of absolute score values.</div>
+</div>
+
+<h2>RAG Pattern End-to-End</h2>
+
+<p class="lead">Retrieval-Augmented Generation (RAG) grounds an LLM's answers in a private knowledge corpus, eliminating hallucinations about proprietary data. The canonical Azure RAG stack is: <strong>Azure Blob / SharePoint → Document Intelligence → Azure AI Search (hybrid) → Azure OpenAI (GPT-4o)</strong>.</p>
+
+<h3>Two-Phase Architecture</h3>
+
+<div class="pipeline">
+  <span class="step">Source Docs</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Chunk &amp; Enrich</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Embed (text-embedding-3-large)</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">AI Search Index (vector + BM25)</span>
+</div>
+
+<div class="pipeline">
+  <span class="step">User Query</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Embed Query</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Hybrid Retrieval</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Augment Prompt</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Azure OpenAI (GPT-4o)</span>
+  <span class="arrow">-&gt;</span>
+  <span class="step">Grounded Answer</span>
+</div>
+
+<h3>Complete RAG Function</h3>
+<pre><code class="language-python">from openai import AzureOpenAI
+from azure.search.documents import SearchClient
+from azure.search.documents.models import VectorizedQuery
+from azure.core.credentials import AzureKeyCredential
+import os
+
+aoai = AzureOpenAI(
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    api_version="2025-04-01-preview"
+)
+search = SearchClient(
+    os.getenv("SEARCH_ENDPOINT"), "documents",
+    AzureKeyCredential(os.getenv("SEARCH_ADMIN_KEY"))
+)
+
+def get_embedding(text: str) -&gt; list:
+    return aoai.embeddings.create(
+        model="text-embedding-3-large", input=text
+    ).data[0].embedding
+
+def answer_with_rag(question: str) -&gt; str:
+    # 1. Embed the question
+    q_vec = get_embedding(question)
+
+    # 2. Hybrid retrieval
+    vq = VectorizedQuery(vector=q_vec, k_nearest_neighbors=30, fields="content_vector")
+    hits = search.search(
+        search_text=question,
+        vector_queries=[vq],
+        select=["title", "content"],
+        top=4
+    )
+    context = "\n\n".join(
+        f"[Source: {h['title']}]\n{h['content']}" for h in hits
+    )
+
+    # 3. Augmented generation
+    resp = aoai.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system",
+             "content": (
+                 "Answer ONLY from the context below. "
+                 "Cite sources as [Source: title]. "
+                 "If the answer is not in the context, say 'I don't know'.\n\n"
+                 + context
+             )},
+            {"role": "user", "content": question}
+        ],
+        temperature=0.0,
+        max_tokens=800
+    )
+    return resp.choices[0].message.content
+</code></pre>
+
+<h3>Chunking Strategies</h3>
+<table>
+  <tr><th>Strategy</th><th>Description</th><th>When to Use</th></tr>
+  <tr><td>Fixed-size</td><td>Split by character count (e.g. 512 chars, 20 % overlap)</td><td>Uniform text; quick to implement</td></tr>
+  <tr><td>Sentence-based</td><td>Split on sentence boundaries using NLTK / spaCy</td><td>When preserving sentence meaning matters</td></tr>
+  <tr><td>Recursive</td><td>Try paragraph → sentence → word splits in order</td><td>Mixed document types; default LangChain strategy</td></tr>
+  <tr><td>Semantic</td><td>Split where embedding cosine similarity drops (Azure AI Search "text split" skill)</td><td>Best relevance; more compute cost</td></tr>
+  <tr><td>Document-aware</td><td>Use Document Intelligence layout to chunk at table / section boundaries</td><td>PDFs, invoices, reports with rich structure</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Hallucination guard</span> Always instruct the model to answer from context only and explicitly say "I don't know" when the context does not contain the answer. Evaluate with Azure AI Foundry's built-in groundedness metric (requires GPT-4 as judge) to catch answer-context drift before releasing to production.</div>
+
+<div class="qa">
+  <div class="q">What is the difference between semantic ranking and vector search in Azure AI Search?</div>
+  <div class="a"><strong>Vector search</strong> finds documents whose stored embeddings are geometrically close (high cosine similarity) to the query embedding. It captures semantic meaning but requires documents to have been pre-embedded and indexed in vector fields. <strong>Semantic ranking</strong> is a separate, post-retrieval step: it uses a cross-encoder transformer to re-read the query against each candidate passage and re-rank them by passage relevance. Semantic ranking can be applied to the output of keyword, vector, or hybrid search — it does not require vector fields. The two are complementary: vector search provides good candidate recall; semantic ranking improves precision of the final top-K.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you prevent a RAG system from returning outdated information after documents are updated?</div>
+  <div class="a">Use <strong>incremental indexing</strong> via an AI Search Indexer with a <code>dataChangeDetectionPolicy</code> (e.g., SQL HighWaterMark or Blob Storage last-modified timestamp). The indexer re-crawls only changed or new documents and updates/deletes the corresponding index entries. For near-real-time needs, call the index REST API or SDK directly from your document management pipeline (push model). Always store a <code>last_updated</code> metadata field in the index so you can filter with <code>$filter=last_updated ge 2025-01-01T00:00:00Z</code> or display freshness to users.</div>
+</div>
+
+<h2>Azure AI Foundry &amp; ML Studio</h2>
+
+<p class="lead">Azure AI Foundry (released 2024, unifying Azure Machine Learning Studio and Azure AI Studio) is the end-to-end platform for building, evaluating, and deploying AI applications and models on Azure. It introduces a <strong>Hub → Project</strong> organisational model shared by all team members.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Hub &amp; Project Model</h4>
+    <p>A <strong>Hub</strong> is the top-level Azure resource that holds shared infrastructure: compute, storage, connections to services (Azure OpenAI, AI Search, Application Insights), and network/identity configuration.</p>
+    <p>A <strong>Project</strong> lives inside a Hub and isolates a single application or team workstream. Projects share the Hub's connections and compute but have separate experiment tracking, deployments, and file stores.</p>
+  </div>
+  <div class="card">
+    <h4>Model Catalog</h4>
+    <p>Browse and deploy 1,600+ models: Azure OpenAI models, Meta Llama 3/4, Mistral Large, Phi-4, Cohere Command R+, Falcon, and many more via <strong>serverless API deployments</strong> (pay-per-token, no GPU provisioning) or <strong>managed online endpoints</strong> (dedicated VMSS).</p>
+    <p>Each model card includes benchmark scores (MMLU, HumanEval, MT-Bench) and pricing to aid model selection.</p>
+  </div>
+  <div class="card">
+    <h4>Prompt Flow</h4>
+    <p>A visual DAG-based orchestration framework. Nodes can be: <strong>LLM</strong> (call any deployed model), <strong>Prompt</strong> (Jinja2 template), <strong>Python</strong> (arbitrary code), <strong>Embedding</strong>, and <strong>Vector DB lookup</strong>. Flows are versioned, testable with batch inputs, and deployable to managed endpoints.</p>
+  </div>
+  <div class="card">
+    <h4>Evaluations</h4>
+    <p>Built-in metrics: <strong>Groundedness</strong> (is the answer supported by context?), <strong>Relevance</strong> (does it answer the question?), <strong>Coherence</strong>, <strong>Fluency</strong>, and <strong>Similarity</strong>. All use GPT-4 as an LLM judge. Results feed an experiment tracker for A/B comparison of prompt variants and model choices. Custom evaluators (Python functions) are also supported.</p>
+  </div>
+</div>
+
+<details>
+  <summary>Azure ML Studio vs AI Foundry — what moved where</summary>
+  <div class="body">
+    <p>Azure AI Foundry absorbed Azure AI Studio (formerly the AI Studio preview) and added tighter integration with Azure Machine Learning. Key movements:</p>
+    <ul>
+      <li>Model fine-tuning jobs, compute clusters, and MLflow experiment tracking remain in the ML Studio / AI Foundry unified portal.</li>
+      <li>Prompt Flow migrated from ML Studio into AI Foundry Projects.</li>
+      <li>Responsible AI dashboard (fairness, error analysis, model explanations) is in the ML Studio / Foundry model evaluation section.</li>
+      <li>Managed Online Endpoints deploy both traditional ML models and LLM-based flows.</li>
+    </ul>
+    <p>For new projects, use AI Foundry as the entry point. Azure ML Python SDK v2 (<code>azure-ai-ml</code>) manages compute and pipelines; AI Foundry SDK (<code>azure-ai-projects</code>) manages connections, deployments and evaluations.</p>
+  </div>
+</details>
+
+<h2>Responsible AI &amp; Content Safety</h2>
+
+<p class="lead">Microsoft's Responsible AI Standard applies to all Azure AI Services. Azure OpenAI additionally implements runtime content filters that inspect every request and response — and these filters are mandatory; they cannot be disabled unless Microsoft grants an exception via the Limited Access program.</p>
+
+<h3>Microsoft's Six Responsible AI Principles</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Fairness</h4>
+    <p>AI systems should treat all people equitably and not produce discriminatory outcomes based on race, gender, age, disability, nationality, religion, or other protected characteristics.</p>
+  </div>
+  <div class="card">
+    <h4>Reliability &amp; Safety</h4>
+    <p>Systems should perform as designed, handle failures gracefully, and not cause unintended harm. This includes testing under adversarial conditions and setting safe fallback behaviors.</p>
+  </div>
+  <div class="card">
+    <h4>Privacy &amp; Security</h4>
+    <p>Data used to interact with AI must be protected. Azure AI Services do not use customer prompts or data to retrain models. Encryption at rest and in transit is enforced.</p>
+  </div>
+  <div class="card">
+    <h4>Inclusiveness</h4>
+    <p>AI should empower people of all abilities and backgrounds. Speech services support diverse accents; Vision APIs are tested across skin tones; Language APIs cover 100+ languages.</p>
+  </div>
+  <div class="card">
+    <h4>Transparency</h4>
+    <p>Users and operators should understand what AI systems can and cannot do. Model cards, system cards, and capability documentation accompany all Azure OpenAI model releases.</p>
+  </div>
+  <div class="card">
+    <h4>Accountability</h4>
+    <p>People must be accountable for AI systems they create and deploy. Azure provides audit logs, access reviews, and a human oversight framework (HITL) recommendation for high-stakes scenarios.</p>
+  </div>
+</div>
+
+<h3>Azure OpenAI Content Filters</h3>
+<table>
+  <tr><th>Harm Category</th><th>Severity Levels</th><th>Default Action</th></tr>
+  <tr><td>Hate &amp; Fairness</td><td>Safe / Low / Medium / High (0–6)</td><td>Block at Medium and above (configurable)</td></tr>
+  <tr><td>Violence</td><td>Safe / Low / Medium / High</td><td>Block at Medium and above</td></tr>
+  <tr><td>Sexual</td><td>Safe / Low / Medium / High</td><td>Block at Low and above (stricter default)</td></tr>
+  <tr><td>Self-harm</td><td>Safe / Low / Medium / High</td><td>Block at Medium and above</td></tr>
+  <tr><td>Jailbreak</td><td>Detected / Not detected</td><td>Always block when detected (Prompt Shields)</td></tr>
+  <tr><td>Protected material (text)</td><td>Detected / Not detected</td><td>Block or annotate depending on policy</td></tr>
+  <tr><td>Groundedness (RAG)</td><td>Grounded / Ungrounded</td><td>Annotate; block configurable</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Limited Access features</span> Several Azure AI features require explicit Microsoft approval before use: Face API identification/emotion, Custom Neural Voice, Content Safety severity override, and Azure OpenAI access itself (though generally available, it still requires an access request form in some regions). Check the Limited Access policy before designing your architecture.</div>
+
+<div class="qa">
+  <div class="q">Can Azure OpenAI content filters be turned off for a production application?</div>
+  <div class="a">No, not by default. Content filters run on every request and response and cannot be disabled. If a business scenario legitimately requires different thresholds (e.g., a medical platform discussing self-harm with patients), you can submit a <strong>modified content filter configuration request</strong> to Microsoft. Approval is case-by-case, time-limited, and still subject to the usage policies. Even with an approved custom configuration you cannot fully disable all filters — you can only relax specific severity thresholds for specific harm categories in specific deployment contexts.</div>
+</div>
+
+<h2>Authentication: Keys, Endpoints &amp; RBAC</h2>
+
+<p class="lead">Azure AI Services support two authentication modes: API key (fast and simple) and Microsoft Entra ID (recommended for production). Entra ID authentication integrates with Managed Identities so no secret is ever stored in code or configuration files.</p>
+
+<h3>Authentication Cheat Sheet</h3>
+<table>
+  <tr><th>Method</th><th>Header / Mechanism</th><th>When to Use</th></tr>
+  <tr><td>API Key</td><td><code>api-key: &lt;key&gt;</code> (AOAI) or <code>Ocp-Apim-Subscription-Key: &lt;key&gt;</code></td><td>Development, quick tests, CI pipelines with secret managers</td></tr>
+  <tr><td>Entra ID (MSAL/SDK)</td><td>Bearer token in <code>Authorization</code> header; refreshed automatically by SDK</td><td>Production apps; eliminates secret rotation risk</td></tr>
+  <tr><td>Managed Identity (System)</td><td>Identity assigned to the Azure resource (VM, App Service, Function, AKS)</td><td>Server-to-server calls from Azure-hosted workloads</td></tr>
+  <tr><td>Managed Identity (User)</td><td>Explicit identity resource shared across multiple Azure resources</td><td>When multiple services need same permissions; easier role assignment</td></tr>
+  <tr><td>Workload Identity (AKS)</td><td>Service account token federated with Entra ID</td><td>Kubernetes-hosted apps; replaces in-cluster secrets</td></tr>
+</table>
+
+<h3>Key RBAC Roles</h3>
+<table>
+  <tr><th>Role</th><th>Permissions</th></tr>
+  <tr><td>Cognitive Services User</td><td>Call APIs (read/write); cannot manage resources or see keys</td></tr>
+  <tr><td>Cognitive Services Contributor</td><td>Full control including reading keys and creating resources</td></tr>
+  <tr><td>Cognitive Services OpenAI User</td><td>Call Azure OpenAI APIs only (subset of Cognitive Services User)</td></tr>
+  <tr><td>Cognitive Services OpenAI Contributor</td><td>Create deployments and call APIs; cannot read subscription keys</td></tr>
+  <tr><td>Search Index Data Reader</td><td>Execute queries on a specific AI Search index</td></tr>
+  <tr><td>Search Index Data Contributor</td><td>Read + write index documents (ingest, update, delete)</td></tr>
+</table>
+
+<h3>Managed Identity Pattern</h3>
+<pre><code class="language-python">from azure.identity import DefaultAzureCredential
+from azure.identity import get_bearer_token_provider
+from openai import AzureOpenAI
+import os
+
+# DefaultAzureCredential tries: environment vars -&gt; Managed Identity -&gt; CLI -&gt; VS Code
+credential = DefaultAzureCredential()
+
+token_provider = get_bearer_token_provider(
+    credential,
+    "https://cognitiveservices.azure.com/.default"
+)
+
+client = AzureOpenAI(
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    azure_ad_token_provider=token_provider,  # no api_key needed
+    api_version="2025-04-01-preview"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello from Managed Identity!"}]
+)
+print(response.choices[0].message.content)
+</code></pre>
+
+<div class="callout note"><span class="t">Key rotation</span> Every Azure AI Services resource has two API keys. Rotate without downtime by: (1) updating your app to the secondary key, (2) regenerating the primary key in the portal, (3) updating your app back to the regenerated primary. Automate this with Azure Key Vault + Event Grid-triggered Functions. With Managed Identity you skip this entirely.</div>
+
+<div class="qa">
+  <div class="q">What is the difference between Cognitive Services User and Cognitive Services OpenAI User RBAC roles?</div>
+  <div class="a"><strong>Cognitive Services User</strong> grants access to all Azure AI Services APIs under a resource — Vision, Language, Speech, Document Intelligence, and Azure OpenAI. <strong>Cognitive Services OpenAI User</strong> is scoped specifically to the Azure OpenAI API surface and cannot call non-OpenAI services. Use the OpenAI-scoped role to follow the principle of least privilege when a workload only needs to call GPT/embedding endpoints. Neither role allows listing API keys (that requires Contributor) — both rely on Entra ID token auth when used for production least-privilege access.</div>
+</div>
+
+<h2>Python SDK Integration Patterns</h2>
+
+<p class="lead">Each Azure AI service has a dedicated Python SDK package under the <code>azure-ai-*</code> namespace, plus the <code>openai</code> package with native Azure support. Use <code>azure-identity</code> for credential management across all services.</p>
+
+<h3>Package Reference</h3>
+<table>
+  <tr><th>Service</th><th>Package</th><th>Key Client Class</th></tr>
+  <tr><td>Azure OpenAI</td><td><code>openai</code></td><td><code>AzureOpenAI</code></td></tr>
+  <tr><td>Azure AI Language</td><td><code>azure-ai-textanalytics</code></td><td><code>TextAnalyticsClient</code></td></tr>
+  <tr><td>Azure AI Language (CLU)</td><td><code>azure-ai-language-conversations</code></td><td><code>ConversationAnalysisClient</code></td></tr>
+  <tr><td>Azure AI Speech</td><td><code>azure-cognitiveservices-speech</code></td><td><code>SpeechRecognizer</code>, <code>SpeechSynthesizer</code></td></tr>
+  <tr><td>Azure AI Vision</td><td><code>azure-ai-vision-imageanalysis</code></td><td><code>ImageAnalysisClient</code></td></tr>
+  <tr><td>Azure AI Document Intelligence</td><td><code>azure-ai-documentintelligence</code></td><td><code>DocumentIntelligenceClient</code></td></tr>
+  <tr><td>Azure AI Search</td><td><code>azure-search-documents</code></td><td><code>SearchClient</code>, <code>SearchIndexClient</code></td></tr>
+  <tr><td>Azure AI Projects (Foundry)</td><td><code>azure-ai-projects</code></td><td><code>AIProjectClient</code></td></tr>
+  <tr><td>Identity</td><td><code>azure-identity</code></td><td><code>DefaultAzureCredential</code>, <code>ClientSecretCredential</code></td></tr>
+</table>
+
+<h3>Environment Variables Convention</h3>
+<pre><code class="language-bash"># Azure OpenAI
+AZURE_OPENAI_ENDPOINT=https://myaoai.openai.azure.com/
+AZURE_OPENAI_API_KEY=&lt;key&gt;
+# AZURE_OPENAI_API_VERSION is read automatically by some versions of SDK
+
+# Azure AI Language
+LANGUAGE_ENDPOINT=https://my-language.cognitiveservices.azure.com/
+LANGUAGE_KEY=&lt;key&gt;
+
+# Azure AI Speech
+SPEECH_KEY=&lt;key&gt;
+SPEECH_REGION=eastus
+
+# Azure AI Document Intelligence
+DI_ENDPOINT=https://my-di.cognitiveservices.azure.com/
+DI_KEY=&lt;key&gt;
+
+# Azure AI Search
+SEARCH_ENDPOINT=https://my-search.search.windows.net
+SEARCH_ADMIN_KEY=&lt;admin-key&gt;
+SEARCH_QUERY_KEY=&lt;query-only-key&gt;
+</code></pre>
+
+<h3>Async Pattern</h3>
+<pre><code class="language-python">import asyncio
+from openai import AsyncAzureOpenAI
+
+async def ask(question: str) -&gt; str:
+    async with AsyncAzureOpenAI(
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        api_version="2025-04-01-preview"
+    ) as client:
+        resp = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": question}]
+        )
+        return resp.choices[0].message.content
+
+# Fan-out multiple questions concurrently
+questions = ["What is HNSW?", "What is RRF?", "What is PTU?"]
+answers = asyncio.run(asyncio.gather(*[ask(q) for q in questions]))
+</code></pre>
+
+<div class="callout tip"><span class="t">Retry policy</span> All <code>azure-*</code> SDK clients include automatic retry with exponential back-off for transient HTTP 429 (rate limit) and 5xx errors. Tune with <code>RetryPolicy(total=5, backoff_factor=0.8)</code> passed to the client's <code>retry_policy</code> constructor argument. For Azure OpenAI, the <code>openai</code> SDK raises <code>RateLimitError</code> — wrap calls in a <code>tenacity</code> retry decorator for production resilience.</div>
+
+<div class="qa">
+  <div class="q">How do you securely provide Azure credentials to a Python application running in Azure App Service?</div>
+  <div class="a">Enable the <strong>System-Assigned Managed Identity</strong> on the App Service in the Azure Portal (Identity → Status: On). Then grant that identity the appropriate RBAC role on each target resource (e.g., <em>Cognitive Services OpenAI User</em> on the Azure OpenAI resource). In code, use <code>DefaultAzureCredential()</code> — it automatically uses the Managed Identity token when running in Azure. Locally, the same code falls through to Azure CLI credentials (<code>az login</code>). This pattern requires zero secrets in environment variables, no key rotation, and works transparently across environments.</div>
+</div>
+
+<h2>Cost, Quotas &amp; Azure OpenAI vs. Direct OpenAI API</h2>
+
+<p class="lead">Understanding Azure OpenAI pricing and quota mechanics is essential for production planning and a common interview topic. The billing model differs significantly from the direct OpenAI API in both structure and commercial terms.</p>
+
+<h3>Pricing Models</h3>
+<table>
+  <tr><th>Model</th><th>Unit</th><th>Billing Scope</th></tr>
+  <tr><td>Standard deployment (chat/completion)</td><td>Per 1,000 tokens (input priced lower than output)</td><td>Per deployment per region</td></tr>
+  <tr><td>Embedding models</td><td>Per 1,000 tokens (input only)</td><td>Per deployment</td></tr>
+  <tr><td>Provisioned Managed (PTU)</td><td>Per PTU-hour</td><td>1-month or 1-year commitment (discounted)</td></tr>
+  <tr><td>Batch API</td><td>~50 % discount vs Standard</td><td>Per token; 24-hour completion SLA</td></tr>
+  <tr><td>DALL-E 3</td><td>Per image (varies by size and quality)</td><td>Per generation request</td></tr>
+  <tr><td>Whisper</td><td>Per minute of audio</td><td>Per transcription minute</td></tr>
+  <tr><td>Vision (image tokens)</td><td>Fixed + tile-based tokens per image</td><td>Included in chat token billing</td></tr>
+</table>
+
+<h3>Quota Concepts</h3>
+<table>
+  <tr><th>Quota Type</th><th>Description</th></tr>
+  <tr><td>TPM (Tokens Per Minute)</td><td>Rate limit on total tokens (input + output) processed per minute across all calls to a deployment</td></tr>
+  <tr><td>RPM (Requests Per Minute)</td><td>Rate limit on number of API calls; usually derived from TPM (TPM / 6 = approximate RPM)</td></tr>
+  <tr><td>Regional quota</td><td>Total TPM assigned to your subscription per region; shared across all deployments in that region</td></tr>
+  <tr><td>Model quota</td><td>Some models have separate per-subscription caps independent of regional quota</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Quota increase</span> Request increases via the Azure Portal: Azure OpenAI resource → Deployments → select deployment → Request quota increase. Processing takes 3–5 business days. For very large scale, Provisioned Managed (PTU) deployments bypass TPM limits entirely — their throughput is reserved at provisioning time.</div>
+
+<h3>Azure OpenAI vs. Direct OpenAI API</h3>
+<table>
+  <tr><th>Dimension</th><th>Azure OpenAI</th><th>Direct OpenAI API (api.openai.com)</th></tr>
+  <tr><td>Data residency</td><td>Stays in your chosen Azure region; never leaves tenant</td><td>Processed in OpenAI's US/EU datacentres</td></tr>
+  <tr><td>Training on your data</td><td>No — Microsoft contractually commits to this</td><td>No (opt-out by default for API users)</td></tr>
+  <tr><td>Auth / access control</td><td>Azure RBAC + Entra ID + Managed Identity + Private Link</td><td>API key only; org-level only</td></tr>
+  <tr><td>Network isolation</td><td>VNet integration, Private Endpoints, IP allowlist</td><td>Public internet only</td></tr>
+  <tr><td>Content filtering</td><td>Mandatory; configurable thresholds; Prompt Shields</td><td>OpenAI Moderation API (optional, separate call)</td></tr>
+  <tr><td>SLA</td><td>99.9 % availability SLA (Standard); PTU has separate SLA</td><td>No formal SLA</td></tr>
+  <tr><td>Compliance</td><td>ISO 27001, SOC 2, HIPAA, EU Data Boundary, FedRAMP (select regions)</td><td>SOC 2, limited certifications</td></tr>
+  <tr><td>Model availability</td><td>Slightly behind Direct OpenAI for newest releases; regional capacity may vary</td><td>First access to new models</td></tr>
+  <tr><td>Billing</td><td>Azure subscription invoice; EA/MCA pricing, Azure credits</td><td>OpenAI credit-card / invoice billing</td></tr>
+  <tr><td>Rate limits</td><td>Per-deployment TPM; increase via quota request</td><td>Per-org tier; increase by upgrading plan</td></tr>
+</table>
+
+<div class="callout ok"><span class="t">When to choose Azure OpenAI</span> Choose Azure OpenAI if your organisation: (1) has strict data sovereignty or compliance requirements, (2) already uses Azure and wants unified billing/RBAC, (3) needs VNet/Private Link integration, or (4) is subject to regulated industry requirements (HIPAA, FedRAMP). For a personal side project or early-stage startup without compliance requirements, the direct OpenAI API is simpler and gives faster access to new models.</div>
+
+<div class="qa">
+  <div class="q">You are getting HTTP 429 errors from Azure OpenAI. What are your options?</div>
+  <div class="a">A 429 means you hit a quota limit (TPM or RPM). Options in order of effort: (1) <strong>Retry with exponential back-off</strong> — transient spikes often resolve themselves; the SDK does this automatically. (2) <strong>Reduce request rate</strong> — add throttling logic or a queue in front of the API. (3) <strong>Request a quota increase</strong> in the Azure Portal (takes 3–5 days). (4) <strong>Use multiple deployments / regions</strong> — distribute load across deployments in different regions, each with its own quota. (5) <strong>Switch to Provisioned Managed (PTU)</strong> — PTU deployments do not have TPM rate limits; their throughput is reserved. (6) <strong>Use the Batch API</strong> for non-time-sensitive workloads — async with 50 % price reduction and no TPM limit.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How does Azure OpenAI handle data privacy differently from the direct OpenAI API?</div>
+  <div class="a">With Azure OpenAI, Microsoft contractually guarantees that: (a) your prompts, completions, and fine-tuning data are <strong>not used to train or improve OpenAI's or Microsoft's models</strong>, (b) data stays within your <strong>Azure region</strong> (with Global Standard routing as the exception — disabling it keeps data in-region), and (c) the service is subject to your Azure DPA (Data Processing Agreement). Access to data in motion and at rest requires your tenant's keys. The direct OpenAI API also does not train on API data by default, but it lacks the enterprise legal guarantees, VNet isolation, and Azure compliance certifications. For regulated workloads, Azure OpenAI is the required choice.</div>
+</div>
+
+<h3>Best Practices &amp; Interview Cheat Sheet</h3>
+
+<p class="lead">A consolidated reference of key patterns, pitfalls, and metrics for production deployments and technical interviews.</p>
+
+<div class="callout tip"><span class="t">Production checklist</span>
+Use Managed Identity instead of API keys in all Azure-hosted workloads. Store any keys that must be used in Azure Key Vault with automatic rotation. Enable diagnostic logging on all AI resources and route to Log Analytics. Set up alerts on HTTP 429 rate, latency P99, and token consumption per deployment. For Azure OpenAI, configure a custom content filter policy and review Content Safety block logs weekly.</div>
+
+<div class="callout warn"><span class="t">Common pitfalls</span>
+(1) Calling the model by its catalog name instead of the deployment name — always use the deployment name in the <code>model</code> field. (2) Ignoring system prompt token cost — a 2,000-token system prompt is included in every request. (3) Not validating chunks before embedding — empty or near-empty chunks produce noisy embeddings that pollute retrieval. (4) Using the wrong API version — Azure OpenAI feature availability varies by <code>api_version</code>; always pin to a stable version in production. (5) Not handling semantic ranker availability — it requires Basic+ tier; code should degrade gracefully.</div>
+
+<h3>Key Numbers to Remember</h3>
+<table>
+  <tr><th>Item</th><th>Value</th></tr>
+  <tr><td>GPT-4o context window</td><td>128,000 tokens</td></tr>
+  <tr><td>GPT-4.1 context window</td><td>1,000,000 tokens</td></tr>
+  <tr><td>o4-mini context window</td><td>200,000 tokens</td></tr>
+  <tr><td>text-embedding-3-large dimensions</td><td>3,072 (can be truncated to 256 / 512 / 1,024 / 1,536)</td></tr>
+  <tr><td>text-embedding-3-small dimensions</td><td>1,536</td></tr>
+  <tr><td>ada-002 dimensions (legacy)</td><td>1,536</td></tr>
+  <tr><td>DALL-E 3 max sizes</td><td>1024×1024, 1024×1792, 1792×1024</td></tr>
+  <tr><td>Whisper max file size</td><td>25 MB per file</td></tr>
+  <tr><td>Document Intelligence max file size</td><td>500 MB; 2,000 pages</td></tr>
+  <tr><td>AI Search Free tier limit</td><td>3 indexes, 50 MB storage, 10,000 docs</td></tr>
+  <tr><td>Semantic ranker (AI Search) default</td><td>Re-ranks top 50 candidates to return top K</td></tr>
+  <tr><td>RRF k constant</td><td>60 (default in Azure AI Search)</td></tr>
+  <tr><td>Content filter severity levels</td><td>0 (safe), 2 (low), 4 (medium), 6 (high)</td></tr>
+</table>
+
+<h3>Architecture Decision Map</h3>
+<table>
+  <tr><th>Scenario</th><th>Recommended Service(s)</th></tr>
+  <tr><td>Chat over private documents</td><td>Azure AI Search (hybrid) + Azure OpenAI (GPT-4o) — RAG pattern</td></tr>
+  <tr><td>Automate invoice data extraction</td><td>Azure AI Document Intelligence — prebuilt-invoice</td></tr>
+  <tr><td>Moderate user-generated content</td><td>Azure AI Content Safety (harm categories + custom blocklists)</td></tr>
+  <tr><td>Transcribe customer call recordings</td><td>Azure AI Speech — Batch Transcription or Whisper deployment</td></tr>
+  <tr><td>Extract intent from chat messages</td><td>Azure AI Language — CLU (Conversational Language Understanding)</td></tr>
+  <tr><td>Semantic search across product catalogue</td><td>Azure AI Search — vector search with text-embedding-3-large</td></tr>
+  <tr><td>Fine-tune a model on proprietary data</td><td>Azure OpenAI fine-tuning (GPT-4o-mini / GPT-4o, JSONL training format)</td></tr>
+  <tr><td>Run any open-source model (Llama, Phi)</td><td>Azure AI Foundry — Model Catalog serverless endpoint or managed online endpoint</td></tr>
+  <tr><td>OCR on photos / low-quality scans</td><td>Azure AI Vision — Image Analysis 4.0 Read API</td></tr>
+  <tr><td>Real-time voice assistant</td><td>Azure AI Speech STT + Azure OpenAI + TTS (pipeline or GPT-4o Realtime API)</td></tr>
+</table>

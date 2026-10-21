@@ -1,0 +1,731 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Programming Languages</div>
+  <h1>Python</h1>
+  <div class="subtitle">The AI engineer's core language, from object model and comprehensions to async, typing, and interview-ready idioms.</div>
+  <div class="tags"><span>python</span><span>programming-languages</span><span>oop</span><span>async</span><span>typing</span><span>interview-prep</span><span>data-engineering</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~16 min read &middot; 3,550 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-python-is-amp-why-it-matters">What Python Is &amp; Why It Matters</a></li><li><a href="#setup-amp-environment-management">Setup &amp; Environment Management</a></li><li><a href="#core-data-types-amp-the-object-model">Core Data Types &amp; The Object Model</a></li><li><a href="#control-flow-amp-pattern-matching">Control Flow &amp; Pattern Matching</a></li><li><a href="#comprehensions-amp-iteration-idioms">Comprehensions &amp; Iteration Idioms</a></li><li><a href="#functions-arguments-amp-closures">Functions, Arguments &amp; Closures</a></li><li><a href="#object-oriented-programming">Object-Oriented Programming</a></li><li><a href="#decorators-amp-context-managers">Decorators &amp; Context Managers</a></li><li><a href="#generators-iterators-amp-lazy-data">Generators, Iterators &amp; Lazy Data</a></li><li><a href="#type-hints-amp-modern-typing">Type Hints &amp; Modern Typing</a></li><li><a href="#errors-exceptions-amp-robustness">Errors, Exceptions &amp; Robustness</a></li><li><a href="#concurrency-threads-asyncio-amp-processes">Concurrency: Threads, asyncio &amp; Processes</a></li><li><a href="#standard-library-essentials">Standard Library Essentials</a></li><li><a href="#testing-with-pytest">Testing with pytest</a></li><li><a href="#cheat-sheet-amp-comparison-reference">Cheat Sheet &amp; Comparison Reference</a></li><li><a href="#best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-python-is-amp-why-it-matters">What Python Is &amp; Why It Matters</h2>
+<p class="lead">Python is a high-level, dynamically typed, garbage-collected language whose defining promise is that code should be as readable as pseudocode. For a data/AI engineer it is the lingua franca: the same language drives quick data exploration in a notebook, production ETL, model training, and the web service that serves the model.</p>
+
+<p>Python trades raw execution speed for programmer speed and a colossal ecosystem. The heavy numerical work (NumPy, PyTorch, pandas) runs in C/C++/CUDA under the hood; Python is the <em>glue</em> that orchestrates it. Understanding where the boundary sits — pure-Python loops are slow, vectorized library calls are fast — is the single most important mental model for performance.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="680" height="260" rx="10" fill="#eff4ff" stroke="#94a3b8"/>
+  <text x="360" y="45" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e3a8a">Your Python program (the orchestrator)</text>
+  <rect x="50" y="70" width="180" height="60" rx="8" fill="#fff" stroke="#2563eb"/>
+  <text x="140" y="98" text-anchor="middle" font-size="13" fill="#1a2233">Your .py source</text>
+  <text x="140" y="116" text-anchor="middle" font-size="11" fill="#64748b">readable, dynamic</text>
+  <rect x="270" y="70" width="180" height="60" rx="8" fill="#fff" stroke="#0891b2"/>
+  <text x="360" y="98" text-anchor="middle" font-size="13" fill="#1a2233">CPython VM</text>
+  <text x="360" y="116" text-anchor="middle" font-size="11" fill="#64748b">bytecode + GIL</text>
+  <rect x="490" y="70" width="180" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="580" y="98" text-anchor="middle" font-size="13" fill="#1a2233">C / CUDA kernels</text>
+  <text x="580" y="116" text-anchor="middle" font-size="11" fill="#64748b">NumPy, torch, BLAS</text>
+  <line x1="230" y1="100" x2="266" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="450" y1="100" x2="486" y2="100" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="360" y="185" text-anchor="middle" font-size="13" fill="#1a2233">Speed rule of thumb</text>
+  <rect x="90" y="200" width="240" height="55" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="210" y="223" text-anchor="middle" font-size="12" fill="#b45309">Pure-Python for-loop</text>
+  <text x="210" y="242" text-anchor="middle" font-size="11" fill="#64748b">~1x  (slow, flexible)</text>
+  <rect x="390" y="200" width="240" height="55" rx="8" fill="#fff" stroke="#059669"/>
+  <text x="510" y="223" text-anchor="middle" font-size="12" fill="#059669">Vectorized library call</text>
+  <text x="510" y="242" text-anchor="middle" font-size="11" fill="#64748b">10-100x faster</text>
+</svg><div class="cap">Fig 1 — Python is the conductor; the compute-heavy sections delegate to compiled C/CUDA.</div></div>
+
+<div class="callout note"><span class="t">Version</span> Target <span class="badge">Python 3.12+</span> for new work in 2026 (3.13 adds an experimental free-threaded, no-GIL build). Python 2 is long dead. Prefer features available in 3.10+ (structural pattern matching, better error messages, <code>X | Y</code> type unions).</div>
+
+<h2 id="setup-amp-environment-management">Setup &amp; Environment Management</h2>
+<p>The cardinal rule: <strong>never install packages into the system interpreter</strong>. Each project gets an isolated virtual environment so dependency versions never collide.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Check your interpreter</span>
+python --version            <span class="hljs-comment"># or python3 on macOS/Linux</span>
+
+<span class="hljs-comment"># Create and activate a virtual environment (stdlib venv)</span>
+python -m venv .venv
+<span class="hljs-built_in">source</span> .venv/bin/activate   <span class="hljs-comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="hljs-comment"># Install packages into the active venv</span>
+pip install numpy pandas requests
+pip freeze &gt; requirements.txt      <span class="hljs-comment"># snapshot exact versions</span>
+pip install -r requirements.txt    <span class="hljs-comment"># reproduce elsewhere</span>
+
+<span class="hljs-comment"># Modern fast alternative: uv (Rust-based, ~10-100x faster than pip)</span>
+uv venv &amp;&amp; uv pip install pandas
+uv run script.py            <span class="hljs-comment"># auto-manages the environment</span></code></pre>
+
+<div class="grid c3">
+  <div class="card"><h4>venv + pip</h4>Built in, universal, zero extra install. The safe default.</div>
+  <div class="card"><h4>uv / Poetry</h4>Lockfiles, dependency resolution, project metadata in <code>pyproject.toml</code>. Best for apps.</div>
+  <div class="card"><h4>conda</h4>Manages non-Python binaries (CUDA, MKL) too. Common in data science / Anaconda.</div>
+</div>
+
+<div class="callout tip"><span class="t">Tip</span> Add <code>.venv/</code> to <code>.gitignore</code>. Commit <code>requirements.txt</code> (or <code>pyproject.toml</code> + lockfile), never the environment folder itself.</div>
+
+<h2 id="core-data-types-amp-the-object-model">Core Data Types &amp; The Object Model</h2>
+<p>Everything in Python is an object with an identity, a type, and a value. Variables are <em>names bound to objects</em>, not boxes holding values — this explains most aliasing surprises.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 240" width="700" height="240">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <rect x="30" y="30" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="55" text-anchor="middle" font-size="14" fill="#1e3a8a">a</text>
+  <rect x="30" y="100" width="120" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="125" text-anchor="middle" font-size="14" fill="#1e3a8a">b</text>
+  <rect x="400" y="65" width="230" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="515" y="86" text-anchor="middle" font-size="13" fill="#1a2233">list object [1, 2, 3]</text>
+  <text x="515" y="104" text-anchor="middle" font-size="11" fill="#64748b">id=0x7f..  type=list</text>
+  <rect x="400" y="150" width="230" height="45" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="515" y="177" text-anchor="middle" font-size="13" fill="#1a2233">int object 42 (immutable)</text>
+  <line x1="150" y1="50" x2="396" y2="80" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="150" y1="120" x2="396" y2="95" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="250" y="55" font-size="11" fill="#64748b">a = [1,2,3]</text>
+  <text x="230" y="145" font-size="11" fill="#64748b">b = a  (same object!)</text>
+</svg><div class="cap">Fig 2 — Names reference objects. <code>b = a</code> makes both names point at one list; mutating through <code>b</code> is visible via <code>a</code>.</div></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Numbers: int has arbitrary precision, no overflow</span>
+<span class="hljs-number">2</span> ** <span class="hljs-number">100</span>                    <span class="hljs-comment"># 1267650600228229401496703205376</span>
+
+<span class="hljs-comment"># Strings are immutable Unicode; f-strings are the standard for formatting</span>
+name, score = <span class="hljs-string">&quot;Ada&quot;</span>, <span class="hljs-number">98.5</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{name}</span> scored <span class="hljs-subst">{score:<span class="hljs-number">.1</span>f}</span>%&quot;</span>)   <span class="hljs-comment"># Ada scored 98.5%</span>
+
+<span class="hljs-comment"># The core containers</span>
+nums   = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]              <span class="hljs-comment"># list  - ordered, mutable</span>
+point  = (<span class="hljs-number">10</span>, <span class="hljs-number">20</span>)              <span class="hljs-comment"># tuple - ordered, immutable (hashable)</span>
+seen   = {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>}             <span class="hljs-comment"># set   - unordered, unique, fast membership</span>
+lookup = {<span class="hljs-string">&quot;a&quot;</span>: <span class="hljs-number">1</span>, <span class="hljs-string">&quot;b&quot;</span>: <span class="hljs-number">2</span>}      <span class="hljs-comment"># dict  - key -&gt; value, insertion-ordered (3.7+)</span>
+
+<span class="hljs-comment"># Mutable vs immutable: the #1 aliasing gotcha</span>
+a = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+b = a               <span class="hljs-comment"># b is the SAME list</span>
+b.append(<span class="hljs-number">4</span>)
+<span class="hljs-built_in">print</span>(a)            <span class="hljs-comment"># [1, 2, 3, 4]  -- surprised? see Fig 2</span>
+c = a.copy()        <span class="hljs-comment"># shallow copy -&gt; independent top level</span></code></pre>
+
+<table>
+<tr><th>Type</th><th>Mutable?</th><th>Ordered?</th><th>Typical use</th><th>Lookup cost</th></tr>
+<tr><td><code>list</code></td><td>Yes</td><td>Yes</td><td>Sequence you grow/edit</td><td>O(n) search, O(1) index</td></tr>
+<tr><td><code>tuple</code></td><td>No</td><td>Yes</td><td>Fixed record, dict key</td><td>O(n)</td></tr>
+<tr><td><code>dict</code></td><td>Yes</td><td>Insertion</td><td>Keyed lookup</td><td>O(1) average</td></tr>
+<tr><td><code>set</code></td><td>Yes</td><td>No</td><td>Membership, dedup</td><td>O(1) average</td></tr>
+<tr><td><code>str</code></td><td>No</td><td>Yes</td><td>Text</td><td>O(n)</td></tr>
+</table>
+
+<h2 id="control-flow-amp-pattern-matching">Control Flow &amp; Pattern Matching</h2>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Truthiness: empty containers, 0, None, &quot;&quot; are falsy</span>
+items = []
+<span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> items:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;empty&quot;</span>)
+
+<span class="hljs-comment"># Ternary and chained comparisons</span>
+grade = <span class="hljs-string">&quot;pass&quot;</span> <span class="hljs-keyword">if</span> score &gt;= <span class="hljs-number">50</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;fail&quot;</span>
+<span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt;= score &lt;= <span class="hljs-number">100</span>:            <span class="hljs-comment"># chained, reads like math</span>
+    <span class="hljs-keyword">pass</span>
+
+<span class="hljs-comment"># for-else: else runs only if the loop did NOT break</span>
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> nums:
+    <span class="hljs-keyword">if</span> x == <span class="hljs-number">99</span>:
+        <span class="hljs-keyword">break</span>
+<span class="hljs-keyword">else</span>:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;99 not found&quot;</span>)
+
+<span class="hljs-comment"># Structural pattern matching (3.10+)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">handle</span>(<span class="hljs-params">event</span>):
+    <span class="hljs-keyword">match</span> event:
+        <span class="hljs-keyword">case</span> {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;click&quot;</span>, <span class="hljs-string">&quot;x&quot;</span>: x, <span class="hljs-string">&quot;y&quot;</span>: y}:
+            <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;click at <span class="hljs-subst">{x}</span>,<span class="hljs-subst">{y}</span>&quot;</span>
+        <span class="hljs-keyword">case</span> {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;key&quot;</span>, <span class="hljs-string">&quot;code&quot;</span>: code}:
+            <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;key <span class="hljs-subst">{code}</span>&quot;</span>
+        <span class="hljs-keyword">case</span> [first, *rest]:            <span class="hljs-comment"># sequence + capture</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;list starting <span class="hljs-subst">{first}</span>&quot;</span>
+        <span class="hljs-keyword">case</span> _:                          <span class="hljs-comment"># wildcard / default</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;unknown&quot;</span></code></pre>
+
+<h2 id="comprehensions-amp-iteration-idioms">Comprehensions &amp; Iteration Idioms</h2>
+<p>Comprehensions are the idiomatic, fast way to build collections. Prefer them to manual <code>append</code> loops — clearer and often quicker.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">squares   = [x*x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>)]                 <span class="hljs-comment"># list</span>
+evens     = [x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">20</span>) <span class="hljs-keyword">if</span> x % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>]     <span class="hljs-comment"># with filter</span>
+grid      = [(r, c) <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>)]  <span class="hljs-comment"># nested</span>
+by_len    = {w: <span class="hljs-built_in">len</span>(w) <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;bb&quot;</span>, <span class="hljs-string">&quot;ccc&quot;</span>]}  <span class="hljs-comment"># dict comp</span>
+unique    = {x % <span class="hljs-number">3</span> <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>)}               <span class="hljs-comment"># set comp</span>
+
+<span class="hljs-comment"># Generator expression: lazy, memory-efficient (parens, not brackets)</span>
+total = <span class="hljs-built_in">sum</span>(x*x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1_000_000</span>))           <span class="hljs-comment"># no giant list built</span>
+
+<span class="hljs-comment"># Essential built-ins for iteration</span>
+<span class="hljs-keyword">for</span> i, val <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(nums, start=<span class="hljs-number">1</span>):    <span class="hljs-comment"># index + value</span>
+    <span class="hljs-built_in">print</span>(i, val)
+<span class="hljs-keyword">for</span> a, b <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>], [<span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-string">&quot;y&quot;</span>]):       <span class="hljs-comment"># parallel iteration</span>
+    <span class="hljs-built_in">print</span>(a, b)
+<span class="hljs-keyword">from</span> itertools <span class="hljs-keyword">import</span> chain, groupby, count
+<span class="hljs-built_in">list</span>(chain([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>], [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>]))                <span class="hljs-comment"># [1,2,3,4]</span></code></pre>
+
+<div class="callout warn"><span class="t">Pitfall</span> Comprehensions build the whole collection in memory. For a huge or infinite stream use a <em>generator</em> expression (round parentheses) so values are produced one at a time.</div>
+
+<h2 id="functions-arguments-amp-closures">Functions, Arguments &amp; Closures</h2>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">connect</span>(<span class="hljs-params">host, port=<span class="hljs-number">5432</span>, *args, timeout=<span class="hljs-number">30</span>, **kwargs</span>):
+    <span class="hljs-string">&quot;&quot;&quot;positional, default, *args (extra positionals),
+       keyword-only (after *), **kwargs (extra keywords).&quot;&quot;&quot;</span>
+    ...
+
+<span class="hljs-comment"># Force keyword-only / positional-only args</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">area</span>(<span class="hljs-params">width, height, *, unit=<span class="hljs-string">&quot;cm&quot;</span></span>):   <span class="hljs-comment"># unit MUST be passed by name</span>
+    <span class="hljs-keyword">return</span> width * height
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">divide</span>(<span class="hljs-params">a, b, /</span>):                      <span class="hljs-comment"># a, b are positional-only</span>
+    <span class="hljs-keyword">return</span> a / b
+
+<span class="hljs-comment"># Unpacking at the call site</span>
+opts = {<span class="hljs-string">&quot;port&quot;</span>: <span class="hljs-number">6543</span>, <span class="hljs-string">&quot;timeout&quot;</span>: <span class="hljs-number">10</span>}
+connect(<span class="hljs-string">&quot;db.local&quot;</span>, **opts)
+
+<span class="hljs-comment"># Closures capture variables by reference</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">make_counter</span>():
+    count = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">inc</span>():
+        <span class="hljs-keyword">nonlocal</span> count      <span class="hljs-comment"># rebind the enclosing variable</span>
+        count += <span class="hljs-number">1</span>
+        <span class="hljs-keyword">return</span> count
+    <span class="hljs-keyword">return</span> inc
+c = make_counter(); c(); c()   <span class="hljs-comment"># 1, 2</span></code></pre>
+
+<div class="callout danger"><span class="t">Classic bug</span> Never use a mutable default argument. <code>def f(items=[]):</code> shares ONE list across all calls. Use <code>def f(items=None): items = items or []</code> instead.</div>
+
+<h2 id="object-oriented-programming">Object-Oriented Programming</h2>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> dataclasses <span class="hljs-keyword">import</span> dataclass, field
+
+<span class="hljs-meta">@dataclass                       </span><span class="hljs-comment"># auto __init__, __repr__, __eq__</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Point</span>:
+    x: <span class="hljs-built_in">float</span>
+    y: <span class="hljs-built_in">float</span>
+    tags: <span class="hljs-built_in">list</span> = field(default_factory=<span class="hljs-built_in">list</span>)   <span class="hljs-comment"># safe mutable default</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">dist</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">float</span>:
+        <span class="hljs-keyword">return</span> (<span class="hljs-variable language_">self</span>.x**<span class="hljs-number">2</span> + <span class="hljs-variable language_">self</span>.y**<span class="hljs-number">2</span>) ** <span class="hljs-number">0.5</span>
+
+<span class="hljs-comment"># Inheritance, super(), and properties</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Animal</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, name</span>):
+        <span class="hljs-variable language_">self</span>.name = name
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">speak</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-keyword">raise</span> NotImplementedError
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Dog</span>(<span class="hljs-title class_ inherited__">Animal</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">speak</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;woof&quot;</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Account</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, balance</span>):
+        <span class="hljs-variable language_">self</span>._balance = balance
+<span class="hljs-meta">    @property                    </span><span class="hljs-comment"># computed, read like an attribute</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">balance</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._balance
+<span class="hljs-meta">    @balance.setter</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">balance</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-keyword">if</span> value &lt; <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;negative balance&quot;</span>)
+        <span class="hljs-variable language_">self</span>._balance = value
+
+<span class="hljs-comment"># Dunder methods make objects behave like built-ins</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Vec</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y</span>): <span class="hljs-variable language_">self</span>.x, <span class="hljs-variable language_">self</span>.y = x, y
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__add__</span>(<span class="hljs-params">self, o</span>):     <span class="hljs-keyword">return</span> Vec(<span class="hljs-variable language_">self</span>.x+o.x, <span class="hljs-variable language_">self</span>.y+o.y)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__repr__</span>(<span class="hljs-params">self</span>):       <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;Vec(<span class="hljs-subst">{self.x}</span>, <span class="hljs-subst">{self.y}</span>)&quot;</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__len__</span>(<span class="hljs-params">self</span>):        <span class="hljs-keyword">return</span> <span class="hljs-number">2</span></code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>@dataclass</h4>Removes boilerplate for data-holding classes. Add <code>frozen=True</code> for immutability, <code>slots=True</code> for memory savings.</div>
+  <div class="card"><h4>@property</h4>Expose computed/validated values with attribute syntax — no <code>get_x()</code>/<code>set_x()</code> noise.</div>
+</div>
+
+<h2 id="decorators-amp-context-managers">Decorators &amp; Context Managers</h2>
+<p>A decorator is a function that takes a function and returns a replacement — the mechanism behind <code>@property</code>, <code>@staticmethod</code>, Flask routes, and caching.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> functools, time
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">timed</span>(<span class="hljs-params">func</span>):
+<span class="hljs-meta">    @functools.wraps(<span class="hljs-params">func</span>)          </span><span class="hljs-comment"># preserve name/docstring</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">wrapper</span>(<span class="hljs-params">*args, **kwargs</span>):
+        t0 = time.perf_counter()
+        result = func(*args, **kwargs)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{func.__name__}</span>: <span class="hljs-subst">{time.perf_counter()-t0:<span class="hljs-number">.4</span>f}</span>s&quot;</span>)
+        <span class="hljs-keyword">return</span> result
+    <span class="hljs-keyword">return</span> wrapper
+
+<span class="hljs-meta">@timed</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">slow</span>(): time.sleep(<span class="hljs-number">0.1</span>)
+
+<span class="hljs-comment"># functools.cache memoizes automatically</span>
+<span class="hljs-meta">@functools.cache</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">fib</span>(<span class="hljs-params">n</span>):
+    <span class="hljs-keyword">return</span> n <span class="hljs-keyword">if</span> n &lt; <span class="hljs-number">2</span> <span class="hljs-keyword">else</span> fib(n-<span class="hljs-number">1</span>) + fib(n-<span class="hljs-number">2</span>)
+
+<span class="hljs-comment"># Context managers guarantee cleanup via with-blocks</span>
+<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;data.txt&quot;</span>) <span class="hljs-keyword">as</span> f:         <span class="hljs-comment"># file closed even on exception</span>
+    text = f.read()
+
+<span class="hljs-keyword">from</span> contextlib <span class="hljs-keyword">import</span> contextmanager
+<span class="hljs-meta">@contextmanager</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">timer</span>(<span class="hljs-params">label</span>):
+    t0 = time.perf_counter()
+    <span class="hljs-keyword">yield</span>                            <span class="hljs-comment"># body of the with-block runs here</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{label}</span>: <span class="hljs-subst">{time.perf_counter()-t0:<span class="hljs-number">.3</span>f}</span>s&quot;</span>)
+
+<span class="hljs-keyword">with</span> timer(<span class="hljs-string">&quot;load&quot;</span>):
+    data = [x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>**<span class="hljs-number">6</span>)]</code></pre>
+
+<div class="pipeline"><span class="step">@timed</span><span class="arrow">-&gt;</span><span class="step">wrap fn</span><span class="arrow">-&gt;</span><span class="step">call</span><span class="arrow">-&gt;</span><span class="step">measure + delegate</span></div>
+
+<h2 id="generators-iterators-amp-lazy-data">Generators, Iterators &amp; Lazy Data</h2>
+<p>Generators produce values on demand with <code>yield</code>, holding constant memory regardless of stream size — ideal for pipelines over huge datasets or files.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 200" width="700" height="200">
+  <defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs>
+  <rect x="20" y="80" width="130" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="85" y="108" text-anchor="middle" font-size="12" fill="#1e3a8a">read_lines()</text>
+  <rect x="200" y="80" width="130" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="265" y="103" text-anchor="middle" font-size="12" fill="#1e3a8a">parse()</text>
+  <text x="265" y="119" text-anchor="middle" font-size="10" fill="#64748b">yields dicts</text>
+  <rect x="380" y="80" width="130" height="46" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="445" y="103" text-anchor="middle" font-size="12" fill="#1e3a8a">filter_valid()</text>
+  <rect x="560" y="80" width="120" height="46" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="620" y="108" text-anchor="middle" font-size="12" fill="#1a2233">consume</text>
+  <line x1="150" y1="103" x2="196" y2="103" stroke="#059669" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="330" y1="103" x2="376" y2="103" stroke="#059669" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="510" y1="103" x2="556" y2="103" stroke="#059669" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="350" y="45" text-anchor="middle" font-size="12" fill="#64748b">one row flows through the whole pipeline before the next is read — O(1) memory</text>
+</svg><div class="cap">Fig 3 — A generator pipeline: each stage pulls one item at a time; nothing is fully materialized.</div></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">read_lines</span>(<span class="hljs-params">path</span>):
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(path) <span class="hljs-keyword">as</span> f:
+        <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f:              <span class="hljs-comment"># file object is itself a lazy iterator</span>
+            <span class="hljs-keyword">yield</span> line.rstrip()
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">parse</span>(<span class="hljs-params">lines</span>):
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines:
+        <span class="hljs-keyword">yield</span> {<span class="hljs-string">&quot;raw&quot;</span>: line, <span class="hljs-string">&quot;len&quot;</span>: <span class="hljs-built_in">len</span>(line)}
+
+<span class="hljs-comment"># Compose lazily — no intermediate lists, works on a 100GB file</span>
+pipeline = (r <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> parse(read_lines(<span class="hljs-string">&quot;big.log&quot;</span>)) <span class="hljs-keyword">if</span> r[<span class="hljs-string">&quot;len&quot;</span>] &gt; <span class="hljs-number">0</span>)
+first = <span class="hljs-built_in">next</span>(pipeline)              <span class="hljs-comment"># pulls exactly one record</span>
+
+<span class="hljs-comment"># yield can also receive values and produce infinite streams</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">counter</span>(<span class="hljs-params">start=<span class="hljs-number">0</span></span>):
+    n = start
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        <span class="hljs-keyword">yield</span> n
+        n += <span class="hljs-number">1</span></code></pre>
+
+<h2 id="type-hints-amp-modern-typing">Type Hints &amp; Modern Typing</h2>
+<p>Hints are optional and not enforced at runtime, but they power editor autocomplete, catch bugs via <code>mypy</code>/<code>pyright</code>, and document intent. Strongly recommended for any code others will read.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">Optional</span>, <span class="hljs-type">Callable</span>, TypeVar, Protocol
+<span class="hljs-keyword">from</span> collections.abc <span class="hljs-keyword">import</span> Iterable, <span class="hljs-type">Sequence</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">mean</span>(<span class="hljs-params">xs: <span class="hljs-type">Sequence</span>[<span class="hljs-built_in">float</span>]</span>) -&gt; <span class="hljs-built_in">float</span>:
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">sum</span>(xs) / <span class="hljs-built_in">len</span>(xs)
+
+<span class="hljs-comment"># 3.10+ union syntax and built-in generics</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">find</span>(<span class="hljs-params">items: <span class="hljs-built_in">list</span>[<span class="hljs-built_in">int</span>], target: <span class="hljs-built_in">int</span></span>) -&gt; <span class="hljs-built_in">int</span> | <span class="hljs-literal">None</span>:
+    <span class="hljs-keyword">return</span> items.index(target) <span class="hljs-keyword">if</span> target <span class="hljs-keyword">in</span> items <span class="hljs-keyword">else</span> <span class="hljs-literal">None</span>
+
+<span class="hljs-comment"># TypeVar for generic functions</span>
+T = TypeVar(<span class="hljs-string">&quot;T&quot;</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">first</span>(<span class="hljs-params">xs: <span class="hljs-built_in">list</span>[T]</span>) -&gt; T:
+    <span class="hljs-keyword">return</span> xs[<span class="hljs-number">0</span>]
+
+<span class="hljs-comment"># Protocol = structural typing (&quot;duck typing&quot; checked statically)</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SupportsClose</span>(<span class="hljs-title class_ inherited__">Protocol</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">close</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-literal">None</span>: ...
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">shutdown</span>(<span class="hljs-params">resource: SupportsClose</span>) -&gt; <span class="hljs-literal">None</span>:
+    resource.close()</code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs">pip install mypy
+mypy --strict yourmodule.py     <span class="hljs-comment"># static type check, no execution</span></code></pre>
+
+<h2 id="errors-exceptions-amp-robustness">Errors, Exceptions &amp; Robustness</h2>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">class</span> <span class="hljs-title class_">ConfigError</span>(<span class="hljs-title class_ inherited__">Exception</span>):
+    <span class="hljs-string">&quot;&quot;&quot;Custom exceptions inherit from Exception.&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">load</span>(<span class="hljs-params">path</span>):
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(path) <span class="hljs-keyword">as</span> f:
+            <span class="hljs-keyword">return</span> f.read()
+    <span class="hljs-keyword">except</span> FileNotFoundError:
+        <span class="hljs-keyword">raise</span> ConfigError(<span class="hljs-string">f&quot;missing <span class="hljs-subst">{path}</span>&quot;</span>) <span class="hljs-keyword">from</span> <span class="hljs-literal">None</span>   <span class="hljs-comment"># clean chain</span>
+    <span class="hljs-keyword">except</span> PermissionError <span class="hljs-keyword">as</span> e:
+        <span class="hljs-keyword">raise</span> ConfigError(<span class="hljs-string">&quot;no access&quot;</span>) <span class="hljs-keyword">from</span> e             <span class="hljs-comment"># preserve cause</span>
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;read succeeded&quot;</span>)     <span class="hljs-comment"># runs if no exception</span>
+    <span class="hljs-keyword">finally</span>:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;always runs&quot;</span>)        <span class="hljs-comment"># cleanup</span>
+
+<span class="hljs-comment"># EAFP over LBYL: &quot;easier to ask forgiveness than permission&quot;</span>
+<span class="hljs-keyword">try</span>:
+    value = config[<span class="hljs-string">&quot;timeout&quot;</span>]       <span class="hljs-comment"># idiomatic</span>
+<span class="hljs-keyword">except</span> KeyError:
+    value = <span class="hljs-number">30</span>
+<span class="hljs-comment"># ...instead of:  if &quot;timeout&quot; in config: ... (a race in concurrent code)</span>
+
+<span class="hljs-comment"># Exception groups (3.11+) for concurrent errors</span>
+<span class="hljs-keyword">try</span>:
+    ...
+<span class="hljs-keyword">except</span>* ValueError <span class="hljs-keyword">as</span> eg:           <span class="hljs-comment"># handle a subset of grouped errors</span>
+    ...</code></pre>
+
+<div class="callout warn"><span class="t">Never</span> write a bare <code>except:</code> — it swallows <code>KeyboardInterrupt</code> and hides bugs. Catch the narrowest exception you can handle, and always log before re-raising.</div>
+
+<h2 id="concurrency-threads-asyncio-amp-processes">Concurrency: Threads, asyncio &amp; Processes</h2>
+<p>The <strong>GIL</strong> (Global Interpreter Lock) lets only one thread execute Python bytecode at a time. So threads help I/O-bound work (waiting on network/disk) but not CPU-bound work — for CPU parallelism use multiple processes.</p>
+
+<table>
+<tr><th>Workload</th><th>Tool</th><th>Why</th></tr>
+<tr><td>Many network/disk waits</td><td><code>asyncio</code> or <code>ThreadPoolExecutor</code></td><td>Overlap waiting; GIL released during I/O</td></tr>
+<tr><td>Heavy CPU (math, parsing)</td><td><code>ProcessPoolExecutor</code> / <code>multiprocessing</code></td><td>Separate processes bypass the GIL</td></tr>
+<tr><td>Thousands of concurrent sockets</td><td><code>asyncio</code></td><td>One thread, cooperative scheduling, low overhead</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> asyncio, aiohttp
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-params">session, url</span>):
+    <span class="hljs-keyword">async</span> <span class="hljs-keyword">with</span> session.get(url) <span class="hljs-keyword">as</span> resp:
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> resp.text()
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>(<span class="hljs-params">urls</span>):
+    <span class="hljs-keyword">async</span> <span class="hljs-keyword">with</span> aiohttp.ClientSession() <span class="hljs-keyword">as</span> session:
+        <span class="hljs-comment"># gather runs all requests concurrently on one thread</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> asyncio.gather(*(fetch(session, u) <span class="hljs-keyword">for</span> u <span class="hljs-keyword">in</span> urls))
+
+<span class="hljs-comment"># asyncio.run(main([&quot;https://example.com&quot;] * 50))</span>
+
+<span class="hljs-comment"># CPU-bound work: use processes</span>
+<span class="hljs-keyword">from</span> concurrent.futures <span class="hljs-keyword">import</span> ProcessPoolExecutor
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">heavy</span>(<span class="hljs-params">n</span>): <span class="hljs-keyword">return</span> <span class="hljs-built_in">sum</span>(i*i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(n))
+<span class="hljs-keyword">with</span> ProcessPoolExecutor() <span class="hljs-keyword">as</span> pool:
+    results = <span class="hljs-built_in">list</span>(pool.<span class="hljs-built_in">map</span>(heavy, [<span class="hljs-number">10</span>**<span class="hljs-number">6</span>] * <span class="hljs-number">8</span>))   <span class="hljs-comment"># true parallelism</span></code></pre>
+
+<div class="callout note"><span class="t">2026</span> Python 3.13 ships an experimental free-threaded (no-GIL) build. It is not yet the default; write GIL-aware code and choose the process/async tool that matches your workload.</div>
+
+<h2 id="standard-library-essentials">Standard Library Essentials</h2>
+<div class="grid c3">
+  <div class="card"><h4>collections</h4><code>defaultdict</code>, <code>Counter</code>, <code>deque</code>, <code>namedtuple</code></div>
+  <div class="card"><h4>itertools</h4>lazy combinatorics: <code>product</code>, <code>combinations</code>, <code>groupby</code>, <code>islice</code></div>
+  <div class="card"><h4>functools</h4><code>cache</code>, <code>reduce</code>, <code>partial</code>, <code>wraps</code></div>
+  <div class="card"><h4>pathlib</h4>object-oriented filesystem paths — prefer over <code>os.path</code></div>
+  <div class="card"><h4>json / csv</h4>serialize and read tabular/document data</div>
+  <div class="card"><h4>datetime</h4>timezone-aware times, <code>timedelta</code> arithmetic</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> Counter, defaultdict, deque
+<span class="hljs-keyword">from</span> pathlib <span class="hljs-keyword">import</span> Path
+<span class="hljs-keyword">import</span> json
+
+words = <span class="hljs-string">&quot;a b a c a b&quot;</span>.split()
+Counter(words).most_common(<span class="hljs-number">1</span>)         <span class="hljs-comment"># [(&#x27;a&#x27;, 3)]</span>
+
+groups = defaultdict(<span class="hljs-built_in">list</span>)
+<span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> words:
+    groups[w[<span class="hljs-number">0</span>]].append(w)            <span class="hljs-comment"># no KeyError on first access</span>
+
+queue = deque([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>])
+queue.appendleft(<span class="hljs-number">0</span>); queue.pop()      <span class="hljs-comment"># O(1) at both ends</span>
+
+<span class="hljs-comment"># pathlib reads like English</span>
+cfg = Path.home() / <span class="hljs-string">&quot;.config&quot;</span> / <span class="hljs-string">&quot;app.json&quot;</span>
+<span class="hljs-keyword">if</span> cfg.exists():
+    data = json.loads(cfg.read_text())</code></pre>
+
+<h2 id="testing-with-pytest">Testing with pytest</h2>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># file: test_math.py   -&gt;   run with:  pytest -q</span>
+<span class="hljs-keyword">import</span> pytest
+<span class="hljs-keyword">from</span> mymath <span class="hljs-keyword">import</span> divide
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_divide</span>():
+    <span class="hljs-keyword">assert</span> divide(<span class="hljs-number">6</span>, <span class="hljs-number">2</span>) == <span class="hljs-number">3</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_divide_by_zero</span>():
+    <span class="hljs-keyword">with</span> pytest.raises(ZeroDivisionError):
+        divide(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>)
+
+<span class="hljs-meta">@pytest.mark.parametrize(<span class="hljs-params"><span class="hljs-string">&quot;a,b,expected&quot;</span>, [
+    (<span class="hljs-params"><span class="hljs-number">2</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span></span>), (<span class="hljs-params"><span class="hljs-number">9</span>, <span class="hljs-number">3</span>, <span class="hljs-number">3</span></span>), (<span class="hljs-params"><span class="hljs-number">10</span>, <span class="hljs-number">5</span>, <span class="hljs-number">2</span></span>),
+]</span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_cases</span>(<span class="hljs-params">a, b, expected</span>):
+    <span class="hljs-keyword">assert</span> divide(a, b) == expected
+
+<span class="hljs-meta">@pytest.fixture</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">sample_data</span>():
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;users&quot;</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]}       <span class="hljs-comment"># reusable setup, injected by name</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test_uses_fixture</span>(<span class="hljs-params">sample_data</span>):
+    <span class="hljs-keyword">assert</span> <span class="hljs-built_in">len</span>(sample_data[<span class="hljs-string">&quot;users&quot;</span>]) == <span class="hljs-number">3</span></code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Run <code>pytest --cov=mypkg</code> for coverage. Keep tests fast and deterministic; mock external services with <code>unittest.mock</code> or <code>pytest-mock</code>.</div>
+
+<h2 id="cheat-sheet-amp-comparison-reference">Cheat Sheet &amp; Comparison Reference</h2>
+<table>
+<tr><th>Task</th><th>Idiom</th></tr>
+<tr><td>Swap variables</td><td><code>a, b = b, a</code></td></tr>
+<tr><td>Merge dicts (3.9+)</td><td><code>merged = d1 | d2</code></td></tr>
+<tr><td>Reverse a list</td><td><code>xs[::-1]</code> or <code>reversed(xs)</code></td></tr>
+<tr><td>Flatten one level</td><td><code>[x for row in grid for x in row]</code></td></tr>
+<tr><td>Sort by key</td><td><code>sorted(xs, key=lambda p: p.age, reverse=True)</code></td></tr>
+<tr><td>Deduplicate, keep order</td><td><code>list(dict.fromkeys(xs))</code></td></tr>
+<tr><td>Read/write JSON file</td><td><code>json.load(f)</code> / <code>json.dump(obj, f)</code></td></tr>
+<tr><td>Time a block</td><td><code>time.perf_counter()</code> deltas</td></tr>
+<tr><td>Default for missing key</td><td><code>d.get(k, default)</code></td></tr>
+<tr><td>Numeric literal readability</td><td><code>1_000_000</code></td></tr>
+</table>
+
+<h4>list vs tuple vs set vs dict — when to reach for which</h4>
+<table>
+<tr><th>Need</th><th>Choose</th></tr>
+<tr><td>Ordered, editable sequence</td><td><code>list</code></td></tr>
+<tr><td>Fixed record / dict key / return of multiple values</td><td><code>tuple</code></td></tr>
+<tr><td>Fast "is X present?" / remove duplicates</td><td><code>set</code></td></tr>
+<tr><td>Look up a value by a key</td><td><code>dict</code></td></tr>
+</table>
+
+<h2 id="best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Follow PEP 8; auto-format with <code>ruff format</code> (or <code>black</code>) and lint with <code>ruff check</code>. Use descriptive names, small functions, type hints on public APIs, and f-strings for formatting.</div>
+<div class="callout ok"><span class="t">Do</span> Use <code>pathlib</code> for paths, <code>with</code> for resources, comprehensions for transforms, and <code>logging</code> (not <code>print</code>) in libraries and services.</div>
+<div class="callout danger"><span class="t">Avoid</span> Mutable default arguments, bare <code>except:</code>, modifying a list while iterating it, and <code>from module import *</code>.</div>
+<div class="callout warn"><span class="t">Watch</span> <code>is</code> tests identity, <code>==</code> tests equality — use <code>==</code> for values, <code>is</code> only for <code>None</code>/singletons. Integer caching makes <code>a is b</code> deceptively true for small ints.</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># WRONG: shared mutable default persists across calls</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">append</span>(<span class="hljs-params">item, target=[]</span>):
+    target.append(item); <span class="hljs-keyword">return</span> target
+append(<span class="hljs-number">1</span>); append(<span class="hljs-number">2</span>)        <span class="hljs-comment"># returns [1, 2] -- leaked state!</span>
+
+<span class="hljs-comment"># RIGHT</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">append</span>(<span class="hljs-params">item, target=<span class="hljs-literal">None</span></span>):
+    target = [] <span class="hljs-keyword">if</span> target <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span> <span class="hljs-keyword">else</span> target
+    target.append(item); <span class="hljs-keyword">return</span> target
+
+<span class="hljs-comment"># WRONG: mutating while iterating skips elements</span>
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> nums:
+    <span class="hljs-keyword">if</span> x % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>: nums.remove(x)   <span class="hljs-comment"># buggy</span>
+<span class="hljs-comment"># RIGHT: iterate a copy or build a new list</span>
+nums = [x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> nums <span class="hljs-keyword">if</span> x % <span class="hljs-number">2</span> != <span class="hljs-number">0</span>]</code></pre>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What is the GIL and how does it affect concurrency?</div><div class="a">The Global Interpreter Lock ensures only one thread runs Python bytecode at a time in CPython. It protects internal state but means threads give no speedup for CPU-bound work — use <code>multiprocessing</code> for that. Threads still help I/O-bound work because the GIL is released while waiting on I/O. Python 3.13 introduces an experimental free-threaded build that removes it.</div></div>
+<div class="qa"><div class="q">Difference between a list and a tuple?</div><div class="a">Lists are mutable and used for homogeneous, variable-length sequences; tuples are immutable, hashable (so usable as dict keys or set members), slightly smaller/faster, and convey "fixed record." A tuple's immutability is shallow — it can still contain mutable objects.</div></div>
+<div class="qa"><div class="q">How does Python manage memory?</div><div class="a">CPython uses reference counting: each object tracks how many names reference it, and is freed when the count hits zero. A cyclic garbage collector handles reference cycles (e.g. two objects referencing each other). Memory for small objects is pooled by internal allocators.</div></div>
+<div class="qa"><div class="q">Explain <code>*args</code> and <code>**kwargs</code>.</div><div class="a"><code>*args</code> collects extra positional arguments into a tuple; <code>**kwargs</code> collects extra keyword arguments into a dict. At a call site the same operators unpack a sequence/mapping into arguments. They enable flexible, forwarding-friendly APIs.</div></div>
+<div class="qa"><div class="q">What is a decorator?</div><div class="a">A callable that takes a function (or class) and returns a replacement, letting you add behavior — timing, caching, auth, logging — without modifying the wrapped code. <code>@dec</code> above <code>def f</code> is sugar for <code>f = dec(f)</code>. Use <code>functools.wraps</code> to preserve metadata.</div></div>
+<div class="qa"><div class="q">Difference between <code>is</code> and <code>==</code>?</div><div class="a"><code>==</code> compares values (calls <code>__eq__</code>); <code>is</code> compares identity (same object in memory). Use <code>==</code> for equality, <code>is</code> only for singletons like <code>None</code>. Small-int and short-string interning can make <code>is</code> accidentally return <code>True</code>, so never rely on it for value comparison.</div></div>
+<div class="qa"><div class="q">What are generators and why use them?</div><div class="a">Functions that <code>yield</code> values lazily, producing one item at a time and suspending state between calls. They use constant memory regardless of stream length, so they are ideal for large files, infinite sequences, and streaming pipelines. A generator expression is the lazy analogue of a list comprehension.</div></div>
+<div class="qa"><div class="q">Shallow vs deep copy?</div><div class="a">A shallow copy (<code>list.copy()</code>, <code>copy.copy</code>) duplicates the top-level container but shares the nested objects. A deep copy (<code>copy.deepcopy</code>) recursively duplicates everything. Choose deep copy when nested mutable state must be independent — but note it is slower and can fail on unpicklable objects.</div></div>
+<div class="qa"><div class="q">How do you handle exceptions cleanly?</div><div class="a">Catch the narrowest exception you can handle, prefer EAFP (try/except) over pre-checking, use <code>finally</code> or context managers for cleanup, chain with <code>raise ... from e</code> to preserve cause, and never use a bare <code>except:</code>. Define custom exception classes for your domain.</div></div>
+<div class="qa"><div class="q">What does <code>if __name__ == "__main__":</code> do?</div><div class="a">When a file is run directly, its <code>__name__</code> is <code>"__main__"</code>; when imported, it is the module's name. The guard lets a file expose functions for import while also being runnable as a script, without executing the script body on import.</div></div>
+<div class="qa"><div class="q">Explain list vs generator memory trade-off with an example.</div><div class="a"><code>[x*x for x in range(10**8)]</code> allocates ~800MB up front; <code>(x*x for x in range(10**8))</code> allocates almost nothing and yields values on demand. Use the list when you need random access/reuse, the generator when you iterate once over large or streaming data.</div></div>
+<div class="qa"><div class="q">How does method resolution order (MRO) work?</div><div class="a">Python uses the C3 linearization algorithm to order base classes for attribute/method lookup under multiple inheritance. <code>ClassName.__mro__</code> shows the order; <code>super()</code> follows it, enabling cooperative multiple inheritance where each class's method calls the next in the chain exactly once.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li><strong>Effective Python</strong> (Brett Slatkin) — 90 concrete best-practice items; the single best intermediate book.</li>
+  <li><strong>Fluent Python</strong> (Luciano Ramalho, 2nd ed.) — deep dive into the data model, generators, and concurrency.</li>
+  <li>Read the official <strong>docs.python.org</strong> tutorial and the <strong>PEP 8</strong> style guide end to end.</li>
+  <li>Practice DSA in Python on LeetCode/NeetCode to cement idioms under time pressure.</li>
+  <li>Adopt <strong>ruff</strong> (lint + format), <strong>mypy/pyright</strong> (types), and <strong>pytest</strong> in every project.</li>
+  <li>Next languages/tools for an AI engineer: NumPy &amp; pandas internals, then PyTorch, then <code>asyncio</code> for serving models.</li>
+</ul>
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

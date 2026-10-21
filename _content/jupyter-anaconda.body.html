@@ -1,0 +1,416 @@
+<p class="lead">Jupyter and Anaconda are the two tools most data scientists launch first. <strong>Jupyter</strong> gives you a literate, cell-by-cell programming surface where code, output, math, and prose live in one document — the natural habitat for exploration, teaching, and reproducible analysis. <strong>Anaconda</strong> (and its lean cousin Miniconda) gives you a cross-platform package and environment manager that installs not just Python libraries but the compiled C/C++/Fortran stacks (MKL, CUDA, GEOS) they depend on, so your project runs the same on your laptop, a colleague's Mac, and a CI server. Learn the notebook workflow and conda environments well and you eliminate the two biggest sources of friction in data work: slow iteration and "it works on my machine".</p>
+
+<h2>1. What They Are and Why They Matter</h2>
+
+<p>These are complementary layers, not competitors. Anaconda sits <em>underneath</em> and provisions the Python interpreter plus every binary dependency; Jupyter runs <em>on top</em> and gives you an interactive editing experience backed by a language <strong>kernel</strong>. A healthy mental model separates three moving parts: the <strong>front-end</strong> you type into (the browser UI), the <strong>kernel</strong> that actually executes code and holds state, and the <strong>environment</strong> (a conda env) that supplies the packages the kernel imports.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Anaconda / conda</h4>A package <em>and</em> environment manager. Resolves and installs binary dependencies (not just Python), creates isolated environments, and reproduces them across OSes from a single file.</div>
+  <div class="card"><h4>Jupyter Notebook / Lab</h4>A client that renders a <code>.ipynb</code> document and talks to a kernel over a messaging protocol. JupyterLab is the modern IDE-style interface; classic Notebook is the simpler one.</div>
+  <div class="card"><h4>Kernel</h4>The process that runs your code and keeps variables alive between cells. IPython is the default Python kernel; kernels exist for R, Julia, Scala, and dozens more.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 780 300" width="780" height="300">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+    <marker id="arg" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  </defs>
+  <rect x="20" y="110" width="150" height="80" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="145" text-anchor="middle" font-size="14" fill="#1a2233">Browser UI</text>
+  <text x="95" y="165" text-anchor="middle" font-size="11" fill="#6b7688">JupyterLab / Notebook</text>
+
+  <rect x="250" y="110" width="150" height="80" rx="10" fill="#ecfdf5" stroke="#059669"/>
+  <text x="325" y="140" text-anchor="middle" font-size="14" fill="#1a2233">Jupyter Server</text>
+  <text x="325" y="160" text-anchor="middle" font-size="11" fill="#6b7688">HTTP + WebSocket</text>
+  <text x="325" y="176" text-anchor="middle" font-size="11" fill="#6b7688">routes messages</text>
+
+  <rect x="480" y="60" width="150" height="80" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="555" y="92" text-anchor="middle" font-size="14" fill="#1a2233">Kernel</text>
+  <text x="555" y="112" text-anchor="middle" font-size="11" fill="#6b7688">IPython process</text>
+  <text x="555" y="128" text-anchor="middle" font-size="11" fill="#6b7688">holds state</text>
+
+  <rect x="480" y="170" width="150" height="80" rx="10" fill="#fffbeb" stroke="#b45309"/>
+  <text x="555" y="202" text-anchor="middle" font-size="14" fill="#1a2233">conda env</text>
+  <text x="555" y="222" text-anchor="middle" font-size="11" fill="#6b7688">numpy, pandas,</text>
+  <text x="555" y="238" text-anchor="middle" font-size="11" fill="#6b7688">python 3.12 ...</text>
+
+  <rect x="660" y="60" width="100" height="190" rx="10" fill="none" stroke="#94a3b8" stroke-dasharray="5 4"/>
+  <text x="710" y="150" text-anchor="middle" font-size="11" fill="#6b7688" transform="rotate(90 710 150)">Anaconda provisions</text>
+
+  <line x1="170" y1="150" x2="250" y2="150" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="210" y="142" text-anchor="middle" font-size="10" fill="#6b7688">ws</text>
+  <line x1="400" y1="140" x2="480" y2="100" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="440" y="108" text-anchor="middle" font-size="10" fill="#6b7688">ZMQ</text>
+  <line x1="555" y1="140" x2="555" y2="170" stroke="#94a3b8" stroke-width="2" marker-end="url(#arg)"/>
+  <text x="585" y="160" text-anchor="middle" font-size="10" fill="#6b7688">imports</text>
+</svg>
+<div class="cap">Fig 1. The four moving parts: UI talks to the Jupyter Server over WebSocket; the server relays execution requests to a kernel over ZeroMQ; the kernel imports packages from the conda environment it was launched in.</div>
+</div>
+
+<div class="callout note"><span class="t">The single most useful insight</span> A notebook's output depends on <em>which kernel</em> ran it, and that kernel belongs to <em>one</em> environment. 90% of "ModuleNotFoundError even though I pip-installed it" problems are a mismatch: you installed into env A but the notebook is running env B's kernel.</div>
+
+<h2>2. Setup and Getting Started</h2>
+
+<p>Prefer <strong>Miniconda</strong> (just conda + Python) over the full Anaconda Distribution unless you want the ~3 GB bundle of pre-installed scientific packages. Even better for speed is <strong>Miniforge</strong>, which defaults to the community <code>conda-forge</code> channel and ships the fast <code>mamba</code> solver.</p>
+
+<pre><code class="language-bash"># --- Install Miniconda (Linux/macOS example) ---
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+# restart your shell, then verify
+conda --version          # conda 24.x or newer
+conda init bash          # wire conda into your shell startup
+
+# --- Create a project environment (never work in base!) ---
+conda create -n ds python=3.12 numpy pandas jupyterlab -y
+conda activate ds
+
+# --- Launch ---
+jupyter lab              # opens http://localhost:8888 in your browser
+# or the classic interface:
+jupyter notebook</code></pre>
+
+<div class="callout tip"><span class="t">Modern conda is fast</span> Since conda 23.10 the lightning-fast <code>libmamba</code> solver is the default. If you are on an older install, enable it once: <code>conda config --set solver libmamba</code>. Dependency resolution that took minutes now takes seconds.</div>
+
+<p>To make a specific environment selectable as a kernel inside Jupyter, register it with <code>ipykernel</code>:</p>
+
+<pre><code class="language-bash">conda activate ds
+conda install ipykernel -y
+# register this env so it appears in the Jupyter kernel picker
+python -m ipykernel install --user --name ds --display-name "Python (ds)"</code></pre>
+
+<h2>3. The Notebook Document and Cell Workflow</h2>
+
+<p>A notebook is a JSON file (<code>.ipynb</code>) containing an ordered list of <strong>cells</strong>. Each cell is one of three types: <span class="badge">code</span>, <span class="badge g">markdown</span>, or <span class="badge o">raw</span>. Code cells send their source to the kernel and capture whatever the kernel returns — text, tables, images, HTML, interactive widgets.</p>
+
+<h3>The execution model (and its #1 trap)</h3>
+
+<p>Cells share a <strong>single, persistent namespace</strong> in the kernel. The number in <code>[ ]</code> to a cell's left is its <em>execution count</em> — the order in which it was actually run, which need not match top-to-bottom order on screen. This is the source of the notorious "hidden state" bug.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 740 260" width="740" height="260">
+  <defs><marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker></defs>
+  <rect x="30" y="30" width="300" height="200" rx="10" fill="#f6f8fb" stroke="#e3e8ef"/>
+  <text x="180" y="22" text-anchor="middle" font-size="12" fill="#6b7688">On-screen order</text>
+  <rect x="50" y="50" width="260" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="75" font-size="12" fill="#1a2233">[1] x = 10</text>
+  <rect x="50" y="100" width="260" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="125" font-size="12" fill="#1a2233">[3] print(x)  # 42 ?!</text>
+  <rect x="50" y="150" width="260" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="175" font-size="12" fill="#1a2233">[2] x = 42</text>
+
+  <rect x="420" y="80" width="280" height="100" rx="10" fill="#fef2f2" stroke="#dc2626"/>
+  <text x="560" y="115" text-anchor="middle" font-size="13" fill="#1a2233">Kernel ran 1 → 2 → 3</text>
+  <text x="560" y="140" text-anchor="middle" font-size="12" fill="#6b7688">so x is 42 when cell 3 runs,</text>
+  <text x="560" y="158" text-anchor="middle" font-size="12" fill="#6b7688">even though it sits above cell 2</text>
+
+  <line x1="330" y1="130" x2="420" y2="130" stroke="#dc2626" stroke-width="2" marker-end="url(#ar2)"/>
+</svg>
+<div class="cap">Fig 2. Execution count vs. visual order. The kernel remembers state across runs, so out-of-order execution yields results you cannot reproduce by reading top to bottom.</div>
+</div>
+
+<div class="callout danger"><span class="t">Always validate with "Restart &amp; Run All"</span> Before you trust, share, or commit a notebook, run <strong>Kernel → Restart Kernel and Run All Cells</strong>. If it fails or gives different numbers, your notebook had hidden state and is not reproducible.</div>
+
+<h3>Essential keyboard shortcuts</h3>
+
+<p>Jupyter has two modes: <strong>command mode</strong> (blue bar, acts on cells — press <span class="kbd">Esc</span>) and <strong>edit mode</strong> (green bar, type into a cell — press <span class="kbd">Enter</span>).</p>
+
+<table>
+<tr><th>Shortcut</th><th>Mode</th><th>Action</th></tr>
+<tr><td><span class="kbd">Shift</span>+<span class="kbd">Enter</span></td><td>any</td><td>Run cell, select cell below</td></tr>
+<tr><td><span class="kbd">Ctrl</span>+<span class="kbd">Enter</span></td><td>any</td><td>Run cell, stay put</td></tr>
+<tr><td><span class="kbd">Alt</span>+<span class="kbd">Enter</span></td><td>any</td><td>Run cell, insert new cell below</td></tr>
+<tr><td><span class="kbd">A</span> / <span class="kbd">B</span></td><td>command</td><td>Insert cell above / below</td></tr>
+<tr><td><span class="kbd">D</span> <span class="kbd">D</span></td><td>command</td><td>Delete cell</td></tr>
+<tr><td><span class="kbd">M</span> / <span class="kbd">Y</span></td><td>command</td><td>Convert to markdown / code</td></tr>
+<tr><td><span class="kbd">Z</span></td><td>command</td><td>Undo cell deletion</td></tr>
+<tr><td><span class="kbd">0</span> <span class="kbd">0</span></td><td>command</td><td>Restart the kernel</td></tr>
+<tr><td><span class="kbd">Shift</span>+<span class="kbd">M</span></td><td>command</td><td>Merge selected cells</td></tr>
+</table>
+
+<h2>4. IPython Magics and Shell Access</h2>
+
+<p>The IPython kernel adds <strong>magic commands</strong>: special directives prefixed with <code>%</code> (line magic, affects one line) or <code>%%</code> (cell magic, affects the whole cell). They are not Python — they are kernel features for timing, profiling, loading code, and switching languages.</p>
+
+<pre><code class="language-python"># Line magics (single %)
+%timeit sum(range(1000))        # statistically robust micro-benchmark
+%who                            # list variables defined in the namespace
+%matplotlib inline              # render matplotlib figures in the output
+%load_ext autoreload            # auto-reimport edited modules
+%autoreload 2
+%pwd                            # print working directory
+
+# Cell magics (double %%)
+%%timeit                        # time the WHOLE cell
+total = 0
+for i in range(10000):
+    total += i
+
+%%bash                          # run the cell as a shell script
+ls -la
+echo "hello from the shell"
+
+%%writefile helper.py           # dump cell contents to a file
+def greet(name):
+    return f"Hi, {name}"</code></pre>
+
+<p>You can also run shell commands inline with <code>!</code>, and capture their output into a Python variable:</p>
+
+<pre><code class="language-python">!pip install rich               # one-off shell command
+files = !ls *.csv               # capture stdout into a Python list
+print(files)
+
+# Interpolate Python variables into shell with {}
+name = "data.csv"
+!head -n 3 {name}</code></pre>
+
+<div class="callout warn"><span class="t">Use %pip and %conda, not !pip</span> Inside a notebook, prefer the magics <code>%pip install &lt;pkg&gt;</code> and <code>%conda install &lt;pkg&gt;</code>. They install into the <em>exact environment the running kernel uses</em>. Plain <code>!pip</code> may resolve to a different Python on your <code>PATH</code>, which is how packages "disappear".</div>
+
+<table>
+<tr><th>Magic</th><th>Purpose</th></tr>
+<tr><td><code>%timeit</code> / <code>%%timeit</code></td><td>Benchmark a line / cell with multiple runs</td></tr>
+<tr><td><code>%time</code> / <code>%%time</code></td><td>Time a single execution (wall + CPU)</td></tr>
+<tr><td><code>%prun</code>, <code>%lprun</code></td><td>Function-level and line-level profiling</td></tr>
+<tr><td><code>%debug</code>, <code>%pdb on</code></td><td>Post-mortem / automatic debugger on exceptions</td></tr>
+<tr><td><code>%run script.py</code></td><td>Execute an external script in the namespace</td></tr>
+<tr><td><code>%env</code></td><td>Get / set environment variables</td></tr>
+<tr><td><code>%store</code></td><td>Persist a variable across kernel restarts</td></tr>
+<tr><td><code>%lsmagic</code></td><td>List every available magic</td></tr>
+</table>
+
+<h2>5. Kernels and JupyterLab</h2>
+
+<p>The kernel is a separate OS process. The front-end never runs your code directly — it sends <em>execute_request</em> messages and renders the <em>display_data</em> and <em>stream</em> messages that come back. This decoupling is why you can interrupt a runaway loop (<span class="kbd">I</span> <span class="kbd">I</span>), restart a hung kernel, or even connect a remote kernel to a local UI.</p>
+
+<h3>JupyterLab vs. classic Notebook vs. the ecosystem</h3>
+
+<table class="compare">
+<tr><th>Tool</th><th>What it is</th><th>Reach for it when</th></tr>
+<tr><td>JupyterLab</td><td>Full IDE: tabs, file browser, terminals, extensions, side-by-side notebooks</td><td>Default modern choice for serious work</td></tr>
+<tr><td>Jupyter Notebook 7</td><td>The classic single-document UI, now rebuilt on JupyterLab components</td><td>You want a lightweight, focused view</td></tr>
+<tr><td>VS Code / Cursor</td><td>Editor with native <code>.ipynb</code> support + debugger + Git</td><td>You live in an editor and want notebooks beside normal code</td></tr>
+<tr><td>Google Colab</td><td>Hosted notebooks with free GPUs</td><td>No local setup; quick GPU experiments</td></tr>
+<tr><td>JupyterHub</td><td>Multi-user server for teams/classes</td><td>Centralised, shared compute</td></tr>
+</table>
+
+<h3>A worked mini-example: exploratory data analysis</h3>
+
+<p>Here is the archetypal notebook flow — load, inspect, visualise — the kind of cell sequence you would type live in an interview or a real analysis.</p>
+
+<pre><code class="language-python"># Cell 1 — setup
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+# Cell 2 — load and peek
+df = pd.read_csv("sales.csv", parse_dates=["date"])
+df.head()                       # rich HTML table in the output
+
+# Cell 3 — quick profile
+df.describe()
+df.isna().sum()                 # missing-value audit
+
+# Cell 4 — a visual, rendered inline
+monthly = df.set_index("date")["revenue"].resample("ME").sum()
+monthly.plot(figsize=(9, 4), title="Monthly revenue")
+plt.ylabel("USD")
+plt.tight_layout()</code></pre>
+
+<div class="pipeline">
+  <span class="step">conda create env</span><span class="arrow">-></span>
+  <span class="step">register kernel</span><span class="arrow">-></span>
+  <span class="step">jupyter lab</span><span class="arrow">-></span>
+  <span class="step">explore in cells</span><span class="arrow">-></span>
+  <span class="step">Restart &amp; Run All</span><span class="arrow">-></span>
+  <span class="step">export env.yml</span>
+</div>
+
+<h2>6. Conda: Environments and Package Management</h2>
+
+<p>An environment is a self-contained directory holding a specific Python interpreter and a specific set of packages. Isolation means Project A can use pandas 1.5 while Project B uses pandas 2.2, with zero conflict. Never install into <code>base</code> — keep it minimal and create one env per project.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 740 240" width="740" height="240">
+  <rect x="30" y="30" width="200" height="180" rx="10" fill="#f6f8fb" stroke="#94a3b8"/>
+  <text x="130" y="55" text-anchor="middle" font-size="13" fill="#1a2233" font-weight="bold">base (keep minimal)</text>
+  <text x="130" y="80" text-anchor="middle" font-size="11" fill="#6b7688">conda, python</text>
+
+  <rect x="270" y="30" width="200" height="180" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="370" y="55" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">env: ds</text>
+  <text x="370" y="80" text-anchor="middle" font-size="11" fill="#1a2233">python 3.12</text>
+  <text x="370" y="100" text-anchor="middle" font-size="11" fill="#1a2233">pandas 2.2</text>
+  <text x="370" y="120" text-anchor="middle" font-size="11" fill="#1a2233">numpy 2.1</text>
+  <text x="370" y="140" text-anchor="middle" font-size="11" fill="#1a2233">jupyterlab</text>
+
+  <rect x="510" y="30" width="200" height="180" rx="10" fill="#ecfdf5" stroke="#059669"/>
+  <text x="610" y="55" text-anchor="middle" font-size="13" fill="#065f46" font-weight="bold">env: legacy</text>
+  <text x="610" y="80" text-anchor="middle" font-size="11" fill="#1a2233">python 3.9</text>
+  <text x="610" y="100" text-anchor="middle" font-size="11" fill="#1a2233">pandas 1.5</text>
+  <text x="610" y="120" text-anchor="middle" font-size="11" fill="#1a2233">tensorflow 2.11</text>
+</svg>
+<div class="cap">Fig 3. Isolated environments. Each project gets its own interpreter + pinned packages; incompatible versions coexist peacefully side by side.</div>
+</div>
+
+<pre><code class="language-bash"># Lifecycle of a conda environment
+conda create -n ds python=3.12          # create
+conda activate ds                       # enter
+conda install pandas scikit-learn       # install from default/conda-forge
+conda install -c conda-forge polars     # install from a specific channel
+conda list                              # what's installed
+conda env list                          # all environments on the machine
+conda update pandas                     # upgrade one package
+conda remove numpy                      # uninstall
+conda deactivate                        # leave
+conda env remove -n ds                  # delete entirely
+
+# Faster: use mamba as a drop-in replacement
+mamba install pytorch -c pytorch</code></pre>
+
+<h3>Reproducibility: environment files</h3>
+
+<p>The payoff of conda is sharing an exact environment. There are two export styles — a human-authored spec and a fully pinned lock.</p>
+
+<pre><code class="language-yaml"># environment.yml — the spec you hand-edit and commit to Git
+name: ds
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pandas>=2.2
+  - scikit-learn
+  - jupyterlab
+  - pip
+  - pip:                      # pip-only deps live in a nested block
+      - some-pypi-only-package==1.4.0</code></pre>
+
+<pre><code class="language-bash"># Recreate the environment anywhere from the spec
+conda env create -f environment.yml
+conda activate ds
+
+# Update an existing env after editing the file
+conda env update -f environment.yml --prune   # --prune removes dropped deps
+
+# Fully pinned, exact export (good for a snapshot; OS-specific!)
+conda env export > environment.lock.yml
+
+# Cross-platform explicit spec (reproducible, no builds)
+conda env export --from-history > environment.yml</code></pre>
+
+<div class="callout tip"><span class="t">--from-history is the portable export</span> A plain <code>conda env export</code> pins exact build strings tied to your OS and will often fail to recreate on a different platform. <code>--from-history</code> records only the packages <em>you</em> explicitly asked for, producing a clean, cross-platform file.</div>
+
+<h2>7. conda vs pip vs venv</h2>
+
+<p>These overlap but solve different problems. <strong>venv</strong> isolates Python packages only. <strong>pip</strong> installs from PyPI into whatever environment is active. <strong>conda</strong> is both an environment manager <em>and</em> a package manager that also handles non-Python binaries. They can be combined — but with rules.</p>
+
+<table class="compare">
+<tr><th>Dimension</th><th>conda</th><th>pip + venv</th></tr>
+<tr><td>Manages environments</td><td>Yes (<code>conda create</code>)</td><td>venv does; pip does not</td></tr>
+<tr><td>Package source</td><td>conda channels (conda-forge, defaults)</td><td>PyPI</td></tr>
+<tr><td>Non-Python deps</td><td>Yes — CUDA, MKL, GDAL, compilers</td><td>No (relies on prebuilt wheels)</td></tr>
+<tr><td>Language scope</td><td>Any language</td><td>Python only</td></tr>
+<tr><td>Dependency solver</td><td>Full SAT solver (libmamba)</td><td>Resolver, less strict about binary ABI</td></tr>
+<tr><td>Breadth of packages</td><td>Large but &lt; PyPI</td><td>Everything on PyPI</td></tr>
+<tr><td>Best for</td><td>Data science, GPU, geospatial, mixed stacks</td><td>Pure-Python apps, web, lightweight tools</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The golden rule for mixing conda and pip</span> Install as much as possible with conda <em>first</em>, then use <code>pip</code> only for what conda lacks — and do it <em>last</em>. Installing with conda after pip can silently clobber pip-managed files. Record pip deps in the <code>pip:</code> block of <code>environment.yml</code> so the environment stays reproducible.</div>
+
+<p>The modern pure-pip world has also matured. Tools like <strong>uv</strong> (an extremely fast Rust-based resolver/installer) and <strong>Poetry</strong> or <strong>PDM</strong> manage pip-based projects with real lock files. For a pure-Python service, uv + venv is often faster and leaner than conda; for a GPU/compiled scientific stack, conda still wins.</p>
+
+<pre><code class="language-bash"># The venv + pip workflow (no conda)
+python -m venv .venv              # create an env in ./.venv
+source .venv/bin/activate         # (Windows: .venv\Scripts\activate)
+pip install -r requirements.txt   # install pinned deps
+pip freeze > requirements.txt     # snapshot exact versions
+
+# The modern fast alternative: uv
+uv venv                           # create .venv instantly
+uv pip install pandas jupyterlab  # resolve + install in a flash
+uv pip compile requirements.in -o requirements.txt  # lock</code></pre>
+
+<h2>8. Cheat-Sheet Reference</h2>
+
+<h3>conda command reference</h3>
+<table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>conda create -n NAME python=3.12</code></td><td>Create a new environment</td></tr>
+<tr><td><code>conda activate NAME</code> / <code>deactivate</code></td><td>Enter / leave an environment</td></tr>
+<tr><td><code>conda install -c conda-forge PKG</code></td><td>Install from a channel</td></tr>
+<tr><td><code>conda list</code></td><td>List installed packages</td></tr>
+<tr><td><code>conda env list</code></td><td>List all environments</td></tr>
+<tr><td><code>conda env export --from-history &gt; environment.yml</code></td><td>Portable export</td></tr>
+<tr><td><code>conda env create -f environment.yml</code></td><td>Recreate from file</td></tr>
+<tr><td><code>conda clean --all</code></td><td>Free disk by removing caches/tarballs</td></tr>
+<tr><td><code>conda config --show channels</code></td><td>Inspect channel configuration</td></tr>
+</table>
+
+<h3>Jupyter CLI reference</h3>
+<table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>jupyter lab</code></td><td>Launch JupyterLab</td></tr>
+<tr><td><code>jupyter notebook</code></td><td>Launch classic Notebook</td></tr>
+<tr><td><code>jupyter kernelspec list</code></td><td>Show registered kernels</td></tr>
+<tr><td><code>python -m ipykernel install --user --name NAME</code></td><td>Register current env as a kernel</td></tr>
+<tr><td><code>jupyter nbconvert --to html nb.ipynb</code></td><td>Export to HTML / PDF / script</td></tr>
+<tr><td><code>jupyter nbconvert --to notebook --execute nb.ipynb</code></td><td>Run a notebook headless (CI)</td></tr>
+<tr><td><code>jupyter lab --no-browser --port 8889</code></td><td>Headless server (remote work)</td></tr>
+</table>
+
+<h2>9. Best Practices and Common Pitfalls</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>One env per project</h4>Create a named environment per repo and commit an <code>environment.yml</code>. Keep <code>base</code> clean so a broken install never bricks your whole conda.</div>
+  <div class="card"><h4>Notebooks explore, modules ship</h4>Prototype in a notebook, then move stable logic into importable <code>.py</code> files and <code>import</code> them back. Notebooks are not a good home for production code.</div>
+  <div class="card"><h4>Restart &amp; Run All before trusting</h4>Make linear reproducibility a habit. A notebook that only works with hidden state is a liability.</div>
+  <div class="card"><h4>Strip output before committing</h4>Notebook JSON diffs are noisy. Use <code>nbstripout</code> or Jupytext to pair with a <code>.py</code> so Git reviews are readable.</div>
+</div>
+
+<div class="callout ok"><span class="t">Do</span> Pin Python and major libraries (<code>python=3.12</code>, <code>pandas&gt;=2.2</code>). Use <code>%pip</code>/<code>%conda</code> inside notebooks. Prefer <code>conda-forge</code> as a single consistent channel. Set a project README with the one-line recreate command.</div>
+
+<div class="callout danger"><span class="t">Avoid</span> Installing everything into <code>base</code>. Mixing many channels (channel priority conflicts). Running <code>pip</code> then <code>conda</code> in the wrong order. Committing a 50 MB notebook full of embedded plot output. Relying on cell execution order you can't reproduce.</div>
+
+<details>
+<summary>Show: diagnosing "ModuleNotFoundError" in a notebook</summary>
+<div class="body">
+<p>Run this inside the misbehaving notebook to see exactly which Python the kernel uses, then install into <em>that</em> interpreter:</p>
+<pre><code class="language-python">import sys
+print(sys.executable)     # e.g. /opt/conda/envs/ds/bin/python
+# install into THIS interpreter, guaranteed:
+%pip install the-missing-package</code></pre>
+<p>If <code>sys.executable</code> points at an environment you did not expect, switch the kernel via <strong>Kernel → Change Kernel</strong>, or re-register the right env with <code>ipykernel</code>.</p>
+</div>
+</details>
+
+<h2>10. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between a Jupyter front-end, a kernel, and an environment?</div><div class="a">The front-end (browser UI or editor) renders the document and sends execution requests. The kernel is a separate process that actually runs the code and holds all variable state between cells. The environment is the conda/venv that supplies the packages the kernel imports. A notebook's behaviour is determined by the kernel, and the kernel belongs to exactly one environment.</div></div>
+
+<div class="qa"><div class="q">Why can a notebook produce results you cannot reproduce by reading it top to bottom?</div><div class="a">Because cells share one persistent namespace and can be executed in any order. The number in <code>[ ]</code> is the execution count, not the position. If you run a lower cell, then edit and re-run an upper one, state carries over inconsistently. The fix is Restart Kernel and Run All, which forces linear, reproducible execution.</div></div>
+
+<div class="qa"><div class="q">conda vs pip — when would you choose each?</div><div class="a">conda when you need non-Python binaries or a complex scientific/GPU stack (CUDA, MKL, GDAL) and want one tool to manage both the environment and compiled dependencies. pip (with venv or uv) for pure-Python projects where you want the full breadth of PyPI and a lightweight footprint. They can be combined: conda first, pip last.</div></div>
+
+<div class="qa"><div class="q">What is the correct way to combine conda and pip?</div><div class="a">Install everything you can with conda first, then use pip only for packages conda lacks, and do pip last. Capture the pip packages in the <code>pip:</code> block of <code>environment.yml</code>. Running conda after pip can overwrite pip-managed files and corrupt the environment.</div></div>
+
+<div class="qa"><div class="q">What is the difference between a line magic and a cell magic?</div><div class="a">A line magic uses a single <code>%</code> and affects just that line (e.g. <code>%timeit func()</code>). A cell magic uses <code>%%</code> on the first line and applies to the entire cell (e.g. <code>%%timeit</code> times the whole block, <code>%%bash</code> runs the cell as shell). Magics are IPython kernel features, not Python syntax.</div></div>
+
+<div class="qa"><div class="q">Why should you use <code>%pip install</code> instead of <code>!pip install</code> in a notebook?</div><div class="a"><code>%pip</code> is routed to the exact Python interpreter the running kernel uses, so the package lands where your imports look. <code>!pip</code> shells out and may hit a different Python on your PATH, installing into the wrong environment — the classic cause of "I installed it but it's not found."</div></div>
+
+<div class="qa"><div class="q">How do you make a notebook reproducible for a teammate?</div><div class="a">Commit an <code>environment.yml</code> (ideally via <code>conda env export --from-history</code> for portability), pin Python and major library versions, strip output with nbstripout, and ensure the notebook passes Restart &amp; Run All. The teammate recreates with <code>conda env create -f environment.yml</code> and selects the matching kernel.</div></div>
+
+<div class="qa"><div class="q">What does <code>conda env export --from-history</code> give you that a plain export does not?</div><div class="a">It records only the packages you explicitly requested, without OS-specific build strings. A plain <code>conda env export</code> pins exact builds tied to your platform, which frequently fails to recreate on a different OS. <code>--from-history</code> is the cross-platform, human-readable choice.</div></div>
+
+<div class="qa"><div class="q">What is a kernel, concretely, and how do you add one for a specific conda env?</div><div class="a">A kernel is an OS process implementing the Jupyter messaging protocol — for Python it's IPython. To expose a conda env as a kernel: activate it, <code>conda install ipykernel</code>, then <code>python -m ipykernel install --user --name myenv --display-name "Python (myenv)"</code>. It then appears in the kernel picker and the notebook will import from that env.</div></div>
+
+<div class="qa"><div class="q">Why is <code>base</code> special, and why avoid installing into it?</div><div class="a">base is the environment conda itself runs in. Installing project packages there risks dependency conflicts that can break the <code>conda</code> command, pollutes a shared space, and makes projects non-reproducible. Keep base minimal and always work in a dedicated per-project environment.</div></div>
+
+<div class="qa"><div class="q">How would you run a notebook in CI or on a schedule?</div><div class="a">Use <code>jupyter nbconvert --to notebook --execute nb.ipynb</code> (or Papermill, which also injects parameters) to run it headless and capture outputs/errors. Pair this with a locked environment so the run is deterministic. Papermill is the common choice for parameterised, scheduled notebook jobs.</div></div>
+
+<div class="qa"><div class="q">What are the drawbacks of notebooks and how do you mitigate them?</div><div class="a">Hidden state, poor diffability, weak testing, and encouragement of monolithic code. Mitigate with Restart &amp; Run All, nbstripout/Jupytext for clean diffs, moving reusable logic into tested <code>.py</code> modules, and keeping notebooks focused on exploration and narrative rather than production pipelines.</div></div>
+
+<h2>11. Further Learning</h2>
+<ul>
+  <li><strong>Papermill</strong> — parameterise and execute notebooks programmatically for scheduled jobs and reports.</li>
+  <li><strong>Jupytext</strong> — pair notebooks with plain <code>.py</code>/<code>.md</code> so Git diffs are clean and reviewable.</li>
+  <li><strong>nbdev / nbconvert</strong> — build libraries and docs directly from notebooks; export to HTML, PDF, slides.</li>
+  <li><strong>JupyterLab extensions</strong> — variable inspectors, Git integration, LSP code completion, debuggers.</li>
+  <li><strong>uv and Poetry</strong> — modern, fast dependency management for pure-Python projects as an alternative to conda.</li>
+  <li><strong>Mamba / Miniforge</strong> — faster solving and the conda-forge-first distribution; learn channel priority deeply.</li>
+  <li><strong>JupyterHub and Binder</strong> — multi-user deployments and one-click reproducible environments from a repo.</li>
+</ul>

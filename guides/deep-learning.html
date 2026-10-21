@@ -1,0 +1,713 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deep Learning & Neural Networks — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">AI/ML Deep Dive</div>
+  <h1>Deep Learning & Neural Networks</h1>
+  <div class="subtitle">From a single neuron to transformers — the intuition, the math that matters, idiomatic PyTorch, and interview-ready answers for modern deep learning.</div>
+  <div class="tags"><span>deep-learning</span><span>neural-networks</span><span>cnn</span><span>rnn</span><span>transformers</span><span>backprop</span><span>interview-prep</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~17 min read &middot; 3,756 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#1-what-it-is-and-why-it-matters">1. What it is and why it matters</a></li><li><a href="#2-setup-amp-getting-started">2. Setup &amp; getting started</a></li><li><a href="#3-the-neuron-layers-amp-activations">3. The neuron, layers &amp; activations</a></li><li><a href="#4-forward-pass-loss-amp-backpropagation">4. Forward pass, loss &amp; backpropagation</a></li><li><a href="#5-optimizers-amp-the-training-loop">5. Optimizers &amp; the training loop</a></li><li><a href="#6-convolutional-networks-vision">6. Convolutional networks (vision)</a></li><li><a href="#7-sequence-models-rnn-lstm-amp-gru">7. Sequence models: RNN, LSTM &amp; GRU</a></li><li><a href="#8-attention-amp-transformers">8. Attention &amp; transformers</a></li><li><a href="#9-embeddings-amp-representation">9. Embeddings &amp; representation</a></li><li><a href="#10-regularization-amp-normalization">10. Regularization &amp; normalization</a></li><li><a href="#11-transfer-learning-amp-fine-tuning">11. Transfer learning &amp; fine-tuning</a></li><li><a href="#12-a-worked-mini-example-end-to-end-training">12. A worked mini-example: end-to-end training</a></li><li><a href="#13-cheat-sheet-amp-comparisons">13. Cheat-sheet &amp; comparisons</a></li><li><a href="#14-best-practices-amp-common-pitfalls">14. Best practices &amp; common pitfalls</a></li><li><a href="#15-interview-questions-amp-answers">15. Interview Questions &amp; Answers</a></li><li><a href="#16-further-learning">16. Further learning</a></li></ol></nav>
+<p class="lead">Deep learning is the practice of composing many layers of simple, differentiable building blocks into functions rich enough to learn images, language, audio and more directly from raw data — trained end-to-end by gradient descent. This guide takes you from a single neuron to transformers, with the intuition, the math that matters, idiomatic code, and the interview answers.</p>
+
+<div class="callout note"><span class="t">Who this is for</span> An engineer who can code and wants a working, interview-ready mental model of neural networks — not a proofs course. We favor intuition plus runnable PyTorch, then show where each idea is used in production.</div>
+
+<h2 id="1-what-it-is-and-why-it-matters">1. What it is and why it matters</h2>
+
+<p>A neural network is a <strong>parameterized function</strong> <code>y = f(x; θ)</code> built by stacking layers. Each layer applies a linear transform (a matrix multiply plus bias) followed by a nonlinear <em>activation</em>. Stack enough of them and the network becomes a <strong>universal function approximator</strong>: given enough capacity and data, it can approximate essentially any continuous mapping from inputs to outputs.</p>
+
+<p>What makes it "deep" is the composition of many layers, which lets the model build a <strong>hierarchy of features</strong> — edges to textures to object parts to objects in vision; characters to words to phrases to meaning in language. Crucially, these features are <em>learned</em>, not hand-engineered. That is the central shift from classical machine learning.</p>
+
+<div class="diagram"><svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="0" y="0" width="760" height="300" fill="#ffffff"/>
+  <!-- input layer -->
+  <text x="60" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Input x</text>
+  <circle cx="60" cy="80" r="16" fill="#eff4ff" stroke="#2563eb"/>
+  <circle cx="60" cy="150" r="16" fill="#eff4ff" stroke="#2563eb"/>
+  <circle cx="60" cy="220" r="16" fill="#eff4ff" stroke="#2563eb"/>
+  <!-- hidden 1 -->
+  <text x="260" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Hidden (ReLU)</text>
+  <circle cx="260" cy="60" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="260" cy="130" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="260" cy="200" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="260" cy="270" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <!-- hidden 2 -->
+  <text x="470" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Hidden (ReLU)</text>
+  <circle cx="470" cy="90" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="470" cy="160" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <circle cx="470" cy="230" r="16" fill="#ecfdf5" stroke="#059669"/>
+  <!-- output -->
+  <text x="680" y="30" font-size="13" fill="#1a2233" text-anchor="middle">Output y&#770;</text>
+  <circle cx="680" cy="130" r="16" fill="#eff4ff" stroke="#1e3a8a"/>
+  <circle cx="680" cy="200" r="16" fill="#eff4ff" stroke="#1e3a8a"/>
+  <!-- a few representative edges -->
+  <g stroke="#94a3b8" stroke-width="1">
+    <line x1="76" y1="80" x2="244" y2="60"/><line x1="76" y1="80" x2="244" y2="130"/>
+    <line x1="76" y1="150" x2="244" y2="130"/><line x1="76" y1="150" x2="244" y2="200"/>
+    <line x1="76" y1="220" x2="244" y2="200"/><line x1="76" y1="220" x2="244" y2="270"/>
+    <line x1="276" y1="130" x2="454" y2="90"/><line x1="276" y1="200" x2="454" y2="160"/>
+    <line x1="276" y1="60" x2="454" y2="90"/><line x1="276" y1="270" x2="454" y2="230"/>
+    <line x1="486" y1="90" x2="664" y2="130"/><line x1="486" y1="160" x2="664" y2="130"/>
+    <line x1="486" y1="230" x2="664" y2="200"/>
+  </g>
+  <line x1="700" y1="165" x2="745" y2="165" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+</svg><div class="cap">Fig 1. A feed-forward network: data flows left to right; each edge is a learnable weight, each neuron sums its inputs and applies a nonlinearity.</div></div>
+
+<div class="grid c3">
+  <div class="card"><h4>Representation learning</h4>Features emerge from data instead of being hand-crafted. One architecture, many domains.</div>
+  <div class="card"><h4>Scales with data &amp; compute</h4>Performance keeps improving with more parameters, data, and GPU hours — the basis of modern "foundation models".</div>
+  <div class="card"><h4>End-to-end differentiable</h4>Every piece is differentiable, so the whole pipeline is optimized jointly by backprop.</div>
+</div>
+
+<h2 id="2-setup-amp-getting-started">2. Setup &amp; getting started</h2>
+
+<p>PyTorch is the de-facto research and production framework in 2026; JAX and TensorFlow/Keras remain common. We use PyTorch throughout.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Create an isolated environment</span>
+python -m venv .venv &amp;&amp; <span class="hljs-built_in">source</span> .venv/bin/activate   <span class="hljs-comment"># Windows: .venv\Scripts\activate</span>
+
+<span class="hljs-comment"># Install PyTorch (CPU build shown; see pytorch.org for the exact CUDA command)</span>
+pip install torch torchvision torchaudio
+
+<span class="hljs-comment"># Common companions</span>
+pip install numpy matplotlib scikit-learn tensorboard</code></pre>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># Pick the best available accelerator (CUDA, Apple MPS, else CPU)</span>
+device = (
+    <span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available()
+    <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;mps&quot;</span> <span class="hljs-keyword">if</span> torch.backends.mps.is_available()
+    <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>
+)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Using&quot;</span>, device, <span class="hljs-string">&quot;| torch&quot;</span>, torch.__version__)
+
+x = torch.randn(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, device=device)   <span class="hljs-comment"># a 3x4 tensor on the device</span>
+<span class="hljs-built_in">print</span>(x.shape, x.dtype)                 <span class="hljs-comment"># torch.Size([3, 4]) torch.float32</span></code></pre>
+
+<div class="callout tip"><span class="t">Tensors</span> A tensor is just an n-dimensional array that tracks gradients and lives on a device. Scalars are 0-D, vectors 1-D, matrices 2-D, a batch of RGB images is 4-D: <code>[N, C, H, W]</code>.</div>
+
+<h2 id="3-the-neuron-layers-amp-activations">3. The neuron, layers &amp; activations</h2>
+
+<p>A single neuron computes a weighted sum of its inputs plus a bias, then applies an activation <code>a = φ(w·x + b)</code>. A <strong>layer</strong> is many neurons sharing the same inputs, which vectorizes to a matrix multiply: <code>z = Wx + b</code>, <code>a = φ(z)</code>.</p>
+
+<div class="diagram"><svg viewBox="0 0 620 230" width="620" height="230">
+  <defs><marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <rect width="620" height="230" fill="#ffffff"/>
+  <circle cx="60" cy="50" r="14" fill="#eff4ff" stroke="#2563eb"/><text x="30" y="55" font-size="12" fill="#1a2233">x1</text>
+  <circle cx="60" cy="115" r="14" fill="#eff4ff" stroke="#2563eb"/><text x="30" y="120" font-size="12" fill="#1a2233">x2</text>
+  <circle cx="60" cy="180" r="14" fill="#eff4ff" stroke="#2563eb"/><text x="30" y="185" font-size="12" fill="#1a2233">x3</text>
+  <text x="150" y="40" font-size="12" fill="#b45309">w1</text>
+  <text x="150" y="110" font-size="12" fill="#b45309">w2</text>
+  <text x="150" y="175" font-size="12" fill="#b45309">w3</text>
+  <line x1="74" y1="50" x2="300" y2="110" stroke="#94a3b8"/>
+  <line x1="74" y1="115" x2="300" y2="115" stroke="#94a3b8"/>
+  <line x1="74" y1="180" x2="300" y2="120" stroke="#94a3b8"/>
+  <circle cx="330" cy="115" r="30" fill="#ecfdf5" stroke="#059669"/>
+  <text x="330" y="112" font-size="12" fill="#1a2233" text-anchor="middle">&#931; + b</text>
+  <text x="330" y="128" font-size="12" fill="#1a2233" text-anchor="middle">&#966;</text>
+  <line x1="360" y1="115" x2="470" y2="115" stroke="#0891b2" stroke-width="2" marker-end="url(#ah2)"/>
+  <text x="520" y="120" font-size="13" fill="#1a2233" text-anchor="middle">output a</text>
+</svg><div class="cap">Fig 2. One neuron: weighted sum of inputs plus bias, passed through activation φ.</div></div>
+
+<h3>Why activations must be nonlinear</h3>
+<p>Without a nonlinearity, stacking layers collapses: a composition of linear maps is itself a single linear map, so depth buys nothing. The activation is what gives the network the ability to bend decision boundaries and model complex functions.</p>
+
+<table>
+  <tr><th>Activation</th><th>Formula</th><th>Range</th><th>Use when</th><th>Watch out for</th></tr>
+  <tr><td>ReLU</td><td>max(0, z)</td><td>[0, ∞)</td><td>Default hidden-layer choice</td><td>"Dead" neurons stuck at 0</td></tr>
+  <tr><td>Leaky ReLU / GELU</td><td>small slope &lt; 0 / smooth</td><td>(-∞, ∞)</td><td>Avoid dead units; GELU in transformers</td><td>Slightly more compute</td></tr>
+  <tr><td>Sigmoid</td><td>1 / (1 + e⁻ᶻ)</td><td>(0, 1)</td><td>Binary output probability</td><td>Saturates → vanishing gradient</td></tr>
+  <tr><td>Tanh</td><td>(eᶻ-e⁻ᶻ)/(eᶻ+e⁻ᶻ)</td><td>(-1, 1)</td><td>Zero-centered hidden units (RNNs)</td><td>Also saturates</td></tr>
+  <tr><td>Softmax</td><td>eᶻⁱ / Σ eᶻʲ</td><td>(0, 1), sums to 1</td><td>Multi-class output layer</td><td>Not for hidden layers</td></tr>
+</table>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-comment"># A small multilayer perceptron (MLP) for 28x28 images -&gt; 10 classes</span>
+mlp = nn.Sequential(
+    nn.Flatten(),            <span class="hljs-comment"># [N,1,28,28] -&gt; [N,784]</span>
+    nn.Linear(<span class="hljs-number">784</span>, <span class="hljs-number">256</span>),     <span class="hljs-comment"># learnable W (256x784) + b (256)</span>
+    nn.ReLU(),               <span class="hljs-comment"># nonlinearity</span>
+    nn.Dropout(<span class="hljs-number">0.2</span>),         <span class="hljs-comment"># regularization (see section 8)</span>
+    nn.Linear(<span class="hljs-number">256</span>, <span class="hljs-number">10</span>),      <span class="hljs-comment"># logits for 10 classes (no softmax here)</span>
+)
+<span class="hljs-comment"># nn.CrossEntropyLoss applies log-softmax internally, so output raw logits.</span></code></pre>
+
+<h2 id="4-forward-pass-loss-amp-backpropagation">4. Forward pass, loss &amp; backpropagation</h2>
+
+<p>Training repeats a four-step loop. The <strong>forward pass</strong> computes predictions and a scalar <strong>loss</strong>. <strong>Backpropagation</strong> computes the gradient of the loss with respect to every parameter by applying the chain rule layer by layer, from output back to input. The <strong>optimizer</strong> then nudges each parameter in the direction that reduces the loss.</p>
+
+<div class="pipeline"><span class="step">forward: y&#770; = f(x;θ)</span><span class="arrow">-&gt;</span><span class="step">loss L(y&#770;, y)</span><span class="arrow">-&gt;</span><span class="step">backward: ∂L/∂θ</span><span class="arrow">-&gt;</span><span class="step">optimizer step</span></div>
+
+<div class="diagram"><svg viewBox="0 0 740 220" width="740" height="220">
+  <defs>
+    <marker id="fwd" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker>
+    <marker id="bwd" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#b45309"/></marker>
+  </defs>
+  <rect width="740" height="220" fill="#ffffff"/>
+  <g font-size="12" fill="#1a2233" text-anchor="middle">
+    <rect x="30" y="80" width="90" height="50" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="110">x</text>
+    <rect x="190" y="80" width="110" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="245" y="104">Layer 1</text><text x="245" y="120">z1=W1x</text>
+    <rect x="370" y="80" width="110" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="425" y="104">Layer 2</text><text x="425" y="120">z2=W2a1</text>
+    <rect x="550" y="80" width="110" height="50" rx="6" fill="#eff4ff" stroke="#1e3a8a"/><text x="605" y="104">Loss</text><text x="605" y="120">L(y&#770;,y)</text>
+  </g>
+  <!-- forward arrows -->
+  <line x1="120" y1="95" x2="188" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#fwd)"/>
+  <line x1="300" y1="95" x2="368" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#fwd)"/>
+  <line x1="480" y1="95" x2="548" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#fwd)"/>
+  <!-- backward arrows -->
+  <line x1="548" y1="120" x2="480" y2="120" stroke="#b45309" stroke-width="2" marker-end="url(#bwd)"/>
+  <line x1="368" y1="120" x2="300" y2="120" stroke="#b45309" stroke-width="2" marker-end="url(#bwd)"/>
+  <line x1="188" y1="120" x2="120" y2="120" stroke="#b45309" stroke-width="2" marker-end="url(#bwd)"/>
+  <text x="110" y="60" font-size="12" fill="#2563eb">forward (activations)</text>
+  <text x="470" y="165" font-size="12" fill="#b45309">backward (gradients via chain rule)</text>
+</svg><div class="cap">Fig 3. Backprop reuses cached forward activations to compute ∂L/∂W at each layer, moving right to left.</div></div>
+
+<p>Autograd makes this automatic: every tensor op is recorded on a graph, and <code>loss.backward()</code> walks it in reverse.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># Manual illustration of autograd on a tiny computation</span>
+w = torch.tensor(<span class="hljs-number">2.0</span>, requires_grad=<span class="hljs-literal">True</span>)
+b = torch.tensor(<span class="hljs-number">1.0</span>, requires_grad=<span class="hljs-literal">True</span>)
+x = torch.tensor(<span class="hljs-number">3.0</span>)
+
+y_hat = w * x + b          <span class="hljs-comment"># forward: 7.0</span>
+loss = (y_hat - <span class="hljs-number">10.0</span>) ** <span class="hljs-number">2</span>  <span class="hljs-comment"># squared error vs target 10  -&gt; 9.0</span>
+loss.backward()            <span class="hljs-comment"># backward: fills .grad</span>
+
+<span class="hljs-comment"># dL/dw = 2*(y_hat-10)*x = 2*(-3)*3 = -18 ;  dL/db = 2*(-3) = -6</span>
+<span class="hljs-built_in">print</span>(w.grad, b.grad)      <span class="hljs-comment"># tensor(-18.) tensor(-6.)</span></code></pre>
+
+<div class="callout warn"><span class="t">Vanishing &amp; exploding gradients</span> In deep stacks, repeated multiplication of small (&lt;1) derivatives shrinks gradients toward zero; large ones blow up. Cures: ReLU/GELU activations, residual connections, normalization, careful initialization (He/Xavier), and gradient clipping.</div>
+
+<h2 id="5-optimizers-amp-the-training-loop">5. Optimizers &amp; the training loop</h2>
+
+<p>Gradient descent updates parameters as <code>θ ← θ − η · ∂L/∂θ</code>, where <code>η</code> is the learning rate. We rarely use the full dataset per step; <strong>mini-batch SGD</strong> estimates the gradient from a small batch, trading a little noise for huge speedups and better generalization.</p>
+
+<table>
+  <tr><th>Optimizer</th><th>Idea</th><th>Pros</th><th>Typical use</th></tr>
+  <tr><td>SGD</td><td>Plain gradient step</td><td>Simple, strong generalization</td><td>Vision with schedules</td></tr>
+  <tr><td>SGD + Momentum</td><td>Accumulate a velocity</td><td>Dampens oscillation, faster</td><td>CNNs, ResNets</td></tr>
+  <tr><td>RMSProp</td><td>Per-param adaptive scaling</td><td>Handles non-stationary objectives</td><td>RNNs</td></tr>
+  <tr><td>Adam / AdamW</td><td>Momentum + adaptive scaling</td><td>Robust default, fast convergence</td><td>Transformers, most models</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">AdamW is the safe default</span> AdamW decouples weight decay from the gradient update and is the standard choice for transformers and most modern training. Pair it with a learning-rate warmup then cosine decay.</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> DataLoader
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">train_one_epoch</span>(<span class="hljs-params">model, loader: DataLoader, optimizer, device</span>):
+    model.train()                                  <span class="hljs-comment"># enable dropout/batchnorm training mode</span>
+    loss_fn = nn.CrossEntropyLoss()
+    running = <span class="hljs-number">0.0</span>
+    <span class="hljs-keyword">for</span> xb, yb <span class="hljs-keyword">in</span> loader:
+        xb, yb = xb.to(device), yb.to(device)
+        optimizer.zero_grad()                      <span class="hljs-comment"># clear old gradients</span>
+        logits = model(xb)                         <span class="hljs-comment"># forward</span>
+        loss = loss_fn(logits, yb)                 <span class="hljs-comment"># scalar loss</span>
+        loss.backward()                            <span class="hljs-comment"># backprop: fill .grad</span>
+        nn.utils.clip_grad_norm_(model.parameters(), <span class="hljs-number">1.0</span>)  <span class="hljs-comment"># guard against explosions</span>
+        optimizer.step()                           <span class="hljs-comment"># update parameters</span>
+        running += loss.item() * xb.size(<span class="hljs-number">0</span>)
+    <span class="hljs-keyword">return</span> running / <span class="hljs-built_in">len</span>(loader.dataset)
+
+<span class="hljs-comment"># optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=0.01)</span></code></pre>
+
+<div class="callout danger"><span class="t">The #1 beginner bug</span> Forgetting <code>optimizer.zero_grad()</code>. PyTorch <em>accumulates</em> gradients by default, so without zeroing, each step uses the sum of all previous gradients and training diverges or stalls.</div>
+
+<h2 id="6-convolutional-networks-vision">6. Convolutional networks (vision)</h2>
+
+<p>Fully-connected layers ignore spatial structure and explode in parameters on images. A <strong>convolutional layer</strong> slides a small learnable filter across the image, computing the same weighted sum everywhere. This gives two superpowers: <strong>parameter sharing</strong> (one filter, whole image) and <strong>translation equivariance</strong> (a cat is a cat wherever it appears).</p>
+
+<div class="diagram"><svg viewBox="0 0 720 240" width="720" height="240">
+  <defs><marker id="ahc" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect width="720" height="240" fill="#ffffff"/>
+  <!-- input grid -->
+  <g stroke="#94a3b8" fill="#eff4ff">
+    <rect x="30" y="60" width="120" height="120"/>
+    <line x1="70" y1="60" x2="70" y2="180" stroke="#94a3b8"/><line x1="110" y1="60" x2="110" y2="180"/>
+    <line x1="30" y1="100" x2="150" y2="100"/><line x1="30" y1="140" x2="150" y2="140"/>
+  </g>
+  <rect x="30" y="60" width="40" height="40" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="90" y="205" font-size="12" fill="#1a2233" text-anchor="middle">input (H×W×C)</text>
+  <line x1="160" y1="120" x2="230" y2="120" stroke="#2563eb" stroke-width="2" marker-end="url(#ahc)"/>
+  <text x="195" y="108" font-size="11" fill="#b45309" text-anchor="middle">filter</text>
+  <!-- feature map -->
+  <rect x="240" y="75" width="90" height="90" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="285" y="190" font-size="12" fill="#1a2233" text-anchor="middle">feature map</text>
+  <line x1="340" y1="120" x2="400" y2="120" stroke="#2563eb" stroke-width="2" marker-end="url(#ahc)"/>
+  <text x="370" y="108" font-size="11" fill="#1a2233" text-anchor="middle">pool</text>
+  <rect x="410" y="90" width="55" height="55" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="437" y="175" font-size="12" fill="#1a2233" text-anchor="middle">downsampled</text>
+  <line x1="475" y1="120" x2="535" y2="120" stroke="#2563eb" stroke-width="2" marker-end="url(#ahc)"/>
+  <rect x="545" y="70" width="30" height="100" fill="#ecfdf5" stroke="#059669"/>
+  <text x="640" y="110" font-size="12" fill="#1a2233" text-anchor="middle">flatten +</text>
+  <text x="640" y="128" font-size="12" fill="#1a2233" text-anchor="middle">dense → class</text>
+</svg><div class="cap">Fig 4. A CNN: stacks of conv + pooling shrink spatial size while growing channel depth, then dense layers classify.</div></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SmallCNN</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, num_classes=<span class="hljs-number">10</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.features = nn.Sequential(
+            nn.Conv2d(<span class="hljs-number">1</span>, <span class="hljs-number">32</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),  <span class="hljs-comment"># [N,32,28,28]</span>
+            nn.BatchNorm2d(<span class="hljs-number">32</span>), nn.ReLU(),
+            nn.MaxPool2d(<span class="hljs-number">2</span>),                              <span class="hljs-comment"># [N,32,14,14]</span>
+            nn.Conv2d(<span class="hljs-number">32</span>, <span class="hljs-number">64</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),
+            nn.BatchNorm2d(<span class="hljs-number">64</span>), nn.ReLU(),
+            nn.MaxPool2d(<span class="hljs-number">2</span>),                              <span class="hljs-comment"># [N,64,7,7]</span>
+        )
+        <span class="hljs-variable language_">self</span>.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(<span class="hljs-number">64</span> * <span class="hljs-number">7</span> * <span class="hljs-number">7</span>, <span class="hljs-number">128</span>), nn.ReLU(), nn.Dropout(<span class="hljs-number">0.3</span>),
+            nn.Linear(<span class="hljs-number">128</span>, num_classes),
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.classifier(<span class="hljs-variable language_">self</span>.features(x))</code></pre>
+
+<p>Key hyperparameters of a conv layer: <strong>kernel size</strong> (receptive field), <strong>stride</strong> (step size / downsampling), <strong>padding</strong> (preserve spatial size), and <strong>channels</strong> (number of filters = features learned). Landmark architectures to know: LeNet, AlexNet, VGG, <strong>ResNet</strong> (residual connections enabling very deep nets), and EfficientNet. Vision Transformers (ViT) now rival or beat CNNs at scale.</p>
+
+<h2 id="7-sequence-models-rnn-lstm-amp-gru">7. Sequence models: RNN, LSTM &amp; GRU</h2>
+
+<p>For ordered data (text, time series, audio) a <strong>recurrent network</strong> processes one element at a time, carrying a <strong>hidden state</strong> that summarizes everything seen so far: <code>h_t = φ(W_x x_t + W_h h_{t-1} + b)</code>. The same weights are reused at every timestep.</p>
+
+<p>Plain RNNs struggle with long-range dependencies because gradients vanish over many steps. <strong>LSTMs</strong> and <strong>GRUs</strong> add gating — learnable valves that decide what to keep, forget, and output — letting a cell state carry information across long sequences.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Forget gate</h4>Decides how much of the previous cell state to discard.</div>
+  <div class="card"><h4>Input gate</h4>Decides what new information to write into the cell state.</div>
+  <div class="card"><h4>Output gate</h4>Decides what to expose from the cell state as the hidden output.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TextClassifier</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, vocab_size, emb=<span class="hljs-number">128</span>, hidden=<span class="hljs-number">256</span>, classes=<span class="hljs-number">2</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.embed = nn.Embedding(vocab_size, emb)          <span class="hljs-comment"># token id -&gt; vector</span>
+        <span class="hljs-variable language_">self</span>.lstm = nn.LSTM(emb, hidden, batch_first=<span class="hljs-literal">True</span>,  <span class="hljs-comment"># [N, T, emb] -&gt; ...</span>
+                            bidirectional=<span class="hljs-literal">True</span>)
+        <span class="hljs-variable language_">self</span>.head = nn.Linear(hidden * <span class="hljs-number">2</span>, classes)          <span class="hljs-comment"># *2 for bidirectional</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):                 <span class="hljs-comment"># x: [N, T] of token ids</span>
+        e = <span class="hljs-variable language_">self</span>.embed(x)                 <span class="hljs-comment"># [N, T, emb]</span>
+        out, (h, c) = <span class="hljs-variable language_">self</span>.lstm(e)        <span class="hljs-comment"># out: [N, T, 2*hidden]</span>
+        pooled = out.mean(dim=<span class="hljs-number">1</span>)          <span class="hljs-comment"># average over time</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.head(pooled)</code></pre>
+
+<div class="callout note"><span class="t">The shift to attention</span> RNNs are inherently sequential (step t needs step t-1), limiting parallelism and still fading over very long contexts. Transformers removed recurrence entirely and now dominate NLP, vision, audio, and multimodal work.</div>
+
+<h2 id="8-attention-amp-transformers">8. Attention &amp; transformers</h2>
+
+<p>The core idea of <strong>attention</strong>: for each position, compute a weighted blend of all positions, where the weights say "how relevant is each other token to me right now?" Each token emits a <strong>query</strong>, a <strong>key</strong>, and a <strong>value</strong>. The query is matched against all keys (dot product) to produce attention weights, which blend the values.</p>
+
+<p>Scaled dot-product attention: <code>Attention(Q,K,V) = softmax(QKᵀ / √d_k) · V</code>. The <code>√d_k</code> scaling keeps the dot products from growing large and saturating the softmax.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 260" width="700" height="260">
+  <defs><marker id="aht" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect width="700" height="260" fill="#ffffff"/>
+  <g font-size="12" fill="#1a2233" text-anchor="middle">
+    <rect x="40" y="30" width="70" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="55">Q</text>
+    <rect x="40" y="110" width="70" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="135">K</text>
+    <rect x="40" y="190" width="70" height="40" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="215">V</text>
+    <rect x="210" y="70" width="120" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="270" y="94">QKᵀ / √d_k</text>
+    <rect x="400" y="70" width="110" height="40" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="455" y="94">softmax</text>
+    <rect x="400" y="170" width="110" height="40" rx="6" fill="#eff4ff" stroke="#1e3a8a"/><text x="455" y="194">weights·V</text>
+    <rect x="580" y="170" width="90" height="40" rx="6" fill="#eff4ff" stroke="#1e3a8a"/><text x="625" y="194">output</text>
+  </g>
+  <line x1="110" y1="50" x2="208" y2="85" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="110" y1="130" x2="208" y2="95" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="330" y1="90" x2="398" y2="90" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="455" y1="110" x2="455" y2="168" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="110" y1="210" x2="398" y2="195" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+  <line x1="510" y1="190" x2="578" y2="190" stroke="#2563eb" stroke-width="2" marker-end="url(#aht)"/>
+</svg><div class="cap">Fig 5. Scaled dot-product attention. Multi-head attention runs several of these in parallel on different learned projections.</div></div>
+
+<p>A <strong>transformer block</strong> stacks: multi-head self-attention, a position-wise feed-forward network, residual connections around each, and layer normalization. Because attention is order-agnostic, <strong>positional encodings</strong> (sinusoidal or learned, now often rotary/RoPE) inject sequence position. Stacking these blocks gives BERT (encoder), GPT-family (decoder), and T5 (encoder-decoder).</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn, torch.nn.functional <span class="hljs-keyword">as</span> F
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">scaled_dot_product_attention</span>(<span class="hljs-params">q, k, v, mask=<span class="hljs-literal">None</span></span>):
+    <span class="hljs-comment"># q,k,v: [batch, heads, seq, d_k]</span>
+    d_k = q.size(-<span class="hljs-number">1</span>)
+    scores = (q @ k.transpose(-<span class="hljs-number">2</span>, -<span class="hljs-number">1</span>)) / d_k ** <span class="hljs-number">0.5</span>   <span class="hljs-comment"># [.., seq, seq]</span>
+    <span class="hljs-keyword">if</span> mask <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+        scores = scores.masked_fill(mask == <span class="hljs-number">0</span>, <span class="hljs-built_in">float</span>(<span class="hljs-string">&quot;-inf&quot;</span>))
+    weights = F.softmax(scores, dim=-<span class="hljs-number">1</span>)               <span class="hljs-comment"># attention distribution</span>
+    <span class="hljs-keyword">return</span> weights @ v                                <span class="hljs-comment"># blended values</span>
+
+<span class="hljs-comment"># In practice, prefer the fused, memory-efficient built-in:</span>
+<span class="hljs-comment"># out = F.scaled_dot_product_attention(q, k, v, is_causal=True)</span>
+<span class="hljs-comment"># or nn.TransformerEncoderLayer / nn.MultiheadAttention.</span></code></pre>
+
+<div class="callout tip"><span class="t">Why transformers won</span> Self-attention relates any two positions in O(1) sequential steps and is massively parallel on GPUs. Combined with huge datasets, this is what makes modern LLMs and foundation models possible.</div>
+
+<h2 id="9-embeddings-amp-representation">9. Embeddings &amp; representation</h2>
+
+<p>Neural nets need numeric vectors. An <strong>embedding</strong> is a learned, dense, low-dimensional vector for a discrete item (a word, product, user, or category). Items that behave similarly end up close together in the vector space, so geometric distance becomes semantic similarity — the backbone of search, recommendation, and retrieval-augmented generation (RAG).</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn
+
+emb = nn.Embedding(num_embeddings=<span class="hljs-number">10_000</span>, embedding_dim=<span class="hljs-number">64</span>)  <span class="hljs-comment"># 10k tokens -&gt; 64-D</span>
+ids = torch.tensor([[<span class="hljs-number">1</span>, <span class="hljs-number">42</span>, <span class="hljs-number">7</span>]])        <span class="hljs-comment"># a batch of one sequence of 3 tokens</span>
+vecs = emb(ids)                          <span class="hljs-comment"># [1, 3, 64] learned vectors</span>
+
+<span class="hljs-comment"># Cosine similarity between two learned vectors (semantic closeness)</span>
+a, b = vecs[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>], vecs[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>]
+cos = torch.cosine_similarity(a, b, dim=<span class="hljs-number">0</span>)
+<span class="hljs-built_in">print</span>(cos.item())</code></pre>
+
+<h2 id="10-regularization-amp-normalization">10. Regularization &amp; normalization</h2>
+
+<p>Deep nets have enough capacity to <strong>memorize</strong> training data (overfit). Regularization closes the gap between training and validation performance.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Dropout</h4>Randomly zero a fraction of activations each step during training, forcing redundancy. Disabled at inference. Typical p = 0.1–0.5.</div>
+  <div class="card"><h4>Weight decay (L2)</h4>Penalize large weights, encouraging simpler functions. In AdamW it is decoupled from the gradient step.</div>
+  <div class="card"><h4>Batch normalization</h4>Normalize each layer's activations per mini-batch, stabilizing and speeding training. Standard in CNNs.</div>
+  <div class="card"><h4>Layer normalization</h4>Normalize across features per sample (batch-size independent). The norm of choice in transformers and RNNs.</div>
+  <div class="card"><h4>Early stopping</h4>Stop when validation loss stops improving; keep the best checkpoint.</div>
+  <div class="card"><h4>Data augmentation</h4>Flips, crops, color jitter, mixup, cutout — cheap "new" data that improves robustness.</div>
+</div>
+
+<div class="callout warn"><span class="t">BatchNorm &amp; small batches</span> BatchNorm statistics are noisy with tiny batches and leak across examples in some settings. For small batches, long sequences, or online inference, prefer LayerNorm or GroupNorm. Always call <code>model.eval()</code> at inference so BatchNorm uses running statistics and Dropout is turned off.</div>
+
+<h2 id="11-transfer-learning-amp-fine-tuning">11. Transfer learning &amp; fine-tuning</h2>
+
+<p>Training from scratch needs lots of data and compute. <strong>Transfer learning</strong> reuses a model pretrained on a large corpus and adapts it to your task. This is the dominant workflow in 2026: start from a foundation model, then fine-tune.</p>
+
+<div class="pipeline"><span class="step">Pretrained backbone</span><span class="arrow">-&gt;</span><span class="step">freeze or adapt</span><span class="arrow">-&gt;</span><span class="step">new head</span><span class="arrow">-&gt;</span><span class="step">fine-tune on your data</span></div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">from</span> torchvision <span class="hljs-keyword">import</span> models
+
+<span class="hljs-comment"># Start from an ImageNet-pretrained ResNet, retarget to 5 classes</span>
+net = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+<span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> net.parameters():
+    p.requires_grad = <span class="hljs-literal">False</span>               <span class="hljs-comment"># freeze the backbone</span>
+
+net.fc = nn.Linear(net.fc.in_features, <span class="hljs-number">5</span>)  <span class="hljs-comment"># new trainable head</span>
+<span class="hljs-comment"># Train only net.fc first; optionally unfreeze top blocks later with a small LR.</span></code></pre>
+
+<div class="callout tip"><span class="t">PEFT &amp; LoRA</span> For large language models, full fine-tuning is expensive. Parameter-efficient methods like <strong>LoRA</strong> train tiny low-rank adapter matrices while freezing the base weights — a fraction of the cost and memory, with near-full-fine-tune quality.</div>
+
+<h2 id="12-a-worked-mini-example-end-to-end-training">12. A worked mini-example: end-to-end training</h2>
+
+<p>This puts the loop together: data, model, optimizer, train/validate, and the critical <code>eval()</code>/<code>no_grad()</code> discipline.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> DataLoader, TensorDataset
+
+device = <span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>
+
+<span class="hljs-comment"># Synthetic 2-class problem: 20 features</span>
+X = torch.randn(<span class="hljs-number">2000</span>, <span class="hljs-number">20</span>)
+y = (X[:, :<span class="hljs-number">5</span>].<span class="hljs-built_in">sum</span>(dim=<span class="hljs-number">1</span>) &gt; <span class="hljs-number">0</span>).long()      <span class="hljs-comment"># label depends on first 5 features</span>
+train_ds = TensorDataset(X[:<span class="hljs-number">1600</span>], y[:<span class="hljs-number">1600</span>])
+val_ds   = TensorDataset(X[<span class="hljs-number">1600</span>:], y[<span class="hljs-number">1600</span>:])
+train_dl = DataLoader(train_ds, batch_size=<span class="hljs-number">64</span>, shuffle=<span class="hljs-literal">True</span>)
+val_dl   = DataLoader(val_ds, batch_size=<span class="hljs-number">256</span>)
+
+model = nn.Sequential(
+    nn.Linear(<span class="hljs-number">20</span>, <span class="hljs-number">64</span>), nn.ReLU(), nn.Dropout(<span class="hljs-number">0.2</span>),
+    nn.Linear(<span class="hljs-number">64</span>, <span class="hljs-number">2</span>),
+).to(device)
+
+opt = torch.optim.AdamW(model.parameters(), lr=<span class="hljs-number">1e-3</span>, weight_decay=<span class="hljs-number">1e-2</span>)
+loss_fn = nn.CrossEntropyLoss()
+
+<span class="hljs-meta">@torch.no_grad()                           </span><span class="hljs-comment"># no gradients during evaluation</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">accuracy</span>(<span class="hljs-params">dl</span>):
+    model.<span class="hljs-built_in">eval</span>()
+    correct = total = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">for</span> xb, yb <span class="hljs-keyword">in</span> dl:
+        xb, yb = xb.to(device), yb.to(device)
+        preds = model(xb).argmax(dim=<span class="hljs-number">1</span>)
+        correct += (preds == yb).<span class="hljs-built_in">sum</span>().item()
+        total += yb.size(<span class="hljs-number">0</span>)
+    <span class="hljs-keyword">return</span> correct / total
+
+<span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>):
+    model.train()
+    <span class="hljs-keyword">for</span> xb, yb <span class="hljs-keyword">in</span> train_dl:
+        xb, yb = xb.to(device), yb.to(device)
+        opt.zero_grad()
+        loss = loss_fn(model(xb), yb)
+        loss.backward()
+        opt.step()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;epoch <span class="hljs-subst">{epoch}</span>: val acc = <span class="hljs-subst">{accuracy(val_dl):<span class="hljs-number">.3</span>f}</span>&quot;</span>)</code></pre>
+
+<h2 id="13-cheat-sheet-amp-comparisons">13. Cheat-sheet &amp; comparisons</h2>
+
+<table>
+  <tr><th>Task</th><th>Output layer</th><th>Loss function</th></tr>
+  <tr><td>Binary classification</td><td>1 logit (+ sigmoid)</td><td>BCEWithLogitsLoss</td></tr>
+  <tr><td>Multi-class (single label)</td><td>C logits</td><td>CrossEntropyLoss</td></tr>
+  <tr><td>Multi-label</td><td>C logits (+ sigmoid)</td><td>BCEWithLogitsLoss</td></tr>
+  <tr><td>Regression</td><td>linear</td><td>MSELoss / L1Loss / HuberLoss</td></tr>
+</table>
+
+<table>
+  <tr><th>Architecture</th><th>Best for</th><th>Key mechanism</th><th>Weakness</th></tr>
+  <tr><td>MLP</td><td>Tabular, small vectors</td><td>Dense layers</td><td>Ignores structure; parameter-heavy</td></tr>
+  <tr><td>CNN</td><td>Images, local patterns</td><td>Conv + pooling</td><td>Weaker on long-range / global context</td></tr>
+  <tr><td>RNN / LSTM</td><td>Short-medium sequences</td><td>Recurrent hidden state</td><td>Sequential; fades on long context</td></tr>
+  <tr><td>Transformer</td><td>Text, vision, multimodal</td><td>Self-attention</td><td>O(n²) attention; data/compute hungry</td></tr>
+</table>
+
+<details><summary>Show hyperparameter starting points</summary><div class="body">
+<table>
+  <tr><th>Knob</th><th>Reasonable start</th></tr>
+  <tr><td>Learning rate (AdamW)</td><td>3e-4 (transformers), 1e-3 (small nets)</td></tr>
+  <tr><td>Batch size</td><td>Largest that fits memory (32–512 common)</td></tr>
+  <tr><td>Weight decay</td><td>0.01–0.1</td></tr>
+  <tr><td>Dropout</td><td>0.1 (transformers) – 0.5 (dense heads)</td></tr>
+  <tr><td>LR schedule</td><td>Warmup → cosine decay</td></tr>
+  <tr><td>Grad clip norm</td><td>1.0</td></tr>
+</table>
+</div></details>
+
+<h2 id="14-best-practices-amp-common-pitfalls">14. Best practices &amp; common pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Overfit a tiny batch first (loss → ~0) to prove the model + loss + data pipeline work. Split data before any preprocessing to avoid leakage. Track train and val curves together. Set seeds for reproducibility. Checkpoint the best model. Normalize inputs.</div>
+
+<div class="callout tip"><span class="t">Debugging order</span> If training won't learn: (1) check data/labels and shapes, (2) verify loss decreases on one batch, (3) lower the learning rate, (4) check for <code>zero_grad</code> and <code>train()</code>/<code>eval()</code> mode, (5) inspect gradient norms.</div>
+
+<div class="callout danger"><span class="t">Data leakage</span> Fitting a scaler/encoder on the full dataset (including validation/test) inflates scores and fails in production. Fit transforms on train only, then apply to val/test.</div>
+
+<div class="callout warn"><span class="t">When deep learning is NOT the answer</span> On small tabular datasets, gradient-boosted trees (XGBoost, LightGBM) usually win with less tuning. If you have little data, no GPU budget, need full interpretability, or a simple baseline already meets the bar — don't reach for a deep net. Deep learning shines with large, high-dimensional, unstructured data (images, text, audio) and ample compute.</div>
+
+<h2 id="15-interview-questions-amp-answers">15. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">Why do neural networks need nonlinear activation functions?</div><div class="a">Without them, a stack of linear layers composes to a single linear transformation, so the network can only model linear relationships regardless of depth. Nonlinearities let the model approximate complex, non-linear functions and curved decision boundaries.</div></div>
+
+<div class="qa"><div class="q">Explain backpropagation in one paragraph.</div><div class="a">It is the chain rule applied efficiently over the computation graph. The forward pass caches each layer's activations. The backward pass starts from the loss and propagates the gradient of the loss with respect to each intermediate value from output to input, reusing cached values so each gradient is computed once. The result is ∂L/∂θ for every parameter, which the optimizer uses to update weights.</div></div>
+
+<div class="qa"><div class="q">What causes vanishing/exploding gradients and how do you fix them?</div><div class="a">Repeated multiplication of layer Jacobians in deep nets; if their magnitudes are consistently below one, gradients vanish; above one, they explode. Fixes: ReLU/GELU activations, residual (skip) connections, batch/layer normalization, proper initialization (He/Xavier), gradient clipping, and gating (LSTM/GRU) for sequences.</div></div>
+
+<div class="qa"><div class="q">Batch size and learning rate — how are they related?</div><div class="a">Larger batches give lower-variance gradient estimates, so you can often use a larger learning rate; a common heuristic is linear scaling (double the batch, roughly double the LR) with a warmup. Very large batches can hurt generalization, so a schedule and warmup matter.</div></div>
+
+<div class="qa"><div class="q">Dropout vs. BatchNorm — what do they do and when are they active?</div><div class="a">Dropout is regularization: it randomly zeroes activations during training to prevent co-adaptation, and is turned off at inference. BatchNorm normalizes activations using batch statistics to stabilize and accelerate training; at inference it uses running (population) statistics. Both behave differently in train vs. eval mode, which is why calling <code>model.eval()</code> matters.</div></div>
+
+<div class="qa"><div class="q">Why did transformers replace RNNs for most sequence tasks?</div><div class="a">RNNs are inherently sequential (step t depends on t−1), limiting GPU parallelism and still losing long-range information. Self-attention relates any two positions directly with a constant number of sequential operations and parallelizes across the sequence, so it trains far faster on large data and captures long-range dependencies better.</div></div>
+
+<div class="qa"><div class="q">What is the role of the √d_k scaling in attention?</div><div class="a">Dot products of high-dimensional query/key vectors grow with dimension, pushing softmax into saturated regions with tiny gradients. Dividing by √d_k keeps the variance of the scores roughly constant so the softmax stays in a well-conditioned range.</div></div>
+
+<div class="qa"><div class="q">How do you tell overfitting from underfitting, and what do you do about each?</div><div class="a">Underfitting: both training and validation loss are high → increase capacity, train longer, reduce regularization, improve features. Overfitting: training loss is low but validation loss is high and rising → add regularization (dropout, weight decay, augmentation), get more data, or reduce capacity / use early stopping.</div></div>
+
+<div class="qa"><div class="q">What is transfer learning and when do you freeze vs. fine-tune?</div><div class="a">Reusing a model pretrained on a large corpus for a new task. With little data or a similar domain, freeze the backbone and train only a new head. With more data or a distant domain, unfreeze upper layers and fine-tune with a small learning rate. For LLMs, parameter-efficient methods like LoRA adapt the model cheaply.</div></div>
+
+<div class="qa"><div class="q">Why use cross-entropy instead of MSE for classification?</div><div class="a">Cross-entropy pairs with softmax to produce well-calibrated probabilities and gives strong, non-saturating gradients when predictions are confidently wrong, speeding learning. MSE on softmax outputs yields small gradients in saturated regions and treats the problem as regression, which converges slower and less reliably.</div></div>
+
+<div class="qa"><div class="q">When would you NOT use deep learning?</div><div class="a">Small or purely tabular datasets (gradient-boosted trees often win), strict interpretability or latency/compute constraints, or when a simple model already meets requirements. Deep learning pays off with large, unstructured, high-dimensional data and sufficient compute.</div></div>
+
+<div class="qa"><div class="q">What does a residual (skip) connection do?</div><div class="a">It adds a layer's input to its output (<code>y = x + F(x)</code>), creating a gradient "highway" so signals bypass layers. This mitigates vanishing gradients and lets networks go very deep (ResNets, transformers) by letting each block learn a residual correction rather than a full transformation.</div></div>
+
+<h2 id="16-further-learning">16. Further learning</h2>
+
+<ul>
+  <li>Build intuition: Andrej Karpathy's "Neural Networks: Zero to Hero" (micrograd → GPT from scratch).</li>
+  <li>Foundations: the <em>Deep Learning</em> book (Goodfellow, Bengio, Courville) and the <em>Dive into Deep Learning</em> (d2l.ai) interactive text.</li>
+  <li>Papers to read in order: "ImageNet Classification with Deep CNNs" (AlexNet), "Deep Residual Learning" (ResNet), "Attention Is All You Need" (transformer), "BERT", and "LoRA".</li>
+  <li>Practice: reproduce a CNN on CIFAR-10 and a small character-level transformer; then fine-tune a pretrained model on your own dataset.</li>
+  <li>Production next steps: mixed-precision training, learning-rate schedules, distributed/data-parallel training, quantization, and serving — see the MLOps guide.</li>
+</ul>
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

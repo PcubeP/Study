@@ -1,0 +1,461 @@
+<h2>What JavaScript Is &amp; Why It Matters</h2>
+<p class="lead">JavaScript is the single-threaded, dynamically typed, prototype-based language that runs the web browser, the Node.js server, build tools, and the runtime beneath React, Vue, and Angular. Learn it deeply once and you can write front end, back end, CLIs, and mobile apps.</p>
+
+<p>JavaScript (standardised as <strong>ECMAScript</strong>) ships a new edition every June. ES2015 (ES6) was the watershed release — <code>let</code>/<code>const</code>, arrow functions, classes, modules, promises. Everything from ES2020 onward (optional chaining, nullish coalescing, <code>BigInt</code>, top-level <code>await</code>, logical assignment) is the modern baseline this guide targets.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Ubiquitous</h4>Runs in every browser, on servers (Node/Deno/Bun), in edge functions, and embedded devices. The only language native to the browser.</div>
+  <div class="card"><h4>Single-threaded + async</h4>One call stack, but an <em>event loop</em> plus non-blocking I/O lets it handle thousands of concurrent operations.</div>
+  <div class="card"><h4>Multi-paradigm</h4>First-class functions enable functional style; prototypes and classes enable OOP. You pick per problem.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 230" width="720" height="230">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="20" width="200" height="80" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="120" y="48" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Your JS source</text>
+  <text x="120" y="72" text-anchor="middle" font-size="12" fill="#1a2233">.js / .mjs / .ts</text>
+
+  <rect x="270" y="20" width="200" height="80" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="370" y="48" text-anchor="middle" font-size="14" fill="#059669" font-weight="bold">JS Engine</text>
+  <text x="370" y="70" text-anchor="middle" font-size="12" fill="#1a2233">V8 / SpiderMonkey</text>
+  <text x="370" y="88" text-anchor="middle" font-size="11" fill="#1a2233">parse → bytecode → JIT</text>
+
+  <rect x="520" y="20" width="180" height="80" rx="8" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="610" y="48" text-anchor="middle" font-size="14" fill="#0891b2" font-weight="bold">Host runtime</text>
+  <text x="610" y="70" text-anchor="middle" font-size="11" fill="#1a2233">Browser DOM / Node</text>
+  <text x="610" y="88" text-anchor="middle" font-size="11" fill="#1a2233">timers, fetch, fs</text>
+
+  <line x1="222" y1="60" x2="266" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="472" y1="60" x2="516" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+
+  <rect x="140" y="140" width="440" height="70" rx="8" fill="#fff" stroke="#94a3b8" stroke-dasharray="4 3"/>
+  <text x="360" y="168" text-anchor="middle" font-size="13" fill="#1a2233" font-weight="bold">Call stack + heap + event loop + task queues</text>
+  <text x="360" y="190" text-anchor="middle" font-size="11" fill="#1a2233">The engine runs your code; the host supplies the async APIs</text>
+</svg><div class="cap">Fig 1 — JS source is executed by an engine (V8 etc.) embedded in a host runtime that provides I/O APIs.</div></div>
+
+<h2>Setup &amp; Getting Started</h2>
+<p>You need almost nothing to start: open a browser console (<span class="kbd">F12</span>). For real projects install Node.js (bundles <code>npm</code>).</p>
+
+<pre><code class="language-bash"># Install Node via the official installer or a version manager (nvm recommended)
+node --version        # v22.x LTS as of 2026
+npm --version
+
+# Run a file
+node app.js
+
+# Start a REPL to experiment
+node
+
+# Initialise a project (creates package.json)
+npm init -y
+
+# Add a dependency and run a script
+npm install lodash
+npm run build</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Use <code>"type": "module"</code> in <code>package.json</code> so <code>.js</code> files use ES module <code>import</code>/<code>export</code> syntax rather than legacy CommonJS <code>require</code>.</div>
+
+<h2>Types, Values &amp; Coercion</h2>
+<p>JavaScript has <strong>7 primitive types</strong> plus objects. Primitives are immutable and compared by value; objects are compared by reference.</p>
+
+<table>
+  <tr><th>Type</th><th>Example</th><th><code>typeof</code> result</th><th>Notes</th></tr>
+  <tr><td>number</td><td><code>42</code>, <code>3.14</code>, <code>NaN</code></td><td><code>"number"</code></td><td>IEEE-754 double; one type for int &amp; float</td></tr>
+  <tr><td>bigint</td><td><code>9007199254740993n</code></td><td><code>"bigint"</code></td><td>Arbitrary-precision integers</td></tr>
+  <tr><td>string</td><td><code>"hi"</code>, <code>`t${x}`</code></td><td><code>"string"</code></td><td>UTF-16; immutable</td></tr>
+  <tr><td>boolean</td><td><code>true</code></td><td><code>"boolean"</code></td><td></td></tr>
+  <tr><td>undefined</td><td><code>undefined</code></td><td><code>"undefined"</code></td><td>Absence of value (default)</td></tr>
+  <tr><td>null</td><td><code>null</code></td><td><code>"object"</code></td><td>Historic bug; intentional empty</td></tr>
+  <tr><td>symbol</td><td><code>Symbol("id")</code></td><td><code>"symbol"</code></td><td>Unique keys</td></tr>
+  <tr><td>object</td><td><code>{}</code>, <code>[]</code>, <code>fn</code></td><td><code>"object"</code>/<code>"function"</code></td><td>Everything non-primitive</td></tr>
+</table>
+
+<pre><code class="language-javascript">// Prefer const; use let when reassigning; never use var (function-scoped, hoisted)
+const PI = 3.14159;
+let count = 0;
+count += 1;
+
+// Strict equality (===) does NOT coerce. Loose equality (==) does — avoid it.
+0 == "0";        // true  (coerced)  ⚠
+0 === "0";       // false (no coercion) ✓
+null == undefined;   // true  (the one useful == case)
+NaN === NaN;         // false — use Number.isNaN()
+
+// Falsy values (everything else is truthy): false, 0, -0, 0n, "", null, undefined, NaN
+if (!"") console.log("empty string is falsy");
+
+// Nullish coalescing (??) only falls through on null/undefined, not on 0 or ""
+const port = userPort ?? 8080;     // 0 would be kept; || would wrongly replace it
+const name = input?.user?.name ?? "anon";  // optional chaining + nullish default</code></pre>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>typeof null === "object"</code> and <code>typeof NaN === "number"</code>. To test arrays use <code>Array.isArray(x)</code>, not <code>typeof</code>.</div>
+
+<h2>Functions, Scope &amp; Closures</h2>
+<p>Functions are first-class values: assign them, pass them, return them. Scope is <em>lexical</em> — determined by where code is written, not where it is called.</p>
+
+<pre><code class="language-javascript">// Three ways to make a function
+function declared(a, b) { return a + b; }          // hoisted fully
+const expr = function (a, b) { return a + b; };    // not hoisted
+const arrow = (a, b) =&gt; a + b;                      // concise; no own `this`
+
+// Default, rest, and spread
+function greet(name = "world", ...others) {
+  return `hi ${name}` + (others.length ? ` and ${others.join(", ")}` : "");
+}
+const nums = [1, 2, 3];
+Math.max(...nums);                 // spread into args → 3
+const copy = [...nums, 4];         // spread into a new array</code></pre>
+
+<h3>Closures</h3>
+<p>A <strong>closure</strong> is a function bundled with references to the variables of the scope where it was created. It keeps those variables alive after the outer function returns — the foundation of private state, memoisation, and callbacks.</p>
+
+<pre><code class="language-javascript">function makeCounter() {
+  let count = 0;                   // private — not reachable from outside
+  return {
+    inc() { return ++count; },     // closes over `count`
+    get() { return count; },
+  };
+}
+const c = makeCounter();
+c.inc();  // 1
+c.inc();  // 2
+c.get();  // 2 — `count` persisted because the returned functions reference it</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 640 230" width="640" height="230">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker></defs>
+  <rect x="20" y="30" width="240" height="170" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="140" y="56" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">makeCounter() scope</text>
+  <rect x="55" y="80" width="170" height="40" rx="6" fill="#fff" stroke="#2563eb"/>
+  <text x="140" y="105" text-anchor="middle" font-size="13" fill="#1a2233">count = 2</text>
+  <rect x="55" y="135" width="170" height="45" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="140" y="162" text-anchor="middle" font-size="12" fill="#059669">inc(), get()</text>
+
+  <rect x="380" y="60" width="230" height="110" rx="8" fill="#fff" stroke="#94a3b8" stroke-dasharray="4 3"/>
+  <text x="495" y="86" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a2233">After return</text>
+  <text x="495" y="112" text-anchor="middle" font-size="12" fill="#1a2233">const c = makeCounter()</text>
+  <text x="495" y="134" text-anchor="middle" font-size="12" fill="#1a2233">c.inc() still reaches count</text>
+  <text x="495" y="156" text-anchor="middle" font-size="11" fill="#b45309">count survives GC via closure</text>
+
+  <line x1="225" y1="155" x2="376" y2="130" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+</svg><div class="cap">Fig 2 — The returned methods close over <code>count</code>, keeping that variable alive on the heap after the function returns.</div></div>
+
+<h2>Objects, Prototypes &amp; Classes</h2>
+<p>JavaScript inheritance is <strong>prototypal</strong>: every object has a hidden link (<code>[[Prototype]]</code>, read via <code>Object.getPrototypeOf</code>) to another object. Property lookups walk this chain until found or <code>null</code>.</p>
+
+<pre><code class="language-javascript">const animal = {
+  describe() { return `${this.name} says ${this.sound}`; },
+};
+const dog = Object.create(animal);   // dog's prototype is `animal`
+dog.name = "Rex";
+dog.sound = "woof";
+dog.describe();                      // "Rex says woof" — method found on prototype
+
+// `class` is syntax sugar over prototypes
+class Shape {
+  #sides;                            // true private field (ES2022)
+  constructor(sides) { this.#sides = sides; }
+  get sides() { return this.#sides; }
+  area() { return 0; }
+  static unit() { return new Shape(1); }   // static = on the class, not instances
+}
+class Square extends Shape {
+  constructor(side) { super(4); this.side = side; }
+  area() { return this.side ** 2; }         // override
+}
+new Square(3).area();   // 9</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 560 210" width="560" height="210">
+  <defs><marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#0891b2"/></marker></defs>
+  <rect x="40" y="150" width="150" height="46" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="115" y="178" text-anchor="middle" font-size="13" fill="#059669">sq (instance)</text>
+  <rect x="40" y="86" width="150" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="115" y="114" text-anchor="middle" font-size="13" fill="#2563eb">Square.prototype</text>
+  <rect x="40" y="22" width="150" height="46" rx="6" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="115" y="50" text-anchor="middle" font-size="13" fill="#1e3a8a">Shape.prototype</text>
+  <rect x="300" y="22" width="170" height="46" rx="6" fill="#fff" stroke="#94a3b8"/>
+  <text x="385" y="50" text-anchor="middle" font-size="13" fill="#1a2233">Object.prototype → null</text>
+
+  <line x1="115" y1="150" x2="115" y2="134" stroke="#0891b2" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="115" y1="86" x2="115" y2="70" stroke="#0891b2" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="190" y1="45" x2="296" y2="45" stroke="#0891b2" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="245" y="178" font-size="11" fill="#1a2233">Lookup walks UP the chain until found or null</text>
+</svg><div class="cap">Fig 3 — The prototype chain. A missing property on <code>sq</code> is searched on each prototype in turn.</div></div>
+
+<h3>Destructuring &amp; useful object APIs</h3>
+<pre><code class="language-javascript">const user = { id: 1, name: "Ada", role: "admin" };
+const { name, role: title } = user;        // rename on extract → title === "admin"
+const [first, , third] = [10, 20, 30];     // skip holes → first=10, third=30
+
+Object.keys(user);     // ["id","name","role"]
+Object.entries(user);  // [["id",1],["name","Ada"],["role","admin"]]
+const clone = { ...user, role: "user" };   // shallow copy + override
+Object.freeze(clone);  // shallow immutability</code></pre>
+
+<h2>The <code>this</code> Keyword &amp; Binding</h2>
+<p><code>this</code> is decided by <em>how a function is called</em>, not where it is defined — except arrow functions, which capture <code>this</code> lexically.</p>
+
+<table>
+  <tr><th>Call form</th><th>What <code>this</code> is</th></tr>
+  <tr><td><code>fn()</code> (plain)</td><td><code>undefined</code> in strict mode (else global)</td></tr>
+  <tr><td><code>obj.fn()</code></td><td><code>obj</code> (the receiver)</td></tr>
+  <tr><td><code>new Fn()</code></td><td>the freshly created instance</td></tr>
+  <tr><td><code>fn.call(x)</code> / <code>fn.apply(x)</code></td><td><code>x</code> (explicit)</td></tr>
+  <tr><td><code>fn.bind(x)</code></td><td>permanently bound to <code>x</code></td></tr>
+  <tr><td>arrow <code>() =&gt; ...</code></td><td>inherited from the enclosing scope</td></tr>
+</table>
+
+<pre><code class="language-javascript">const timer = {
+  seconds: 0,
+  startBroken() {
+    setInterval(function () { this.seconds++; }, 1000); // ⚠ `this` is NOT timer
+  },
+  startFixed() {
+    setInterval(() =&gt; { this.seconds++; }, 1000);       // ✓ arrow keeps `this`
+  },
+};</code></pre>
+
+<div class="callout warn"><span class="t">Classic pitfall</span> Passing a method as a callback (<code>element.addEventListener("click", obj.handle)</code>) loses <code>this</code>. Fix with <code>obj.handle.bind(obj)</code> or an arrow wrapper.</div>
+
+<h2>The Event Loop, Promises &amp; async/await</h2>
+<p class="lead">JavaScript runs on one thread, so it never blocks on I/O. Instead, async work is handed to the host, and callbacks are queued to run once the call stack is empty — orchestrated by the <strong>event loop</strong>.</p>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <defs><marker id="ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <rect x="30" y="30" width="170" height="120" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="115" y="54" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">Call stack</text>
+  <text x="115" y="80" text-anchor="middle" font-size="11" fill="#1a2233">runs sync code</text>
+  <text x="115" y="100" text-anchor="middle" font-size="11" fill="#1a2233">one frame at a time</text>
+
+  <circle cx="360" cy="90" r="55" fill="#ecfdf5" stroke="#059669"/>
+  <text x="360" y="86" text-anchor="middle" font-size="13" font-weight="bold" fill="#059669">Event</text>
+  <text x="360" y="104" text-anchor="middle" font-size="13" font-weight="bold" fill="#059669">loop</text>
+
+  <rect x="520" y="20" width="180" height="55" rx="8" fill="#fff" stroke="#0891b2"/>
+  <text x="610" y="42" text-anchor="middle" font-size="12" font-weight="bold" fill="#0891b2">Microtask queue</text>
+  <text x="610" y="62" text-anchor="middle" font-size="11" fill="#1a2233">promises — drained FIRST</text>
+
+  <rect x="520" y="105" width="180" height="55" rx="8" fill="#fff" stroke="#b45309"/>
+  <text x="610" y="127" text-anchor="middle" font-size="12" font-weight="bold" fill="#b45309">Macrotask queue</text>
+  <text x="610" y="147" text-anchor="middle" font-size="11" fill="#1a2233">setTimeout, I/O, events</text>
+
+  <line x1="200" y1="90" x2="300" y2="90" stroke="#2563eb" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="420" y1="70" x2="516" y2="48" stroke="#2563eb" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="420" y1="110" x2="516" y2="132" stroke="#2563eb" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="360" y="210" text-anchor="middle" font-size="12" fill="#1a2233">Each tick: run all microtasks, then ONE macrotask, repeat</text>
+  <text x="360" y="232" text-anchor="middle" font-size="11" fill="#b45309">This is why a resolved promise fires before a setTimeout(0)</text>
+</svg><div class="cap">Fig 4 — The event loop empties the stack, drains all microtasks, then processes one macrotask per tick.</div></div>
+
+<pre><code class="language-javascript">console.log("1 sync");
+setTimeout(() =&gt; console.log("4 macrotask"), 0);
+Promise.resolve().then(() =&gt; console.log("3 microtask"));
+console.log("2 sync");
+// Output order: 1, 2, 3, 4  — microtasks beat macrotasks
+
+// A Promise is a value that will exist later. States: pending → fulfilled | rejected.
+function fetchUser(id) {
+  return fetch(`/api/users/${id}`).then((res) =&gt; {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  });
+}
+
+// async/await is syntactic sugar over promises — read it top to bottom
+async function loadProfile(id) {
+  try {
+    const user = await fetchUser(id);               // pauses until resolved
+    const [posts, friends] = await Promise.all([    // run concurrently, await both
+      fetch(`/api/users/${id}/posts`).then((r) =&gt; r.json()),
+      fetch(`/api/users/${id}/friends`).then((r) =&gt; r.json()),
+    ]);
+    return { user, posts, friends };
+  } catch (err) {
+    console.error("load failed:", err.message);
+    throw err;                                        // rethrow or return a fallback
+  }
+}</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Use <code>Promise.all</code> for "all must succeed", <code>Promise.allSettled</code> when you want every result regardless of failures, and <code>Promise.race</code> / <code>Promise.any</code> for the first to settle / first to succeed.</div>
+
+<h2>Modules</h2>
+<p>Modern code uses <strong>ES modules</strong> (ESM). Each file is its own scope; you explicitly export and import bindings. Node also supports legacy CommonJS (<code>require</code>/<code>module.exports</code>).</p>
+
+<pre><code class="language-javascript">// math.js — named exports + one default export
+export const add = (a, b) =&gt; a + b;
+export function mul(a, b) { return a * b; }
+export default class Calculator { /* ... */ }
+
+// app.js
+import Calculator, { add, mul as multiply } from "./math.js";
+import * as math from "./math.js";       // namespace import
+const mod = await import("./math.js");   // dynamic import → lazy / code-splitting</code></pre>
+
+<table>
+  <tr><th></th><th>ES Modules</th><th>CommonJS</th></tr>
+  <tr><td>Syntax</td><td><code>import</code> / <code>export</code></td><td><code>require</code> / <code>module.exports</code></td></tr>
+  <tr><td>Loading</td><td>Static, async, tree-shakeable</td><td>Synchronous, dynamic</td></tr>
+  <tr><td>Where</td><td>Browsers &amp; Node (default)</td><td>Legacy Node</td></tr>
+  <tr><td>Bindings</td><td>Live (read-only views)</td><td>Copied values</td></tr>
+</table>
+
+<h2>Arrays, Iteration &amp; Functional Methods</h2>
+<p>Array methods are the workhorse of day-to-day JS. The functional trio <code>map</code>/<code>filter</code>/<code>reduce</code> replaces most hand-written loops.</p>
+
+<pre><code class="language-javascript">const orders = [
+  { id: 1, total: 30, paid: true },
+  { id: 2, total: 70, paid: false },
+  { id: 3, total: 50, paid: true },
+];
+
+orders.map((o) =&gt; o.total);                 // [30, 70, 50] — transform
+orders.filter((o) =&gt; o.paid);               // keep paid orders
+orders.find((o) =&gt; o.id === 2);             // first match or undefined
+orders.some((o) =&gt; !o.paid);                // true — any unpaid?
+orders.every((o) =&gt; o.total &gt; 0);           // true — all positive?
+
+// reduce folds a list into one accumulated value
+const paidRevenue = orders
+  .filter((o) =&gt; o.paid)
+  .reduce((sum, o) =&gt; sum + o.total, 0);    // 80
+
+// Iterate with for...of (values) — prefer over for...in for arrays
+for (const o of orders) console.log(o.id);
+
+// Immutable-friendly helpers (ES2023): toSorted/toReversed/with don't mutate
+const sorted = [3, 1, 2].toSorted();        // [1,2,3]; original untouched</code></pre>
+
+<table>
+  <tr><th>Method</th><th>Returns</th><th>Mutates?</th><th>Use for</th></tr>
+  <tr><td><code>map</code></td><td>new array</td><td>no</td><td>1:1 transform</td></tr>
+  <tr><td><code>filter</code></td><td>new array</td><td>no</td><td>keep a subset</td></tr>
+  <tr><td><code>reduce</code></td><td>any value</td><td>no</td><td>aggregate/fold</td></tr>
+  <tr><td><code>forEach</code></td><td><code>undefined</code></td><td>no</td><td>side effects only</td></tr>
+  <tr><td><code>flatMap</code></td><td>new array</td><td>no</td><td>map + flatten one level</td></tr>
+  <tr><td><code>sort</code></td><td>same array</td><td><strong>yes</strong></td><td>in-place ordering</td></tr>
+  <tr><td><code>push/splice</code></td><td>varies</td><td><strong>yes</strong></td><td>in-place edits</td></tr>
+</table>
+
+<h2>DOM &amp; Fetch — Browser Basics</h2>
+<p>In the browser, <code>document</code> exposes the DOM tree. You query nodes, mutate them, and listen for events.</p>
+
+<pre><code class="language-javascript">// Query
+const btn = document.querySelector("#load");
+const items = document.querySelectorAll(".item");   // static NodeList
+
+// Create &amp; insert
+const li = document.createElement("li");
+li.textContent = "New item";
+li.classList.add("item");
+document.querySelector("ul").append(li);
+
+// Events — the handler receives an Event object
+btn.addEventListener("click", async (event) =&gt; {
+  event.preventDefault();
+  const res = await fetch("/api/data", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ q: "hello" }),
+  });
+  if (!res.ok) throw new Error(res.statusText);
+  const data = await res.json();
+  console.log(data);
+});</code></pre>
+
+<div class="callout note"><span class="t">Note</span> <code>fetch</code> only rejects on network failure — an HTTP 404 or 500 still <em>resolves</em>. Always check <code>res.ok</code> yourself.</div>
+
+<h3>Mini worked example: a debounced search box</h3>
+<pre><code class="language-javascript">// Debounce: wait until the user stops typing before firing — a real-world closure use
+function debounce(fn, delay = 300) {
+  let timer;                                   // persisted via closure
+  return (...args) =&gt; {
+    clearTimeout(timer);
+    timer = setTimeout(() =&gt; fn(...args), delay);
+  };
+}
+
+const input = document.querySelector("#search");
+const search = debounce(async (query) =&gt; {
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+  const results = await res.json();
+  render(results);
+}, 400);
+
+input.addEventListener("input", (e) =&gt; search(e.target.value));</code></pre>
+
+<h2>Cheat-Sheet Reference</h2>
+<table>
+  <tr><th>Task</th><th>Modern idiom</th></tr>
+  <tr><td>Default if null/undefined</td><td><code>x ?? fallback</code></td></tr>
+  <tr><td>Safe deep access</td><td><code>a?.b?.c</code></td></tr>
+  <tr><td>Clone array</td><td><code>[...arr]</code> or <code>arr.slice()</code></td></tr>
+  <tr><td>Shallow clone object</td><td><code>{ ...obj }</code> or <code>structuredClone(obj)</code> (deep)</td></tr>
+  <tr><td>Merge objects</td><td><code>{ ...a, ...b }</code></td></tr>
+  <tr><td>Unique values</td><td><code>[...new Set(arr)]</code></td></tr>
+  <tr><td>Object → array</td><td><code>Object.entries(obj)</code></td></tr>
+  <tr><td>Array → object</td><td><code>Object.fromEntries(pairs)</code></td></tr>
+  <tr><td>Conditional assign</td><td><code>obj.x ??= computeDefault()</code></td></tr>
+  <tr><td>Format number</td><td><code>n.toLocaleString()</code></td></tr>
+  <tr><td>Parse/stringify JSON</td><td><code>JSON.parse(s)</code> / <code>JSON.stringify(o, null, 2)</code></td></tr>
+  <tr><td>Async delay</td><td><code>await new Promise(r =&gt; setTimeout(r, ms))</code></td></tr>
+</table>
+
+<div class="pipeline"><span class="step">parse</span><span class="arrow">-&gt;</span><span class="step">compile (JIT)</span><span class="arrow">-&gt;</span><span class="step">execute</span><span class="arrow">-&gt;</span><span class="step">event loop</span><span class="arrow">-&gt;</span><span class="step">GC</span></div>
+
+<h2>Best Practices &amp; Common Pitfalls</h2>
+<div class="grid c2">
+  <div class="card"><h4>Do</h4>
+    <div class="callout ok"><span class="t">Good</span> Default to <code>const</code>; use <code>===</code>; prefer pure functions and immutable updates; name async functions by what they return; always <code>await</code> or <code>return</code> a promise.</div>
+  </div>
+  <div class="card"><h4>Avoid</h4>
+    <div class="callout danger"><span class="t">Avoid</span> <code>var</code>, loose <code>==</code>, mutating shared arrays, <code>for...in</code> on arrays, floating promises (unhandled rejections), and blocking the main thread with heavy sync loops.</div>
+  </div>
+</div>
+
+<div class="callout warn"><span class="t">Float math</span> <code>0.1 + 0.2 === 0.3</code> is <strong>false</strong> (IEEE-754). Compare with an epsilon or work in integer cents. For money, consider <code>BigInt</code> or a decimal library.</div>
+
+<pre><code class="language-javascript">// Pitfall: shared reference in a loop closure (var)
+const fns = [];
+for (var i = 0; i &lt; 3; i++) fns.push(() =&gt; i);
+fns.map((f) =&gt; f());   // [3, 3, 3] ⚠ — all share one `i`
+// Fix: use let (new binding each iteration)
+for (let j = 0; j &lt; 3; j++) fns.push(() =&gt; j);   // [0, 1, 2] ✓
+
+// Pitfall: forgetting await → floating promise, errors vanish
+async function bad() { fetchUser(1); }   // ⚠ result + errors lost
+async function good() { return await fetchUser(1); }</code></pre>
+
+<h2>Interview Questions &amp; Answers</h2>
+<div class="qa"><div class="q">What is the difference between <code>==</code> and <code>===</code>?</div><div class="a"><code>===</code> compares type and value with no coercion. <code>==</code> coerces operands to a common type first, producing surprising results (<code>"" == 0</code> is true). Always use <code>===</code>; the one accepted <code>==</code> use is <code>x == null</code> to catch both <code>null</code> and <code>undefined</code>.</div></div>
+
+<div class="qa"><div class="q">Explain closures and give a real use.</div><div class="a">A closure is a function together with the lexical environment it was created in, so it retains access to outer variables after the outer function returns. Uses: private state (module pattern), memoisation caches, debounce/throttle, and event handlers that remember configuration.</div></div>
+
+<div class="qa"><div class="q">How does the event loop order <code>setTimeout(0)</code> vs a resolved promise?</div><div class="a">The promise callback runs first. After each synchronous run completes, the loop drains the entire <em>microtask</em> queue (promise callbacks, <code>queueMicrotask</code>) before taking a single <em>macrotask</em> (timers, I/O). So microtasks always beat timers of the same tick.</div></div>
+
+<div class="qa"><div class="q">What is <code>this</code> and how is it determined?</div><div class="a">It is the call-time receiver, set by how the function is invoked: the object before the dot for method calls, the new instance for <code>new</code>, the explicit argument for <code>call</code>/<code>apply</code>/<code>bind</code>, and <code>undefined</code> (strict mode) for plain calls. Arrow functions ignore all of that and capture <code>this</code> lexically.</div></div>
+
+<div class="qa"><div class="q">Explain prototypal inheritance.</div><div class="a">Each object has an internal <code>[[Prototype]]</code> link to another object. Property reads that miss the object walk up this chain until found or <code>null</code>. <code>class</code> is sugar: methods live on <code>Class.prototype</code>, and <code>extends</code> links one prototype to another.</div></div>
+
+<div class="qa"><div class="q">What is the difference between <code>null</code> and <code>undefined</code>?</div><div class="a"><code>undefined</code> means a variable has not been assigned (the engine's default); <code>null</code> is an explicit "no value" you assign deliberately. <code>typeof undefined</code> is <code>"undefined"</code>; <code>typeof null</code> is <code>"object"</code> (a historic bug).</div></div>
+
+<div class="qa"><div class="q">What does <code>const</code> actually guarantee?</div><div class="a">That the binding cannot be reassigned — not that the value is immutable. A <code>const</code> object or array can still have its contents mutated. Use <code>Object.freeze</code> for shallow immutability.</div></div>
+
+<div class="qa"><div class="q">How do you run async operations concurrently vs sequentially?</div><div class="a">Sequentially: <code>await</code> each in turn. Concurrently: start them all (they return promises immediately) then <code>await Promise.all([...])</code>. Awaiting inside a loop serialises; mapping to promises then awaiting all parallelises.</div></div>
+
+<div class="qa"><div class="q">What is hoisting?</div><div class="a">Declarations are processed before execution. <code>function</code> declarations and <code>var</code> are hoisted (var initialised to <code>undefined</code>); <code>let</code>/<code>const</code> are hoisted but live in the "temporal dead zone" until their declaration line, so accessing them early throws.</div></div>
+
+<div class="qa"><div class="q">Why is <code>0.1 + 0.2 !== 0.3</code>?</div><div class="a">Numbers are 64-bit IEEE-754 doubles; 0.1 and 0.2 have no exact binary representation, so the sum is 0.30000000000000004. Compare with a tolerance (<code>Math.abs(a-b) &lt; Number.EPSILON</code>) or use integer units.</div></div>
+
+<div class="qa"><div class="q">Difference between <code>map</code> and <code>forEach</code>?</div><div class="a"><code>map</code> returns a new transformed array and is for producing values; <code>forEach</code> returns <code>undefined</code> and is for side effects only. Chaining and functional pipelines use <code>map</code>; you cannot <code>break</code> out of either (use <code>for...of</code> or <code>some</code>).</div></div>
+
+<div class="qa"><div class="q">What is event delegation?</div><div class="a">Attaching one listener to a common ancestor and using <code>event.target</code> to handle events from many children, relying on bubbling. It is efficient for large/ dynamic lists and avoids per-element listeners.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+  <li><strong>MDN Web Docs</strong> — the authoritative reference for every API and language feature.</li>
+  <li><strong>"You Don't Know JS Yet"</strong> (Kyle Simpson) — deep dives on scope, closures, <code>this</code>, and types.</li>
+  <li><strong>TC39 proposals</strong> — track upcoming ECMAScript features (temporal, records &amp; tuples, decorators).</li>
+  <li><strong>Node.js docs</strong> — streams, the <code>fs</code>/<code>http</code> APIs, and the Node event loop phases.</li>
+  <li><strong>TypeScript</strong> — the natural next step: static types over the same language.</li>
+  <li><strong>Build projects</strong> — a debounced search UI, a small REST server, and a React app to apply closures, async, and modules in anger.</li>
+</ul>

@@ -1,0 +1,487 @@
+<p class="lead">Retrieval-Augmented Generation (RAG) turns a general-purpose language model into a domain expert by feeding it the <em>right</em> passages from your own knowledge base at query time. Instead of hoping the model memorised a fact during training, you retrieve authoritative text and let the model reason over it — cutting hallucinations, enabling citations, and keeping answers fresh without retraining.</p>
+
+<h2>1. What RAG Is and Why It Matters</h2>
+
+<p>A raw large language model (LLM) is a fixed snapshot: its knowledge stops at its training cutoff, it cannot see your private documents, and when it lacks a fact it will often <strong>confidently invent one</strong>. RAG solves this by splitting the problem into two systems — a <span class="badge">retriever</span> that finds relevant text and a <span class="badge g">generator</span> (the LLM) that writes the answer grounded in that text.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Freshness</h4>Update the knowledge base, not the model. New docs are searchable in seconds — no fine-tuning, no GPU cluster.</div>
+  <div class="card"><h4>Grounding</h4>Answers cite retrieved passages, so users can verify claims and you can measure faithfulness.</div>
+  <div class="card"><h4>Cost</h4>Cheaper than fine-tuning for factual knowledge; you pay per-token for context instead of retraining weights.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 720 260" width="720" height="260">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="105" width="120" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="80" y="135" text-anchor="middle" font-size="14" fill="#1a2233">User query</text>
+
+  <rect x="200" y="30" width="150" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="275" y="60" text-anchor="middle" font-size="13" fill="#1a2233">Embed + Retrieve</text>
+
+  <rect x="200" y="180" width="150" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="275" y="205" text-anchor="middle" font-size="12" fill="#1a2233">Vector + keyword</text>
+  <text x="275" y="221" text-anchor="middle" font-size="12" fill="#1a2233">index (your docs)</text>
+
+  <rect x="410" y="105" width="150" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="485" y="130" text-anchor="middle" font-size="12" fill="#1a2233">Prompt =</text>
+  <text x="485" y="146" text-anchor="middle" font-size="12" fill="#1a2233">query + passages</text>
+
+  <rect x="610" y="105" width="90" height="50" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="655" y="135" text-anchor="middle" font-size="14" fill="#fff">LLM</text>
+
+  <line x1="140" y1="130" x2="200" y2="60" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="275" y1="80" x2="275" y2="180" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="275" y1="180" x2="275" y2="82" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="350" y1="55" x2="410" y2="120" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="140" y1="130" x2="410" y2="130" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ah)"/>
+  <line x1="560" y1="130" x2="610" y2="130" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="360" y="115" font-size="11" fill="#b45309">query (verbatim)</text>
+</svg>
+<div class="cap">Fig 1 — The RAG loop: the query drives retrieval; retrieved passages plus the original query become the LLM prompt.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> RAG is "open-book exam" for an LLM. Fine-tuning changes <em>how</em> the model thinks; RAG changes <em>what it can see</em> right now. Use fine-tuning for behaviour and format, RAG for knowledge and facts.</div>
+
+<h2>2. Getting Started</h2>
+
+<p>A minimal stack needs three things: an embedding model, a vector store, and an LLM. Here we use open, widely-available components.</p>
+
+<pre><code class="language-bash"># Create an isolated environment
+python -m venv .venv &amp;&amp; source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# Core libraries
+pip install langchain langchain-community langchain-text-splitters
+pip install sentence-transformers      # local embeddings
+pip install chromadb faiss-cpu         # two popular vector stores
+pip install rank-bm25                  # keyword/sparse retrieval for hybrid search
+pip install "unstructured[pdf]"        # document loaders</code></pre>
+
+<pre><code class="language-python"># hello_rag.py — a complete 30-line RAG pipeline
+from langchain_community.document_loaders import TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+
+# 1) Load &amp; chunk
+docs = TextLoader("handbook.txt", encoding="utf-8").load()
+chunks = RecursiveCharacterTextSplitter(
+    chunk_size=800, chunk_overlap=120
+).split_documents(docs)
+
+# 2) Embed &amp; index
+emb = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+store = Chroma.from_documents(chunks, emb, collection_name="hr")
+
+# 3) Retrieve
+retriever = store.as_retriever(search_kwargs={"k": 4})
+hits = retriever.invoke("How many vacation days do new hires get?")
+for h in hits:
+    print(h.page_content[:120], "...")</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Start local (sentence-transformers + Chroma) so you can iterate for free, then swap the embedding and LLM calls for a hosted API once the pipeline shape is proven. The interfaces are identical.</div>
+
+<h2>3. The Anatomy of a RAG Pipeline</h2>
+
+<p>Production RAG is a pipeline of distinct stages, each independently tunable. Two of them run <strong>offline</strong> (ingestion) and the rest run <strong>online</strong> (per query).</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker>
+  </defs>
+  <text x="20" y="30" font-size="13" fill="#b45309" font-weight="bold">OFFLINE — Ingestion</text>
+  <g font-size="12" fill="#1a2233">
+    <rect x="20" y="45" width="110" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/><text x="75" y="73" text-anchor="middle">Load docs</text>
+    <rect x="150" y="45" width="110" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/><text x="205" y="73" text-anchor="middle">Chunk</text>
+    <rect x="280" y="45" width="110" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/><text x="335" y="73" text-anchor="middle">Embed</text>
+    <rect x="410" y="45" width="120" height="46" rx="7" fill="#ecfdf5" stroke="#059669"/><text x="470" y="73" text-anchor="middle">Index / upsert</text>
+  </g>
+  <line x1="130" y1="68" x2="150" y2="68" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="260" y1="68" x2="280" y2="68" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="390" y1="68" x2="410" y2="68" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+
+  <rect x="560" y="35" width="170" height="220" rx="10" fill="#f8fafc" stroke="#0891b2" stroke-dasharray="5 3"/>
+  <text x="645" y="150" text-anchor="middle" font-size="13" fill="#0891b2">Vector +</text>
+  <text x="645" y="168" text-anchor="middle" font-size="13" fill="#0891b2">keyword store</text>
+  <line x1="530" y1="68" x2="560" y2="90" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+
+  <text x="20" y="180" font-size="13" fill="#b45309" font-weight="bold">ONLINE — Query</text>
+  <g font-size="12" fill="#1a2233">
+    <rect x="20" y="195" width="100" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/><text x="70" y="223" text-anchor="middle">Query</text>
+    <rect x="140" y="195" width="100" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/><text x="190" y="223" text-anchor="middle">Retrieve</text>
+    <rect x="260" y="195" width="100" height="46" rx="7" fill="#fff7ed" stroke="#b45309"/><text x="310" y="223" text-anchor="middle">Rerank</text>
+    <rect x="380" y="195" width="100" height="46" rx="7" fill="#eff4ff" stroke="#2563eb"/><text x="430" y="223" text-anchor="middle">Build prompt</text>
+    <rect x="500" y="195" width="100" height="46" rx="7" fill="#059669" stroke="#1e3a8a"/><text x="550" y="223" text-anchor="middle" fill="#fff">Generate</text>
+  </g>
+  <line x1="120" y1="218" x2="140" y2="218" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="240" y1="218" x2="260" y2="218" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="360" y1="218" x2="380" y2="218" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="480" y1="218" x2="500" y2="218" stroke="#94a3b8" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="190" y1="195" x2="620" y2="130" stroke="#0891b2" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#ah2)"/>
+</svg>
+<div class="cap">Fig 2 — Offline ingestion builds the index once; the online path retrieves, reranks, and generates per query.</div>
+</div>
+
+<table>
+  <tr><th>Stage</th><th>Responsibility</th><th>Key knobs</th></tr>
+  <tr><td>Load</td><td>Parse PDFs, HTML, DB rows into text + metadata</td><td>Parser quality, OCR, table extraction</td></tr>
+  <tr><td>Chunk</td><td>Split into retrievable units</td><td>Size, overlap, boundaries</td></tr>
+  <tr><td>Embed</td><td>Map text to vectors</td><td>Model, dimension, normalisation</td></tr>
+  <tr><td>Index</td><td>Store vectors for fast ANN search</td><td>HNSW params, metric</td></tr>
+  <tr><td>Retrieve</td><td>Find top-k candidates</td><td>k, hybrid weights, filters</td></tr>
+  <tr><td>Rerank</td><td>Reorder candidates by true relevance</td><td>Cross-encoder, top-n kept</td></tr>
+  <tr><td>Generate</td><td>Compose grounded answer</td><td>Prompt, temperature, citations</td></tr>
+</table>
+
+<h2>4. Chunking Strategies</h2>
+
+<p>Chunking is the most underrated lever in RAG. Chunk too large and you dilute the embedding and waste context tokens; chunk too small and you fragment ideas so no single chunk carries the answer.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Fixed-size + overlap</h4>Split every N characters/tokens with an overlap window (e.g. 800/120). Simple, robust default. Overlap prevents cutting a sentence off from its context.</div>
+  <div class="card"><h4>Recursive / structural</h4>Split on a hierarchy of separators (paragraphs → sentences → words) so boundaries respect structure. LangChain's <span class="kbd">RecursiveCharacterTextSplitter</span>.</div>
+  <div class="card"><h4>Semantic</h4>Embed sentences, start a new chunk when cosine similarity to the running group drops below a threshold. Keeps topically coherent units together.</div>
+  <div class="card"><h4>Document-aware</h4>Respect Markdown headings, code blocks, or table rows. Attach the heading path as metadata so a chunk knows its section.</div>
+</div>
+
+<pre><code class="language-python"># Attach heading context so a retrieved chunk carries its section title
+from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
+
+md = MarkdownHeaderTextSplitter(headers_to_split_on=[
+    ("#", "h1"), ("##", "h2"), ("###", "h3"),
+])
+sections = md.split_text(open("guide.md", encoding="utf-8").read())
+
+# Second pass: keep sections under the model's ideal size, preserving metadata
+splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100)
+chunks = splitter.split_documents(sections)
+# Each chunk.metadata now has {"h1": ..., "h2": ...} — great for filtering &amp; citing</code></pre>
+
+<div class="callout tip"><span class="t">Rule of thumb</span> Target ~200–400 tokens per chunk for dense factual Q&amp;A, with 10–20% overlap. Store rich metadata (source, page, section, timestamp) — it powers filtering, citations, and debugging.</div>
+
+<h3>The "parent document" trick</h3>
+<p>Embed <em>small</em> chunks for precise retrieval, but return the <em>larger</em> parent passage to the LLM for context. This decouples retrieval granularity from generation context.</p>
+
+<h2>5. Embeddings and the Vector Space</h2>
+
+<p>An embedding model maps text to a fixed-length vector such that semantically similar text lands nearby. Retrieval is then a nearest-neighbour search under a similarity metric — usually <strong>cosine similarity</strong>.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 520 260" width="520" height="260">
+  <line x1="40" y1="220" x2="480" y2="220" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="40" y1="220" x2="40" y2="20" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="470" y="240" font-size="12" fill="#1a2233">dim 1</text>
+  <text x="50" y="30" font-size="12" fill="#1a2233">dim 2</text>
+  <circle cx="150" cy="80" r="7" fill="#2563eb"/><text x="162" y="84" font-size="12" fill="#1a2233">"annual leave"</text>
+  <circle cx="180" cy="110" r="7" fill="#2563eb"/><text x="192" y="114" font-size="12" fill="#1a2233">"vacation days"</text>
+  <circle cx="165" cy="95" r="7" fill="#059669"/><text x="177" y="140" font-size="12" fill="#059669">query: "time off?"</text>
+  <circle cx="380" cy="190" r="7" fill="#b45309"/><text x="300" y="195" font-size="12" fill="#b45309">"parking policy"</text>
+  <line x1="165" y1="95" x2="180" y2="110" stroke="#059669" stroke-dasharray="3 2"/>
+  <line x1="165" y1="95" x2="150" y2="80" stroke="#059669" stroke-dasharray="3 2"/>
+  <line x1="165" y1="95" x2="380" y2="190" stroke="#b45309" stroke-dasharray="3 2"/>
+</svg>
+<div class="cap">Fig 3 — Semantically related passages cluster near the query vector; unrelated ones sit far away regardless of shared keywords.</div>
+</div>
+
+<pre><code class="language-python">from sentence_transformers import SentenceTransformer
+import numpy as np
+
+model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+# normalize_embeddings=True lets us use a plain dot product as cosine similarity
+vecs = model.encode(
+    ["How much annual leave?", "vacation entitlement", "office parking rules"],
+    normalize_embeddings=True,
+)
+sim = vecs @ vecs.T          # cosine similarity matrix (unit vectors)
+print(np.round(sim, 2))
+# Row 0 vs 1 (leave ~ vacation) is high; vs 2 (parking) is low.</code></pre>
+
+<table>
+  <tr><th>Choice</th><th>Trade-off</th></tr>
+  <tr><td>Dimension (384 vs 1024)</td><td>Higher dims capture more nuance but cost more memory &amp; slower search.</td></tr>
+  <tr><td>Metric (cosine / dot / L2)</td><td>Cosine ignores magnitude — the default for normalised text embeddings.</td></tr>
+  <tr><td>Domain fit</td><td>A model tuned on your domain (legal, code, biomedical) beats a bigger general model.</td></tr>
+  <tr><td>Query vs passage prompts</td><td>Many models (e.g. BGE, E5) want an instruction prefix on queries — read the model card.</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Consistency</span> You MUST embed queries and documents with the <em>same</em> model and the same normalisation. Mixing models silently destroys retrieval quality — the vector spaces are incompatible.</div>
+
+<h2>6. Indexing and Approximate Nearest Neighbour Search</h2>
+
+<p>Exact nearest-neighbour search over millions of vectors is too slow. Vector databases use <strong>Approximate Nearest Neighbour (ANN)</strong> indexes — most commonly <span class="badge">HNSW</span> (Hierarchical Navigable Small World), a layered graph you greedily walk toward the query.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 560 240" width="560" height="240">
+  <defs><marker id="ah3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563eb"/></marker></defs>
+  <text x="20" y="30" font-size="12" fill="#b45309">Layer 2 (sparse, long hops)</text>
+  <circle cx="80" cy="55" r="6" fill="#1e3a8a"/><circle cx="300" cy="55" r="6" fill="#1e3a8a"/><circle cx="500" cy="55" r="6" fill="#1e3a8a"/>
+  <line x1="86" y1="55" x2="294" y2="55" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah3)"/>
+  <text x="20" y="115" font-size="12" fill="#b45309">Layer 1</text>
+  <circle cx="80" cy="140" r="6" fill="#2563eb"/><circle cx="190" cy="140" r="6" fill="#2563eb"/><circle cx="300" cy="140" r="6" fill="#2563eb"/><circle cx="400" cy="140" r="6" fill="#2563eb"/><circle cx="500" cy="140" r="6" fill="#2563eb"/>
+  <line x1="300" y1="61" x2="300" y2="134" stroke="#94a3b8" stroke-dasharray="3 2"/>
+  <line x1="300" y1="140" x2="394" y2="140" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah3)"/>
+  <text x="20" y="195" font-size="12" fill="#b45309">Layer 0 (all nodes, dense)</text>
+  <g fill="#93c5fd"><circle cx="80" cy="215" r="5"/><circle cx="140" cy="215" r="5"/><circle cx="200" cy="215" r="5"/><circle cx="260" cy="215" r="5"/><circle cx="320" cy="215" r="5"/><circle cx="380" cy="215" r="5"/><circle cx="440" cy="215" r="5"/><circle cx="500" cy="215" r="5"/></g>
+  <circle cx="420" cy="215" r="7" fill="#059669"/><text x="430" y="210" font-size="11" fill="#059669">nearest</text>
+  <line x1="400" y1="146" x2="420" y2="209" stroke="#2563eb" stroke-width="1.5" marker-end="url(#ah3)"/>
+</svg>
+<div class="cap">Fig 4 — HNSW: start at the top layer with long hops, descend layer by layer, refining to the true nearest neighbours at the base.</div>
+</div>
+
+<table>
+  <tr><th>Parameter</th><th>Effect</th></tr>
+  <tr><td><span class="kbd">M</span></td><td>Edges per node. Higher = better recall, more memory.</td></tr>
+  <tr><td><span class="kbd">ef_construction</span></td><td>Build-time search width. Higher = better graph, slower indexing.</td></tr>
+  <tr><td><span class="kbd">ef_search</span></td><td>Query-time width. The main recall/latency dial at serve time.</td></tr>
+</table>
+
+<pre><code class="language-python"># FAISS: exact vs HNSW, and metadata filtering pattern with Chroma
+import faiss, numpy as np
+d = 384
+xb = np.random.rand(100_000, d).astype("float32")
+faiss.normalize_L2(xb)
+
+flat = faiss.IndexFlatIP(d)          # exact, brute force (baseline)
+flat.add(xb)
+
+hnsw = faiss.IndexHNSWFlat(d, 32)    # M=32
+hnsw.hnsw.efConstruction = 200
+hnsw.add(xb)
+hnsw.hnsw.efSearch = 64              # tune recall vs latency at query time
+
+q = xb[:1]
+D, I = hnsw.search(q, k=5)           # top-5 approximate neighbours
+print(I)</code></pre>
+
+<h2>7. Hybrid Search: Dense + Sparse</h2>
+
+<p>Dense (embedding) search excels at meaning but can miss exact identifiers — error codes, SKUs, proper nouns. Sparse keyword search (BM25) nails exact terms but misses paraphrase. <strong>Hybrid search</strong> fuses both, typically via <span class="badge o">Reciprocal Rank Fusion (RRF)</span>.</p>
+
+<pre><code class="language-python"># Reciprocal Rank Fusion: combine two ranked lists into one robust ranking
+def rrf(rank_lists, k=60):
+    scores = {}
+    for ranking in rank_lists:              # each = [doc_id, doc_id, ...] best-first
+        for rank, doc_id in enumerate(ranking):
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank + 1)
+    return sorted(scores, key=scores.get, reverse=True)
+
+dense = ["d3", "d1", "d7", "d2"]   # from vector search
+sparse = ["d1", "d9", "d3", "d5"]  # from BM25
+print(rrf([dense, sparse]))        # d1 &amp; d3 rise: they rank well in BOTH systems</code></pre>
+
+<div class="callout ok"><span class="t">Why RRF works</span> It needs no score calibration between systems (cosine and BM25 scores are not comparable). It only uses <em>ranks</em>, rewarding documents that appear high in multiple lists.</div>
+
+<h2>8. Reranking</h2>
+
+<p>Retrieval optimises for <em>recall</em> (don't miss the right passage) by casting a wide net (k=20–50). A <strong>reranker</strong> then optimises for <em>precision</em>, scoring each candidate against the query with a heavier, more accurate model, and keeps the top 3–5.</p>
+
+<p>The key distinction: a <strong>bi-encoder</strong> (your embedding model) encodes query and document <em>separately</em> — fast, cacheable, but coarse. A <strong>cross-encoder</strong> feeds query and document <em>together</em> into a transformer, attending across both — far more accurate, but too slow to run over the whole corpus. So you use bi-encoder to retrieve and cross-encoder to rerank.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 620 190" width="620" height="190">
+  <text x="20" y="30" font-size="13" fill="#1e3a8a" font-weight="bold">Bi-encoder (retrieve)</text>
+  <rect x="20" y="45" width="90" height="34" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="65" y="67" text-anchor="middle" font-size="12">query</text>
+  <rect x="20" y="95" width="90" height="34" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="65" y="117" text-anchor="middle" font-size="12">doc</text>
+  <rect x="140" y="45" width="60" height="34" rx="6" fill="#dbeafe" stroke="#2563eb"/><text x="170" y="67" text-anchor="middle" font-size="11">vec</text>
+  <rect x="140" y="95" width="60" height="34" rx="6" fill="#dbeafe" stroke="#2563eb"/><text x="170" y="117" text-anchor="middle" font-size="11">vec</text>
+  <text x="220" y="90" font-size="18" fill="#059669">cos</text>
+  <text x="130" y="165" font-size="11" fill="#059669">separate → fast</text>
+
+  <line x1="300" y1="90" x2="340" y2="90" stroke="#94a3b8" stroke-width="2"/>
+  <text x="360" y="30" font-size="13" fill="#b45309" font-weight="bold">Cross-encoder (rerank)</text>
+  <rect x="360" y="60" width="180" height="50" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="450" y="82" text-anchor="middle" font-size="12">[query] + [doc]</text>
+  <text x="450" y="100" text-anchor="middle" font-size="12">joint transformer</text>
+  <rect x="560" y="68" width="50" height="34" rx="6" fill="#059669"/><text x="585" y="90" text-anchor="middle" font-size="12" fill="#fff">score</text>
+  <text x="370" y="165" font-size="11" fill="#b45309">joint attention → accurate</text>
+</svg>
+<div class="cap">Fig 5 — Bi-encoders scale to millions of docs; cross-encoders re-score a short candidate list with full cross-attention.</div>
+</div>
+
+<pre><code class="language-python">from sentence_transformers import CrossEncoder
+
+reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+query = "How many vacation days do new hires get?"
+candidates = [c.page_content for c in retriever.invoke(query)]  # k=20 recall net
+
+scored = reranker.predict([(query, c) for c in candidates])
+top = [c for _, c in sorted(zip(scored, candidates), reverse=True)][:4]  # precision
+# `top` now goes into the prompt — smaller, cleaner, more relevant context.</code></pre>
+
+<h2>9. Generation: Prompting and Citations</h2>
+
+<p>The final stage stitches retrieved passages into a grounded prompt. The system prompt must instruct the model to answer <em>only</em> from context and to say "I don't know" when the context is insufficient.</p>
+
+<pre><code class="language-python">SYSTEM = """You are a precise assistant. Answer the question using ONLY the
+context passages. If the answer is not in the context, say you don't know.
+Cite sources inline as [1], [2] matching the passage numbers."""
+
+def build_prompt(question, passages):
+    ctx = "\n\n".join(f"[{i+1}] {p.page_content}" for i, p in enumerate(passages))
+    return [
+        {"role": "system", "content": SYSTEM},
+        {"role": "user", "content": f"Context:\n{ctx}\n\nQuestion: {question}"},
+    ]
+
+# With Anthropic's SDK (temperature=0 for factual, deterministic answers):
+import anthropic
+client = anthropic.Anthropic()
+msgs = build_prompt("How many vacation days do new hires get?", top_passages)
+resp = client.messages.create(
+    model="claude-opus-4-8",   # current model id as of 2026
+    max_tokens=512, temperature=0,
+    system=msgs[0]["content"],
+    messages=[msgs[1]],
+)
+print(resp.content[0].text)</code></pre>
+
+<div class="callout tip"><span class="t">Prompt-caching &amp; context order</span> Put stable, large context (retrieved passages, long system prompt) at the front so it can be cached across turns; keep the volatile question last. Models attend most reliably to the start and end of context — bury nothing important in the middle ("lost in the middle").</div>
+
+<h2>10. Evaluating a RAG System</h2>
+
+<p>You cannot improve what you don't measure. RAG evaluation splits into <strong>retrieval quality</strong> and <strong>generation quality</strong>, and the two failure surfaces must be measured separately so you know which stage to fix.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>Retrieval metrics</h4><strong>Recall@k</strong>: fraction of relevant docs found in top-k. <strong>Precision@k</strong>: fraction of top-k that are relevant. <strong>MRR / nDCG</strong>: reward putting the right doc high.</div>
+  <div class="card"><h4>Generation metrics</h4><strong>Faithfulness</strong>: every claim is supported by context (no hallucination). <strong>Answer relevance</strong>: the answer addresses the question. <strong>Context relevance</strong>: retrieved passages were on-topic.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 560 210" width="560" height="210">
+  <rect x="30" y="40" width="120" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/><text x="90" y="70" text-anchor="middle" font-size="12">Question</text>
+  <rect x="30" y="120" width="120" height="50" rx="8" fill="#ecfdf5" stroke="#059669"/><text x="90" y="150" text-anchor="middle" font-size="12">Context</text>
+  <rect x="410" y="80" width="120" height="50" rx="8" fill="#059669"/><text x="470" y="110" text-anchor="middle" font-size="12" fill="#fff">Answer</text>
+  <text x="200" y="55" font-size="12" fill="#2563eb">answer relevance</text>
+  <line x1="150" y1="60" x2="410" y2="95" stroke="#2563eb" stroke-dasharray="4 3"/>
+  <text x="200" y="150" font-size="12" fill="#059669">faithfulness</text>
+  <line x1="150" y1="145" x2="410" y2="115" stroke="#059669" stroke-dasharray="4 3"/>
+  <text x="200" y="112" font-size="12" fill="#b45309">context relevance</text>
+  <line x1="150" y1="105" x2="150" y2="105" stroke="#b45309"/>
+  <line x1="90" y1="90" x2="90" y2="120" stroke="#b45309" stroke-width="2"/>
+</svg>
+<div class="cap">Fig 6 — The RAG evaluation triad: each metric ties two of {question, context, answer} together.</div>
+</div>
+
+<pre><code class="language-python"># Sketch of an LLM-as-judge faithfulness check (the idea behind RAGAS)
+JUDGE = """Given CONTEXT and an ANSWER, list each factual claim in the ANSWER.
+For each, output SUPPORTED if the CONTEXT entails it, else UNSUPPORTED.
+Faithfulness = supported_claims / total_claims."""
+
+def faithfulness(context, answer, client):
+    r = client.messages.create(
+        model="claude-opus-4-8", max_tokens=400, temperature=0,
+        system=JUDGE,
+        messages=[{"role": "user",
+                   "content": f"CONTEXT:\n{context}\n\nANSWER:\n{answer}"}],
+    )
+    return r.content[0].text   # parse SUPPORTED/UNSUPPORTED counts</code></pre>
+
+<div class="callout note"><span class="t">Build a golden set</span> Curate 50–200 (question, ideal-answer, relevant-doc-ids) triples. Run it on every change to catch regressions. Automated LLM-judge scores are directional; the golden set is your ground truth.</div>
+
+<h2>11. Common Failure Modes</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Retrieval miss</h4>The right passage isn't in top-k. Causes: bad chunking, domain-mismatched embeddings, no hybrid search for exact terms. Fix: wider k + rerank, hybrid, better embeddings.</div>
+  <div class="card"><h4>Lost in the middle</h4>The right passage <em>is</em> retrieved but buried in a long context and ignored. Fix: rerank to fewer passages, reorder, shorten context.</div>
+  <div class="card"><h4>Hallucination despite context</h4>Model answers from prior knowledge, not the passages. Fix: strict "only from context" prompt, temperature 0, faithfulness eval.</div>
+  <div class="card"><h4>Stale index</h4>Docs updated but vectors not re-embedded. Fix: incremental upserts keyed by content hash + document versioning.</div>
+</div>
+
+<div class="callout danger"><span class="t">Silent quality decay</span> A RAG system rarely errors loudly — it just quietly returns worse answers as the corpus grows or embeddings drift. Without continuous evaluation on a golden set you will not notice until users complain.</div>
+
+<h2>12. Advanced RAG Patterns</h2>
+
+<div class="grid c3">
+  <div class="card"><h4>Query rewriting / HyDE</h4>Rewrite terse queries, or generate a hypothetical answer and embed <em>that</em> to retrieve — bridges the vocabulary gap between questions and documents.</div>
+  <div class="card"><h4>Multi-query fusion</h4>Generate several paraphrases of the query, retrieve for each, and fuse with RRF for higher recall.</div>
+  <div class="card"><h4>Self / corrective RAG</h4>The model grades retrieved passages; if they're weak it re-retrieves, reformulates, or falls back to web search before answering.</div>
+  <div class="card"><h4>Agentic RAG</h4>Retrieval becomes a tool the LLM calls on demand, possibly multiple times, mid-reasoning — good for multi-hop questions.</div>
+  <div class="card"><h4>GraphRAG</h4>Build a knowledge graph of entities/relations; retrieve subgraphs and community summaries for global "connect the dots" questions.</div>
+  <div class="card"><h4>Contextual retrieval</h4>Prepend an LLM-generated document-level summary to each chunk before embedding, so isolated chunks retain global context.</div>
+</div>
+
+<pre><code class="language-python"># HyDE: retrieve using a hypothetical answer's embedding, not the raw question
+def hyde_retrieve(question, llm, embedder, store):
+    hypo = llm(f"Write a short factual passage answering: {question}")
+    qvec = embedder.encode(hypo, normalize_embeddings=True)  # embed the answer
+    return store.similarity_search_by_vector(qvec, k=8)      # denser match</code></pre>
+
+<h3>Mini worked example: a support-bot retrieval decision</h3>
+<div class="pipeline">
+  <span class="step">User: "error E-4021 on upload"</span>
+  <span class="arrow">-></span>
+  <span class="step">Hybrid retrieve (BM25 catches E-4021)</span>
+  <span class="arrow">-></span>
+  <span class="step">Rerank top-20 → top-4</span>
+  <span class="arrow">-></span>
+  <span class="step">Grounded answer + [cite]</span>
+</div>
+<p>Pure dense search might rank a semantically similar but wrong error higher; BM25 anchors on the exact code <code>E-4021</code>, and the reranker confirms the passage actually explains that code.</p>
+
+<h2>13. Cheat-Sheet Reference</h2>
+
+<table>
+  <tr><th>Concept</th><th>One-liner</th><th>Typical value</th></tr>
+  <tr><td>Chunk size</td><td>Retrievable unit size</td><td>200–400 tokens</td></tr>
+  <tr><td>Overlap</td><td>Shared text between chunks</td><td>10–20%</td></tr>
+  <tr><td>Retrieval k</td><td>Candidates before rerank</td><td>20–50</td></tr>
+  <tr><td>Kept after rerank</td><td>Passages sent to LLM</td><td>3–5</td></tr>
+  <tr><td>Similarity metric</td><td>Vector closeness</td><td>cosine</td></tr>
+  <tr><td>Fusion</td><td>Combine dense + sparse</td><td>RRF (k=60)</td></tr>
+  <tr><td>Generation temp</td><td>Randomness</td><td>0 for factual</td></tr>
+</table>
+
+<h4>RAG vs Fine-tuning vs Long-context</h4>
+<table>
+  <tr><th>Need</th><th>Best tool</th><th>Why</th></tr>
+  <tr><td>Fresh / private facts</td><td>RAG</td><td>Update the index, cite sources</td></tr>
+  <tr><td>New behaviour / style / format</td><td>Fine-tuning</td><td>Changes model weights</td></tr>
+  <tr><td>One-off analysis of a single doc</td><td>Long-context</td><td>Just paste it; no infra</td></tr>
+  <tr><td>Huge, changing corpus</td><td>RAG</td><td>Can't fit in context; must retrieve</td></tr>
+</table>
+
+<h2>14. Best Practices and Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Store rich metadata and always return citations. Evaluate retrieval and generation separately. Start simple (fixed chunks + dense) and add hybrid/rerank only when metrics justify it.</div>
+<div class="callout tip"><span class="t">Do</span> Version your index and embedding model together; a model change requires a full re-embed. Log every query, its retrieved ids, and the answer for offline analysis.</div>
+<div class="callout warn"><span class="t">Avoid</span> Chunking blindly by character count across tables/code. Mixing embedding models between index and query. Sending 30 passages hoping "more context helps" — it hurts precision and cost.</div>
+<div class="callout danger"><span class="t">Never</span> Trust an ungrounded answer just because it cites a number. Verify citations map to real passages, and keep temperature at 0 for factual retrieval.</div>
+
+<h2>15. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What problem does RAG solve that a bigger LLM does not?</div><div class="a">Access to fresh, private, or high-volume knowledge with source attribution. Scaling parameters improves reasoning but not knowledge of data the model never saw, and gives no citations or freshness. RAG externalises knowledge into an updatable index.</div></div>
+
+<div class="qa"><div class="q">Why chunk documents at all — why not embed whole files?</div><div class="a">Embeddings compress a whole text into one vector; a long document's vector becomes a blurry average that matches nothing precisely, and you'd waste context tokens returning irrelevant sections. Chunking gives precise, focused units that embed and retrieve cleanly.</div></div>
+
+<div class="qa"><div class="q">Bi-encoder vs cross-encoder — when do you use each?</div><div class="a">Bi-encoders encode query and doc separately, so document vectors are precomputed and searched fast — use for first-stage retrieval over the full corpus. Cross-encoders process query+doc jointly with cross-attention, far more accurate but O(candidates) forward passes — use to rerank a short candidate list.</div></div>
+
+<div class="qa"><div class="q">Why add keyword (BM25) search if you already have embeddings?</div><div class="a">Dense retrieval can miss exact tokens — error codes, IDs, rare proper nouns — because they get smeared into semantic space. BM25 matches them exactly. Hybrid search via RRF gives you both semantic recall and lexical precision.</div></div>
+
+<div class="qa"><div class="q">How do you measure whether a RAG system is good?</div><div class="a">Separate retrieval metrics (recall@k, precision@k, MRR/nDCG against labelled relevant docs) from generation metrics (faithfulness, answer relevance, context relevance). Maintain a golden set of question/answer/relevant-doc triples and track it on every change.</div></div>
+
+<div class="qa"><div class="q">What is "lost in the middle" and how do you mitigate it?</div><div class="a">LLMs attend most reliably to the beginning and end of long contexts, so a relevant passage placed in the middle can be ignored. Mitigate by reranking down to few passages, ordering the strongest first/last, and keeping total context tight.</div></div>
+
+<div class="qa"><div class="q">The model still hallucinates even with good retrieval. What now?</div><div class="a">Tighten the prompt to answer only from context and to say "I don't know" otherwise; set temperature 0; run a faithfulness check that flags claims unsupported by context; and verify retrieval actually contained the answer (else it's a retrieval miss, not a generation problem).</div></div>
+
+<div class="qa"><div class="q">Explain HNSW at a high level.</div><div class="a">A multi-layer proximity graph. Upper layers have few nodes with long-range links for fast coarse navigation; lower layers are dense. Search starts at the top, greedily hops toward the query, and descends layer by layer, refining to true neighbours at the base — giving log-ish search over millions of vectors.</div></div>
+
+<div class="qa"><div class="q">How would you handle a corpus that updates constantly?</div><div class="a">Incremental upserts keyed by a content hash so unchanged chunks are skipped; delete-and-reinsert changed docs; version documents and store timestamps in metadata for recency filtering. Never require a full rebuild for small edits.</div></div>
+
+<div class="qa"><div class="q">When is RAG the wrong choice?</div><div class="a">When the task needs new behaviour or output format (fine-tune instead), when the knowledge fits comfortably in a single prompt (just use long context), or when latency budgets can't absorb a retrieval+rerank round trip and the knowledge is small and static.</div></div>
+
+<div class="qa"><div class="q">What is HyDE and why can it help?</div><div class="a">Hypothetical Document Embeddings: use the LLM to draft a plausible answer to the query, then embed and retrieve with that draft. It bridges the vocabulary/asymmetry gap between short questions and prose documents, since an answer-shaped text sits closer to real passages in embedding space.</div></div>
+
+<div class="qa"><div class="q">Design a RAG system for 10M internal documents. What are the key decisions?</div><div class="a">Ingestion pipeline with robust parsers and structural chunking + metadata; a domain-appropriate embedding model; an ANN store (HNSW) sharded for scale with metadata filtering and access control; hybrid retrieval + cross-encoder rerank; a grounded, citing prompt at temp 0; and continuous evaluation on a golden set with query logging. Discuss cost, latency, freshness (incremental upserts), and security (per-user filtering) trade-offs.</div></div>
+
+<h2>16. Further Learning</h2>
+<ul>
+  <li>Read the original RAG paper (Lewis et al., 2020) and the "Lost in the Middle" paper for foundational intuition.</li>
+  <li>Build the golden-set evaluation harness before optimising — try the RAGAS library for faithfulness/relevance metrics.</li>
+  <li>Experiment with a cross-encoder reranker and measure precision@k gains against the dense-only baseline.</li>
+  <li>Study advanced patterns: HyDE, multi-query fusion, contextual retrieval, GraphRAG, and agentic/corrective RAG.</li>
+  <li>Learn one production vector store deeply (FAISS internals, or a managed store's filtering/scaling model) and one framework (LangChain or LlamaIndex).</li>
+  <li>Practise the system-design interview: sketch the offline vs online paths, name every knob, and justify cost/latency/freshness trade-offs aloud.</li>
+</ul>

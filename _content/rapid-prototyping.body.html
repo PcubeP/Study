@@ -1,0 +1,2825 @@
+<h2>The Demo-in-a-Day Doctrine</h2>
+<p class="lead">A Forward Deployed Engineer's core move is to compress the distance between a customer saying "could it do X?" and seeing X working on their own data. A deck describing a capability generates a follow-up meeting. A working thing that answers a question they actually have generates a budget. The entire discipline of rapid prototyping is about making that second outcome achievable within days rather than quarters, without writing code you will be ashamed of.</p>
+
+<div class="facts">
+  <div class="f"><b>1-3 days</b><span>TARGET TIME TO FIRST WORKING DEMO</span></div>
+  <div class="f"><b>&lt;500</b><span>LINES FOR MOST USEFUL PROTOTYPES</span></div>
+  <div class="f"><b>80/20</b><span>SHOW THE 20% OF FEATURES THAT CARRY 80% OF VALUE</span></div>
+  <div class="f"><b>0</b><span>ACCEPTABLE LIVE FAILURES IN FRONT OF A CUSTOMER</span></div>
+</div>
+
+<h3>Why the working prototype wins</h3>
+<p>Three things happen when a customer uses a prototype rather than hearing about it, and none of them happen in a slide review.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Requirements become real</h4><p>In a workshop people describe the system they imagine. In front of a prototype they say "no, we'd never type the order number, we'd paste the whole email" — a sentence worth four weeks of guesswork. Prototypes extract tacit requirements that no amount of interviewing surfaces.</p></div>
+  <div class="card"><h4>The sceptics move</h4><p>Every room has someone who believes it cannot work on their messy data. You cannot argue them out of it. You can run it on their messy data in front of them. Their objection becomes a specific, solvable gap instead of a general doubt.</p></div>
+  <div class="card"><h4>You find the real blockers early</h4><p>Building even a toy version forces you to get data access, discover that the API needs a VPN, learn that the PDFs are scanned images, and find out that half the records have no customer id. These are the things that kill projects in month four. Find them in week one.</p></div>
+</div>
+
+<h3>The rules of prototype scope</h3>
+<ol class="steps">
+  <li><b>One user, one task, one happy path.</b> Pick the single most valuable workflow and make it genuinely excellent. Three mediocre workflows demo worse than one that works.</li>
+  <li><b>Real data, always.</b> A prototype on synthetic data proves nothing to the person whose data is messy. Get a sample — masked, sampled, whatever it takes — but make it theirs. The moment they see their own product names on screen, the conversation changes.</li>
+  <li><b>Fake the expensive parts deliberately and honestly.</b> Hardcode the auth. Stub the write-back to SAP. Use a CSV instead of the live feed. Then say so out loud during the demo: "the write-back is stubbed; it's two days of work once we have the API credentials." Honesty about stubs buys enormous trust.</li>
+  <li><b>No infrastructure you do not need today.</b> No Kubernetes, no message queue, no microservices, no auth service, no CI pipeline. A single process on one box is correct for a prototype and you should be comfortable defending that.</li>
+  <li><b>Timebox hard and ship the timebox.</b> Three days means three days. If something is not done, cut scope, never quality of the demo path. A rough edge off the happy path is invisible; a crash on the happy path is the only thing anyone remembers.</li>
+  <li><b>Write down everything you deferred.</b> A prototype debt register, started on day one, is the artefact that lets you answer "how long to productionise?" with a number instead of a shrug.</li>
+</ol>
+
+<div class="callout danger"><span class="t">The prototype trap</span>The demo goes well, the customer says "great, can we just put that live next week?", and six months later you are still running a Streamlit app with a hardcoded API key serving forty people. The defence is not refusing — it is having stated from the first demo, in writing, what the graduation path costs. "This is a prototype. To run it for real needs authentication, tests, a database instead of local files, and deployment into your tenancy: roughly four weeks." Say that in demo one, repeat it in demo two, and put it in the summary email. Then the decision to ship it anyway is theirs, made with information.</div>
+
+<h3>What a prototype is not</h3>
+<table>
+<tr><th>A prototype</th><th>A product</th></tr>
+<tr><td>Proves a capability is possible on real data</td><td>Serves many users reliably over years</td></tr>
+<tr><td>One happy path, built fast</td><td>All paths, including the nasty ones</td></tr>
+<tr><td>Errors shown as a friendly message to the demo operator</td><td>Errors handled, logged, alerted, retried</td></tr>
+<tr><td>Secrets in a <code>.env</code> file you control</td><td>Secrets in a managed vault with rotation</td></tr>
+<tr><td>State in memory or a local file</td><td>State in a database with migrations and backups</td></tr>
+<tr><td>Run by you, on your terms, in a meeting</td><td>Run by their team, at 3 a.m., without you</td></tr>
+<tr><td>Disposable — you expect to rewrite it</td><td>Maintained — you expect to extend it</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Build it to be thrown away, but make it easy not to</span>These two are not in conflict if you keep the business logic in plain, testable Python functions and keep the UI layer thin. Then "productionising" means swapping the UI and the storage, not rewriting the thinking. The single highest-leverage structural decision in a prototype is: <b>no business logic inside a Streamlit callback or a FastAPI route handler.</b></div>
+
+<h2>Choosing the Stack</h2>
+<p class="lead">The wrong framework costs you a day of fighting the tool instead of solving the problem. The choice is almost mechanical once you know who will use the thing, whether it needs to be embedded in something else, and whether it has to survive beyond the demo.</p>
+
+<h3>The decision table</h3>
+<table>
+<tr><th>If…</th><th>Use</th><th>Because</th></tr>
+<tr><td>A data/ML demo for 1-20 internal users, you own the whole UI</td><td><b>Streamlit</b></td><td>Fastest path from script to shareable app; layout, widgets, charts, chat all built in</td></tr>
+<tr><td>A model demo you want to share as a link, or embed in a page</td><td><b>Gradio</b></td><td>Purpose-built for model I/O; <code>share=True</code> gives a public tunnel in one line; native on HF Spaces</td></tr>
+<tr><td>The customer's own frontend must call it, or it is a service</td><td><b>FastAPI</b></td><td>Real HTTP API, OpenAPI docs, typed validation, streaming, async</td></tr>
+<tr><td>You need a polished, branded UI the customer's designers specified</td><td><b>FastAPI + React/Next.js</b></td><td>Full control of the UI; costs 3-5x the frontend time</td></tr>
+<tr><td>The audience is data scientists and the artefact is the analysis</td><td><b>Jupyter / Marimo</b></td><td>Narrative plus code; nobody needs a web app to read a notebook</td></tr>
+<tr><td>It is a form-plus-workflow with no custom logic</td><td><b>No-code (Power Apps, Retool, Budibase)</b></td><td>Their IT already supports it; you are not the bottleneck</td></tr>
+<tr><td>An internal tool with CRUD over a database</td><td><b>Retool / Appsmith / Streamlit + SQLModel</b></td><td>Do not hand-build CRUD screens in 2026</td></tr>
+<tr><td>It must run entirely inside their network with no internet</td><td><b>FastAPI + Streamlit in one Docker Compose</b></td><td>Two containers, no cloud dependencies, portable to any VM</td></tr>
+</table>
+
+<h3>Streamlit vs Gradio vs FastAPI, honestly</h3>
+<table>
+<tr><th></th><th>Streamlit</th><th>Gradio</th><th>FastAPI</th></tr>
+<tr><td>Mental model</td><td>Script re-runs top to bottom on every interaction</td><td>Event handlers bound to components</td><td>Request &#8594; handler &#8594; response</td></tr>
+<tr><td>Time to a chat UI</td><td>~20 lines</td><td>~5 lines (<code>ChatInterface</code>)</td><td>You build the UI yourself</td></tr>
+<tr><td>Layout control</td><td>Good (columns, tabs, containers, sidebar)</td><td>Good with Blocks, awkward with Interface</td><td>N/A</td></tr>
+<tr><td>Multi-page</td><td>Native</td><td>Possible but clumsy</td><td>Routers</td></tr>
+<tr><td>Custom styling</td><td>Theming + CSS injection; fights you past a point</td><td>Theming + CSS; similar limits</td><td>Unlimited</td></tr>
+<tr><td>Auth</td><td>None built in (OIDC in recent versions / Community Cloud)</td><td><code>auth=</code> tuple for basic gating</td><td>You implement it properly</td></tr>
+<tr><td>Concurrency</td><td>One session per browser tab; shared process</td><td>Queue with configurable concurrency</td><td>Full async, workers, proper control</td></tr>
+<tr><td>Used by a machine</td><td>No</td><td>Yes (it exposes an API)</td><td>Yes, that is the point</td></tr>
+<tr><td>Graduates to production</td><td>Rarely well</td><td>Rarely well</td><td>Yes, directly</td></tr>
+</table>
+
+<div class="callout ok"><span class="t">The default that is right most often</span><b>FastAPI for the logic, Streamlit for the face.</b> The backend holds everything real — retrieval, model calls, business rules — behind typed endpoints that can be tested with <code>pytest</code> and called by anything. The frontend is a thin client. When the customer says "actually we want this inside our portal", you throw away the Streamlit app and keep 90% of the work. When they say "can you just run it as a batch job", same answer. This split costs you about two extra hours on day one and saves weeks later.</div>
+
+<h3>When to say no to a prototype</h3>
+<ul class="checklist">
+  <li>The data needed does not exist yet and will not within the engagement.</li>
+  <li>Legal has not cleared sending the data to the model provider you planned to use, and there is no on-prem alternative in scope.</li>
+  <li>The real question is organisational ("will the team adopt this?") and a prototype cannot answer it.</li>
+  <li>They want a production system and are using the word "prototype" to avoid a procurement process. Clarify before you build.</li>
+  <li>The demo audience is three levels above anyone who has used the current process — build it, but insist a real user is in the room.</li>
+</ul>
+
+<h2>Python Project Setup That Does Not Waste an Hour</h2>
+<p class="lead">Every hour spent on environment problems is an hour not spent on the demo, and environment problems compound: the thing works on your machine, then not on the customer's VM, then not in the container. Fix this once with a layout you can reproduce from muscle memory and you will never think about it again.</p>
+
+<h3>Use uv</h3>
+<p><code>uv</code> replaces pip, virtualenv, pip-tools and most of poetry's role, and it is dramatically faster — resolving and installing a FastAPI + LangChain + pandas stack typically drops from minutes to seconds. Speed matters here because you will rebuild environments many times a day on a customer laptop.</p>
+
+<pre><code class="language-bash"># Install uv (one time)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Windows: powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# New project
+uv init customer-demo &amp;&amp; cd customer-demo
+uv python pin 3.12                      # writes .python-version; pins the interpreter
+
+# Add dependencies - resolves and installs into .venv automatically
+uv add fastapi "uvicorn[standard]" pydantic pydantic-settings httpx
+uv add streamlit pandas python-multipart
+uv add --dev pytest pytest-asyncio ruff mypy
+
+# Run anything inside the environment without activating it
+uv run uvicorn app.main:app --reload
+uv run streamlit run ui/app.py
+uv run pytest -q
+
+# Reproduce exactly elsewhere (uses uv.lock)
+uv sync --frozen
+
+# One-off tools without polluting the project
+uvx ruff check .</code></pre>
+
+<div class="callout tip"><span class="t">Commit the lockfile</span><code>uv.lock</code> (or <code>poetry.lock</code>, or a <code>requirements.txt</code> produced by <code>uv pip compile</code>) is what makes the demo reproducible on the customer's machine. The classic prototype failure is arriving on site, running <code>pip install -r requirements.txt</code> with unpinned versions, getting a six-month-newer library with a breaking change, and spending the first hour of your demo day debugging an import. Pin everything.</div>
+
+<h3>pyproject.toml</h3>
+<pre><code class="language-text">[project]
+name = "customer-demo"
+version = "0.1.0"
+requires-python = "&gt;=3.11"
+dependencies = [
+    "fastapi&gt;=0.115",
+    "uvicorn[standard]&gt;=0.32",
+    "pydantic&gt;=2.9",
+    "pydantic-settings&gt;=2.6",
+    "httpx&gt;=0.27",
+    "python-multipart&gt;=0.0.12",
+    "streamlit&gt;=1.40",
+    "pandas&gt;=2.2",
+]
+
+[dependency-groups]
+dev = ["pytest&gt;=8.3", "pytest-asyncio&gt;=0.24", "ruff&gt;=0.8", "mypy&gt;=1.13"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]</code></pre>
+
+<h3>Project layout for a prototype that might graduate</h3>
+<pre><code class="language-text">customer-demo/
+  pyproject.toml
+  uv.lock
+  .env.example                 # committed - documents required vars, NO values
+  .env                         # gitignored - real values
+  .gitignore
+  README.md                    # how to run it, in 5 lines
+  docker-compose.yml
+  Makefile
+  app/                         # FastAPI backend
+    __init__.py
+    main.py                    # app factory + router registration ONLY
+    config.py                  # pydantic-settings
+    deps.py                    # dependency-injection providers
+    routers/
+      health.py
+      ask.py
+      documents.py
+    services/                  # ALL business logic lives here. No framework imports.
+      retrieval.py
+      llm.py
+      ingest.py
+    models/                    # pydantic request/response schemas
+      schemas.py
+  ui/                          # Streamlit frontend
+    app.py
+    api_client.py              # the ONLY file that knows the backend URL
+    components.py
+    pages/
+      1_Ask.py
+      2_Documents.py
+      3_Feedback.py
+  tests/
+    test_services.py           # these test real logic and run in 2 seconds
+    test_api.py
+  data/
+    samples/                   # seeded demo data, committed if not sensitive
+  scripts/
+    seed.py
+    ingest_pdfs.py</code></pre>
+
+<div class="callout warn"><span class="t">The one rule that makes the layout worth it</span><code>app/services/*.py</code> must not import FastAPI, and must not import Streamlit. They take plain arguments and return plain objects. This means you can test them without a server, call them from a script, call them from a notebook, and reuse them unchanged when the UI is replaced. Prototypes that violate this rule cannot be graduated; they can only be rewritten.</div>
+
+<h3>Configuration and secrets</h3>
+<pre><code class="language-python"># app/config.py
+from functools import lru_cache
+from pydantic import Field, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+    # Required - the app refuses to start without them, with a clear error
+    openai_api_key: SecretStr
+    vector_store_path: str
+
+    # Optional with sane defaults
+    app_name: str = "Customer Document Assistant"
+    model_name: str = "gpt-4o-mini"
+    embedding_model: str = "text-embedding-3-small"
+    max_context_chunks: int = Field(default=6, ge=1, le=20)
+    request_timeout_s: float = Field(default=60.0, gt=0)
+    demo_mode: bool = False                    # serves canned answers; see "demo-proof"
+    log_level: str = "INFO"
+    allowed_origins: list[str] = ["http://localhost:8501"]
+
+@lru_cache
+def get_settings() -&gt; Settings:
+    return Settings()                          # cached; validated once at startup</code></pre>
+
+<pre><code class="language-bash"># .env.example  - COMMIT THIS. It is the contract for whoever runs the app next.
+OPENAI_API_KEY=sk-replace-me
+VECTOR_STORE_PATH=./data/index
+MODEL_NAME=gpt-4o-mini
+MAX_CONTEXT_CHUNKS=6
+DEMO_MODE=false
+LOG_LEVEL=INFO</code></pre>
+
+<div class="callout danger"><span class="t">The <code>.env</code> that ended up on GitHub</span>Add <code>.env</code> to <code>.gitignore</code> before your first commit, not after. If a key does leak, rotating it is the only fix — deleting the commit does not help, because the history and any fork retain it, and scrapers find committed keys within minutes. On a customer engagement a leaked key is not just embarrassing, it is a reportable security incident. Use <code>SecretStr</code> so the value does not appear in logs or tracebacks, and run <code>gitleaks</code> or <code>detect-secrets</code> in a pre-commit hook.</div>
+
+<h3>A Makefile is the fastest documentation</h3>
+<pre><code class="language-bash">.PHONY: install api ui dev test lint fmt seed docker
+
+install:
+	uv sync
+
+api:
+	uv run uvicorn app.main:app --reload --port 8000
+
+ui:
+	uv run streamlit run ui/app.py --server.port 8501
+
+dev:
+	uv run honcho start          # runs api and ui together (Procfile)
+
+test:
+	uv run pytest -q
+
+lint:
+	uv run ruff check . &amp;&amp; uv run mypy app
+
+fmt:
+	uv run ruff format . &amp;&amp; uv run ruff check --fix .
+
+seed:
+	uv run python scripts/seed.py
+
+docker:
+	docker compose up --build</code></pre>
+
+<h2>FastAPI Fundamentals</h2>
+<p class="lead">FastAPI gives you a typed, validated, self-documenting HTTP API with very little ceremony, and it is the right backend for anything a customer's systems will eventually call. The parts worth knowing well are Pydantic validation, dependency injection, and the async model — because those three determine whether your prototype survives being pointed at by something other than your browser.</p>
+
+<h3>The minimum real app</h3>
+<pre><code class="language-python"># app/main.py
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from app.config import get_settings
+from app.routers import ask, documents, health
+from app.services.retrieval import VectorIndex
+
+logging.basicConfig(level=get_settings().log_level,
+                    format="%(asctime)s %(levelname)s %(name)s %(message)s")
+log = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Load expensive things ONCE at startup, not per request.
+    This is the difference between a 40 ms demo and a 4 s demo."""
+    s = get_settings()
+    log.info("loading vector index from %s", s.vector_store_path)
+    app.state.index = VectorIndex.load(s.vector_store_path)
+    log.info("index ready: %d chunks", app.state.index.size)
+    yield
+    log.info("shutting down")
+    app.state.index.close()
+
+def create_app() -&gt; FastAPI:
+    s = get_settings()
+    app = FastAPI(
+        title=s.app_name,
+        version="0.1.0",
+        description="Prototype document assistant. Not production hardened.",
+        lifespan=lifespan,
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=s.allowed_origins,       # never ["*"] with credentials
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    app.include_router(health.router)
+    app.include_router(ask.router,       prefix="/api/v1")
+    app.include_router(documents.router, prefix="/api/v1")
+
+    @app.exception_handler(Exception)
+    async def unhandled(request: Request, exc: Exception):
+        log.exception("unhandled error on %s %s", request.method, request.url.path)
+        return JSONResponse(
+            status_code=500,
+            content={"error": "internal_error",
+                     "detail": "Something went wrong. The team has been notified.",
+                     "request_id": request.headers.get("x-request-id", "-")},
+        )
+    return app
+
+app = create_app()</code></pre>
+
+<h3>Parameters and Pydantic v2 models</h3>
+<pre><code class="language-python"># app/models/schemas.py
+from datetime import datetime
+from enum import Enum
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+class Scope(str, Enum):
+    all = "all"
+    policies = "policies"
+    contracts = "contracts"
+
+class AskRequest(BaseModel):
+    question: Annotated[str, Field(min_length=3, max_length=2000,
+                                   examples=["What is the notice period for a fixed-term contract?"])]
+    scope: Scope = Scope.all
+    top_k: Annotated[int, Field(ge=1, le=20)] = 6
+    temperature: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+    include_sources: bool = True
+
+    @field_validator("question")
+    @classmethod
+    def strip_and_check(cls, v: str) -&gt; str:
+        v = v.strip()
+        if not v:
+            raise ValueError("question cannot be blank")
+        return v
+
+class Citation(BaseModel):
+    document_id: str
+    title: str
+    page: int | None = None
+    snippet: str
+    score: float
+
+class AskResponse(BaseModel):
+    answer: str
+    citations: list[Citation] = []
+    model: str
+    latency_ms: int
+    request_id: str
+    truncated: bool = False
+
+class DateRange(BaseModel):
+    start: datetime
+    end: datetime
+
+    @model_validator(mode="after")
+    def ordered(self):
+        if self.start &gt;= self.end:
+            raise ValueError("start must be before end")
+        return self</code></pre>
+
+<pre><code class="language-python"># app/routers/ask.py
+import time, uuid
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.deps import get_index, get_llm, verify_api_key
+from app.models.schemas import AskRequest, AskResponse
+from app.services.retrieval import VectorIndex
+from app.services.llm import LLMClient, LLMTimeout, LLMRefusal
+
+router = APIRouter(tags=["ask"], dependencies=[Depends(verify_api_key)])
+
+@router.post("/ask", response_model=AskResponse,
+             responses={422: {"description": "Validation error"},
+                        503: {"description": "Model unavailable"}})
+async def ask(
+    req: AskRequest,
+    index: Annotated[VectorIndex, Depends(get_index)],
+    llm: Annotated[LLMClient, Depends(get_llm)],
+) -&gt; AskResponse:
+    started = time.perf_counter()
+    request_id = str(uuid.uuid4())[:8]
+
+    chunks = index.search(req.question, k=req.top_k,
+                          filters={"scope": req.scope.value} if req.scope != "all" else None)
+    if not chunks:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No relevant documents found. Try rephrasing or widening the scope.",
+        )
+
+    try:
+        result = await llm.answer(req.question, chunks, temperature=req.temperature)
+    except LLMTimeout:
+        raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT,
+                            detail="The model took too long. Try a shorter question.")
+    except LLMRefusal as e:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+
+    return AskResponse(
+        answer=result.text,
+        citations=result.citations if req.include_sources else [],
+        model=llm.model_name,
+        latency_ms=int((time.perf_counter() - started) * 1000),
+        request_id=request_id,
+        truncated=result.truncated,
+    )
+
+# Path and query parameters, typed and validated automatically
+@router.get("/documents/{document_id}/chunks")
+async def list_chunks(
+    document_id: str,
+    index: Annotated[VectorIndex, Depends(get_index)],
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    return index.chunks_for(document_id, limit=limit, offset=offset)</code></pre>
+
+<h3>Dependency injection</h3>
+<p>FastAPI's <code>Depends</code> is the mechanism that keeps route handlers thin and makes everything testable. A dependency is just a callable whose result is injected; it can be cached, nested, and overridden in tests.</p>
+
+<pre><code class="language-python"># app/deps.py
+import secrets
+from typing import Annotated
+
+from fastapi import Depends, Header, HTTPException, Request, status
+
+from app.config import Settings, get_settings
+from app.services.llm import LLMClient
+from app.services.retrieval import VectorIndex
+
+SettingsDep = Annotated[Settings, Depends(get_settings)]
+
+def get_index(request: Request) -&gt; VectorIndex:
+    """Reads the singleton created in lifespan. No per-request loading."""
+    return request.app.state.index
+
+def get_llm(settings: SettingsDep) -&gt; LLMClient:
+    return LLMClient(api_key=settings.openai_api_key.get_secret_value(),
+                     model=settings.model_name,
+                     timeout_s=settings.request_timeout_s)
+
+def verify_api_key(settings: SettingsDep,
+                   x_api_key: Annotated[str | None, Header()] = None) -&gt; None:
+    """Minimal gate for a prototype. compare_digest avoids timing leaks."""
+    expected = settings.demo_api_key.get_secret_value()
+    if not x_api_key or not secrets.compare_digest(x_api_key, expected):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing API key")</code></pre>
+
+<pre><code class="language-python"># tests/test_api.py - dependency_overrides is why DI is worth the ceremony
+import pytest
+from fastapi.testclient import TestClient
+
+from app.main import create_app
+from app.deps import get_index, get_llm, verify_api_key
+
+class FakeIndex:
+    size = 3
+    def search(self, q, k, filters=None):
+        return [{"document_id": "d1", "title": "Policy", "snippet": "Notice is 30 days.",
+                 "score": 0.91, "page": 2}]
+
+class FakeLLM:
+    model_name = "fake"
+    async def answer(self, q, chunks, temperature=0.0):
+        class R: text, citations, truncated = "Thirty days.", [], False
+        return R()
+
+@pytest.fixture
+def client():
+    app = create_app()
+    app.dependency_overrides[get_index]       = lambda: FakeIndex()
+    app.dependency_overrides[get_llm]         = lambda: FakeLLM()
+    app.dependency_overrides[verify_api_key]  = lambda: None
+    return TestClient(app)
+
+def test_ask_returns_answer(client):
+    r = client.post("/api/v1/ask", json={"question": "What is the notice period?"})
+    assert r.status_code == 200
+    assert r.json()["answer"] == "Thirty days."
+
+def test_short_question_rejected(client):
+    r = client.post("/api/v1/ask", json={"question": "a"})
+    assert r.status_code == 422          # Pydantic min_length, no code of yours ran</code></pre>
+
+<div class="callout tip"><span class="t">These tests take two seconds and save the demo</span>With fakes injected, your whole API suite runs without network, keys or a model. You can run it on the customer's locked-down laptop, in their CI, on a plane. The temptation in a prototype is to skip tests entirely; writing just these three — happy path, validation failure, upstream failure — costs twenty minutes and catches the regressions that happen when you change something an hour before a demo.</div>
+
+<h3>Error handling that reads well</h3>
+<pre><code class="language-python">from fastapi import Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+class DomainError(Exception):
+    """Base for errors we expect and can explain to a user."""
+    status_code = status.HTTP_400_BAD_REQUEST
+    code = "domain_error"
+    def __init__(self, message: str, **ctx):
+        super().__init__(message)
+        self.message, self.ctx = message, ctx
+
+class DocumentNotIndexed(DomainError):
+    status_code = status.HTTP_409_CONFLICT
+    code = "document_not_indexed"
+
+class ContextTooLarge(DomainError):
+    status_code = status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+    code = "context_too_large"
+
+def register_error_handlers(app):
+    @app.exception_handler(DomainError)
+    async def domain_handler(request: Request, exc: DomainError):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": exc.code, "detail": exc.message, "context": exc.ctx},
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_handler(request: Request, exc: RequestValidationError):
+        # Default FastAPI output is verbose; flatten it for a UI to display.
+        problems = [{"field": ".".join(str(p) for p in e["loc"][1:]), "message": e["msg"]}
+                    for e in exc.errors()]
+        return JSONResponse(status_code=422,
+                            content={"error": "validation_failed", "problems": problems})</code></pre>
+
+<h3>Async vs sync, and when it actually matters</h3>
+<p>This is the single most misunderstood part of FastAPI and it causes real demo failures.</p>
+
+<table>
+<tr><th>Handler type</th><th>Where it runs</th><th>Consequence</th></tr>
+<tr><td><code>async def</code> with only <code>await</code>ed I/O</td><td>The event loop</td><td>Correct. Thousands of concurrent waits on one process.</td></tr>
+<tr><td><code>async def</code> containing a blocking call (<code>requests.get</code>, <code>time.sleep</code>, heavy CPU)</td><td>The event loop — and <b>blocks it</b></td><td><b>Disaster.</b> Every other request on that worker stalls. The classic cause of "the demo froze".</td></tr>
+<tr><td><code>def</code> (plain)</td><td>A threadpool (default 40 threads)</td><td>Safe for blocking I/O. Limited by threadpool size; GIL limits CPU work.</td></tr>
+</table>
+
+<pre><code class="language-python">import asyncio, time
+import httpx, requests
+from fastapi import APIRouter
+from fastapi.concurrency import run_in_threadpool
+
+router = APIRouter()
+
+# WRONG: blocking library inside async - freezes the whole event loop
+@router.get("/bad")
+async def bad():
+    r = requests.get("https://slow.example.com/data", timeout=30)   # blocks everything
+    return r.json()
+
+# RIGHT (a): async client inside async
+@router.get("/good-async")
+async def good_async():
+    async with httpx.AsyncClient(timeout=30) as c:
+        r = await c.get("https://slow.example.com/data")
+    return r.json()
+
+# RIGHT (b): keep the blocking library, use a plain def - FastAPI threadpools it
+@router.get("/good-sync")
+def good_sync():
+    return requests.get("https://slow.example.com/data", timeout=30).json()
+
+# RIGHT (c): CPU-bound work must leave the event loop explicitly
+@router.post("/embed")
+async def embed(texts: list[str]):
+    vectors = await run_in_threadpool(model.encode, texts)   # or a process pool
+    return {"n": len(vectors)}
+
+# Concurrency control: never let a demo fan out 500 model calls at once
+SEMAPHORE = asyncio.Semaphore(8)
+
+async def call_model(prompt: str) -&gt; str:
+    async with SEMAPHORE:
+        async with httpx.AsyncClient(timeout=60) as c:
+            r = await c.post(MODEL_URL, json={"prompt": prompt})
+            r.raise_for_status()
+            return r.json()["text"]
+
+@router.post("/batch")
+async def batch(prompts: list[str]):
+    results = await asyncio.gather(*(call_model(p) for p in prompts),
+                                   return_exceptions=True)
+    ok  = [r for r in results if not isinstance(r, Exception)]
+    err = [str(r) for r in results if isinstance(r, Exception)]
+    return {"results": ok, "errors": err}</code></pre>
+
+<div class="callout danger"><span class="t">The demo that froze</span>A prototype used <code>async def</code> handlers with the synchronous OpenAI SDK. In testing — one user, one request at a time — it was fine. In the demo, the customer opened the app in three tabs, and every request queued behind the first blocking call. It looked like the model was broken. The rule: inside <code>async def</code>, everything slow must be <code>await</code>ed or pushed to a threadpool. If you are not sure, write <code>def</code> instead of <code>async def</code> — the threadpool is slower in theory and far safer in practice.</div>
+
+<h3>OpenAPI docs as a deliverable</h3>
+<p><code>/docs</code> gives you an interactive Swagger UI and <code>/redoc</code> a readable reference, both generated from your type hints. This is genuinely useful at a customer: their integration engineer can try your API in a browser without reading your code, and you can hand them <code>/openapi.json</code> to generate a client.</p>
+
+<pre><code class="language-python">app = FastAPI(
+    title="Document Assistant API",
+    version="0.1.0",
+    summary="Ask questions over the policy corpus.",
+    description=(
+        "**Prototype.** Rate limited, no SLA.\n\n"
+        "Auth: send `X-API-Key`. Ask your contact for a key."
+    ),
+    contact={"name": "Delivery team", "email": "team@example.com"},
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_tags=[
+        {"name": "ask", "description": "Question answering over indexed documents."},
+        {"name": "documents", "description": "Upload, list and reindex documents."},
+    ],
+)
+
+# Generate a typed client for them in one command:
+#   npx @hey-api/openapi-ts -i http://localhost:8000/openapi.json -o ./client
+# or for Python:
+#   uvx openapi-python-client generate --url http://localhost:8000/openapi.json</code></pre>
+
+<h2>FastAPI for AI Applications</h2>
+<p class="lead">AI workloads break the assumptions of a normal web API: responses take ten seconds instead of fifty milliseconds, users expect to see tokens as they arrive, uploads are large, some jobs run for minutes, and the upstream provider rate-limits you. These patterns are what separate an AI prototype that feels fast from one that feels broken.</p>
+
+<h3>Streaming responses (SSE)</h3>
+<p>Streaming is the single highest-impact UX change in an LLM app. Time-to-first-token of 400 ms with tokens flowing feels instant; a 9-second blank screen feels broken, even though total latency is identical.</p>
+
+<pre><code class="language-python">import json
+from collections.abc import AsyncIterator
+
+from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
+
+router = APIRouter()
+
+async def sse_events(question: str, llm, index) -&gt; AsyncIterator[str]:
+    """Server-Sent Events. Each message is 'data: &lt;payload&gt;\\n\\n'."""
+    # 1. Tell the client what is happening before the slow part starts
+    yield f"data: {json.dumps({'type': 'status', 'message': 'Searching documents...'})}\n\n"
+
+    chunks = await index.asearch(question, k=6)
+    yield f"data: {json.dumps({'type': 'sources', 'sources': [c.brief() for c in chunks]})}\n\n"
+    yield f"data: {json.dumps({'type': 'status', 'message': 'Generating answer...'})}\n\n"
+
+    # 2. Stream the tokens
+    try:
+        async for token in llm.astream(question, chunks):
+            yield f"data: {json.dumps({'type': 'token', 'text': token})}\n\n"
+    except Exception as e:
+        yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+        return
+
+    # 3. Explicit terminator so the client knows it is complete, not truncated
+    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+@router.post("/ask/stream")
+async def ask_stream(req: AskRequest, llm=Depends(get_llm), index=Depends(get_index)):
+    return StreamingResponse(
+        sse_events(req.question, llm, index),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",      # critical behind nginx, or it buffers everything
+        },
+    )</code></pre>
+
+<pre><code class="language-python"># Consuming SSE from Python (e.g. your Streamlit client)
+import httpx, json
+
+def stream_answer(question: str, api_url: str, api_key: str):
+    with httpx.Client(timeout=httpx.Timeout(300.0, connect=10.0)) as client:
+        with client.stream("POST", f"{api_url}/api/v1/ask/stream",
+                           json={"question": question},
+                           headers={"X-API-Key": api_key}) as response:
+            response.raise_for_status()
+            for line in response.iter_lines():
+                if not line or not line.startswith("data: "):
+                    continue
+                event = json.loads(line[6:])
+                if event["type"] == "token":
+                    yield event["text"]
+                elif event["type"] == "error":
+                    raise RuntimeError(event["message"])
+                elif event["type"] == "done":
+                    return</code></pre>
+
+<div class="callout warn"><span class="t">Proxies will silently break your stream</span>nginx buffers responses by default, so your beautifully streamed tokens arrive as one lump at the end. Set <code>X-Accel-Buffering: no</code> on the response and <code>proxy_buffering off;</code> in nginx. Azure Container Apps, Cloud Run and most load balancers also need the response to start within their initial-response timeout, which is why you emit a status event immediately rather than waiting for retrieval to finish. Test streaming through the real deployment path, never just on localhost.</div>
+
+<h3>File uploads</h3>
+<pre><code class="language-python">import hashlib
+from pathlib import Path
+
+from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile, status
+
+router = APIRouter()
+
+ALLOWED = {"application/pdf", "text/plain", "text/markdown",
+           "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+MAX_BYTES = 25 * 1024 * 1024
+CHUNK = 1024 * 1024
+
+@router.post("/documents", status_code=status.HTTP_202_ACCEPTED)
+async def upload(background: BackgroundTasks, files: list[UploadFile] = File(...)):
+    if len(files) &gt; 20:
+        raise HTTPException(400, "Maximum 20 files per upload")
+
+    accepted, rejected = [], []
+    for f in files:
+        if f.content_type not in ALLOWED:
+            rejected.append({"name": f.filename, "reason": f"unsupported type {f.content_type}"})
+            continue
+
+        # Stream to disk - never f.read() a 25 MB file into memory per request
+        dest = Path("data/uploads") / f"{hashlib.sha256(f.filename.encode()).hexdigest()[:12]}_{f.filename}"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        size, digest = 0, hashlib.sha256()
+        with dest.open("wb") as out:
+            while block := await f.read(CHUNK):
+                size += len(block)
+                if size &gt; MAX_BYTES:
+                    out.close(); dest.unlink(missing_ok=True)
+                    rejected.append({"name": f.filename, "reason": "exceeds 25 MB"})
+                    break
+                digest.update(block)
+                out.write(block)
+            else:
+                accepted.append({"name": f.filename, "bytes": size,
+                                 "sha256": digest.hexdigest()[:16], "path": str(dest)})
+
+    for doc in accepted:
+        background.add_task(index_document, doc["path"], doc["sha256"])
+
+    return {"accepted": accepted, "rejected": rejected,
+            "message": f"{len(accepted)} file(s) queued for indexing"}</code></pre>
+
+<h3>Background tasks and long-running jobs</h3>
+<p><code>BackgroundTasks</code> runs after the response is sent, in the same process. That is perfect for a prototype and wrong for anything that must survive a restart. Know the boundary.</p>
+
+<table>
+<tr><th>Mechanism</th><th>Survives restart?</th><th>Use for</th></tr>
+<tr><td><code>BackgroundTasks</code></td><td>No</td><td>Indexing an uploaded file, sending a webhook, writing a log — prototype-scale work</td></tr>
+<tr><td><code>asyncio.create_task</code></td><td>No; also no backpressure</td><td>Fire-and-forget within one request lifetime. Keep a reference or it may be garbage collected.</td></tr>
+<tr><td>In-process job registry (dict + task)</td><td>No, but gives progress and cancellation</td><td>Multi-minute jobs in a demo where the user needs a progress bar</td></tr>
+<tr><td>Celery / RQ / Dramatiq + Redis</td><td>Yes</td><td>When the customer will actually run it; adds a broker to operate</td></tr>
+<tr><td>Cloud queue (SQS, Service Bus, Pub/Sub) + worker</td><td>Yes</td><td>Production graduation</td></tr>
+</table>
+
+<pre><code class="language-python">import asyncio, uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from enum import Enum
+
+from fastapi import APIRouter, HTTPException
+
+router = APIRouter()
+
+class JobState(str, Enum):
+    queued = "queued"; running = "running"; done = "done"
+    failed = "failed"; cancelled = "cancelled"
+
+@dataclass
+class Job:
+    id: str
+    state: JobState = JobState.queued
+    progress: float = 0.0
+    message: str = ""
+    result: dict | None = None
+    error: str | None = None
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+JOBS: dict[str, Job] = {}
+TASKS: dict[str, asyncio.Task] = {}
+
+async def run_ingest(job: Job, paths: list[str]) -&gt; None:
+    try:
+        job.state = JobState.running
+        total = len(paths)
+        for i, p in enumerate(paths, start=1):
+            await asyncio.sleep(0)                  # yield so cancellation can land
+            await index_one(p)
+            job.progress = i / total
+            job.message = f"Indexed {i}/{total}: {p.split('/')[-1]}"
+        job.state, job.result = JobState.done, {"indexed": total}
+    except asyncio.CancelledError:
+        job.state, job.message = JobState.cancelled, "Cancelled by user"
+        raise
+    except Exception as e:
+        job.state, job.error = JobState.failed, str(e)
+
+@router.post("/jobs/ingest")
+async def start_ingest(paths: list[str]):
+    job = Job(id=str(uuid.uuid4())[:8])
+    JOBS[job.id] = job
+    TASKS[job.id] = asyncio.create_task(run_ingest(job, paths))
+    return {"job_id": job.id}
+
+@router.get("/jobs/{job_id}")
+async def job_status(job_id: str):
+    if job_id not in JOBS:
+        raise HTTPException(404, "Unknown job")
+    j = JOBS[job_id]
+    return {"id": j.id, "state": j.state, "progress": round(j.progress, 3),
+            "message": j.message, "result": j.result, "error": j.error}
+
+@router.delete("/jobs/{job_id}")
+async def cancel_job(job_id: str):
+    task = TASKS.get(job_id)
+    if not task:
+        raise HTTPException(404, "Unknown job")
+    task.cancel()
+    return {"cancelled": True}</code></pre>
+
+<h3>WebSockets when you need two-way</h3>
+<pre><code class="language-python">from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+router = APIRouter()
+
+@router.websocket("/ws/chat")
+async def ws_chat(ws: WebSocket):
+    await ws.accept()
+    history: list[dict] = []
+    try:
+        while True:
+            msg = await ws.receive_json()
+            if msg.get("type") == "cancel":
+                await ws.send_json({"type": "cancelled"})
+                continue
+
+            history.append({"role": "user", "content": msg["text"]})
+            await ws.send_json({"type": "status", "message": "thinking"})
+
+            buf = []
+            async for token in llm.astream_chat(history):
+                buf.append(token)
+                await ws.send_json({"type": "token", "text": token})
+            history.append({"role": "assistant", "content": "".join(buf)})
+            await ws.send_json({"type": "done"})
+    except WebSocketDisconnect:
+        pass                                     # normal; the user closed the tab</code></pre>
+
+<div class="callout tip"><span class="t">Prefer SSE unless you genuinely need upstream messages</span>SSE is plain HTTP: it works through every proxy, reconnects automatically in browsers, and needs no special infrastructure. WebSockets need sticky sessions behind a load balancer, keep-alive tuning, and their own reconnection logic. For streaming an LLM answer, SSE is strictly simpler. Reach for WebSockets when the client must interrupt mid-generation or when you have a genuinely bidirectional flow.</div>
+
+<h3>Timeouts, retries and rate limits against the model provider</h3>
+<pre><code class="language-python">import asyncio, random, time
+import httpx
+
+class LLMTimeout(Exception): pass
+class LLMRateLimited(Exception): pass
+
+class LLMClient:
+    def __init__(self, api_key: str, model: str, timeout_s: float = 60.0,
+                 max_concurrency: int = 8):
+        self.model = model
+        self._sem = asyncio.Semaphore(max_concurrency)
+        self._client = httpx.AsyncClient(
+            base_url="https://api.openai.com/v1",
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=httpx.Timeout(timeout_s, connect=10.0, read=timeout_s),
+            limits=httpx.Limits(max_connections=max_concurrency * 2,
+                                max_keepalive_connections=max_concurrency),
+        )
+
+    async def _post(self, path: str, payload: dict, attempts: int = 4) -&gt; dict:
+        async with self._sem:
+            for attempt in range(1, attempts + 1):
+                try:
+                    r = await self._client.post(path, json=payload)
+                except httpx.ReadTimeout:
+                    if attempt == attempts:
+                        raise LLMTimeout(f"model timed out after {attempts} attempts")
+                    await asyncio.sleep(random.uniform(0, 2 ** attempt))
+                    continue
+
+                if r.status_code == 429:
+                    wait = float(r.headers.get("retry-after", 2 ** attempt))
+                    if attempt == attempts:
+                        raise LLMRateLimited("rate limited; try again shortly")
+                    await asyncio.sleep(wait + random.uniform(0, 1))
+                    continue
+                if r.status_code &gt;= 500:
+                    if attempt == attempts:
+                        r.raise_for_status()
+                    await asyncio.sleep(random.uniform(0, 2 ** attempt))
+                    continue
+
+                r.raise_for_status()
+                return r.json()
+
+    async def answer(self, question: str, chunks: list, temperature: float = 0.0):
+        context = "\n\n---\n\n".join(c.text for c in chunks)
+        data = await self._post("/chat/completions", {
+            "model": self.model,
+            "temperature": temperature,
+            "messages": [
+                {"role": "system",
+                 "content": "Answer ONLY from the provided context. "
+                            "If the answer is not present, say so explicitly."},
+                {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {question}"},
+            ],
+        })
+        return data["choices"][0]["message"]["content"]</code></pre>
+
+<div class="callout danger"><span class="t">Unbounded concurrency is how you get your key suspended</span>A demo where someone pastes 200 questions into a loop can fire 200 simultaneous requests, hit the provider's rate limit, trigger aggressive retries, and in the worst case get the organisation's key throttled for everyone — including the production system of a different team at the customer. The semaphore above is four lines and prevents this entirely. Set it before the first demo, not after the incident.</div>
+
+<h2>Streamlit Deep Dive</h2>
+<p class="lead">Streamlit's entire design rests on one idea that is bizarre until it clicks: <b>your script re-runs from top to bottom on every single interaction</b>. There is no component tree, no virtual DOM, no event handlers in the usual sense. Once you accept that, everything else — session state, caching, forms, fragments — is a consequence, and you can build a convincing app in an afternoon.</p>
+
+<h3>The rerun model</h3>
+<div class="diagram">
+<svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="760" height="270" fill="#ffffff"/>
+  <text x="16" y="20" font-size="11" fill="#1e3a8a" font-family="sans-serif">THE STREAMLIT RERUN LOOP</text>
+
+  <rect x="20" y="40" width="130" height="50" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="85" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">User clicks</text>
+  <text x="85" y="78" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">a widget</text>
+
+  <text x="162" y="70" font-size="14" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="178" y="40" width="150" height="50" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="253" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">ENTIRE SCRIPT</text>
+  <text x="253" y="78" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">re-runs top to bottom</text>
+
+  <text x="340" y="70" font-size="14" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="356" y="40" width="150" height="50" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="431" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">Widgets return</text>
+  <text x="431" y="78" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">their CURRENT value</text>
+
+  <text x="518" y="70" font-size="14" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+
+  <rect x="534" y="40" width="150" height="50" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="609" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">Page redrawn</text>
+  <text x="609" y="78" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">from scratch</text>
+
+  <rect x="20" y="120" width="320" height="120" rx="5" fill="#ffffff" stroke="#6b7688"/>
+  <text x="34" y="140" font-size="10" fill="#1e3a8a" font-family="sans-serif">WIPED ON EVERY RERUN</text>
+  <text x="34" y="160" font-size="9" fill="#6b7688" font-family="sans-serif">local variables</text>
+  <text x="34" y="176" font-size="9" fill="#6b7688" font-family="sans-serif">anything computed inline</text>
+  <text x="34" y="192" font-size="9" fill="#6b7688" font-family="sans-serif">a model you loaded at the top</text>
+  <text x="34" y="208" font-size="9" fill="#6b7688" font-family="sans-serif">your conversation history (!)</text>
+  <text x="34" y="228" font-size="9" fill="#1e3a8a" font-family="sans-serif">&#8594; this is why the chat forgets</text>
+
+  <rect x="368" y="120" width="316" height="120" rx="5" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="382" y="140" font-size="10" fill="#1e3a8a" font-family="sans-serif">SURVIVES RERUNS</text>
+  <text x="382" y="160" font-size="9" fill="#6b7688" font-family="sans-serif">st.session_state  &#8594; per browser session</text>
+  <text x="382" y="176" font-size="9" fill="#6b7688" font-family="sans-serif">@st.cache_data    &#8594; serialisable results</text>
+  <text x="382" y="192" font-size="9" fill="#6b7688" font-family="sans-serif">@st.cache_resource&#8594; models, clients, conns</text>
+  <text x="382" y="208" font-size="9" fill="#6b7688" font-family="sans-serif">files on disk / external stores</text>
+  <text x="382" y="228" font-size="9" fill="#1e3a8a" font-family="sans-serif">&#8594; put ALL real state here</text>
+</svg>
+<div class="cap">Everything confusing about Streamlit follows from this single loop. Memorise the two boxes.</div>
+</div>
+
+<h3>session_state</h3>
+<pre><code class="language-python">import streamlit as st
+
+# Initialise ONCE. This guard runs on the first script execution only;
+# on subsequent reruns the key already exists and is left alone.
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "doc_count" not in st.session_state:
+    st.session_state.doc_count = 0
+if "last_error" not in st.session_state:
+    st.session_state.last_error = None
+
+# Widgets can bind directly to a state key
+st.text_input("Your name", key="user_name")      # writes st.session_state.user_name
+
+# Callbacks fire BEFORE the rerun, so state is already updated when the script runs
+def clear_chat():
+    st.session_state.messages = []
+    st.session_state.last_error = None
+
+st.button("Clear conversation", on_click=clear_chat)
+
+# Two widgets can never share a key - this raises DuplicateWidgetID
+# st.slider("A", key="k"); st.slider("B", key="k")   # error</code></pre>
+
+<div class="callout danger"><span class="t">The two session_state traps</span><b>1. Assigning to a widget-bound key after the widget is created</b> raises <code>StreamlitAPIException</code>. Mutate it in an <code>on_click</code> callback instead, which runs before the rerun. <b>2. session_state is per browser session, in memory, in one process.</b> If the app restarts, or you scale to two replicas without sticky sessions, every user loses their state mid-demo. For a prototype that is acceptable; just never put anything in session_state you cannot afford to lose, and pin the deployment to one replica.</div>
+
+<h3>Caching: the two decorators and when each is wrong</h3>
+<table>
+<tr><th></th><th><code>@st.cache_data</code></th><th><code>@st.cache_resource</code></th></tr>
+<tr><td>Caches</td><td>A <b>copy</b> of the return value (pickled)</td><td>The <b>object itself</b>, shared globally</td></tr>
+<tr><td>Use for</td><td>DataFrames, query results, API responses, computations</td><td>ML models, DB connections, HTTP clients, vector indexes</td></tr>
+<tr><td>Mutation safety</td><td>Safe — each caller gets its own copy</td><td>Unsafe — all sessions share one object, so it must be thread-safe</td></tr>
+<tr><td>Scope</td><td>Shared across all users of the process</td><td>Shared across all users of the process</td></tr>
+<tr><td>Wrong choice symptom</td><td>Using it for a model: slow, or "cannot pickle" errors</td><td>Using it for a DataFrame: one user's edit changes everyone's data</td></tr>
+</table>
+
+<pre><code class="language-python">import pandas as pd
+import streamlit as st
+
+@st.cache_resource                       # one index for the whole process
+def get_index():
+    from app.services.retrieval import VectorIndex
+    return VectorIndex.load("./data/index")
+
+@st.cache_resource
+def get_api_client():
+    import httpx
+    return httpx.Client(base_url=st.secrets["API_URL"], timeout=120.0)
+
+@st.cache_data(ttl=600, show_spinner="Loading data...")
+def load_orders(customer_id: str, as_of: str) -&gt; pd.DataFrame:
+    """Keyed on the ARGUMENTS. Different args = different cache entry."""
+    return pd.read_parquet(f"data/orders_{customer_id}_{as_of}.parquet")
+
+@st.cache_data(ttl=3600, max_entries=200)
+def embed_query(text: str) -&gt; list[float]:
+    return get_api_client().post("/embed", json={"text": text}).json()["vector"]
+
+# Arguments must be hashable. Prefix with an underscore to skip hashing a param.
+@st.cache_data
+def search(_index, query: str, k: int):      # _index is not hashed
+    return _index.search(query, k=k)
+
+# Manual invalidation - wire this to a "Refresh" button in the UI
+if st.button("Refresh data"):
+    load_orders.clear()                       # clear one function
+    st.cache_data.clear()                     # clear everything
+    st.rerun()</code></pre>
+
+<div class="callout tip"><span class="t">Cache the expensive thing, not the cheap thing</span>The pattern that makes a Streamlit demo feel instant: <code>cache_resource</code> for anything loaded once (a 2-second model load becomes a one-time cost rather than a per-click cost) and <code>cache_data</code> with a TTL for anything fetched. Without caching, every keystroke in a text input re-loads your model. With it, the app feels like a native tool. This is usually the single biggest perceived-performance fix available to you.</div>
+
+<h3>Forms: batching inputs so the script does not rerun per keystroke</h3>
+<pre><code class="language-python">with st.form("search_form", clear_on_submit=False, border=True):
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        query = st.text_input("Question", placeholder="What is our refund policy?")
+    with col2:
+        top_k = st.number_input("Sources", min_value=1, max_value=20, value=6)
+
+    scope = st.multiselect("Scope", ["policies", "contracts", "manuals"], default=["policies"])
+    advanced = st.expander("Advanced")
+    with advanced:
+        temperature = st.slider("Temperature", 0.0, 1.0, 0.0, 0.1)
+        rerank = st.checkbox("Re-rank results", value=True)
+
+    submitted = st.form_submit_button("Ask", type="primary", use_container_width=True)
+
+if submitted:
+    if not query.strip():
+        st.warning("Enter a question first.")
+    else:
+        with st.spinner("Searching..."):
+            result = call_api(query, top_k, scope, temperature, rerank)
+        st.session_state.messages.append({"role": "user", "content": query})
+        st.session_state.messages.append({"role": "assistant", "content": result})</code></pre>
+
+<h3>Layout</h3>
+<pre><code class="language-python">st.set_page_config(
+    page_title="Document Assistant",
+    page_icon=":mag:",
+    layout="wide",                       # "centered" is the default and often too narrow
+    initial_sidebar_state="expanded",
+)
+
+with st.sidebar:
+    st.header("Settings")
+    st.selectbox("Model", ["gpt-4o-mini", "gpt-4o"], key="model")
+    st.slider("Sources to retrieve", 1, 20, 6, key="top_k")
+    st.divider()
+    st.caption(f"Index: {get_index().size:,} chunks")
+    st.caption(f"Updated: {index_updated_at():%d %b %Y %H:%M}")
+
+tab_ask, tab_docs, tab_eval = st.tabs(["Ask", "Documents", "Evaluation"])
+
+with tab_ask:
+    left, right = st.columns([2, 1], gap="large")
+    with left:
+        st.subheader("Conversation")
+        # ... chat area
+    with right:
+        st.subheader("Sources")
+        with st.container(height=520, border=True):
+            for c in st.session_state.get("last_sources", []):
+                with st.expander(f"{c['title']} (p.{c['page']}) - {c['score']:.2f}"):
+                    st.markdown(c["snippet"])
+
+with tab_docs:
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Documents", 1_284, delta="+12 today")
+    m2.metric("Chunks", 18_902)
+    m3.metric("Last reindex", "2h ago")
+    st.dataframe(documents_df(), use_container_width=True, hide_index=True)</code></pre>
+
+<h3>Chat UI with streaming</h3>
+<pre><code class="language-python">import streamlit as st
+
+st.title("Policy Assistant")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# 1. Replay the whole history on every rerun - this is NOT wasteful,
+#    it is how Streamlit works, and it is fast because it is just markdown.
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"], avatar="&#129302;" if msg["role"] == "assistant" else None):
+        st.markdown(msg["content"])
+        if msg.get("sources"):
+            with st.expander(f"{len(msg['sources'])} sources"):
+                for s in msg["sources"]:
+                    st.markdown(f"**{s['title']}** (p.{s['page']}) - _{s['score']:.2f}_")
+                    st.caption(s["snippet"])
+
+# 2. Input is pinned to the bottom of the page automatically
+if prompt := st.chat_input("Ask about a policy..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        try:
+            # st.write_stream consumes any generator and returns the full text
+            full = st.write_stream(stream_answer(prompt, api_url(), api_key()))
+            sources = st.session_state.get("pending_sources", [])
+            st.session_state.messages.append(
+                {"role": "assistant", "content": full, "sources": sources})
+        except Exception as e:
+            st.error(f"Could not get an answer: {e}")
+            st.session_state.messages.append(
+                {"role": "assistant",
+                 "content": "_Sorry - that request failed. Try again or rephrase._"})
+
+# 3. Feedback, captured into your eval set. Do this from day one.
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+    c1, c2, _ = st.columns([1, 1, 8])
+    if c1.button(":thumbsup:", key=f"up_{len(st.session_state.messages)}"):
+        log_feedback(st.session_state.messages[-2:], rating=1)
+        st.toast("Thanks - logged.")
+    if c2.button(":thumbsdown:", key=f"down_{len(st.session_state.messages)}"):
+        log_feedback(st.session_state.messages[-2:], rating=-1)
+        st.toast("Thanks - logged for review.")</code></pre>
+
+<h3>File uploads and multipage apps</h3>
+<pre><code class="language-python">uploaded = st.file_uploader(
+    "Upload policy documents",
+    type=["pdf", "docx", "txt", "md"],
+    accept_multiple_files=True,
+    help="Max 25 MB per file. Files are indexed locally and not sent anywhere else.",
+)
+
+if uploaded:
+    progress = st.progress(0.0, text="Starting...")
+    results = []
+    for i, f in enumerate(uploaded, start=1):
+        progress.progress(i / len(uploaded), text=f"Indexing {f.name}...")
+        # UploadedFile is a BytesIO-like object; .getvalue() gives bytes
+        results.append(index_bytes(f.name, f.getvalue()))
+    progress.empty()
+
+    ok = [r for r in results if r["status"] == "ok"]
+    bad = [r for r in results if r["status"] != "ok"]
+    st.success(f"Indexed {len(ok)} file(s), {sum(r['chunks'] for r in ok)} chunks.")
+    if bad:
+        st.warning("Some files could not be processed:")
+        st.dataframe(bad, hide_index=True)</code></pre>
+
+<pre><code class="language-python"># Multipage: ui/app.py defines navigation explicitly (st.navigation API)
+import streamlit as st
+
+pages = {
+    "Assistant": [
+        st.Page("pages/ask.py",      title="Ask",        icon=":material/search:", default=True),
+        st.Page("pages/documents.py",title="Documents",  icon=":material/folder:"),
+    ],
+    "Admin": [
+        st.Page("pages/evaluation.py", title="Evaluation", icon=":material/science:"),
+        st.Page("pages/settings.py",   title="Settings",   icon=":material/settings:"),
+    ],
+}
+nav = st.navigation(pages)
+st.set_page_config(page_title="Document Assistant", layout="wide")
+nav.run()
+
+# The older convention still works: a pages/ directory with 1_Ask.py, 2_Documents.py
+# where the number controls order and the name becomes the label.</code></pre>
+
+<h3>Fragments: rerun part of the page</h3>
+<pre><code class="language-python"># Without a fragment, this clock would rerun the ENTIRE script every 5 seconds,
+# re-calling your API and resetting scroll position. A fragment reruns only itself.
+@st.fragment(run_every="5s")
+def live_status():
+    status = get_api_client().get("/health").json()
+    c1, c2, c3 = st.columns(3)
+    c1.metric("API", "up" if status["ok"] else "down")
+    c2.metric("Queue depth", status["queue"])
+    c3.metric("p95 latency", f"{status['p95_ms']} ms")
+
+live_status()
+
+@st.fragment
+def source_panel():
+    """Reruns only when ITS widgets change - the chat above is untouched."""
+    filt = st.text_input("Filter sources")
+    for s in st.session_state.get("last_sources", []):
+        if filt.lower() in s["title"].lower():
+            st.caption(f"{s['title']} - {s['score']:.2f}")</code></pre>
+
+<h3>Streamlit anti-patterns</h3>
+<table>
+<tr><th>Anti-pattern</th><th>Symptom</th><th>Fix</th></tr>
+<tr><td>Loading a model at module level without caching</td><td>App takes 8 s per click</td><td><code>@st.cache_resource</code></td></tr>
+<tr><td>Business logic inside the Streamlit script</td><td>Untestable; cannot be reused</td><td>Move to <code>services/</code>; the UI only calls and displays</td></tr>
+<tr><td>Relying on session_state for anything durable</td><td>Lost on restart or scale-out</td><td>Write to a file, SQLite or the backend</td></tr>
+<tr><td>Long synchronous work with no feedback</td><td>Looks frozen; users click again</td><td><code>st.spinner</code>, <code>st.status</code>, <code>st.progress</code></td></tr>
+<tr><td>Mutating a <code>cache_data</code> result in place</td><td>Confusing stale values</td><td>Copy before mutating, or use <code>cache_resource</code> deliberately</td></tr>
+<tr><td>Deep <code>if/else</code> trees to simulate pages</td><td>Unmaintainable after ~200 lines</td><td><code>st.navigation</code> / <code>pages/</code></td></tr>
+<tr><td>Secrets in the script</td><td>Leaked on screen-share</td><td><code>st.secrets</code> / env vars</td></tr>
+</table>
+
+<h2>Gradio Deep Dive</h2>
+<p class="lead">Gradio was built for one job — put a UI in front of a model and share it — and it is still the fastest way to do exactly that. Where Streamlit gives you a general-purpose app framework, Gradio gives you a model demo with input and output components, an event graph, a built-in queue, and a public link in one line. On a customer site, its killer feature is often that one line.</p>
+
+<h3>Interface: the five-line demo</h3>
+<pre><code class="language-python">import gradio as gr
+
+def classify(text: str, threshold: float) -&gt; dict:
+    scores = model.predict_proba([text])[0]
+    return {label: float(s) for label, s in zip(model.classes_, scores) if s &gt;= threshold}
+
+demo = gr.Interface(
+    fn=classify,
+    inputs=[
+        gr.Textbox(lines=4, label="Support ticket text",
+                   placeholder="Paste the customer's message..."),
+        gr.Slider(0.0, 1.0, value=0.1, step=0.05, label="Minimum confidence"),
+    ],
+    outputs=gr.Label(num_top_classes=5, label="Predicted category"),
+    title="Ticket Classifier",
+    description="Classifies incoming support tickets. Trained on 42k historical tickets.",
+    examples=[
+        ["My invoice shows the wrong VAT rate", 0.1],
+        ["Cannot log in after the password reset", 0.1],
+        ["Requesting a refund for order 88213", 0.1],
+    ],
+    cache_examples=True,            # precomputes example outputs - instant on load
+    flagging_mode="manual",         # gives users a flag button; writes to a CSV
+)
+
+if __name__ == "__main__":
+    demo.launch()</code></pre>
+
+<h3>Blocks: when you need real layout and event wiring</h3>
+<pre><code class="language-python">import gradio as gr
+
+with gr.Blocks(title="Document Assistant", theme=gr.themes.Soft()) as demo:
+    gr.Markdown("# Document Assistant\nAsk questions over the indexed policy corpus.")
+
+    # State is explicit in Gradio - it is a component you pass around
+    session = gr.State({"history": [], "sources": []})
+
+    with gr.Row():
+        with gr.Column(scale=3):
+            chat   = gr.Chatbot(height=460, type="messages", show_copy_button=True)
+            with gr.Row():
+                box  = gr.Textbox(placeholder="Ask a question...", scale=8,
+                                  show_label=False, container=False)
+                send = gr.Button("Send", variant="primary", scale=1)
+                stop = gr.Button("Stop", variant="stop", scale=1)
+        with gr.Column(scale=1):
+            gr.Markdown("### Settings")
+            model_dd = gr.Dropdown(["gpt-4o-mini", "gpt-4o"], value="gpt-4o-mini", label="Model")
+            topk     = gr.Slider(1, 20, value=6, step=1, label="Sources")
+            gr.Markdown("### Retrieved sources")
+            sources  = gr.JSON(label=None)
+
+    with gr.Accordion("Upload documents", open=False):
+        files  = gr.File(file_count="multiple", file_types=[".pdf", ".txt", ".md"])
+        upload = gr.Button("Index")
+        status = gr.Markdown()
+
+    clear = gr.Button("Clear conversation")
+
+    def respond(message, history, model, k, state):
+        chunks = index.search(message, k=k)
+        state["sources"] = [c.brief() for c in chunks]
+        history = history + [{"role": "user", "content": message}]
+        partial = ""
+        for token in llm.stream(message, chunks, model=model):
+            partial += token
+            yield history + [{"role": "assistant", "content": partial}], state["sources"], state
+
+    submit_event = send.click(
+        respond,
+        inputs=[box, chat, model_dd, topk, session],
+        outputs=[chat, sources, session],
+    ).then(lambda: "", outputs=box)          # clear the input after sending
+
+    box.submit(respond, [box, chat, model_dd, topk, session], [chat, sources, session])
+    stop.click(None, cancels=[submit_event]) # genuine cancellation of a running generator
+    clear.click(lambda: ([], [], {"history": [], "sources": []}), outputs=[chat, sources, session])
+    upload.click(index_files, inputs=files, outputs=status)
+
+demo.queue(default_concurrency_limit=4, max_size=32)
+demo.launch(server_name="0.0.0.0", server_port=7860)</code></pre>
+
+<h3>ChatInterface: the shortest path to a chat demo</h3>
+<pre><code class="language-python">import gradio as gr
+
+def chat_fn(message, history):
+    """history is a list of {'role','content'} dicts when type='messages'."""
+    context = retrieve(message, k=6)
+    partial = ""
+    for token in llm.stream(message, context, history=history):
+        partial += token
+        yield partial                       # yielding makes it stream, no extra config
+
+demo = gr.ChatInterface(
+    fn=chat_fn,
+    type="messages",
+    title="Policy Assistant",
+    description="Answers come only from indexed policy documents.",
+    examples=["What is the notice period?", "How do I claim travel expenses?"],
+    cache_examples=False,
+    chatbot=gr.Chatbot(height=520, show_copy_button=True),
+    textbox=gr.Textbox(placeholder="Ask about a policy...", container=False, scale=7),
+    theme=gr.themes.Soft(),
+)
+
+demo.queue(default_concurrency_limit=4).launch(
+    auth=("demo", "the-password-you-told-them"),   # minimal gate, see auth section
+    share=False,
+)</code></pre>
+
+<h3>Queueing and concurrency</h3>
+<pre><code class="language-python"># Gradio's queue is the thing that stops a demo collapsing under three users.
+demo.queue(
+    default_concurrency_limit=4,     # how many of ANY event run at once
+    max_size=50,                     # beyond this, users are told the queue is full
+    status_update_rate="auto",
+)
+
+# Per-event overrides: embedding is GPU bound, retrieval is not
+with gr.Blocks() as demo:
+    btn.click(expensive_gpu_fn, inputs, outputs, concurrency_limit=1,
+              concurrency_id="gpu")        # named lane shared with other GPU events
+    btn2.click(cheap_lookup, inputs, outputs, concurrency_limit=20)</code></pre>
+
+<h3>Sharing links</h3>
+<pre><code class="language-python">demo.launch(share=True)
+# Creates a *.gradio.live tunnel, valid for ~1 week, reachable from anywhere.</code></pre>
+
+<div class="callout danger"><span class="t">Never use <code>share=True</code> with customer data</span>That URL is a public tunnel through Gradio's infrastructure to a process on your laptop. There is no authentication unless you add <code>auth=</code>, the link is guessable enough that scanners find these, and your laptop is now an internet-facing server inside the customer's network. It is brilliant for sharing a toy model with a colleague and completely unacceptable for a prototype containing a customer's contracts. If you need remote access, deploy it properly behind their SSO — that is a half-day of work and it is the difference between a professional engagement and an incident report.</div>
+
+<h3>Streamlit or Gradio?</h3>
+<table>
+<tr><th>Choose Gradio when</th><th>Choose Streamlit when</th></tr>
+<tr><td>The app is fundamentally "input &#8594; model &#8594; output"</td><td>The app has multiple views, tables, filters, dashboards</td></tr>
+<tr><td>You want a chat UI in under ten lines</td><td>You need rich data display — dataframes, charts, metrics, editors</td></tr>
+<tr><td>You are deploying to Hugging Face Spaces</td><td>You are deploying to the customer's cloud</td></tr>
+<tr><td>You need a temporary share link for a colleague</td><td>You need multipage navigation and a sidebar of controls</td></tr>
+<tr><td>You need built-in queueing and cancellation</td><td>You want the script-rerun simplicity</td></tr>
+<tr><td>You want the UI to double as a callable API</td><td>You will call a separate FastAPI backend anyway</td></tr>
+<tr><td>Image/audio/video input and output components</td><td>Tabular and textual workflows</td></tr>
+</table>
+
+<div class="callout note"><span class="t">In practice</span>For FDE work with enterprise customers, Streamlit wins most of the time, because the demos are usually "chat plus a table plus some filters plus an upload" and because it looks more like an internal business tool. Gradio wins for pure model demos, for anything with images or audio, and when you need a shareable link to a model within minutes. Both are prototyping tools; neither is where you should land in production.</div>
+
+<h2>Worked Example: Document Q&amp;A Over a Customer's PDFs</h2>
+<p class="lead">This is the prototype you will build more than any other. A customer has a folder of policy documents, contracts or manuals, and someone spends hours a week answering questions that are answered somewhere in those files. Here is the whole thing — FastAPI backend, Streamlit frontend — small enough to read and real enough to demo.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="760" height="290" fill="#ffffff"/>
+  <text x="16" y="20" font-size="11" fill="#1e3a8a" font-family="sans-serif">PROTOTYPE ARCHITECTURE: TWO PROCESSES, ONE COMPOSE FILE</text>
+
+  <rect x="16" y="40" width="170" height="90" rx="5" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="101" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">STREAMLIT UI</text>
+  <text x="101" y="80" font-size="9" fill="#6b7688" text-anchor="middle" font-family="sans-serif">chat, upload, sources</text>
+  <text x="101" y="94" font-size="9" fill="#6b7688" text-anchor="middle" font-family="sans-serif">feedback buttons</text>
+  <text x="101" y="112" font-size="9" fill="#0891b2" text-anchor="middle" font-family="sans-serif">:8501</text>
+
+  <line x1="186" y1="85" x2="238" y2="85" stroke="#2563eb" stroke-width="2"/>
+  <text x="212" y="78" font-size="11" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+  <text x="212" y="102" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">HTTP + SSE</text>
+
+  <rect x="238" y="40" width="190" height="90" rx="5" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="333" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">FASTAPI BACKEND</text>
+  <text x="333" y="80" font-size="9" fill="#6b7688" text-anchor="middle" font-family="sans-serif">/ask /ask/stream</text>
+  <text x="333" y="94" font-size="9" fill="#6b7688" text-anchor="middle" font-family="sans-serif">/documents /feedback</text>
+  <text x="333" y="112" font-size="9" fill="#0891b2" text-anchor="middle" font-family="sans-serif">:8000</text>
+
+  <line x1="428" y1="70" x2="480" y2="70" stroke="#6b7688"/>
+  <line x1="428" y1="100" x2="480" y2="100" stroke="#6b7688"/>
+
+  <rect x="480" y="46" width="130" height="44" rx="4" fill="#e3e8ef" stroke="#1e3a8a"/>
+  <text x="545" y="64" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">VECTOR INDEX</text>
+  <text x="545" y="78" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">Chroma / FAISS (file)</text>
+
+  <rect x="480" y="98" width="130" height="44" rx="4" fill="#e3e8ef" stroke="#1e3a8a"/>
+  <text x="545" y="116" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">SQLite</text>
+  <text x="545" y="130" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">queries + feedback</text>
+
+  <rect x="634" y="46" width="110" height="44" rx="4" fill="#eff4ff" stroke="#0891b2"/>
+  <text x="689" y="64" font-size="9" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">LLM API</text>
+  <text x="689" y="78" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">or local model</text>
+  <line x1="610" y1="68" x2="634" y2="68" stroke="#6b7688"/>
+
+  <rect x="16" y="166" width="728" height="54" rx="4" fill="#ffffff" stroke="#6b7688"/>
+  <text x="30" y="186" font-size="10" fill="#1e3a8a" font-family="sans-serif">INGESTION (offline, run once before the demo)</text>
+  <text x="30" y="206" font-size="9" fill="#6b7688" font-family="sans-serif">PDFs &#8594; extract text &#8594; chunk (600 tok, 15% overlap) &#8594; embed (batched) &#8594; upsert with metadata (title, page, doc_id)</text>
+
+  <text x="16" y="248" font-size="9" fill="#2563eb" font-family="sans-serif">Everything real lives in app/services/. Swap Streamlit for React, or SQLite for Postgres,</text>
+  <text x="16" y="264" font-size="9" fill="#2563eb" font-family="sans-serif">without touching the logic. That is the whole reason for the split.</text>
+</svg>
+<div class="cap">Two containers, no cluster, no queue. Deployable to a laptop, a customer VM or a container service unchanged.</div>
+</div>
+
+<h3>Backend: the retrieval service</h3>
+<pre><code class="language-python"># app/services/retrieval.py - NO FastAPI imports. Pure logic, fully testable.
+from __future__ import annotations
+
+import hashlib
+import re
+from dataclasses import dataclass
+from pathlib import Path
+
+import chromadb
+from chromadb.utils import embedding_functions
+
+
+@dataclass(frozen=True)
+class Chunk:
+    chunk_id: str
+    document_id: str
+    title: str
+    page: int | None
+    text: str
+    score: float = 0.0
+
+    def brief(self) -&gt; dict:
+        return {"document_id": self.document_id, "title": self.title, "page": self.page,
+                "score": round(self.score, 3),
+                "snippet": self.text[:280] + ("..." if len(self.text) &gt; 280 else "")}
+
+
+def chunk_text(text: str, target_tokens: int = 600, overlap_ratio: float = 0.15) -&gt; list[str]:
+    """Paragraph-aware chunking. Roughly 4 chars per token for English.
+    Splitting on paragraph boundaries matters far more than the exact size:
+    a chunk that ends mid-sentence retrieves badly and reads badly in a citation."""
+    target_chars = target_tokens * 4
+    overlap = int(target_chars * overlap_ratio)
+
+    paras = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
+    chunks, current = [], ""
+    for p in paras:
+        if len(current) + len(p) + 2 &lt;= target_chars:
+            current = f"{current}\n\n{p}" if current else p
+        else:
+            if current:
+                chunks.append(current)
+            # Carry the tail of the previous chunk forward so a fact that
+            # straddles a boundary is retrievable from either side.
+            current = (current[-overlap:] + "\n\n" + p) if current and overlap else p
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+class VectorIndex:
+    def __init__(self, client, collection):
+        self._client, self._col = client, collection
+
+    @classmethod
+    def load(cls, path: str, embedding_model: str = "all-MiniLM-L6-v2") -&gt; "VectorIndex":
+        Path(path).mkdir(parents=True, exist_ok=True)
+        client = chromadb.PersistentClient(path=path)
+        ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=embedding_model)
+        col = client.get_or_create_collection(
+            name="documents", embedding_function=ef,
+            metadata={"hnsw:space": "cosine"},
+        )
+        return cls(client, col)
+
+    @property
+    def size(self) -&gt; int:
+        return self._col.count()
+
+    def add_document(self, document_id: str, title: str, pages: list[str]) -&gt; int:
+        """Idempotent: deletes existing chunks for this doc before inserting."""
+        self._col.delete(where={"document_id": document_id})
+
+        ids, docs, metas = [], [], []
+        for page_no, page_text in enumerate(pages, start=1):
+            for i, chunk in enumerate(chunk_text(page_text)):
+                cid = hashlib.sha256(f"{document_id}|{page_no}|{i}".encode()).hexdigest()[:24]
+                ids.append(cid)
+                docs.append(chunk)
+                metas.append({"document_id": document_id, "title": title, "page": page_no})
+
+        # Chroma has a per-call batch limit; chunk the upsert.
+        for s in range(0, len(ids), 256):
+            self._col.upsert(ids=ids[s:s+256], documents=docs[s:s+256], metadatas=metas[s:s+256])
+        return len(ids)
+
+    def search(self, query: str, k: int = 6, filters: dict | None = None) -&gt; list[Chunk]:
+        res = self._col.query(query_texts=[query], n_results=k, where=filters or None)
+        if not res["ids"] or not res["ids"][0]:
+            return []
+        out = []
+        for cid, doc, meta, dist in zip(res["ids"][0], res["documents"][0],
+                                        res["metadatas"][0], res["distances"][0]):
+            out.append(Chunk(chunk_id=cid, document_id=meta["document_id"],
+                             title=meta["title"], page=meta.get("page"),
+                             text=doc, score=1.0 - dist))   # cosine distance -&gt; similarity
+        return out
+
+    def documents(self) -&gt; list[dict]:
+        all_meta = self._col.get(include=["metadatas"])["metadatas"]
+        seen: dict[str, dict] = {}
+        for m in all_meta:
+            d = seen.setdefault(m["document_id"], {"document_id": m["document_id"],
+                                                   "title": m["title"], "chunks": 0})
+            d["chunks"] += 1
+        return sorted(seen.values(), key=lambda d: d["title"])
+
+    def close(self) -&gt; None:
+        pass</code></pre>
+
+<h3>Backend: the answering service</h3>
+<pre><code class="language-python"># app/services/llm.py
+from __future__ import annotations
+
+import json
+from collections.abc import AsyncIterator
+from dataclasses import dataclass
+
+import httpx
+
+from app.services.retrieval import Chunk
+
+SYSTEM_PROMPT = """You answer questions using ONLY the numbered context passages provided.
+
+Rules:
+- Cite the passage number in square brackets for every factual claim, e.g. [2].
+- If the context does not contain the answer, reply exactly:
+  "I could not find that in the indexed documents."
+  Do not use outside knowledge to fill the gap.
+- Be concise. Three sentences unless the question needs more.
+- If passages disagree, say so and cite both."""
+
+
+@dataclass
+class Answer:
+    text: str
+    citations: list[dict]
+    truncated: bool = False
+
+
+def build_context(chunks: list[Chunk], max_chars: int = 12_000) -&gt; tuple[str, bool]:
+    parts, used, truncated = [], 0, False
+    for i, c in enumerate(chunks, start=1):
+        block = f"[{i}] {c.title}" + (f" (page {c.page})" if c.page else "") + f"\n{c.text}"
+        if used + len(block) &gt; max_chars:
+            truncated = True
+            break
+        parts.append(block)
+        used += len(block)
+    return "\n\n---\n\n".join(parts), truncated
+
+
+class LLMClient:
+    def __init__(self, api_key: str, model: str, timeout_s: float = 60.0, base_url: str | None = None):
+        self.model = model
+        self._client = httpx.AsyncClient(
+            base_url=base_url or "https://api.openai.com/v1",
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=httpx.Timeout(timeout_s, connect=10.0),
+        )
+
+    async def answer(self, question: str, chunks: list[Chunk], temperature: float = 0.0) -&gt; Answer:
+        context, truncated = build_context(chunks)
+        r = await self._client.post("/chat/completions", json={
+            "model": self.model,
+            "temperature": temperature,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": f"Context:\n\n{context}\n\nQuestion: {question}"},
+            ],
+        })
+        r.raise_for_status()
+        text = r.json()["choices"][0]["message"]["content"]
+        return Answer(text=text, citations=[c.brief() for c in chunks], truncated=truncated)
+
+    async def astream(self, question: str, chunks: list[Chunk],
+                      temperature: float = 0.0) -&gt; AsyncIterator[str]:
+        context, _ = build_context(chunks)
+        payload = {
+            "model": self.model, "temperature": temperature, "stream": True,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": f"Context:\n\n{context}\n\nQuestion: {question}"},
+            ],
+        }
+        async with self._client.stream("POST", "/chat/completions", json=payload) as r:
+            r.raise_for_status()
+            async for line in r.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                body = line[6:]
+                if body == "[DONE]":
+                    return
+                delta = json.loads(body)["choices"][0]["delta"]
+                if "content" in delta:
+                    yield delta["content"]</code></pre>
+
+<h3>Backend: routes</h3>
+<pre><code class="language-python"># app/routers/ask.py
+import json, time, uuid
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+
+from app.deps import get_index, get_llm
+from app.models.schemas import AskRequest, AskResponse
+from app.services.feedback import log_query, log_feedback
+from app.services.llm import LLMClient
+from app.services.retrieval import VectorIndex
+
+router = APIRouter(tags=["ask"])
+
+
+@router.post("/ask", response_model=AskResponse)
+async def ask(req: AskRequest,
+              index: Annotated[VectorIndex, Depends(get_index)],
+              llm: Annotated[LLMClient, Depends(get_llm)]) -&gt; AskResponse:
+    t0, rid = time.perf_counter(), str(uuid.uuid4())[:8]
+    chunks = index.search(req.question, k=req.top_k)
+    if not chunks:
+        raise HTTPException(404, "No relevant passages found.")
+    result = await llm.answer(req.question, chunks, temperature=req.temperature)
+    latency = int((time.perf_counter() - t0) * 1000)
+
+    # Log EVERY query. This becomes your evaluation set and your demo transcript.
+    log_query(rid, req.question, result.text, [c.chunk_id for c in chunks], latency)
+
+    return AskResponse(answer=result.text, citations=result.citations,
+                       model=llm.model, latency_ms=latency,
+                       request_id=rid, truncated=result.truncated)
+
+
+@router.post("/ask/stream")
+async def ask_stream(req: AskRequest,
+                     index: Annotated[VectorIndex, Depends(get_index)],
+                     llm: Annotated[LLMClient, Depends(get_llm)]):
+    async def events():
+        rid = str(uuid.uuid4())[:8]
+        t0 = time.perf_counter()
+        yield f"data: {json.dumps({'type':'status','message':'Searching documents'})}\n\n"
+
+        chunks = index.search(req.question, k=req.top_k)
+        if not chunks:
+            yield f"data: {json.dumps({'type':'error','message':'No relevant passages found.'})}\n\n"
+            return
+        yield f"data: {json.dumps({'type':'sources','sources':[c.brief() for c in chunks]})}\n\n"
+
+        buf = []
+        try:
+            async for tok in llm.astream(req.question, chunks, temperature=req.temperature):
+                buf.append(tok)
+                yield f"data: {json.dumps({'type':'token','text':tok})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'type':'error','message':str(e)})}\n\n"
+            return
+
+        latency = int((time.perf_counter() - t0) * 1000)
+        log_query(rid, req.question, "".join(buf), [c.chunk_id for c in chunks], latency)
+        yield f"data: {json.dumps({'type':'done','request_id':rid,'latency_ms':latency})}\n\n"
+
+    return StreamingResponse(events(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@router.post("/feedback")
+async def feedback(request_id: str, rating: int, comment: str | None = None):
+    if rating not in (-1, 1):
+        raise HTTPException(422, "rating must be -1 or 1")
+    log_feedback(request_id, rating, comment)
+    return {"ok": True}</code></pre>
+
+<pre><code class="language-python"># app/services/feedback.py - SQLite is enough, and it is one file you can hand over.
+import sqlite3, json, datetime
+from pathlib import Path
+
+DB = Path("data/app.db")
+
+def _conn():
+    DB.parent.mkdir(parents=True, exist_ok=True)
+    c = sqlite3.connect(DB, check_same_thread=False)
+    c.execute("""create table if not exists queries (
+        request_id text primary key, ts text, question text, answer text,
+        chunk_ids text, latency_ms integer)""")
+    c.execute("""create table if not exists feedback (
+        request_id text, ts text, rating integer, comment text)""")
+    return c
+
+def log_query(request_id, question, answer, chunk_ids, latency_ms):
+    with _conn() as c:
+        c.execute("insert or replace into queries values (?,?,?,?,?,?)",
+                  (request_id, datetime.datetime.now(datetime.UTC).isoformat(),
+                   question, answer, json.dumps(chunk_ids), latency_ms))
+
+def log_feedback(request_id, rating, comment=None):
+    with _conn() as c:
+        c.execute("insert into feedback values (?,?,?,?)",
+                  (request_id, datetime.datetime.now(datetime.UTC).isoformat(), rating, comment))
+
+def export_eval_set(path="data/eval_set.jsonl"):
+    """Everything the customer asked during the demo, ready to become test cases."""
+    with _conn() as c:
+        rows = c.execute("""
+            select q.question, q.answer, q.chunk_ids, f.rating
+            from queries q left join feedback f using (request_id)
+            order by q.ts""").fetchall()
+    with open(path, "w", encoding="utf-8") as fh:
+        for question, answer, chunk_ids, rating in rows:
+            fh.write(json.dumps({"question": question, "answer": answer,
+                                 "retrieved": json.loads(chunk_ids),
+                                 "rating": rating}) + "\n")
+    return len(rows)</code></pre>
+
+<h3>Frontend: the Streamlit client</h3>
+<pre><code class="language-python"># ui/api_client.py - the ONLY module that knows the backend exists
+import json
+import httpx
+import streamlit as st
+
+
+def _base() -&gt; str:
+    return st.secrets.get("API_URL", "http://localhost:8000")
+
+
+@st.cache_resource
+def client() -&gt; httpx.Client:
+    return httpx.Client(base_url=_base(), timeout=httpx.Timeout(300.0, connect=10.0),
+                        headers={"X-API-Key": st.secrets.get("API_KEY", "dev")})
+
+
+def health() -&gt; dict:
+    try:
+        r = client().get("/health", timeout=5.0)
+        return r.json() if r.status_code == 200 else {"ok": False}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def documents() -&gt; list[dict]:
+    return client().get("/api/v1/documents").json()
+
+
+def upload(files) -&gt; dict:
+    payload = [("files", (f.name, f.getvalue(), f.type)) for f in files]
+    return client().post("/api/v1/documents", files=payload).json()
+
+
+def ask_stream(question: str, top_k: int = 6):
+    """Yields text tokens; stashes sources in session_state as they arrive."""
+    with client().stream("POST", "/api/v1/ask/stream",
+                         json={"question": question, "top_k": top_k}) as r:
+        r.raise_for_status()
+        for line in r.iter_lines():
+            if not line or not line.startswith("data: "):
+                continue
+            ev = json.loads(line[6:])
+            if ev["type"] == "sources":
+                st.session_state.pending_sources = ev["sources"]
+            elif ev["type"] == "token":
+                yield ev["text"]
+            elif ev["type"] == "error":
+                raise RuntimeError(ev["message"])
+            elif ev["type"] == "done":
+                st.session_state.last_request_id = ev["request_id"]
+                st.session_state.last_latency_ms = ev["latency_ms"]
+                return
+
+
+def send_feedback(request_id: str, rating: int, comment: str | None = None):
+    client().post("/api/v1/feedback",
+                  params={"request_id": request_id, "rating": rating},
+                  json={"comment": comment})</code></pre>
+
+<pre><code class="language-python"># ui/app.py
+import streamlit as st
+
+from api_client import ask_stream, documents, health, send_feedback, upload
+
+st.set_page_config(page_title="Policy Assistant", page_icon=":books:", layout="wide")
+
+for key, default in [("messages", []), ("pending_sources", []),
+                     ("last_request_id", None), ("last_latency_ms", None)]:
+    st.session_state.setdefault(key, default)
+
+# --- Sidebar: status, controls, and the reset button you WILL need mid-demo ---
+with st.sidebar:
+    st.title("Policy Assistant")
+    h = health()
+    if h.get("ok"):
+        st.success(f"Connected - {h.get('chunks', 0):,} chunks indexed")
+    else:
+        st.error("Backend unavailable")
+        st.caption(h.get("error", ""))
+
+    top_k = st.slider("Passages to retrieve", 1, 15, 6)
+    st.divider()
+
+    with st.expander("Add documents"):
+        files = st.file_uploader("PDF, DOCX, TXT", type=["pdf", "docx", "txt", "md"],
+                                 accept_multiple_files=True, label_visibility="collapsed")
+        if files and st.button("Index files", use_container_width=True):
+            with st.spinner("Indexing..."):
+                res = upload(files)
+            st.success(f"Indexed {len(res['accepted'])} file(s)")
+            if res["rejected"]:
+                st.warning(res["rejected"])
+
+    st.divider()
+    if st.button("Reset conversation", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.pending_sources = []
+        st.rerun()
+
+    with st.expander("Indexed documents"):
+        st.dataframe(documents(), hide_index=True, use_container_width=True)
+
+# --- Main: chat on the left, citations on the right ---
+chat_col, src_col = st.columns([2, 1], gap="large")
+
+with chat_col:
+    for i, m in enumerate(st.session_state.messages):
+        with st.chat_message(m["role"]):
+            st.markdown(m["content"])
+            if m.get("latency_ms"):
+                st.caption(f"{m['latency_ms']} ms")
+
+    if prompt := st.chat_input("Ask about a policy..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            try:
+                text = st.write_stream(ask_stream(prompt, top_k=top_k))
+                st.session_state.messages.append({
+                    "role": "assistant", "content": text,
+                    "sources": st.session_state.pending_sources,
+                    "latency_ms": st.session_state.last_latency_ms,
+                })
+            except Exception as e:
+                st.error("That request failed. Try rephrasing, or check the backend status.")
+                st.caption(str(e))
+
+    # Feedback on the most recent answer -&gt; straight into the eval set
+    if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+        c1, c2, _ = st.columns([1, 1, 6])
+        rid = st.session_state.last_request_id
+        if c1.button("Helpful", use_container_width=True):
+            send_feedback(rid, 1); st.toast("Thanks - logged.")
+        if c2.button("Not helpful", use_container_width=True):
+            send_feedback(rid, -1); st.toast("Logged for review.")
+
+with src_col:
+    st.subheader("Sources")
+    sources = (st.session_state.messages[-1].get("sources")
+               if st.session_state.messages else []) or st.session_state.pending_sources
+    if not sources:
+        st.caption("Ask a question to see the passages used.")
+    for i, s in enumerate(sources, start=1):
+        with st.expander(f"[{i}] {s['title']}" + (f" - p.{s['page']}" if s['page'] else ""),
+                         expanded=(i == 1)):
+            st.caption(f"Relevance {s['score']:.2f}")
+            st.markdown(s["snippet"])</code></pre>
+
+<h3>The ingestion script</h3>
+<pre><code class="language-python"># scripts/ingest_pdfs.py - run this BEFORE the demo, not during it.
+import sys, time
+from pathlib import Path
+
+import pypdf
+
+from app.services.retrieval import VectorIndex
+
+
+def extract_pages(path: Path) -&gt; list[str]:
+    reader = pypdf.PdfReader(str(path))
+    pages = [(p.extract_text() or "").strip() for p in reader.pages]
+    text_chars = sum(len(p) for p in pages)
+    if text_chars &lt; 200 * len(pages):
+        # A scanned PDF. You will meet these at every customer.
+        print(f"  WARNING: {path.name} looks scanned ({text_chars} chars across "
+              f"{len(pages)} pages). OCR needed - skipping for now.")
+    return pages
+
+
+def main(folder: str, index_path: str = "./data/index"):
+    index = VectorIndex.load(index_path)
+    pdfs = sorted(Path(folder).rglob("*.pdf"))
+    print(f"Found {len(pdfs)} PDFs")
+
+    total_chunks, skipped, t0 = 0, 0, time.perf_counter()
+    for i, path in enumerate(pdfs, start=1):
+        try:
+            pages = extract_pages(path)
+            if not any(pages):
+                skipped += 1
+                continue
+            n = index.add_document(document_id=path.stem, title=path.stem.replace("_", " "),
+                                   pages=pages)
+            total_chunks += n
+            print(f"[{i}/{len(pdfs)}] {path.name}: {len(pages)} pages, {n} chunks")
+        except Exception as e:
+            skipped += 1
+            print(f"[{i}/{len(pdfs)}] FAILED {path.name}: {e}")
+
+    print(f"\nDone in {time.perf_counter() - t0:.1f}s. "
+          f"{total_chunks:,} chunks, {skipped} files skipped. Index size: {index.size:,}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1] if len(sys.argv) &gt; 1 else "./data/pdfs")</code></pre>
+
+<div class="callout warn"><span class="t">Scanned PDFs are the most common surprise</span>You will be given "the policy documents" and discover that a third of them are scans with no text layer. Check this on day one with the character-count heuristic above. Your options are OCR (Tesseract locally, or a cloud document-intelligence service if data residency allows), asking the customer for the original files, or scoping those documents out of the demo and saying so. All three are fine; discovering it the night before the demo is not.</div>
+
+<h2>Making a Prototype Demo-Proof</h2>
+<p class="lead">The prototype working on your machine is roughly half the job. The other half is making sure that nothing visible goes wrong in the forty minutes when it matters — on their network, on a projector, with the CTO watching, after a flight. Demo failures are not bad luck; they are a small set of predictable causes, and all of them are preventable.</p>
+
+<h3>The failure modes, ranked by how often they actually happen</h3>
+<table>
+<tr><th>#</th><th>Failure</th><th>Prevention</th></tr>
+<tr><td>1</td><td>Customer guest wifi blocks your API calls or is unusably slow</td><td>Offline/demo mode with cached responses; mobile hotspot as backup; a recorded video as the last resort</td></tr>
+<tr><td>2</td><td>Model provider is slow or rate-limits mid-demo</td><td>Cache every demo question's answer; short timeout with a cached fallback; a second provider configured</td></tr>
+<tr><td>3</td><td>Someone types something you never tested and it 500s</td><td>Catch-all error handler that shows a friendly message, never a stack trace</td></tr>
+<tr><td>4</td><td>Laptop sleeps / screensaver / notifications</td><td>Disable sleep and notifications; do not present from your personal machine's main profile</td></tr>
+<tr><td>5</td><td>App state is dirty from the practice run</td><td>A visible Reset button and a one-command reseed</td></tr>
+<tr><td>6</td><td>Fonts/layout break on the projector resolution</td><td>Test at 1280x720 and at 150% browser zoom</td></tr>
+<tr><td>7</td><td>Cold start: first request takes 30 s while a model loads</td><td>Warm up in <code>lifespan</code>; fire a dummy request before they walk in</td></tr>
+<tr><td>8</td><td>You demo on data that embarrasses someone in the room</td><td>Review every seeded record; no real salaries, no named individuals, no competitor names</td></tr>
+</table>
+
+<h3>Demo mode</h3>
+<pre><code class="language-python"># app/services/demo.py
+import hashlib, json
+from pathlib import Path
+
+CACHE = Path("data/demo_cache.json")
+
+class DemoCache:
+    """Answers canned responses for known questions. Two purposes:
+    1) the demo works with no network at all
+    2) known questions answer in 50 ms instead of 6 s, which looks far better"""
+
+    def __init__(self, enabled: bool):
+        self.enabled = enabled
+        self._data = json.loads(CACHE.read_text()) if CACHE.exists() else {}
+
+    @staticmethod
+    def _key(question: str) -&gt; str:
+        norm = " ".join(question.lower().split()).rstrip("?.")
+        return hashlib.sha256(norm.encode()).hexdigest()[:16]
+
+    def get(self, question: str) -&gt; dict | None:
+        return self._data.get(self._key(question)) if self.enabled else None
+
+    def put(self, question: str, answer: str, citations: list[dict]) -&gt; None:
+        self._data[self._key(question)] = {"answer": answer, "citations": citations}
+        CACHE.write_text(json.dumps(self._data, indent=2))
+
+
+# In the route:
+#   cached = demo_cache.get(req.question)
+#   if cached:
+#       return AskResponse(**cached, model="cache", latency_ms=12, request_id="demo")
+#
+# Then, the day before the demo, run every planned question once with
+# DEMO_MODE=false to populate the cache, and flip DEMO_MODE=true to present.</code></pre>
+
+<pre><code class="language-python"># Graceful degradation: try live, fall back to cache, never show a stack trace.
+async def answer_with_fallback(question: str, chunks, llm, cache) -&gt; tuple[str, str]:
+    try:
+        result = await asyncio.wait_for(llm.answer(question, chunks), timeout=12.0)
+        cache.put(question, result.text, result.citations)      # warm the cache as you go
+        return result.text, "live"
+    except (asyncio.TimeoutError, httpx.HTTPError, httpx.ConnectError):
+        cached = cache.get(question)
+        if cached:
+            return cached["answer"], "cache"
+        return ("I could not reach the model just now. The passages below are the "
+                "most relevant ones from the documents."), "degraded"</code></pre>
+
+<div class="callout tip"><span class="t">The cache-as-you-go trick</span>Run through your entire demo script once on a good connection the day before. Every answer lands in the cache. On demo day, even if the network dies completely, every question you planned to ask returns instantly, and anything improvised still tries live. You get resilience and a visibly snappier demo for ten lines of code.</div>
+
+<h3>Seeded data and the reset button</h3>
+<pre><code class="language-python"># scripts/seed.py - idempotent. Run it before every demo.
+import shutil, sqlite3
+from pathlib import Path
+
+from app.services.retrieval import VectorIndex
+
+def reset():
+    for p in ["data/index", "data/app.db", "data/uploads"]:
+        path = Path(p)
+        if path.is_dir():
+            shutil.rmtree(path)
+        elif path.exists():
+            path.unlink()
+
+def seed():
+    reset()
+    index = VectorIndex.load("data/index")
+    for doc in Path("data/samples").glob("*.txt"):
+        index.add_document(doc.stem, doc.stem.replace("_", " "), [doc.read_text()])
+    print(f"Seeded {index.size} chunks from data/samples/")
+
+if __name__ == "__main__":
+    seed()</code></pre>
+
+<h3>Error states a customer can read</h3>
+<pre><code class="language-python">ERROR_MESSAGES = {
+    "no_results":   ("No matching passages", "Nothing in the indexed documents matched. "
+                                             "Try different wording, or check the scope filter."),
+    "timeout":      ("That took too long",   "The model did not respond in time. Try a shorter question."),
+    "rate_limited": ("Busy right now",       "We are being rate limited. Wait a few seconds and retry."),
+    "upstream":     ("Service unavailable",  "The language model service is not reachable. "
+                                             "Retrieval still works - see the passages on the right."),
+    "too_large":    ("Too much context",     "That question matched too much text. Reduce the number of passages."),
+}
+
+def show_error(code: str, detail: str | None = None):
+    title, body = ERROR_MESSAGES.get(code, ("Something went wrong", "Please try again."))
+    st.error(f"**{title}**  \n{body}")
+    if detail:
+        with st.expander("Technical detail"):
+            st.code(detail)              # available, but not shoved in the customer's face</code></pre>
+
+<h3>The pre-demo checklist</h3>
+<ul class="checklist">
+  <li>Full run-through on the <b>actual machine and network</b> you will present from, at least two hours before.</li>
+  <li><code>python scripts/seed.py</code> run; data is clean, realistic and contains nothing embarrassing.</li>
+  <li>Demo cache populated for every question in your script.</li>
+  <li>Backend warm — one dummy request fired so no model loading happens live.</li>
+  <li>Browser at the resolution you will project; zoom set; only the demo tab open.</li>
+  <li>Notifications off, sleep disabled, Do Not Disturb on, phone silenced.</li>
+  <li>Mobile hotspot tethered and tested as a fallback.</li>
+  <li>A screen recording of the full happy path saved locally, ready to play if everything fails.</li>
+  <li>Reset button tested — you will need it between sections.</li>
+  <li>Three improvised questions tried, so you know the error path looks acceptable.</li>
+  <li>Decided in advance what you will say when something breaks: "that's the prototype's error path doing its job — let me reset" is a perfectly good line.</li>
+  <li>Someone else on the call ready to drive the conversation while you fix anything.</li>
+</ul>
+
+<div class="callout ok"><span class="t">How to handle a live failure</span>Do not apologise repeatedly, do not start debugging on the shared screen, and never show a terminal full of red. Say what happened in one sentence, hit reset, and move on. If it fails twice, switch to the recording and say "I'll show you the recorded version and we'll debug offline — the interesting part is what it does, not whether the demo wifi holds." Customers forgive technical failure handled calmly; they remember panic.</div>
+
+<h2>Lightweight Auth for Prototypes</h2>
+<p class="lead">A prototype containing a customer's documents on a public URL with no authentication is a security incident, not a demo. The good news is that every option here takes under an hour, and picking one is almost always enough to get past a security conversation that would otherwise block you for weeks.</p>
+
+<h3>The options, from weakest to strongest</h3>
+<table>
+<tr><th>Option</th><th>Effort</th><th>Good enough for</th><th>Not good enough for</th></tr>
+<tr><td>Nothing, localhost only</td><td>0</td><td>Running on your laptop, screen-shared</td><td>Anything anyone else can reach</td></tr>
+<tr><td>Shared password (Gradio <code>auth=</code>, Streamlit gate)</td><td>10 min</td><td>A handful of named people, non-sensitive data</td><td>Real PII, many users, audit requirements</td></tr>
+<tr><td>HTTP Basic + HTTPS</td><td>20 min</td><td>Internal demos behind a VPN</td><td>Anything where you need to know <i>who</i> did what</td></tr>
+<tr><td>API key per user</td><td>30 min</td><td>Machine-to-machine; attributing usage</td><td>Browser-facing UIs</td></tr>
+<tr><td>Signed, expiring links</td><td>30 min</td><td>Sharing a single result or report externally</td><td>An ongoing interactive app</td></tr>
+<tr><td>OAuth proxy (oauth2-proxy, Easy Auth, IAP)</td><td>1-2 h</td><td>Anything inside the customer's tenancy — this is the right answer</td><td>Nothing; this is the one to aim for</td></tr>
+<tr><td>Full OIDC in the app</td><td>1-2 days</td><td>Production</td><td>A three-day prototype</td></tr>
+</table>
+
+<h3>Shared password gate in Streamlit</h3>
+<pre><code class="language-python"># ui/auth.py
+import hmac
+import streamlit as st
+
+
+def check_password() -&gt; bool:
+    """Minimal gate. Blocks casual access; it is NOT real security.
+    Use it with HTTPS and a non-guessable password, and never with real PII."""
+
+    def entered():
+        if hmac.compare_digest(st.session_state["pw"], st.secrets["APP_PASSWORD"]):
+            st.session_state["authenticated"] = True
+            del st.session_state["pw"]                 # never keep it in state
+        else:
+            st.session_state["authenticated"] = False
+
+    if st.session_state.get("authenticated"):
+        return True
+
+    st.title("Policy Assistant")
+    st.caption("Internal prototype. Access is restricted.")
+    st.text_input("Password", type="password", on_change=entered, key="pw")
+    if st.session_state.get("authenticated") is False:
+        st.error("Incorrect password")
+    return False
+
+
+# ui/app.py
+# if not check_password():
+#     st.stop()</code></pre>
+
+<h3>HTTP Basic and API keys in FastAPI</h3>
+<pre><code class="language-python">import secrets
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import APIKeyHeader, HTTPBasic, HTTPBasicCredentials
+
+basic = HTTPBasic()
+
+def require_basic(creds: Annotated[HTTPBasicCredentials, Depends(basic)]) -&gt; str:
+    settings = get_settings()
+    user_ok = secrets.compare_digest(creds.username, settings.basic_user)
+    pass_ok = secrets.compare_digest(creds.password,
+                                     settings.basic_password.get_secret_value())
+    if not (user_ok and pass_ok):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials",
+                            headers={"WWW-Authenticate": "Basic"})
+    return creds.username
+
+
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+def require_api_key(key: Annotated[str | None, Depends(api_key_header)]) -&gt; str:
+    """Per-user keys so you can attribute and revoke individually."""
+    keys = get_settings().api_keys          # {"key-abc": "sunita@customer.com", ...}
+    if not key or key not in keys:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or missing API key")
+    return keys[key]
+
+
+# Signed, expiring link - good for "here is your report, valid 24 hours"
+import hmac, hashlib, time, base64
+
+def sign_link(resource_id: str, ttl_s: int = 86400) -&gt; str:
+    secret = get_settings().link_secret.get_secret_value().encode()
+    expires = int(time.time()) + ttl_s
+    payload = f"{resource_id}:{expires}".encode()
+    sig = base64.urlsafe_b64encode(hmac.new(secret, payload, hashlib.sha256).digest()).decode()
+    return f"/shared/{resource_id}?expires={expires}&amp;sig={sig}"
+
+def verify_link(resource_id: str, expires: int, sig: str) -&gt; bool:
+    if time.time() &gt; expires:
+        return False
+    secret = get_settings().link_secret.get_secret_value().encode()
+    payload = f"{resource_id}:{expires}".encode()
+    expected = base64.urlsafe_b64encode(hmac.new(secret, payload, hashlib.sha256).digest()).decode()
+    return hmac.compare_digest(sig, expected)</code></pre>
+
+<h3>OAuth proxy — the one to aim for</h3>
+<p>Put the app behind a proxy that handles the customer's identity provider. Your app stays auth-free and receives a trusted header with the user's identity. This is a configuration task, not a development task, and it is what the customer's security team actually wants to see.</p>
+
+<pre><code class="language-yaml"># docker-compose.yml fragment: oauth2-proxy in front of the Streamlit app
+services:
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    command:
+      - --provider=oidc
+      - --oidc-issuer-url=https://login.microsoftonline.com/${TENANT_ID}/v2.0
+      - --client-id=${CLIENT_ID}
+      - --client-secret=${CLIENT_SECRET}
+      - --cookie-secret=${COOKIE_SECRET}
+      - --email-domain=customer.com
+      - --upstream=http://ui:8501
+      - --http-address=0.0.0.0:4180
+      - --pass-authorization-header=true
+      - --set-xauthrequest=true
+      - --skip-provider-button=true
+    ports: ["443:4180"]
+    depends_on: [ui]
+
+  ui:
+    build: .
+    command: streamlit run ui/app.py --server.port 8501 --server.address 0.0.0.0
+    expose: ["8501"]
+    # No ports: - the ONLY way in is through the proxy.</code></pre>
+
+<pre><code class="language-python"># On Azure Container Apps / App Service, "Easy Auth" does the same with no container:
+#   az containerapp auth microsoft update -g rg -n myapp \
+#     --client-id $CLIENT_ID --client-secret $CLIENT_SECRET \
+#     --tenant-id $TENANT_ID --yes
+#   az containerapp auth update -g rg -n myapp --action Return401 --enabled true
+#
+# Your app then reads the identity from injected headers:
+user_email = request.headers.get("X-MS-CLIENT-PRINCIPAL-NAME")     # Azure Easy Auth
+user_email = request.headers.get("X-Auth-Request-Email")           # oauth2-proxy
+user_email = request.headers.get("X-Goog-Authenticated-User-Email") # Google IAP</code></pre>
+
+<div class="callout danger"><span class="t">The rule you must never break</span><b>Customer data must never be reachable from the public internet without authentication.</b> Not "probably nobody will find the URL". Not "it's only for a week". Internet-wide scanners find new hosts within minutes, and a Streamlit app with a file browser or a vector index full of contracts is a breach you will have to report. If you need remote access and cannot stand up a proxy in time, the correct answer is a screen share — not a public URL. This is one of the few genuinely non-negotiable rules in prototyping.</div>
+
+<h2>Packaging and Deployment</h2>
+<p class="lead">"It works on my laptop" is fine for the first demo and nowhere near enough for the second. The moment a customer wants to click around on their own, you need it running somewhere they can reach, in their tenancy, with their secrets. Two Dockerfiles and a compose file get you 90% of the way, and the same artefacts carry you into production later.</p>
+
+<h3>Dockerfile for the FastAPI backend</h3>
+<pre><code class="language-dockerfile"># Multi-stage: build deps once, ship a small runtime image.
+FROM python:3.12-slim AS builder
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
+
+COPY app ./app
+RUN uv sync --frozen --no-dev
+
+
+FROM python:3.12-slim AS runtime
+
+RUN apt-get update \
+ &amp;&amp; apt-get install -y --no-install-recommends curl \
+ &amp;&amp; rm -rf /var/lib/apt/lists/* \
+ &amp;&amp; useradd --create-home --uid 10001 appuser
+
+WORKDIR /app
+COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
+COPY --chown=appuser:appuser app ./app
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+USER appuser
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD curl -fsS http://localhost:8000/health || exit 1
+
+# One worker per container; scale by running more containers.
+# --proxy-headers is required behind a load balancer or your URLs will be wrong.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", \
+     "--workers", "1", "--proxy-headers", "--forwarded-allow-ips", "*"]</code></pre>
+
+<h3>Dockerfile for the Streamlit frontend</h3>
+<pre><code class="language-dockerfile">FROM python:3.12-slim
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+RUN apt-get update \
+ &amp;&amp; apt-get install -y --no-install-recommends curl \
+ &amp;&amp; rm -rf /var/lib/apt/lists/* \
+ &amp;&amp; useradd --create-home --uid 10001 appuser
+
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+COPY --chown=appuser:appuser ui ./ui
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    STREAMLIT_SERVER_HEADLESS=true \
+    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false \
+    STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
+
+USER appuser
+EXPOSE 8501
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS http://localhost:8501/_stcore/health || exit 1
+
+CMD ["streamlit", "run", "ui/app.py", \
+     "--server.port=8501", "--server.address=0.0.0.0", \
+     "--server.enableCORS=false", "--server.enableXsrfProtection=true"]</code></pre>
+
+<h3>docker-compose for the whole thing</h3>
+<pre><code class="language-yaml">services:
+  api:
+    build: {context: ., dockerfile: Dockerfile.api}
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
+      VECTOR_STORE_PATH: /data/index
+      MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
+      DEMO_MODE: ${DEMO_MODE:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - appdata:/data
+    expose: ["8000"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits: {cpus: "2.0", memory: 4G}
+    restart: unless-stopped
+
+  ui:
+    build: {context: ., dockerfile: Dockerfile.ui}
+    environment:
+      API_URL: http://api:8000              # service name, not localhost
+      API_KEY: ${API_KEY:?set API_KEY in .env}
+    ports: ["8501:8501"]
+    depends_on:
+      api: {condition: service_healthy}
+    restart: unless-stopped
+
+volumes:
+  appdata:</code></pre>
+
+<div class="callout warn"><span class="t">Two compose mistakes that cost an hour each</span><b>1.</b> The UI calling <code>http://localhost:8000</code> — inside a container, <code>localhost</code> is that container. Use the service name (<code>http://api:8000</code>). <b>2.</b> Forgetting a volume for the index, so every restart loses the data you spent twenty minutes ingesting, including five minutes before a demo. Name your volumes and test <code>docker compose down &amp;&amp; docker compose up</code> before you rely on it.</div>
+
+<h3>Where to deploy</h3>
+<table>
+<tr><th>Target</th><th>Time to deploy</th><th>Good for</th><th>Watch out for</th></tr>
+<tr><td><b>Azure Container Apps</b></td><td>~15 min</td><td>Azure customers; built-in HTTPS, Easy Auth, scale-to-zero, secrets</td><td>Scale-to-zero means cold starts; set min replicas to 1 before a demo</td></tr>
+<tr><td><b>Google Cloud Run</b></td><td>~10 min</td><td>GCP customers; simplest container-to-URL path there is</td><td>Request timeout cap; needs explicit config for long streams</td></tr>
+<tr><td><b>AWS App Runner / ECS Fargate</b></td><td>20-40 min</td><td>AWS customers</td><td>App Runner is simple but limited; ECS needs more wiring</td></tr>
+<tr><td><b>Hugging Face Spaces</b></td><td>~5 min</td><td>Public model demos, Gradio especially</td><td><b>Never</b> for customer data — it is third-party hosting</td></tr>
+<tr><td><b>Customer VM + docker compose</b></td><td>30-60 min</td><td>Air-gapped, strict data residency, "it must stay inside"</td><td>You now own patching, TLS, restarts; use <code>restart: unless-stopped</code> and a systemd unit</td></tr>
+<tr><td><b>Streamlit Community Cloud</b></td><td>~5 min</td><td>Public demos of non-sensitive apps</td><td>Public by default; resource limits; not for customer data</td></tr>
+</table>
+
+<pre><code class="language-bash"># Azure Container Apps - the fastest credible path for an enterprise customer
+az group create -n rg-demo -l westeurope
+
+az containerapp env create -n demo-env -g rg-demo -l westeurope
+
+# Secrets go in the platform, never in the image
+az containerapp create \
+  -n doc-assistant-api -g rg-demo --environment demo-env \
+  --image myacr.azurecr.io/doc-api:0.1.0 \
+  --target-port 8000 --ingress internal \
+  --min-replicas 1 --max-replicas 3 \
+  --cpu 1.0 --memory 2Gi \
+  --secrets openai-key=$OPENAI_API_KEY \
+  --env-vars OPENAI_API_KEY=secretref:openai-key VECTOR_STORE_PATH=/data/index
+
+az containerapp create \
+  -n doc-assistant-ui -g rg-demo --environment demo-env \
+  --image myacr.azurecr.io/doc-ui:0.1.0 \
+  --target-port 8501 --ingress external \
+  --min-replicas 1 --max-replicas 1 \
+  --env-vars API_URL=https://doc-assistant-api.internal.&lt;env-domain&gt;
+
+# Lock it down with the tenant's identity provider
+az containerapp auth microsoft update -g rg-demo -n doc-assistant-ui \
+  --client-id $CLIENT_ID --client-secret $CLIENT_SECRET --tenant-id $TENANT_ID --yes
+az containerapp auth update -g rg-demo -n doc-assistant-ui \
+  --action RedirectToLoginPage --enabled true</code></pre>
+
+<div class="callout tip"><span class="t">Streamlit does not scale horizontally without sticky sessions</span>Session state lives in one process's memory. Two replicas behind a round-robin load balancer means a user's second click may hit a different replica with no memory of them, and the app appears to reset randomly. For a prototype, pin <code>min-replicas = max-replicas = 1</code> and move on. If you genuinely need more capacity, that is one of the signals that it is time to graduate to a real frontend.</div>
+
+<h3>Resource sizing for a prototype</h3>
+<table>
+<tr><th>Component</th><th>Starting point</th><th>Increase when</th></tr>
+<tr><td>FastAPI backend (API-based LLM)</td><td>1 vCPU, 1-2 GB</td><td>You see memory pressure from large document parsing</td></tr>
+<tr><td>FastAPI with a local embedding model</td><td>2 vCPU, 4 GB</td><td>Embedding batches get slow; consider GPU only if you must</td></tr>
+<tr><td>Streamlit UI</td><td>0.5-1 vCPU, 1 GB</td><td>Rarely — the UI is thin if you kept logic in the backend</td></tr>
+<tr><td>Vector index (Chroma/FAISS on disk)</td><td>Index size &times; ~1.5 in RAM</td><td>Beyond ~1M chunks, move to a managed vector service</td></tr>
+<tr><td>Disk</td><td>10-20 GB</td><td>Uploads accumulate; add a cleanup job</td></tr>
+</table>
+
+<h2>Observability and Feedback in a Prototype</h2>
+<p class="lead">A prototype with no logging teaches you nothing. A prototype that captures every question, every retrieval, every latency and every thumbs-down turns a one-hour demo into a labelled dataset you can use to improve the system and to justify the next phase. This is the cheapest high-leverage thing in the entire guide, and almost nobody does it.</p>
+
+<h3>Structured request logging</h3>
+<pre><code class="language-python"># app/middleware.py
+import json, logging, time, uuid
+
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+
+log = logging.getLogger("requests")
+
+
+class RequestLogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        rid = request.headers.get("x-request-id") or str(uuid.uuid4())[:8]
+        request.state.request_id = rid
+        t0 = time.perf_counter()
+
+        try:
+            response = await call_next(request)
+            status = response.status_code
+        except Exception:
+            status = 500
+            raise
+        finally:
+            log.info(json.dumps({
+                "request_id": rid,
+                "method": request.method,
+                "path": request.url.path,
+                "status": status,
+                "duration_ms": round((time.perf_counter() - t0) * 1000, 1),
+                "user": request.headers.get("x-auth-request-email", "anonymous"),
+                "ua": request.headers.get("user-agent", "")[:80],
+            }))
+
+        response.headers["X-Request-ID"] = rid
+        return response</code></pre>
+
+<pre><code class="language-python"># Log the AI-specific things a request log does not capture.
+# These five fields are what let you debug "why was that answer wrong?" afterwards.
+def log_interaction(request_id, question, retrieved, answer, model, latency_ms, cost_usd=None):
+    log.info(json.dumps({
+        "event": "ask",
+        "request_id": request_id,
+        "question": question,
+        "retrieved_ids": [c.chunk_id for c in retrieved],
+        "retrieved_scores": [round(c.score, 3) for c in retrieved],
+        "top_score": round(retrieved[0].score, 3) if retrieved else None,
+        "answer_chars": len(answer),
+        "said_not_found": "could not find that" in answer.lower(),
+        "model": model,
+        "latency_ms": latency_ms,
+        "cost_usd": cost_usd,
+    }))</code></pre>
+
+<h3>Capturing the eval set from the demo itself</h3>
+<div class="callout ok"><span class="t">The move that pays for itself twice</span>Every question a customer asks during a demo is a real user query, which is exactly what you cannot invent. Log all of them. After a one-hour session you have 30-60 genuine questions, the retrieved passages for each, and often a thumbs-up/down. That is your first evaluation set, and it is far more valuable than anything you would have written yourself. Export it at the end of the day, send it to them in the follow-up email as "the questions you asked and how the system handled them", and you have simultaneously built a test suite and demonstrated rigour.</div>
+
+<pre><code class="language-python"># scripts/export_eval.py
+import json, sqlite3
+from pathlib import Path
+
+def export(db="data/app.db", out="data/eval_set.jsonl"):
+    c = sqlite3.connect(db)
+    rows = c.execute("""
+        select q.request_id, q.ts, q.question, q.answer, q.chunk_ids, q.latency_ms,
+               f.rating, f.comment
+        from queries q
+        left join feedback f on f.request_id = q.request_id
+        order by q.ts
+    """).fetchall()
+
+    with Path(out).open("w", encoding="utf-8") as fh:
+        for rid, ts, question, answer, chunk_ids, latency, rating, comment in rows:
+            fh.write(json.dumps({
+                "id": rid, "ts": ts,
+                "question": question,
+                "generated_answer": answer,
+                "retrieved": json.loads(chunk_ids),
+                "latency_ms": latency,
+                "human_rating": rating,
+                "human_comment": comment,
+                "expected_answer": None,     # fill these in with the customer's SME
+            }) + "\n")
+
+    neg = sum(1 for r in rows if r[6] == -1)
+    print(f"Exported {len(rows)} interactions ({neg} negative) to {out}")
+
+if __name__ == "__main__":
+    export()</code></pre>
+
+<h3>What to measure, even in a prototype</h3>
+<table>
+<tr><th>Metric</th><th>Why it matters in a demo context</th></tr>
+<tr><td>p50 / p95 latency, end to end</td><td>The customer will ask "how fast is it?" — have a number, not an impression</td></tr>
+<tr><td>Time to first token</td><td>The number that determines perceived speed; optimise this over total latency</td></tr>
+<tr><td>Retrieval top score distribution</td><td>Consistently low top scores means your chunking or embedding is wrong, not the model</td></tr>
+<tr><td>"Could not find" rate</td><td>High rate = coverage gap. This is a concrete, fixable finding to report.</td></tr>
+<tr><td>Thumbs-down rate and the questions behind it</td><td>Your prioritised backlog, written by the customer</td></tr>
+<tr><td>Cost per question</td><td>Lets you answer "what would this cost for 500 users?" credibly</td></tr>
+<tr><td>Error rate by type</td><td>Tells you which failure mode to harden first</td></tr>
+</table>
+
+<pre><code class="language-python"># A tiny cost tracker. Verify current prices before quoting anything.
+PRICES_PER_1K = {                    # USD per 1k tokens - CHECK CURRENT PRICING
+    "gpt-4o-mini":            {"in": 0.00015, "out": 0.0006},
+    "gpt-4o":                 {"in": 0.0025,  "out": 0.01},
+    "text-embedding-3-small": {"in": 0.00002, "out": 0.0},
+}
+
+def estimate_cost(model: str, in_tokens: int, out_tokens: int) -&gt; float:
+    p = PRICES_PER_1K.get(model)
+    if not p:
+        return 0.0
+    return (in_tokens / 1000) * p["in"] + (out_tokens / 1000) * p["out"]
+
+# Then in the follow-up email:
+#   "Average cost per question in the session was $0.0031.
+#    At 200 questions/day that is about $19/month in model spend."
+# A concrete number like that moves a budget conversation forward more
+# than any amount of architecture discussion.</code></pre>
+
+<h2>Performance Tricks</h2>
+<p class="lead">A prototype does not need to be fast in the throughput sense — it needs to <i>feel</i> fast to one person clicking through it. Those are different problems with different solutions, and the handful of techniques below cover almost all of the perceived-latency wins available to you.</p>
+
+<h3>Rank the wins</h3>
+<table>
+<tr><th>Technique</th><th>Typical win</th><th>Effort</th></tr>
+<tr><td>Stream the response instead of waiting</td><td>8 s &#8594; 400 ms <i>perceived</i></td><td>30 min</td></tr>
+<tr><td>Load models/clients once at startup, not per request</td><td>Removes 2-8 s from every request</td><td>10 min</td></tr>
+<tr><td>Cache answers for repeated/demo questions</td><td>6 s &#8594; 20 ms</td><td>20 min</td></tr>
+<tr><td>Warm up before the demo</td><td>Removes the first-request penalty entirely</td><td>5 min</td></tr>
+<tr><td>Batch embedding calls</td><td>5-20x on ingestion</td><td>15 min</td></tr>
+<tr><td>Use a smaller/faster model for the demo path</td><td>2-4x, often with no visible quality loss</td><td>5 min</td></tr>
+<tr><td>Show progress for anything over ~1 s</td><td>No real win; large perceived win</td><td>5 min</td></tr>
+<tr><td>Reduce retrieved chunks from 10 to 5</td><td>~30% fewer input tokens, faster and cheaper</td><td>1 min</td></tr>
+</table>
+
+<h3>Warm start and lazy loading</h3>
+<pre><code class="language-python">from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app):
+    s = get_settings()
+
+    # 1. Load heavy objects ONCE
+    app.state.index = VectorIndex.load(s.vector_store_path)
+    app.state.llm   = LLMClient(s.openai_api_key.get_secret_value(), s.model_name)
+
+    # 2. Warm the embedding model with a throwaway call so the FIRST real
+    #    user request does not pay for lazy initialisation inside the library.
+    try:
+        app.state.index.search("warmup", k=1)
+        log.info("index warm")
+    except Exception as e:
+        log.warning("warmup failed (continuing): %s", e)
+
+    # 3. Optionally pre-warm the model connection pool
+    try:
+        await asyncio.wait_for(app.state.llm.ping(), timeout=10)
+    except Exception:
+        log.warning("model not reachable at startup - demo mode may be needed")
+
+    yield
+    await app.state.llm.aclose()</code></pre>
+
+<pre><code class="language-python"># Lazy-load things that are expensive AND not always needed.
+# This keeps container startup fast (important for scale-to-zero platforms)
+# while still paying the cost only once.
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def get_reranker():
+    from sentence_transformers import CrossEncoder
+    return CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+
+# Called only when rerank=True; the import itself costs ~2 s.</code></pre>
+
+<h3>Batching</h3>
+<pre><code class="language-python">async def embed_many(texts: list[str], batch_size: int = 256) -&gt; list[list[float]]:
+    """One API call per 256 texts instead of one per text.
+    On a 10k-chunk corpus this is the difference between 20 minutes and 90 seconds."""
+    out: list[list[float]] = []
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i + batch_size]
+        r = await client.post("/embeddings",
+                              json={"model": "text-embedding-3-small", "input": batch})
+        r.raise_for_status()
+        out.extend(d["embedding"] for d in sorted(r.json()["data"], key=lambda d: d["index"]))
+    return out</code></pre>
+
+<h3>Cold start on serverless platforms</h3>
+<div class="callout warn"><span class="t">Scale-to-zero and demos do not mix</span>Cloud Run and Container Apps can scale to zero, which is excellent for cost and terrible for a demo: the first request after idle waits for a container start plus your model load — commonly 15-40 seconds, during which the customer concludes the system is broken. Before any demo, set minimum replicas to 1, and add a keep-warm ping every few minutes. Afterwards, set it back to zero. Put both commands in your runbook so you cannot forget.</div>
+
+<pre><code class="language-bash"># Before the demo
+az containerapp update -n doc-assistant-api -g rg-demo --min-replicas 1
+az containerapp update -n doc-assistant-ui  -g rg-demo --min-replicas 1
+
+# Keep-warm from anywhere (cron, GitHub Actions, your laptop)
+while true; do curl -fsS https://doc-assistant-api.../health &gt; /dev/null; sleep 240; done
+
+# After the demo
+az containerapp update -n doc-assistant-api -g rg-demo --min-replicas 0</code></pre>
+
+<h2>The Graduation Path</h2>
+<p class="lead">At some point the prototype gets used by real people, and everything you deliberately skipped becomes a liability. This section is the honest list of what changes, so you can estimate it, price it, and have the conversation before the customer discovers it the hard way.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="760" height="290" fill="#ffffff"/>
+  <text x="16" y="20" font-size="11" fill="#1e3a8a" font-family="sans-serif">WHAT CHANGES WHEN A PROTOTYPE BECOMES A PRODUCT</text>
+
+  <rect x="16" y="40" width="340" height="210" rx="5" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="186" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">PROTOTYPE</text>
+  <text x="32" y="86" font-size="9" fill="#6b7688" font-family="sans-serif">State: session_state + local files</text>
+  <text x="32" y="106" font-size="9" fill="#6b7688" font-family="sans-serif">Auth: shared password</text>
+  <text x="32" y="126" font-size="9" fill="#6b7688" font-family="sans-serif">Secrets: .env on a VM</text>
+  <text x="32" y="146" font-size="9" fill="#6b7688" font-family="sans-serif">Tests: three smoke tests</text>
+  <text x="32" y="166" font-size="9" fill="#6b7688" font-family="sans-serif">Deploy: docker compose up, by hand</text>
+  <text x="32" y="186" font-size="9" fill="#6b7688" font-family="sans-serif">Errors: a message on screen</text>
+  <text x="32" y="206" font-size="9" fill="#6b7688" font-family="sans-serif">Scale: 1 replica, 5 users</text>
+  <text x="32" y="226" font-size="9" fill="#6b7688" font-family="sans-serif">Owner: you, in a meeting</text>
+
+  <text x="378" y="150" font-size="16" fill="#2563eb" text-anchor="middle" font-family="sans-serif">&#8594;</text>
+  <text x="378" y="172" font-size="8" fill="#6b7688" text-anchor="middle" font-family="sans-serif">4-10 wks</text>
+
+  <rect x="404" y="40" width="340" height="210" rx="5" fill="#e3e8ef" stroke="#1e3a8a"/>
+  <text x="574" y="62" font-size="10" fill="#1e3a8a" text-anchor="middle" font-family="sans-serif">PRODUCT</text>
+  <text x="420" y="86" font-size="9" fill="#6b7688" font-family="sans-serif">State: Postgres + migrations + backups</text>
+  <text x="420" y="106" font-size="9" fill="#6b7688" font-family="sans-serif">Auth: SSO, roles, per-doc permissions</text>
+  <text x="420" y="126" font-size="9" fill="#6b7688" font-family="sans-serif">Secrets: Key Vault, rotation</text>
+  <text x="420" y="146" font-size="9" fill="#6b7688" font-family="sans-serif">Tests: unit + integration + eval suite in CI</text>
+  <text x="420" y="166" font-size="9" fill="#6b7688" font-family="sans-serif">Deploy: pipeline, staging, rollback</text>
+  <text x="420" y="186" font-size="9" fill="#6b7688" font-family="sans-serif">Errors: logged, alerted, on-call runbook</text>
+  <text x="420" y="206" font-size="9" fill="#6b7688" font-family="sans-serif">Scale: N replicas, stateless, autoscaled</text>
+  <text x="420" y="226" font-size="9" fill="#6b7688" font-family="sans-serif">Owner: a named team that is not you</text>
+
+  <text x="16" y="276" font-size="9" fill="#2563eb" font-family="sans-serif">Say this on day one, in writing. The decision to ship anyway is theirs - but it must be informed.</text>
+</svg>
+<div class="cap">The graduation gap. Estimate it once and reuse the estimate; it is remarkably consistent across projects.</div>
+</div>
+
+<h3>The nine things that must change</h3>
+<ol class="steps">
+  <li><b>State moves out of the process.</b> session_state and local files become Postgres (or the customer's standard store) with schema migrations via Alembic, backups, and a restore you have actually tested. Until this is done the app cannot be restarted safely or scaled at all.</li>
+  <li><b>Real authentication and authorisation.</b> SSO through their IdP, roles, and — critically for document systems — per-document permissions enforced at retrieval time, not just at the UI. A RAG system that ignores source ACLs is a data-leak machine.</li>
+  <li><b>Secrets management.</b> <code>.env</code> becomes Key Vault / Secret Manager / Parameter Store, injected at runtime, with rotation and an audit trail. No secret in an image, a repo or an environment variable printed in logs.</li>
+  <li><b>Tests.</b> Unit tests on the services, integration tests on the API, and an evaluation suite that runs your golden question set and asserts quality thresholds — because a prompt change can silently degrade answers in a way no unit test catches.</li>
+  <li><b>CI/CD.</b> Build, test, scan, push, deploy to staging, smoke test, promote. Plus a rollback that someone has performed at least once as a drill.</li>
+  <li><b>Observability.</b> Structured logs shipped somewhere searchable, metrics with dashboards, traces for the slow path, alerts with an on-call rotation, and an SLO everyone has agreed to.</li>
+  <li><b>Scaling and resilience.</b> Stateless replicas behind a load balancer, autoscaling rules, graceful shutdown, circuit breakers on the model provider, and a defined behaviour when the provider is down.</li>
+  <li><b>A frontend that is not Streamlit.</b> If more than a handful of people use it daily, you will hit the limits of the rerun model, the lack of sticky sessions, and the styling ceiling. Budget for React or their standard frontend stack.</li>
+  <li><b>Ownership.</b> A named team, documentation they wrote or reviewed, a runbook they have exercised, and an agreed support model. Without this the system decays regardless of its technical quality.</li>
+</ol>
+
+<h3>The prototype debt register</h3>
+<p>Start this file on day one and update it every time you take a shortcut. It takes thirty seconds per entry and it is the single most useful artefact you hand over.</p>
+
+<pre><code class="language-text">PROTOTYPE DEBT REGISTER - Document Assistant - updated 2026-03-14
+
+ID  AREA        SHORTCUT TAKEN                        RISK IF SHIPPED AS-IS          EST
+--  ----------  ------------------------------------  -----------------------------  ----
+D1  Auth        Shared password in st.secrets         Anyone with the URL+pw sees     4d
+                                                      all indexed documents
+D2  AuthZ       No per-document permissions           Users see documents they are    6d
+                                                      not entitled to. BLOCKER.
+D3  State       session_state + SQLite on a volume    Restart loses conversations;    5d
+                                                      cannot scale past 1 replica
+D4  Secrets     OPENAI_API_KEY in container env       No rotation, visible to anyone  2d
+                                                      with container access
+D5  Ingestion   Manual script, run by hand            New documents are not indexed   3d
+                                                      until someone remembers
+D6  Ingestion   Scanned PDFs skipped entirely         ~30% of the corpus is invisible 5d
+                                                      to the assistant. Needs OCR.
+D7  Quality     No evaluation suite                   Prompt changes can silently     4d
+                                                      degrade answers
+D8  Ops         No logging/alerting beyond stdout     Failures are invisible          3d
+D9  Deploy      Deployed by hand with az cli          No rollback, no staging         4d
+D10 Frontend    Streamlit, 1 replica, no sticky        Breaks above ~10 concurrent    15d
+                sessions                               users
+--  ----------  ------------------------------------  -----------------------------  ----
+                                                      BLOCKERS (D2):              6d
+                                                      MINIMUM VIABLE PRODUCTION:  31d
+                                                      FULL:                       51d
+
+Assumption: one engineer. Excludes customer-side security review and
+procurement, which historically add 2-6 weeks of elapsed time.</code></pre>
+
+<div class="callout ok"><span class="t">Why this document wins arguments</span>When the customer asks "can't we just use the prototype?", you do not have to say no, and you do not have to be vague. You show the register, point at D2 as a blocker, and offer a six-day path to something defensible. You have turned an uncomfortable conversation into a scoping exercise with a number attached — which is exactly what the person holding the budget needs.</div>
+
+<h2>Anti-Patterns and How Prototypes Fail</h2>
+<p class="lead">These are the specific, repeated ways prototypes fail in front of customers. Each one is cheap to avoid and expensive to experience.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>The infinite prototype</h4><p>Four months in, still "a prototype", now with twelve features and six users, no tests, and nobody willing to own it. Caused by never defining what "done" means. Fix: a written scope and end date before you start, and a go/no-go decision meeting at the end.</p></div>
+  <div class="card"><h4>The demo-only path</h4><p>It works beautifully for the three questions you rehearsed and crashes on the fourth. Caused by testing only the script. Fix: have someone who has not seen it use it for ten minutes before the demo, and fix whatever they break.</p></div>
+  <div class="card"><h4>The synthetic-data illusion</h4><p>Built on clean generated data, it falls apart on the customer's actual records with their missing fields, duplicate ids and 1990s encodings. Fix: insist on real (masked) data in week one, even if it is only 500 rows.</p></div>
+  <div class="card"><h4>The hidden stub</h4><p>You stubbed the write-back and forgot to mention it. The customer thinks it is working end to end and tells their boss. Later this looks like dishonesty. Fix: say every stub out loud during the demo and list them in the follow-up email.</p></div>
+  <div class="card"><h4>Over-engineering on day one</h4><p>Three days spent on Kubernetes manifests, a message queue and a CI pipeline for a demo seen by four people once. Fix: the infrastructure rule — nothing that is not needed for this week's demo.</p></div>
+  <div class="card"><h4>The silent failure</h4><p>The model call fails, the code swallows the exception, and the UI shows an empty answer. The customer concludes the model is stupid rather than that the network is broken. Fix: never catch broadly without surfacing something to the user.</p></div>
+  <div class="card"><h4>Cherry-picked examples</h4><p>You only ever show the five documents you know retrieve well. Someone picks a sixth and it fails. Fix: test against a random sample before the demo and know your actual hit rate — then you can say "it handles roughly 8 in 10 of these; here's what the failures look like", which is far more credible.</p></div>
+  <div class="card"><h4>The unreproducible environment</h4><p>It runs on your laptop and nowhere else, because of an unpinned dependency, a local file path, or a tool you installed six months ago. Fix: build the Docker image on day one and do your own testing through it.</p></div>
+</div>
+
+<div class="callout danger"><span class="t">The failure that ends engagements</span>A prototype containing the customer's confidential documents left running on a public URL after the demo. Nobody turned it off; a scanner found it; the customer's security team found out from someone else. Everything you built becomes irrelevant. Have a written teardown step: when the demo period ends, the app is stopped, the data is deleted, the keys are rotated, and you send a short email confirming all three. Put it in your calendar before the demo, not after.</div>
+
+<h2>Interview Questions</h2>
+
+<div class="qa">
+  <div class="q">A customer wants a demo in three days of an AI assistant over their internal documents. Walk me through your plan.</div>
+  <div class="a">Day zero, before anything technical: I ask for a sample of the documents and confirm in writing whether that data may be sent to a hosted model API, because the answer determines the entire architecture and I cannot un-ask it later. Day one: ingestion, because that is where the surprises are. Extract text from the real files, discover which are scanned images, chunk, embed, index, and run ten questions through retrieval alone to see whether the right passages come back — if retrieval is bad the model cannot save it. Day two: FastAPI backend with a streaming endpoint and a Streamlit frontend with chat, sources panel, upload and a reset button, plus structured logging of every query. Day three: harden the demo — seed data, populate a demo cache by running the full script once, test on the actual network, write the pre-demo checklist, and spend an hour letting a colleague try to break it. I would deliberately not build authentication beyond a password gate, not deploy to the cloud unless they need remote access, and not add any feature beyond the single workflow we agreed. Everything I skipped goes in a debt register that I hand over with the demo.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Why would you build a FastAPI backend rather than putting everything in Streamlit?</div>
+  <div class="a">Three reasons, and the first is the decisive one. First, reusability: when the customer says "actually we want this inside our existing portal" or "can it run as a batch job over the whole queue", a FastAPI backend already answers both and only the thin UI is thrown away. If the logic lives inside Streamlit callbacks, that request means a rewrite. Second, testability: service functions that take plain arguments and return plain objects can be tested in two seconds with pytest, with no browser and no server, which matters enormously when you are changing things an hour before a demo. Third, concurrency and streaming: Streamlit's one-script-per-session model makes real concurrency control, background jobs and token streaming awkward, whereas FastAPI gives you async, semaphores, SSE and proper timeouts. The cost is about two hours on day one plus one extra container. In the rare case where the thing genuinely is a single-user notebook replacement that will never be integrated, I would skip it and say so.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Explain Streamlit's execution model and the most common bug it causes.</div>
+  <div class="a">Streamlit re-runs the entire script from top to bottom on every interaction. There is no component tree and no persistent handler scope — when you click a button, your script executes again from line one, and each widget function returns its current value. The most common bug is losing state: people store conversation history or a loaded model in a local variable and are confused when it resets on every click, because that variable is recreated each run. The fix is <code>st.session_state</code> for per-session data, initialised behind an <code>if key not in session_state</code> guard so it is set once, and the caching decorators for expensive objects — <code>cache_resource</code> for models, clients and connections which are shared by reference, and <code>cache_data</code> for serialisable results which are copied per caller. The second-most-common bug follows from the same model: loading a model at module level without caching, so every single keystroke in a text input reloads it and the app feels broken. Once you internalise "the script reruns, so anything that must survive goes in session_state or a cache", the framework stops being surprising.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is the difference between <code>async def</code> and <code>def</code> in a FastAPI route, and when does it bite you?</div>
+  <div class="a">An <code>async def</code> handler runs directly on the event loop, which is correct and efficient when everything slow inside it is awaited. A plain <code>def</code> handler is run in a threadpool, which is safe for blocking I/O at the cost of being bounded by the thread count. The bite is putting blocking code inside <code>async def</code> — calling <code>requests.get</code>, <code>time.sleep</code>, a synchronous database driver, or doing heavy CPU work. That blocks the event loop, so every other request handled by that worker stalls until it finishes. In single-user testing you never notice; in a demo where the customer opens three tabs, everything appears to hang and it looks like the model is broken. The rules I apply: use <code>async def</code> with async clients like httpx for I/O; use plain <code>def</code> if you want to keep a synchronous library; push CPU-bound work to <code>run_in_threadpool</code> or a process pool; and if unsure, write <code>def</code>, because the threadpool is marginally slower in theory and dramatically safer in practice.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you make a prototype resilient to a bad network during a customer demo?</div>
+  <div class="a">Layered defence. First, a demo cache: I run the full demo script once on a good connection the day before, which stores the answer for every planned question keyed on a normalised hash, so on the day those questions return in milliseconds with no network at all. Second, graceful degradation: a short timeout on the model call — around ten seconds rather than sixty — falling back to the cache, and failing that to a message plus the retrieved passages, so the customer still sees the retrieval working even if generation fails. Third, no stack traces ever reach the screen; there is a catch-all handler that renders a readable message with the technical detail hidden behind an expander. Fourth, operational preparation: a tethered mobile hotspot tested in advance, minimum replicas set to one so there is no cold start, a warm-up request fired before they walk in, and a screen recording of the happy path saved locally. And finally a rehearsed sentence for when something fails anyway, because the recovery is what the room remembers, not the failure.</div>
+</div>
+
+<div class="qa">
+  <div class="q">A customer wants to put your prototype straight into production. How do you respond?</div>
+  <div class="a">I do not refuse, because refusing makes me an obstacle and they may have a legitimate reason to accept the risk. Instead I make the risk explicit and priced. I show the prototype debt register — which I started on day one — and separate it into three tiers: blockers that create unacceptable risk, items needed for minimum viable production, and nice-to-haves. For a document assistant the blocker is almost always authorisation: the prototype does not enforce per-document permissions, so users can retrieve content they are not entitled to, which is a data-leak risk regardless of how good the answers are. I would quantify that as, say, six days of work, and the minimum viable production path as around four to six weeks including auth, durable state, secrets management, an evaluation suite, deployment automation and monitoring. Then I let them choose. Very often they pick a middle path: fix the blockers, run a limited pilot with twenty named users, and schedule the rest. What matters is that the decision is theirs and informed, and that it is in writing — because in six months somebody will ask why there are no tests.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you handle authentication for a prototype that needs to be accessible to the customer?</div>
+  <div class="a">The governing rule is that customer data is never reachable from the public internet without authentication — not "probably nobody will find it", because scanners find new hosts within minutes. Within that constraint I scale the effort to the context. If it only needs to be seen in a meeting, I screen-share from localhost and there is no auth problem to solve. If a handful of named people need to click around, a shared password gate plus HTTPS is defensible for non-sensitive data. The answer I actually push for, because it takes one to two hours and is what their security team wants to see, is an OAuth proxy in front of the app — oauth2-proxy in compose, or Azure Easy Auth, or Google IAP — which handles their identity provider entirely outside my code and passes the authenticated email in a header. My app stays auth-free and I get real SSO and an audit trail. What I would never do is a public Gradio share link or a cloud endpoint with open ingress containing their documents, because that is a reportable incident rather than a shortcut.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What would you log in a prototype, and why bother?</div>
+  <div class="a">I log every interaction with the question, the retrieved chunk ids and their scores, the generated answer, the model, latency, and any thumbs-up or thumbs-down — into SQLite, which is one file I can hand over. The reason is that a demo is the only time you get real user queries before launch, and you cannot invent them. After a one-hour session you have thirty to sixty genuine questions with retrieval traces and partial human judgements, which is your first evaluation set and is far better than anything you would have written. It also lets you answer, concretely, the questions the customer will ask next: what was the p95 latency, what fraction of questions could not be answered from the corpus, which documents were never retrieved, what did a question cost on average. Sending that analysis in the follow-up email — "here are the forty questions you asked, here's where it struggled, here's what that implies for scope" — does more for the next phase than any slide. It costs about twenty lines of code.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Your demo app is slow — eight seconds per answer. What do you do?</div>
+  <div class="a">First I measure where the time goes rather than guessing: retrieval, model generation, and any pre- or post-processing, timed separately. Usually generation dominates, in which case the highest-impact fix is not making it faster but making it <i>feel</i> faster by streaming — time to first token of a few hundred milliseconds with text flowing reads as instant, even though total latency is unchanged. That is a thirty-minute change and it is the single biggest perceived win available. After that: check that models, clients and the index are loaded once in the lifespan rather than per request, which often removes several seconds that nobody noticed were there; cache answers for repeated questions; reduce the number of retrieved chunks, since going from ten to five cuts input tokens by roughly half with little quality loss in most corpora; batch anything that loops over items; and consider a smaller model for the demo path. If retrieval is the slow part, the index is usually either too large for the machine or doing something pathological like re-embedding the query with a cold model. I would also set minimum replicas to one so there is no cold start, which is otherwise the worst eight seconds of the demo.</div>
+</div>
+
+<div class="qa">
+  <div class="q">When would you choose Gradio over Streamlit?</div>
+  <div class="a">Gradio when the app is fundamentally a model with inputs and outputs, and especially when the inputs or outputs are images, audio or video, because its components for those are much better. Also when I want a chat UI in under ten lines with streaming, cancellation and a queue already handled — <code>ChatInterface</code> does in five lines what takes thirty in Streamlit. Also when deploying to Hugging Face Spaces, which is Gradio's native home, or when I want the UI to double as a callable API, which Gradio exposes automatically. Streamlit when the app is more of an internal business tool — multiple pages, dataframes, filters, metrics, a sidebar of controls — because it has better primitives for data display and navigation and it looks more like software the customer's staff already use. For typical enterprise FDE work the answer is Streamlit more often than not, because the demos are usually chat plus a table plus an upload. The one thing I would never do is choose Gradio because of the <code>share=True</code> link when the app contains customer data, since that is a public tunnel with no authentication.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you keep a three-day prototype from becoming unmaintainable?</div>
+  <div class="a">One structural rule does most of the work: no business logic inside a framework callback. Everything real — retrieval, prompt construction, model calls, parsing, validation — lives in plain functions in a services module that imports neither FastAPI nor Streamlit. The route handlers and the UI only call those functions and display results. That single discipline means the logic is testable without a server, reusable from a script or a notebook, and survives replacing the UI. On top of that: pin dependencies with a lockfile so the environment is reproducible, keep configuration in one pydantic-settings class rather than scattered <code>os.getenv</code> calls, write three tests covering the happy path, a validation failure and an upstream failure, and build the Docker image on day one so you discover environment problems immediately rather than the night before. None of this is heavyweight — it is maybe two extra hours across three days — and it is the difference between a prototype that can be graduated and one that can only be rewritten.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What would make you refuse to build a prototype?</div>
+  <div class="a">A few situations. If the data required does not exist and will not exist within the engagement, a prototype would have to run on fiction, and a demo on synthetic data proves nothing to a room full of people who know their data is messy. If legal or privacy has not cleared sending the data to the model provider I planned to use, and there is no viable on-premise or in-tenancy alternative within scope, I would stop and resolve that first rather than build something I may have to delete. If the real question is organisational — will people actually change their workflow — a prototype cannot answer it, and I would propose a different intervention such as shadowing the current process. And if they are describing a production system but calling it a prototype to bypass procurement and security review, I would clarify that explicitly, because building to prototype standards something that will be used in production is how people get hurt. In every one of these cases the right move is to say what I think is actually needed, propose the smaller thing that would genuinely de-risk the decision, and get agreement in writing.</div>
+</div>
+
+<h2>Build-a-Demo Lab Plan and Checklists</h2>
+<p class="lead">The only way to get fast at this is to do it repeatedly under a clock. Each lab below is deliberately timeboxed; the discipline of stopping when the box ends is as much of the skill as the code.</p>
+
+<h3>Lab 1 — Four hours: the baseline demo</h3>
+<ol class="steps">
+  <li><b>00:00-00:20</b> &mdash; <code>uv init</code>, pin Python, add FastAPI, Streamlit, httpx, pydantic-settings. Create the folder layout. Commit.</li>
+  <li><b>00:20-01:00</b> &mdash; Backend: <code>/health</code>, <code>/ask</code> returning a hardcoded answer, settings class, three pytest tests with fakes. Prove the tests run in under five seconds.</li>
+  <li><b>01:00-01:40</b> &mdash; Frontend: chat UI calling the backend. Sidebar with health status. Reset button. The <i>entire</i> frontend talks to the backend through one <code>api_client.py</code>.</li>
+  <li><b>01:40-02:30</b> &mdash; Make it real: ingest 20 documents you actually have, wire retrieval, wire a model. Fix whatever breaks.</li>
+  <li><b>02:30-03:00</b> &mdash; Add streaming end to end. Measure time to first token before and after; write both numbers down.</li>
+  <li><b>03:00-03:30</b> &mdash; Harden: catch-all error handler, friendly error states, loading indicators, demo cache, seed script.</li>
+  <li><b>03:30-04:00</b> &mdash; Dockerfiles and compose. Run <code>docker compose down &amp;&amp; up</code> and confirm the index survives. Write a five-line README.</li>
+</ol>
+
+<h3>Lab 2 — Two hours: deploy and lock down</h3>
+<ol class="steps">
+  <li>Push both images to a registry.</li>
+  <li>Deploy to Container Apps or Cloud Run with internal ingress on the API and external on the UI.</li>
+  <li>Put secrets in the platform's secret store; confirm nothing sensitive is in the image (<code>docker history</code> and a <code>grep</code> of the layers).</li>
+  <li>Add an OAuth proxy or the platform's built-in auth. Confirm that an unauthenticated request gets a 401 — actually test it from a private browser window.</li>
+  <li>Verify streaming still works through the load balancer. If it buffers, fix the headers. This is the step everyone skips and everyone regrets.</li>
+  <li>Set minimum replicas to one, measure cold vs warm first-request latency, write both into your runbook.</li>
+  <li>Write the teardown script: stop, delete data, rotate keys.</li>
+</ol>
+
+<h3>Lab 3 — One hour: break it on purpose</h3>
+<ol class="steps">
+  <li>Disconnect the network mid-answer. What does the user see? Fix it.</li>
+  <li>Set the model API key to garbage. What does the user see? Fix it.</li>
+  <li>Upload a 40 MB file, a zero-byte file, a <code>.exe</code> renamed to <code>.pdf</code>, and a scanned PDF.</li>
+  <li>Paste 50,000 characters into the question box.</li>
+  <li>Open five tabs and submit simultaneously. Does anything block? If yes, you have a blocking call inside <code>async def</code>.</li>
+  <li>Restart the container mid-conversation. What is lost? Is that acceptable? Write it in the debt register.</li>
+  <li>Ask ten questions you know are not covered by the corpus. Does it hallucinate or say it cannot find them? This is the behaviour the customer will test first.</li>
+</ol>
+
+<h3>Lab 4 — Repeat under pressure</h3>
+<ol class="steps">
+  <li>Pick a dataset or document corpus you have never seen. Give yourself four hours total.</li>
+  <li>Build the demo, deploy it, and present it to someone for ten minutes without rehearsing.</li>
+  <li>Log every question they ask. Export the eval set. Write the one-page follow-up.</li>
+  <li>Do this three times with different domains. By the third you will have internalised the layout, the error handling and the checklist, and four hours will feel comfortable.</li>
+</ol>
+
+<h3>Checklist: before you write any code</h3>
+<ul class="checklist">
+  <li>One user, one task, one happy path agreed and written down.</li>
+  <li>Real (or realistically masked) sample data in hand.</li>
+  <li>Written confirmation of whether that data may go to a hosted model API.</li>
+  <li>Demo date, audience and the single question the demo must answer.</li>
+  <li>Decided which parts you are deliberately stubbing, and told them.</li>
+  <li>An end date for the prototype and what happens to it afterwards.</li>
+</ul>
+
+<h3>Checklist: code quality for a prototype that can graduate</h3>
+<ul class="checklist">
+  <li>Business logic in <code>services/</code> with no framework imports.</li>
+  <li>Configuration in one settings class; nothing read from <code>os.environ</code> ad hoc.</li>
+  <li><code>.env</code> gitignored before the first commit; <code>.env.example</code> committed.</li>
+  <li>Dependencies pinned in a lockfile.</li>
+  <li>Three tests: happy path, validation failure, upstream failure.</li>
+  <li>Dockerfile built and tested on day one, not demo day.</li>
+  <li>Structured logging of every interaction into a file you can hand over.</li>
+  <li>A catch-all error handler; no stack trace ever reaches a user.</li>
+  <li>Timeouts on every outbound call; a concurrency limit on the model client.</li>
+  <li>A seed script and a visible reset button.</li>
+</ul>
+
+<h3>Checklist: demo day</h3>
+<ul class="checklist">
+  <li>Full run-through on the presenting machine and network, two hours ahead.</li>
+  <li>Seeded, reviewed data with nothing embarrassing in it.</li>
+  <li>Demo cache populated; minimum replicas set to one; app warmed.</li>
+  <li>Notifications off, sleep disabled, one browser tab, resolution tested.</li>
+  <li>Hotspot tethered; screen recording of the happy path saved locally.</li>
+  <li>Three improvised questions tried so you know what failure looks like.</li>
+  <li>Stub list written down, to be stated out loud during the demo.</li>
+  <li>A colleague briefed to carry the conversation if you need to fix something.</li>
+</ul>
+
+<h3>Checklist: after the demo</h3>
+<ul class="checklist">
+  <li>Follow-up email within 24 hours: what was shown, what was stubbed, the questions they asked, what you recommend next.</li>
+  <li>Eval set exported and shared.</li>
+  <li>Debt register updated and attached, with the blockers separated from the rest.</li>
+  <li>Teardown executed on the agreed date: app stopped, data deleted, keys rotated, confirmation sent.</li>
+  <li>A written go/no-go recommendation, including the option of not proceeding.</li>
+</ul>

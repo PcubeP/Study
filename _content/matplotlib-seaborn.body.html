@@ -1,0 +1,427 @@
+<p class="lead">Matplotlib is the foundational plotting library for Python — low-level, explicit, and able to draw essentially anything. Seaborn sits on top of it, trading a little control for a lot of convenience: statistical charts, sensible defaults, and tidy-data awareness in one line. Learn Matplotlib's figure/axes model once and every chart in the ecosystem (Seaborn, pandas <code>.plot()</code>, scikit-learn displays) becomes customisable, because they all return Matplotlib objects.</p>
+
+<h2>1. What They Are and Why They Matter</h2>
+
+<p>A visualisation is a function from data to pixels whose job is to let a human reason about numbers faster than a table ever could. Matplotlib (first released 2003) is the <em>engine</em>: it owns the canvas, the axes, the ticks, and every line and glyph. Seaborn (first released 2014) is a <em>statistical grammar</em> layered on top — it reads tidy DataFrames, computes aggregations and confidence intervals for you, and emits attractive Matplotlib figures you can still tweak afterwards.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Matplotlib</h4>Total control, verbose. You place every element. The substrate for the whole Python viz stack.</div>
+  <div class="card"><h4>Seaborn</h4>Concise statistical charts from tidy data: distributions, relationships, categories, correlation — with themes that look good by default.</div>
+  <div class="card"><h4>They compose</h4>Seaborn draws onto a Matplotlib <code>Axes</code>. Start in Seaborn for speed, drop to Matplotlib for the last 10% of polish.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 760 300" width="760" height="300">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="30" y="120" width="150" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="105" y="148" text-anchor="middle" font-size="13" fill="#1a2233">Tidy DataFrame</text>
+  <text x="105" y="166" text-anchor="middle" font-size="11" fill="#1a2233">rows = observations</text>
+
+  <rect x="225" y="55" width="160" height="55" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="305" y="80" text-anchor="middle" font-size="12" fill="#1a2233">Seaborn</text>
+  <text x="305" y="97" text-anchor="middle" font-size="11" fill="#1a2233">stats + defaults</text>
+
+  <rect x="225" y="190" width="160" height="55" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="305" y="215" text-anchor="middle" font-size="12" fill="#1a2233">Matplotlib API</text>
+  <text x="305" y="232" text-anchor="middle" font-size="11" fill="#1a2233">Figure / Axes</text>
+
+  <rect x="440" y="120" width="150" height="60" rx="8" fill="#2563eb" stroke="#1e3a8a"/>
+  <text x="515" y="148" text-anchor="middle" font-size="12" fill="#fff">Renderer</text>
+  <text x="515" y="166" text-anchor="middle" font-size="11" fill="#fff">(Agg / PDF / SVG)</text>
+
+  <rect x="635" y="120" width="95" height="60" rx="8" fill="#059669" stroke="#1e3a8a"/>
+  <text x="682" y="155" text-anchor="middle" font-size="12" fill="#fff">Pixels</text>
+
+  <line x1="180" y1="140" x2="225" y2="85" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="180" y1="160" x2="225" y2="215" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="385" y1="85" x2="430" y2="135" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="385" y1="215" x2="430" y2="165" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="590" y1="150" x2="635" y2="150" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="305" y="285" text-anchor="middle" font-size="11" fill="#b45309">Seaborn is a convenience layer; everything ultimately becomes Matplotlib artists.</text>
+</svg>
+<div class="cap">Fig 1 — Data flows through Seaborn (optional) into Matplotlib's Figure/Axes, then to a backend renderer.</div>
+</div>
+
+<div class="callout note"><span class="t">Mental model</span> Think of a <strong>Figure</strong> as the sheet of paper and each <strong>Axes</strong> as one chart drawn on it. Almost every plotting call ultimately adds <em>artists</em> (lines, patches, text) to an Axes.</div>
+
+<h2>2. Setup and Getting Started</h2>
+
+<pre><code class="language-bash"># Install into a virtual environment
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install matplotlib seaborn pandas numpy
+
+# Versions this guide targets (2026-era)
+python -c "import matplotlib, seaborn; print(matplotlib.__version__, seaborn.__version__)"
+# e.g. 3.9.x  0.13.x</code></pre>
+
+<p>The canonical imports. Note Seaborn is conventionally <code>sns</code> and Matplotlib's stateful interface is <code>plt</code>:</p>
+
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# A good global baseline: Seaborn theme + readable DPI
+sns.set_theme(style="whitegrid", context="notebook")
+plt.rcParams["figure.dpi"] = 110        # crisper inline figures
+plt.rcParams["savefig.bbox"] = "tight"  # trim whitespace on export</code></pre>
+
+<div class="callout tip"><span class="t">Backends</span> In Jupyter, figures render inline automatically. In a plain script you need <code>plt.show()</code> to open a window, or <code>fig.savefig("out.png")</code> to write a file. On a headless server set a non-interactive backend early: <code>import matplotlib; matplotlib.use("Agg")</code>.</div>
+
+<h2>3. The Figure / Axes Model — the One Thing to Understand</h2>
+
+<p>Matplotlib has <strong>two interfaces</strong>, and mixing them up is the single biggest source of confusion.</p>
+
+<div class="grid c2">
+  <div class="card"><h4>pyplot (implicit)</h4>Commands like <code>plt.plot()</code> act on a hidden "current axes". Fine for quick, one-chart throwaways. State is global and surprising with multiple plots.</div>
+  <div class="card"><h4>Object-oriented (explicit)</h4><code>fig, ax = plt.subplots()</code> then call methods on <code>ax</code>. Verbose but unambiguous. <strong>Use this</strong> for anything reusable, in functions, or with subplots.</div>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 720 360" width="720" height="360">
+  <rect x="40" y="20" width="640" height="320" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="55" y="42" font-size="13" fill="#1e3a8a" font-weight="bold">Figure</text>
+
+  <rect x="80" y="60" width="260" height="240" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="95" y="82" font-size="12" fill="#1e3a8a" font-weight="bold">Axes (one chart)</text>
+
+  <!-- plotting region -->
+  <rect x="130" y="110" width="180" height="140" fill="#fff" stroke="#1a2233"/>
+  <!-- a line -->
+  <polyline points="135,235 175,180 215,200 255,130 305,150" fill="none" stroke="#059669" stroke-width="2.5"/>
+  <!-- axis labels -->
+  <text x="220" y="285" text-anchor="middle" font-size="11" fill="#1a2233">x-axis (xlabel, xticks)</text>
+  <text x="112" y="180" text-anchor="middle" font-size="11" fill="#1a2233" transform="rotate(-90 112 180)">y-axis</text>
+  <text x="220" y="102" text-anchor="middle" font-size="11" fill="#b45309">Title</text>
+
+  <rect x="380" y="60" width="260" height="110" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="395" y="82" font-size="12" fill="#1a2233" font-weight="bold">Axes (second chart)</text>
+  <circle cx="440" cy="130" r="4" fill="#2563eb"/><circle cx="490" cy="115" r="4" fill="#2563eb"/>
+  <circle cx="540" cy="140" r="4" fill="#2563eb"/><circle cx="590" cy="108" r="4" fill="#2563eb"/>
+
+  <rect x="380" y="190" width="260" height="110" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="395" y="212" font-size="12" fill="#1a2233" font-weight="bold">Axes (third chart)</text>
+  <rect x="420" y="250" width="22" height="40" fill="#0891b2"/><rect x="455" y="235" width="22" height="55" fill="#0891b2"/>
+  <rect x="490" y="260" width="22" height="30" fill="#0891b2"/><rect x="525" y="225" width="22" height="65" fill="#0891b2"/>
+</svg>
+<div class="cap">Fig 2 — One Figure contains one or more Axes. Each Axes owns its own data region, two Axis objects (x/y), ticks, labels, title, and legend.</div>
+</div>
+
+<pre><code class="language-python"># The explicit, recommended pattern
+fig, ax = plt.subplots(figsize=(6, 4))   # one Figure, one Axes
+x = np.linspace(0, 2 * np.pi, 200)
+ax.plot(x, np.sin(x), label="sin")
+ax.plot(x, np.cos(x), label="cos", linestyle="--")
+
+ax.set_title("Trig functions")
+ax.set_xlabel("x (radians)")
+ax.set_ylabel("f(x)")
+ax.legend()
+ax.grid(True, alpha=0.3)
+fig.savefig("trig.png")   # or plt.show()</code></pre>
+
+<div class="callout warn"><span class="t">Gotcha</span> <code>plt.plot</code> and <code>ax.plot</code> look identical but <code>plt</code> targets whatever Axes was created last. Inside a loop or a helper function this silently draws onto the wrong chart. Always carry an explicit <code>ax</code> once you have more than one plot.</div>
+
+<h2>4. Core Chart Types in Matplotlib</h2>
+
+<h3>Line, scatter, bar, histogram</h3>
+
+<pre><code class="language-python">rng = np.random.default_rng(0)
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 7))
+
+# Line — trends over an ordered axis (time, sequence)
+t = np.arange(0, 50)
+axes[0, 0].plot(t, np.cumsum(rng.normal(size=50)), color="#2563eb")
+axes[0, 0].set_title("Line: random walk")
+
+# Scatter — relationship between two numeric variables
+x = rng.normal(size=200)
+y = 2 * x + rng.normal(size=200)
+axes[0, 1].scatter(x, y, s=18, alpha=0.6, color="#059669")
+axes[0, 1].set_title("Scatter: y vs x")
+
+# Bar — compare a numeric value across categories
+cats = ["A", "B", "C", "D"]
+axes[1, 0].bar(cats, [23, 17, 35, 29], color="#0891b2")
+axes[1, 0].set_title("Bar: value by category")
+
+# Histogram — distribution of one numeric variable
+axes[1, 1].hist(rng.normal(size=1000), bins=30, color="#b45309", edgecolor="white")
+axes[1, 1].set_title("Histogram: distribution")
+
+fig.tight_layout()   # prevents overlapping labels</code></pre>
+
+<div class="callout tip"><span class="t">tight_layout vs constrained_layout</span> <code>fig.tight_layout()</code> adjusts spacing once. For complex grids prefer creating the figure with <code>plt.subplots(..., layout="constrained")</code>, which re-flows automatically as you add titles, legends, and colorbars.</div>
+
+<h3>Styling anatomy: colors, markers, linestyles</h3>
+
+<table>
+<tr><th>Parameter</th><th>Common values</th><th>Example</th></tr>
+<tr><td><code>color</code> / <code>c</code></td><td>name, hex, RGB tuple, "C0".."C9"</td><td><code>color="#2563eb"</code></td></tr>
+<tr><td><code>linestyle</code> / <code>ls</code></td><td><code>"-"</code> <code>"--"</code> <code>"-."</code> <code>":"</code></td><td><code>ls="--"</code></td></tr>
+<tr><td><code>linewidth</code> / <code>lw</code></td><td>points (float)</td><td><code>lw=2.5</code></td></tr>
+<tr><td><code>marker</code></td><td><code>"o" "s" "^" "x" "." "D"</code></td><td><code>marker="o"</code></td></tr>
+<tr><td><code>alpha</code></td><td>0 (transparent) to 1</td><td><code>alpha=0.5</code></td></tr>
+<tr><td><code>cmap</code></td><td><code>viridis</code>, <code>magma</code>, <code>coolwarm</code></td><td><code>cmap="viridis"</code></td></tr>
+</table>
+
+<h2>5. Subplots and Layout</h2>
+
+<p><code>plt.subplots(nrows, ncols)</code> returns the Figure and an array of Axes. Index it to place each chart. For non-uniform grids, reach for <code>subplot_mosaic</code> — readable and flexible.</p>
+
+<pre><code class="language-python"># A dashboard: one wide chart on top, two below
+fig, axd = plt.subplot_mosaic(
+    """
+    AA
+    BC
+    """,
+    figsize=(10, 6), layout="constrained",
+)
+axd["A"].plot(np.cumsum(rng.normal(size=100)))
+axd["A"].set_title("Overview")
+axd["B"].hist(rng.normal(size=500), bins=25)
+axd["C"].scatter(rng.normal(size=100), rng.normal(size=100), s=12)
+
+# Share axes so panels are comparable
+fig2, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(9, 3.5))</code></pre>
+
+<div class="callout note"><span class="t">Shared scales</span> Use <code>sharex</code>/<code>sharey</code> when panels show the same quantity — comparing panels with different hidden scales is one of the most common ways a chart misleads.</div>
+
+<h2>6. Seaborn: Statistical Plots in One Line</h2>
+
+<p>Seaborn's modern API splits into <strong>figure-level</strong> functions (create their own Figure, support faceting via <code>col</code>/<code>row</code>) and <strong>axes-level</strong> functions (draw into an existing <code>ax</code>). Knowing which is which explains most "why can't I combine these?" confusion.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 260" width="760" height="260">
+  <rect x="20" y="30" width="340" height="210" rx="10" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="190" y="55" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Figure-level (own the Figure)</text>
+  <text x="40" y="85" font-size="12" fill="#1a2233">relplot  — scatter / line</text>
+  <text x="40" y="110" font-size="12" fill="#1a2233">displot  — hist / kde / ecdf</text>
+  <text x="40" y="135" font-size="12" fill="#1a2233">catplot  — box / bar / violin / strip</text>
+  <text x="40" y="160" font-size="12" fill="#1a2233">lmplot   — regression</text>
+  <text x="40" y="185" font-size="12" fill="#1a2233">pairplot, jointplot</text>
+  <text x="40" y="215" font-size="11" fill="#b45309">return FacetGrid; use col= / row= to facet</text>
+
+  <rect x="400" y="30" width="340" height="210" rx="10" fill="#ecfdf5" stroke="#059669"/>
+  <text x="570" y="55" text-anchor="middle" font-size="13" fill="#1a2233" font-weight="bold">Axes-level (draw into ax)</text>
+  <text x="420" y="85" font-size="12" fill="#1a2233">scatterplot, lineplot</text>
+  <text x="420" y="110" font-size="12" fill="#1a2233">histplot, kdeplot, ecdfplot</text>
+  <text x="420" y="135" font-size="12" fill="#1a2233">boxplot, barplot, violinplot</text>
+  <text x="420" y="160" font-size="12" fill="#1a2233">heatmap, regplot</text>
+  <text x="420" y="185" font-size="12" fill="#1a2233">countplot, stripplot</text>
+  <text x="420" y="215" font-size="11" fill="#059669">accept ax=; compose with Matplotlib</text>
+</svg>
+<div class="cap">Fig 3 — Seaborn's two tiers. Each figure-level function wraps a family of axes-level kinds via its <code>kind=</code> argument.</div>
+</div>
+
+<pre><code class="language-python"># Built-in example datasets make Seaborn easy to learn
+tips = sns.load_dataset("tips")      # restaurant bills
+penguins = sns.load_dataset("penguins")
+flights = sns.load_dataset("flights")
+
+# Axes-level: draw into a Matplotlib ax you control
+fig, ax = plt.subplots(figsize=(6, 4))
+sns.scatterplot(data=tips, x="total_bill", y="tip",
+                hue="time", size="size", ax=ax)
+ax.set_title("Tip vs bill")
+
+# Figure-level: Seaborn makes the Figure, facet with col=
+g = sns.relplot(data=tips, x="total_bill", y="tip",
+                col="time", hue="smoker", kind="scatter")
+g.set_axis_labels("Bill ($)", "Tip ($)")</code></pre>
+
+<div class="callout warn"><span class="t">Figure-level + ax</span> You cannot pass <code>ax=</code> to <code>relplot</code>/<code>catplot</code>/<code>displot</code> — they build their own Figure. If you need to place a Seaborn chart inside your own subplot grid, use the <em>axes-level</em> twin (<code>scatterplot</code>, <code>boxplot</code>, ...).</div>
+
+<h3>The statistical workhorses</h3>
+
+<pre><code class="language-python"># 1) Heatmap — matrix of values; perfect for a correlation matrix
+corr = penguins.select_dtypes("number").corr(numeric_only=True)
+fig, ax = plt.subplots(figsize=(5, 4))
+sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm",
+            vmin=-1, vmax=1, center=0, ax=ax)
+
+# 2) Boxplot — distribution + outliers across categories
+sns.boxplot(data=tips, x="day", y="total_bill", hue="smoker")
+
+# 3) Pairplot — every pairwise scatter + per-variable histograms
+sns.pairplot(penguins, hue="species", corner=True)
+
+# 4) Regplot — scatter with a fitted regression line + CI band
+sns.regplot(data=tips, x="total_bill", y="tip",
+            scatter_kws={"alpha": 0.4}, line_kws={"color": "#b45309"})</code></pre>
+
+<div class="callout tip"><span class="t">Correlation heatmaps</span> Always set a <strong>diverging</strong> colormap (<code>coolwarm</code>, <code>RdBu_r</code>) with <code>center=0</code> for correlations, so positive and negative read as opposite hues and zero is neutral. A sequential map here is misleading.</div>
+
+<h3>Distributions: histogram vs KDE vs ECDF</h3>
+
+<pre><code class="language-python">fig, axes = plt.subplots(1, 3, figsize=(12, 3.5), layout="constrained")
+sns.histplot(data=penguins, x="flipper_length_mm", hue="species",
+             kde=True, ax=axes[0])
+sns.kdeplot(data=penguins, x="flipper_length_mm", hue="species",
+            fill=True, alpha=0.4, ax=axes[1])
+sns.ecdfplot(data=penguins, x="flipper_length_mm", hue="species", ax=axes[2])
+for a, t in zip(axes, ["hist + kde", "kde", "ecdf"]):
+    a.set_title(t)</code></pre>
+
+<h2>7. Worked Mini-Example: An EDA Panel</h2>
+
+<p>A realistic first pass on a dataset: understand distributions, relationships, and group differences on one page. This mixes Seaborn (for the statistics) with Matplotlib (for the layout).</p>
+
+<pre><code class="language-python">import seaborn as sns, matplotlib.pyplot as plt
+
+sns.set_theme(style="whitegrid")
+df = sns.load_dataset("penguins").dropna()
+
+fig, axd = plt.subplot_mosaic(
+    """
+    AB
+    CD
+    """,
+    figsize=(11, 8), layout="constrained",
+)
+
+# A: distribution of a key measurement by group
+sns.histplot(df, x="body_mass_g", hue="species", kde=True, ax=axd["A"])
+axd["A"].set_title("Body mass distribution")
+
+# B: relationship between two measurements, colored by group
+sns.scatterplot(df, x="flipper_length_mm", y="body_mass_g",
+                hue="species", style="sex", ax=axd["B"])
+axd["B"].set_title("Flipper vs mass")
+
+# C: group comparison with box + raw points overlaid
+sns.boxplot(df, x="species", y="bill_length_mm", ax=axd["C"], fliersize=0)
+sns.stripplot(df, x="species", y="bill_length_mm", ax=axd["C"],
+              color="black", alpha=0.3, size=3)
+axd["C"].set_title("Bill length by species")
+
+# D: correlation structure
+corr = df.select_dtypes("number").corr()
+sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm",
+            center=0, ax=axd["D"])
+axd["D"].set_title("Correlations")
+
+fig.suptitle("Penguins — exploratory overview", fontsize=15)
+fig.savefig("eda_penguins.png", dpi=150)</code></pre>
+
+<div class="callout ok"><span class="t">Why this works</span> Four complementary views answer four questions — "how is it distributed?", "what relates to what?", "do groups differ?", "which variables move together?" — the standard opening moves of exploratory data analysis.</div>
+
+<h2>8. Choosing the Right Chart</h2>
+
+<p>Pick the chart from the <em>question</em> and the <em>data types</em>, not from aesthetics. The table below is the decision shortcut.</p>
+
+<table>
+<tr><th>Your question</th><th>Data</th><th>Chart</th><th>Seaborn</th></tr>
+<tr><td>How does one variable change over an ordered axis?</td><td>numeric vs time/sequence</td><td>Line</td><td><code>lineplot</code></td></tr>
+<tr><td>Do two numeric variables relate?</td><td>numeric vs numeric</td><td>Scatter (+ regline)</td><td><code>scatterplot</code>, <code>regplot</code></td></tr>
+<tr><td>How is one variable distributed?</td><td>one numeric</td><td>Histogram / KDE / ECDF</td><td><code>histplot</code>, <code>kdeplot</code></td></tr>
+<tr><td>Compare a value across categories?</td><td>category vs numeric</td><td>Bar</td><td><code>barplot</code>, <code>countplot</code></td></tr>
+<tr><td>Compare distributions across categories?</td><td>category vs numeric</td><td>Box / Violin</td><td><code>boxplot</code>, <code>violinplot</code></td></tr>
+<tr><td>How do many variables correlate?</td><td>matrix</td><td>Heatmap</td><td><code>heatmap</code></td></tr>
+<tr><td>Explore all pairwise relationships?</td><td>several numeric</td><td>Scatter matrix</td><td><code>pairplot</code></td></tr>
+<tr><td>Part-to-whole over few categories?</td><td>category + proportion</td><td>Stacked/grouped bar (not pie)</td><td><code>barplot</code></td></tr>
+</table>
+
+<div class="pipeline"><span class="step">Question</span><span class="arrow">-&gt;</span><span class="step">Data types</span><span class="arrow">-&gt;</span><span class="step">Chart family</span><span class="arrow">-&gt;</span><span class="step">Polish</span></div>
+
+<h2>9. Cheat-Sheet Reference</h2>
+
+<table>
+<tr><th>Task</th><th>Code</th></tr>
+<tr><td>Create figure + axes</td><td><code>fig, ax = plt.subplots(figsize=(6,4))</code></td></tr>
+<tr><td>Grid of axes</td><td><code>fig, axes = plt.subplots(2, 3)</code></td></tr>
+<tr><td>Set titles/labels</td><td><code>ax.set(title=..., xlabel=..., ylabel=...)</code></td></tr>
+<tr><td>Legend</td><td><code>ax.legend(loc="best")</code></td></tr>
+<tr><td>Limits / ticks</td><td><code>ax.set_xlim(0,10); ax.set_xticks([...])</code></td></tr>
+<tr><td>Log scale</td><td><code>ax.set_yscale("log")</code></td></tr>
+<tr><td>Annotate a point</td><td><code>ax.annotate("peak", xy=(x,y), xytext=(x,y+1), arrowprops={...})</code></td></tr>
+<tr><td>Save high-res</td><td><code>fig.savefig("f.png", dpi=300, bbox_inches="tight")</code></td></tr>
+<tr><td>Close figure (free memory)</td><td><code>plt.close(fig)</code></td></tr>
+<tr><td>Seaborn theme</td><td><code>sns.set_theme(style="whitegrid")</code></td></tr>
+<tr><td>Seaborn palette</td><td><code>sns.set_palette("colorblind")</code></td></tr>
+<tr><td>Facet grid</td><td><code>sns.relplot(..., col="g", row="h")</code></td></tr>
+<tr><td>Move legend outside</td><td><code>sns.move_legend(ax, "upper left", bbox_to_anchor=(1,1))</code></td></tr>
+</table>
+
+<h3>Matplotlib vs Seaborn at a glance</h3>
+
+<table>
+<tr><th>Aspect</th><th>Matplotlib</th><th>Seaborn</th></tr>
+<tr><td>Level</td><td>Low — explicit artists</td><td>High — statistical charts</td></tr>
+<tr><td>Input</td><td>arrays, anything</td><td>tidy DataFrames (best)</td></tr>
+<tr><td>Stats (CI, aggregation)</td><td>manual</td><td>built in</td></tr>
+<tr><td>Defaults</td><td>plain</td><td>attractive themes</td></tr>
+<tr><td>Faceting</td><td>manual subplots</td><td>one-line <code>col</code>/<code>row</code></tr>
+<tr><td>Final control</td><td>total</td><td>drop to Matplotlib</td></tr>
+</table>
+
+<h2>10. Best Practices</h2>
+
+<div class="callout ok"><span class="t">Do</span> Prefer the object-oriented API (<code>fig, ax</code>). Label every axis with units. Start bar/count axes at zero. Use colorblind-safe palettes (<code>sns.set_palette("colorblind")</code> or the <code>viridis</code> family). Keep aspect ratios honest. Export vector (<code>.svg</code>/<code>.pdf</code>) for print, high-DPI PNG for screens.</div>
+
+<div class="callout tip"><span class="t">Legibility</span> Fewer than ~7 colors; direct-label lines instead of relying on a legend when you can; use <code>layout="constrained"</code> to stop labels colliding; set a <code>context</code> (<code>paper</code>/<code>notebook</code>/<code>talk</code>/<code>poster</code>) to scale fonts for the medium.</div>
+
+<div class="callout warn"><span class="t">Avoid</span> Pie charts for more than 2-3 slices (angles are hard to compare — use a bar). Dual y-axes that imply false correlation. Rainbow (<code>jet</code>) colormaps — they create perceptual banding and fail for colorblind readers.</div>
+
+<div class="callout danger"><span class="t">Deceptive axes</span> Truncating a bar-chart y-axis exaggerates differences and is a classic way to lie with data. Bars encode length, so their baseline <strong>must</strong> be zero. Line charts, which encode position, may use a non-zero baseline when justified.</div>
+
+<h2>11. Common Pitfalls</h2>
+
+<div class="grid c2">
+  <div class="card"><h4>Memory leaks in loops</h4>Creating hundreds of figures without <code>plt.close(fig)</code> keeps them all in memory. Close each one after saving in batch jobs.</div>
+  <div class="card"><h4>Wrong current axes</h4>Mixing <code>plt.*</code> and <code>ax.*</code> draws onto the last-created Axes. Commit to the explicit API with multiple plots.</div>
+  <div class="card"><h4>Overlapping labels</h4>Default layout can clip titles/ticks. Use <code>layout="constrained"</code> or <code>fig.tight_layout()</code>; rotate dense tick labels.</div>
+  <div class="card"><h4>Untidy data for Seaborn</h4>Seaborn wants long/tidy format (one row per observation). Reshape wide tables with <code>df.melt()</code> before plotting.</div>
+  <div class="card"><h4>Blurry exports</h4>Default DPI is low. Pass <code>dpi=150-300</code> and <code>bbox_inches="tight"</code>, or save vector formats.</div>
+  <div class="card"><h4>Sequential map for diverging data</h4>Correlations and signed deltas need a diverging map centered at 0, not <code>viridis</code>.</div>
+</div>
+
+<details><summary>Show: reshape a wide table to tidy for Seaborn</summary>
+<div class="body">
+<pre><code class="language-python"># Wide: one column per metric -> Long: metric/value columns
+wide = pd.DataFrame({"year": [2024, 2025], "sales": [10, 14], "cost": [6, 7]})
+long = wide.melt(id_vars="year", var_name="metric", value_name="value")
+sns.barplot(data=long, x="year", y="value", hue="metric")</code></pre>
+</div>
+</details>
+
+<h2>12. Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between a Figure and an Axes in Matplotlib?</div><div class="a">The Figure is the top-level container (the whole canvas); an Axes is a single plot drawn within it, with its own data region, x/y Axis objects, ticks, title, and legend. One Figure can hold many Axes. Note the terminology trap: an <em>Axes</em> is a whole subplot, while an <em>Axis</em> (singular) is one of its two coordinate axes.</div></div>
+
+<div class="qa"><div class="q">When should you use the pyplot interface vs the object-oriented interface?</div><div class="a">Use pyplot (<code>plt.plot</code>) for quick, single-chart exploration. Use the OO interface (<code>fig, ax = plt.subplots()</code> then <code>ax.method()</code>) for anything with multiple subplots, inside functions, or in production code — it is explicit about which Axes you target and avoids hidden global state.</div></div>
+
+<div class="qa"><div class="q">How does Seaborn relate to Matplotlib?</div><div class="a">Seaborn is a higher-level library built on top of Matplotlib. It computes statistics (aggregations, confidence intervals, KDEs) and applies attractive themes, but it renders by creating Matplotlib Figure/Axes objects. Axes-level Seaborn functions accept <code>ax=</code>, so you can draw a Seaborn chart and then fine-tune it with raw Matplotlib calls.</div></div>
+
+<div class="qa"><div class="q">What is the difference between figure-level and axes-level Seaborn functions?</div><div class="a">Axes-level functions (<code>scatterplot</code>, <code>boxplot</code>, <code>heatmap</code>) draw into a single provided Axes and return it. Figure-level functions (<code>relplot</code>, <code>catplot</code>, <code>displot</code>, <code>pairplot</code>) manage their own Figure, return a <code>FacetGrid</code>, and support faceting via <code>col</code>/<code>row</code> — but you cannot pass them an existing <code>ax</code>.</div></div>
+
+<div class="qa"><div class="q">When would you choose a boxplot over a histogram?</div><div class="a">Use a histogram/KDE to see the full shape of one distribution (modality, skew). Use a boxplot to compactly compare the summary (median, quartiles, outliers) of a numeric variable <em>across several categories</em> side by side. For small samples, overlay the raw points (strip/swarm) because a box can hide how few observations there are.</div></div>
+
+<div class="qa"><div class="q">Why must a bar chart's y-axis start at zero but a line chart's need not?</div><div class="a">A bar encodes value through <em>length</em>, so a non-zero baseline distorts the ratios the length is supposed to communicate. A line encodes value through <em>position</em>, so zooming the axis to the data range is legitimate and often necessary to see trends — provided the axis is clearly labelled.</div></div>
+
+<div class="qa"><div class="q">What colormap would you use for a correlation matrix and why?</div><div class="a">A diverging map such as <code>coolwarm</code> or <code>RdBu_r</code> with <code>center=0</code> and <code>vmin=-1, vmax=1</code>. Correlations are signed and symmetric around zero, so you want two opposing hues meeting at a neutral middle. A sequential map (like <code>viridis</code>) would misrepresent strong negative and strong positive values as similarly "extreme" only by intensity, losing the sign.</div></div>
+
+<div class="qa"><div class="q">What does "tidy" or "long-form" data mean for Seaborn, and why does it matter?</div><div class="a">Tidy data has one row per observation and one column per variable, so categorical variables live in their own columns to be mapped onto <code>x</code>, <code>hue</code>, <code>col</code>, etc. Seaborn's declarative API relies on this: you name columns and it does the grouping. Wide data (a column per series) must be reshaped with <code>df.melt()</code> first.</div></div>
+
+<div class="qa"><div class="q">How do you prevent a memory blow-up when generating many figures in a batch job?</div><div class="a">Each <code>plt.figure</code>/<code>subplots</code> stays registered in pyplot's state machine until closed. After saving, call <code>plt.close(fig)</code> (or <code>plt.close("all")</code>) so the figure and its artists are garbage-collected. On a headless server also set the <code>Agg</code> backend so no GUI resources are allocated.</div></div>
+
+<div class="qa"><div class="q">How do you place a legend outside the plotting area?</div><div class="a">With Matplotlib: <code>ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1))</code> and use <code>constrained</code> layout so it isn't clipped. With Seaborn axes-level plots, <code>sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))</code> is the clean one-liner; figure-level grids expose <code>g.legend</code>.</div></div>
+
+<div class="qa"><div class="q">What is the difference between <code>regplot</code> and <code>lmplot</code>?</div><div class="a">Both fit and draw a regression line with a confidence band. <code>regplot</code> is axes-level — it draws into one Axes you control. <code>lmplot</code> is figure-level — it wraps <code>regplot</code> on a FacetGrid, so it can split the regression across subplots with <code>col</code>/<code>row</code>/<code>hue</code>. Choose <code>regplot</code> to compose into a custom layout, <code>lmplot</code> for quick faceted regressions.</div></div>
+
+<div class="qa"><div class="q">How would you visualise the relationship between every pair of numeric columns quickly?</div><div class="a"><code>sns.pairplot(df, hue="group", corner=True)</code> draws a matrix of pairwise scatterplots with per-variable distributions on the diagonal; <code>hue</code> colors by a category and <code>corner=True</code> drops the redundant upper triangle. For a numeric summary of the same thing, compute <code>df.corr()</code> and show it as a <code>heatmap</code>.</div></div>
+
+<h2>13. Further Learning</h2>
+
+<ul>
+  <li>Matplotlib official <em>Users Guide</em> and the <em>Anatomy of a Figure</em> and <em>cheatsheets</em> pages — authoritative and current.</li>
+  <li>Seaborn's <em>official tutorial</em> (especially "Overview of seaborn plotting functions" and "Data structures accepted by seaborn").</li>
+  <li>The newer <strong>seaborn.objects</strong> interface (<code>import seaborn.objects as so</code>) — a composable grammar-of-graphics API worth exploring once the basics click.</li>
+  <li>Claus Wilke, <em>Fundamentals of Data Visualization</em> (free online) — chart choice and perception, library-agnostic.</li>
+  <li>Practice: load <code>sns.get_dataset_names()</code> datasets and rebuild each chart type from memory, then recreate a chart you admire from a paper or dashboard.</li>
+  <li>Next steps in the stack: interactive plots with <strong>Plotly</strong>/<strong>Altair</strong>, and large-data rendering with <strong>datashader</strong>.</li>
+</ul>

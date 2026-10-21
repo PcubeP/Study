@@ -1,0 +1,1774 @@
+<h2>Why Containers Won</h2>
+<p class="lead">Before containers, shipping software to a customer meant shipping a document. "Install Python 3.9, these 40 packages, this version of libssl, set these six environment variables, and make sure the locale is UTF-8." Half of it was wrong, the other half was undocumented tribal knowledge, and the first deployment call ran four hours. A container image replaces that document with an artifact: one file, one hash, byte-identical on your laptop and in the customer's data centre.</p>
+
+<div class="facts">
+  <div class="f"><b>2013</b><span>DOCKER'S FIRST PUBLIC RELEASE</span></div>
+  <div class="f"><b>~1</b><span>SECOND TO START A CONTAINER</span></div>
+  <div class="f"><b>60s+</b><span>TO BOOT AN EQUIVALENT VM</span></div>
+  <div class="f"><b>1</b><span>KERNEL SHARED BY ALL CONTAINERS</span></div>
+</div>
+
+<h3>What a container actually is</h3>
+<p>There is no "container" object in the Linux kernel. A container is an ordinary process that has been started with a particular arrangement of three long-standing kernel features:</p>
+<div class="grid c3">
+  <div class="card"><h4>Namespaces</h4><p>Isolate what the process can <em>see</em>: PID (its own process tree, where your app is PID 1), mount (its own filesystem view), network (its own interfaces and ports), UTS (hostname), IPC, user (UID mapping), cgroup.</p></div>
+  <div class="card"><h4>cgroups</h4><p>Limit what the process can <em>use</em>: CPU shares and quota, memory ceiling, block I/O weight, PIDs count. This is what makes <code>--memory=512m</code> enforceable rather than advisory.</p></div>
+  <div class="card"><h4>Union filesystem</h4><p>Stack read-only image layers with a thin writable layer on top via overlayfs. Ten containers from one image share the same underlying bytes on disk until they write.</p></div>
+</div>
+<p>A VM virtualises hardware and runs a full guest kernel — gigabytes of image, tens of seconds to boot, strong isolation. A container shares the host kernel — megabytes, sub-second start, weaker isolation. That kernel sharing has two consequences you will explain to customers repeatedly: a Linux container cannot run on a Windows kernel without a Linux VM underneath (which is exactly what Docker Desktop and WSL2 provide), and a container escape is a host compromise, which is why security teams care about what runs as root inside.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="20" font-size="12" font-weight="700" fill="#1e3a8a">VIRTUAL MACHINES</text>
+  <text x="400" y="20" font-size="12" font-weight="700" fill="#1e3a8a">CONTAINERS</text>
+
+  <rect x="20" y="30" width="110" height="30" rx="4" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="75" y="50" text-anchor="middle" font-size="10" fill="#1e3a8a">App A + libs</text>
+  <rect x="140" y="30" width="110" height="30" rx="4" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="195" y="50" text-anchor="middle" font-size="10" fill="#1e3a8a">App B + libs</text>
+  <rect x="20" y="64" width="110" height="34" rx="4" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="75" y="85" text-anchor="middle" font-size="10" fill="#1e3a8a">Guest OS kernel</text>
+  <rect x="140" y="64" width="110" height="34" rx="4" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="195" y="85" text-anchor="middle" font-size="10" fill="#1e3a8a">Guest OS kernel</text>
+  <rect x="20" y="102" width="230" height="28" rx="4" fill="#ffffff" stroke="#6b7688" stroke-width="2"/>
+  <text x="135" y="121" text-anchor="middle" font-size="10" fill="#1e3a8a">Hypervisor</text>
+  <rect x="20" y="134" width="230" height="28" rx="4" fill="#ffffff" stroke="#6b7688" stroke-width="2"/>
+  <text x="135" y="153" text-anchor="middle" font-size="10" fill="#1e3a8a">Host OS</text>
+  <rect x="20" y="166" width="230" height="28" rx="4" fill="#1e3a8a" stroke="#1e3a8a"/>
+  <text x="135" y="185" text-anchor="middle" font-size="10" fill="#ffffff">Hardware</text>
+  <text x="20" y="214" font-size="10" fill="#6b7688">GBs per VM, ~60 s boot, own kernel</text>
+
+  <rect x="400" y="30" width="105" height="30" rx="4" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="452" y="50" text-anchor="middle" font-size="10" fill="#1e3a8a">App A + libs</text>
+  <rect x="513" y="30" width="105" height="30" rx="4" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="565" y="50" text-anchor="middle" font-size="10" fill="#1e3a8a">App B + libs</text>
+  <rect x="626" y="30" width="105" height="30" rx="4" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="678" y="50" text-anchor="middle" font-size="10" fill="#1e3a8a">App C + libs</text>
+  <rect x="400" y="64" width="331" height="34" rx="4" fill="#ffffff" stroke="#0891b2" stroke-width="2"/>
+  <text x="565" y="85" text-anchor="middle" font-size="10" fill="#1e3a8a">Container runtime (containerd + runc)</text>
+  <rect x="400" y="102" width="331" height="60" rx="4" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="565" y="126" text-anchor="middle" font-size="10" fill="#1e3a8a">Host OS kernel — SHARED</text>
+  <text x="565" y="146" text-anchor="middle" font-size="10" fill="#6b7688">namespaces + cgroups + overlayfs</text>
+  <rect x="400" y="166" width="331" height="28" rx="4" fill="#1e3a8a" stroke="#1e3a8a"/>
+  <text x="565" y="185" text-anchor="middle" font-size="10" fill="#ffffff">Hardware</text>
+  <text x="400" y="214" font-size="10" fill="#6b7688">MBs per container, ~1 s start, shared kernel</text>
+</svg>
+<div class="cap">The structural difference: a duplicated kernel per workload versus one shared kernel with isolated views.</div>
+</div>
+
+<h3>What this buys you on a customer engagement</h3>
+<table>
+<tr><th>Problem before containers</th><th>What the image gives you</th></tr>
+<tr><td>"It works on my machine"</td><td>The same filesystem, libraries and interpreter everywhere; the only variables left are kernel, CPU architecture and injected configuration</td></tr>
+<tr><td>Three days of dependency installation on a locked-down host</td><td>One <code>docker load</code> of a tarball you staged and checksummed</td></tr>
+<tr><td>"Which version is in production?"</td><td>An immutable digest: <code>sha256:9f2c…</code>. There is exactly one answer</td></tr>
+<tr><td>Prototype environment drifts from the demo environment</td><td><code>compose.yaml</code> in the repo; <code>docker compose up</code> reproduces the whole stack in 30 seconds</td></tr>
+<tr><td>Rollback means re-running the installer backwards</td><td>Deploy the previous tag; the old image is still in the registry</td></tr>
+<tr><td>Security review of an unfamiliar binary</td><td>SBOM and CVE scan of the image, one artifact, one report</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Docker is not the only runtime</span>Docker Engine is one implementation. Kubernetes dropped the Docker shim in 1.24 and talks to <strong>containerd</strong> or <strong>CRI-O</strong> directly. <strong>Podman</strong> is daemonless and rootless by default, and is the default on RHEL — <code>alias docker=podman</code> covers most commands. Images are standardised by the <strong>OCI</strong> spec, so an image built by Docker, Podman, Buildah, Kaniko or BuildKit runs anywhere. At a customer who has banned the Docker daemon for security reasons, this is the conversation that unblocks you.</div>
+
+<h2>Images, Layers, Registries, Tags and Digests</h2>
+<p class="lead">Understanding the layer model is what separates a 1.2 GB image that rebuilds in four minutes from a 90 MB image that rebuilds in eight seconds. It also explains why the secret you deleted in a later layer is still in the image.</p>
+
+<h3>The layer model</h3>
+<p>Each instruction in a Dockerfile that changes the filesystem (<code>RUN</code>, <code>COPY</code>, <code>ADD</code>) produces a new read-only layer containing only the <em>delta</em>. Metadata-only instructions (<code>ENV</code>, <code>WORKDIR</code>, <code>EXPOSE</code>, <code>LABEL</code>, <code>USER</code>, <code>CMD</code>, <code>ENTRYPOINT</code>) change the image config, not the filesystem. At runtime, overlayfs stacks the layers and adds a thin writable layer on top. Writing to a file that exists in a lower layer triggers a copy-up: the whole file is copied into the writable layer first.</p>
+
+<pre><code class="language-bash">docker history myapp:1.4.2
+# IMAGE          CREATED BY                                      SIZE
+# 9f2c1a3b…      CMD ["uvicorn" "app.main:app" …]                0B
+# &lt;missing&gt;      USER appuser                                    0B
+# &lt;missing&gt;      COPY . /app                                     12.4MB
+# &lt;missing&gt;      RUN pip install -r requirements.txt            218MB
+# &lt;missing&gt;      COPY requirements.txt /app/                     1.2kB
+# &lt;missing&gt;      RUN apt-get update &amp;&amp; apt-get install -y gcc     184MB
+# &lt;missing&gt;      /bin/sh -c #(nop) CMD ["python3"]               0B
+
+docker image inspect myapp:1.4.2 --format '{{json .RootFS.Layers}}' | jq -r '.[]'
+docker image ls --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}'
+docker system df            # images, containers, volumes, build cache - where the disk went
+</code></pre>
+
+<div class="callout danger"><span class="t">Deleting a file does not shrink the image</span><code>RUN wget secrets.tar &amp;&amp; tar xf secrets.tar &amp;&amp; rm secrets.tar</code> in three separate <code>RUN</code> instructions leaves the tarball permanently in layer 1. The later <code>rm</code> only writes a whiteout marker in a higher layer — anyone can <code>docker save</code> the image and extract it. The same applies to <code>ARG</code>-injected tokens, <code>.git</code> directories, and <code>~/.aws/credentials</code> copied in by an over-broad <code>COPY . .</code>. Fix it by doing the download, use and delete in <strong>one</strong> <code>RUN</code>, by using a multi-stage build, or by using BuildKit secret mounts.</div>
+
+<h3>Tags versus digests</h3>
+<pre><code class="language-text">registry.corp.example.com:5000/platform/inference-api:1.4.2
+└──────────── registry host:port ───────────┘ └─ path ─┘ └ tag ┘
+
+registry.corp.example.com:5000/platform/inference-api@sha256:9f2c1a3b7e…
+                                                      └──── digest ────┘
+</code></pre>
+<p>A tag is a mutable pointer. <code>:latest</code> is just a tag with a conventional name and no special meaning — nothing guarantees it is the newest. A digest is the SHA-256 of the image manifest: content-addressable, immutable, verifiable. If you pull by digest you provably get the same bytes every time.</p>
+<table>
+<tr><th>Reference style</th><th>Use for</th><th>Risk</th></tr>
+<tr><td><code>:latest</code></td><td>Local experimentation only</td><td>Unreproducible. Two nodes can run different code under the same tag</td></tr>
+<tr><td><code>:1.4.2</code></td><td>Human-readable releases, Helm values</td><td>Mutable — a tag can be re-pushed unless the registry enforces immutability</td></tr>
+<tr><td><code>:1.4.2-a9f3c1d</code></td><td>Release + git SHA; the practical default</td><td>Still technically mutable, but collisions are accidental not routine</td></tr>
+<tr><td><code>@sha256:…</code></td><td>Production manifests, base images in Dockerfiles, anything audited</td><td>Unreadable; needs tooling to update. This is what it buys its safety with</td></tr>
+</table>
+<pre><code class="language-bash">docker inspect --format='{{index .RepoDigests 0}}' myapp:1.4.2
+docker buildx imagetools inspect registry.corp/platform/api:1.4.2   # manifest list, per-arch digests
+crane digest registry.corp/platform/api:1.4.2                        # no daemon needed
+skopeo inspect docker://registry.corp/platform/api:1.4.2             # works where Docker is banned
+</code></pre>
+
+<h3>Registries</h3>
+<pre><code class="language-bash">docker login registry.corp.example.com:5000 -u svc_ci --password-stdin &lt; /run/secrets/reg
+docker tag myapp:1.4.2 registry.corp.example.com:5000/platform/myapp:1.4.2
+docker push registry.corp.example.com:5000/platform/myapp:1.4.2
+docker pull registry.corp.example.com:5000/platform/myapp@sha256:9f2c…
+
+# Move an image between registries with no local daemon and no disk staging
+skopeo copy docker://docker.io/library/postgres:16.2 \
+            docker://registry.corp.example.com:5000/mirror/postgres:16.2
+crane copy docker.io/library/redis:7.2 registry.corp:5000/mirror/redis:7.2
+
+# Fully air-gapped: save to a file, carry it across, load on the far side
+docker save registry.corp/platform/myapp:1.4.2 | gzip &gt; myapp-1.4.2.tar.gz
+sha256sum myapp-1.4.2.tar.gz &gt; myapp-1.4.2.tar.gz.sha256
+gunzip -c myapp-1.4.2.tar.gz | docker load
+</code></pre>
+<div class="callout warn"><span class="t">Credentials land in plaintext by default</span><code>docker login</code> writes a base64 blob to <code>~/.docker/config.json</code>. On a shared bastion that is readable by anyone who can read your home directory. Use a credential helper (<code>docker-credential-pass</code>, <code>ecr-login</code>, <code>acr-env</code>), or log out when finished, or use short-lived registry tokens. Never put a registry password in a Dockerfile <code>ARG</code> — it is recorded in <code>docker history</code>.</div>
+
+<h3>Multi-architecture images</h3>
+<p>An Apple Silicon laptop builds <code>linux/arm64</code> by default; the customer's servers are almost certainly <code>linux/amd64</code>. The resulting <code>exec format error</code> wastes an afternoon if you do not expect it.</p>
+<pre><code class="language-bash">docker buildx create --name multi --use --bootstrap
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t registry.corp/platform/myapp:1.4.2 --push .
+docker buildx imagetools inspect registry.corp/platform/myapp:1.4.2
+# Name: …   MediaType: application/vnd.oci.image.index.v1+json
+#   Platform: linux/amd64
+#   Platform: linux/arm64
+
+# Quick single-arch cross build when you just need amd64 from a Mac
+docker build --platform linux/amd64 -t myapp:1.4.2 .
+</code></pre>
+
+<h2>Writing a Dockerfile Properly</h2>
+<p class="lead">Most Dockerfiles in the wild are a transliteration of a README. A good one is engineered around two things the engine actually cares about: the order of layers for cache reuse, and what ends up in the final filesystem.</p>
+
+<h3>Instruction by instruction</h3>
+<table>
+<tr><th>Instruction</th><th>What it does</th><th>What people get wrong</th></tr>
+<tr><td><code>FROM</code></td><td>Base image; starts a build stage</td><td>Using <code>:latest</code>; not pinning a digest for reproducible or audited builds</td></tr>
+<tr><td><code>RUN</code></td><td>Executes a command, commits a layer</td><td>Splitting <code>apt-get update</code> and <code>install</code> into two <code>RUN</code>s — the cached update makes installs fail or install stale packages</td></tr>
+<tr><td><code>COPY</code></td><td>Copies from build context into the image</td><td><code>COPY . .</code> before dependency install, destroying all cache on every source edit</td></tr>
+<tr><td><code>ADD</code></td><td>Like COPY, plus URL fetch and auto-extract of tars</td><td>Use <code>COPY</code> unless you specifically want tar extraction. <code>ADD &lt;url&gt;</code> hides a download with no checksum</td></tr>
+<tr><td><code>WORKDIR</code></td><td>Sets cwd, creates the directory</td><td>Using <code>RUN cd /app</code> instead — the cd does not persist to the next instruction</td></tr>
+<tr><td><code>ENV</code></td><td>Env var in image config, present at runtime</td><td>Putting secrets here. <code>docker inspect</code> prints them to anyone</td></tr>
+<tr><td><code>ARG</code></td><td>Build-time variable only</td><td>Assuming it is secret. Values appear in <code>docker history</code></td></tr>
+<tr><td><code>EXPOSE</code></td><td>Documentation + a hint for <code>-P</code></td><td>Believing it publishes the port. It does not; <code>-p</code> does</td></tr>
+<tr><td><code>USER</code></td><td>UID/GID for subsequent instructions and runtime</td><td>Omitting it, so the container runs as root and fails the customer's admission policy</td></tr>
+<tr><td><code>ENTRYPOINT</code></td><td>The fixed executable</td><td>Shell form, which wraps in <code>/bin/sh -c</code> and swallows SIGTERM</td></tr>
+<tr><td><code>CMD</code></td><td>Default args to ENTRYPOINT, or the default command</td><td>Confusing it with ENTRYPOINT; <code>docker run img cmd</code> overrides CMD, not ENTRYPOINT</td></tr>
+<tr><td><code>HEALTHCHECK</code></td><td>Periodic liveness probe for Docker</td><td>Expecting Kubernetes to use it — K8s ignores it and uses its own probes</td></tr>
+</table>
+
+<h3>ENTRYPOINT vs CMD, and the PID 1 signal problem</h3>
+<pre><code class="language-dockerfile"># exec form - argv array, no shell, signals reach your process
+ENTRYPOINT ["/usr/local/bin/uvicorn"]
+CMD ["app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+
+# shell form - runs as: /bin/sh -c "uvicorn app.main:app"
+# sh becomes PID 1, forwards NOTHING, your app never sees SIGTERM
+ENTRYPOINT uvicorn app.main:app        # avoid
+</code></pre>
+<p>With exec form, <code>docker run myapp --port 9090</code> replaces CMD and runs <code>uvicorn --port 9090</code>. With no ENTRYPOINT and only <code>CMD ["python","app.py"]</code>, <code>docker run myapp bash</code> gives you a shell — handy for debugging. Choose ENTRYPOINT when the image is a single-purpose tool, CMD-only when you want it to double as a general runtime.</p>
+<div class="callout warn"><span class="t">Zombie reaping</span>If your process spawns children and is PID 1, it must reap them or you accumulate zombies until the PID limit. Either handle <code>SIGCHLD</code> properly in the app, or add a tiny init: <code>docker run --init</code> (injects tini), or <code>ENTRYPOINT ["/sbin/tini","--","./app"]</code>, or in Kubernetes rely on the fact that most frameworks handle it — but verify with <code>ps -ef</code> inside the container under load.</div>
+
+<h3>Layer caching: the single highest-leverage idea</h3>
+<p>Docker reuses a cached layer when the instruction string is identical <em>and</em>, for <code>COPY</code>/<code>ADD</code>, the checksum of the copied files is unchanged. The moment one layer misses, every layer after it rebuilds. Therefore: order from least-frequently-changed to most-frequently-changed.</p>
+<pre><code class="language-dockerfile"># BAD - every source edit reinstalls 200 MB of dependencies
+FROM python:3.12-slim
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+CMD ["python", "app.py"]
+</code></pre>
+<pre><code class="language-dockerfile"># GOOD - dependency layer survives source edits
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "app.py"]
+</code></pre>
+<p>Same idea in every ecosystem: <code>COPY package.json package-lock.json ./</code> then <code>RUN npm ci</code> then <code>COPY . .</code>; <code>COPY go.mod go.sum ./</code> then <code>RUN go mod download</code> then <code>COPY . .</code>; <code>COPY pom.xml .</code> then <code>RUN mvn -B dependency:go-offline</code> then <code>COPY src ./src</code>.</p>
+
+<pre><code class="language-dockerfile"># One RUN, cleaned up in the same layer - the apt idiom
+RUN apt-get update \
+ &amp;&amp; apt-get install -y --no-install-recommends \
+      curl ca-certificates libpq5 \
+ &amp;&amp; rm -rf /var/lib/apt/lists/*
+</code></pre>
+<p><code>--no-install-recommends</code> typically saves 50–150 MB. The <code>rm -rf /var/lib/apt/lists/*</code> must be in the same <code>RUN</code> or the cache files are already committed to a layer. On RHEL-family bases the equivalent is <code>microdnf install -y … &amp;&amp; microdnf clean all</code>; on Alpine, <code>apk add --no-cache</code> does it in one flag.</p>
+
+<h3>BuildKit cache mounts and secrets</h3>
+<pre><code class="language-dockerfile"># syntax=docker/dockerfile:1.7
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+# Persist the pip cache ACROSS builds without baking it into a layer
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
+
+# A secret that is mounted during the RUN and never recorded in any layer
+RUN --mount=type=secret,id=netrc,target=/root/.netrc \
+    pip install --extra-index-url https://nexus.corp/simple internal-sdk==2.1.0
+</code></pre>
+<pre><code class="language-bash">DOCKER_BUILDKIT=1 docker build --secret id=netrc,src=$HOME/.netrc -t myapp:1.4.2 .
+</code></pre>
+<p>Cache mounts are the difference between a 4-minute and a 25-second rebuild on a slow customer network. Secret mounts are the correct way to use a private package index token at build time without it appearing in <code>docker history</code>.</p>
+
+<h3>.dockerignore</h3>
+<p>The build context is tarred and sent to the daemon before the first instruction runs. A forgotten <code>.git</code> or <code>node_modules</code> can turn a 2 MB context into 900 MB, slow every build, and leak credentials.</p>
+<pre><code class="language-text">.git
+.gitignore
+**/node_modules
+**/__pycache__
+**/*.pyc
+.venv
+venv
+.env
+.env.*
+*.log
+dist
+build
+.pytest_cache
+.mypy_cache
+coverage/
+.idea
+.vscode
+docs/
+tests/fixtures/large/
+*.tar.gz
+Dockerfile*
+docker-compose*.yml
+README.md
+.aws
+.ssh
+**/*.pem
+**/*.key
+</code></pre>
+<pre><code class="language-bash">du -sh .                                      # how big is your context?
+docker build --no-cache --progress=plain .    # see "transferring context: N MB"
+</code></pre>
+
+<h2>Multi-Stage Builds, Slim Bases, and Non-Root</h2>
+<p class="lead">A build toolchain is not a runtime dependency. Multi-stage builds let you compile with gcc, Maven or the full Node toolchain and then ship only the artifact. Typical result: 1.1 GB becomes 120 MB, and the CVE count drops by an order of magnitude because there is nothing left to be vulnerable.</p>
+
+<h3>Python — compile wheels, ship a venv</h3>
+<pre><code class="language-dockerfile"># syntax=docker/dockerfile:1.7
+FROM python:3.12-slim AS builder
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PYTHONDONTWRITEBYTECODE=1
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
+      build-essential libpq-dev gcc \
+ &amp;&amp; rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY requirements.txt .
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements.txt
+
+# ---------- runtime ----------
+FROM python:3.12-slim AS runtime
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
+      libpq5 curl ca-certificates \
+ &amp;&amp; rm -rf /var/lib/apt/lists/* \
+ &amp;&amp; groupadd -r app -g 10001 \
+ &amp;&amp; useradd -r -u 10001 -g app -d /app -s /sbin/nologin app
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+WORKDIR /app
+COPY --chown=app:app ./app ./app
+USER 10001
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
+  CMD curl -fsS http://127.0.0.1:8080/healthz || exit 1
+ENTRYPOINT ["uvicorn"]
+CMD ["app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+</code></pre>
+<p><code>gcc</code>, <code>build-essential</code> and <code>libpq-dev</code> exist only in the builder stage and never reach the final image — that alone removes roughly 400 MB and dozens of CVEs.</p>
+
+<h3>Go — static binary into scratch</h3>
+<pre><code class="language-dockerfile">FROM golang:1.22 AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=linux go build -trimpath \
+      -ldflags="-s -w -X main.version=${VERSION}" -o /out/api ./cmd/api
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=builder /out/api /api
+USER 65532:65532
+EXPOSE 8080
+ENTRYPOINT ["/api"]
+</code></pre>
+
+<h3>Node — prune dev dependencies</h3>
+<pre><code class="language-dockerfile">FROM node:20-bookworm-slim AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci
+
+FROM node:20-bookworm-slim AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build &amp;&amp; npm prune --omit=dev
+
+FROM node:20-bookworm-slim AS runtime
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/dist ./dist
+USER node
+EXPOSE 3000
+CMD ["node", "dist/server.js"]
+</code></pre>
+
+<h3>Choosing a base image</h3>
+<table>
+<tr><th>Base</th><th>Typical size</th><th>Shell?</th><th>libc</th><th>Use when</th></tr>
+<tr><td><code>ubuntu:22.04</code></td><td>~78 MB</td><td>Yes</td><td>glibc</td><td>You need apt and familiarity; customer security baselines often mandate it</td></tr>
+<tr><td><code>debian:12-slim</code></td><td>~75 MB</td><td>Yes</td><td>glibc</td><td>Sensible general default</td></tr>
+<tr><td><code>python:3.12-slim</code></td><td>~130 MB</td><td>Yes</td><td>glibc</td><td>Python services; the safe default</td></tr>
+<tr><td><code>alpine:3.19</code></td><td>~7 MB</td><td>Yes (ash)</td><td><strong>musl</strong></td><td>Tiny tools, Go/Rust statics — not for scientific Python</td></tr>
+<tr><td><code>distroless/base</code></td><td>~20 MB</td><td><strong>No</strong></td><td>glibc</td><td>Hardened runtime, minimal CVE surface</td></tr>
+<tr><td><code>distroless/static</code></td><td>~2 MB</td><td><strong>No</strong></td><td>none</td><td>Static Go/Rust binaries</td></tr>
+<tr><td><code>scratch</code></td><td>0</td><td>No</td><td>none</td><td>Absolute minimum; you supply everything including CA certs</td></tr>
+<tr><td><code>ubi9-minimal</code></td><td>~40 MB</td><td>Yes</td><td>glibc</td><td>Red Hat customers who require supported, certified base images</td></tr>
+</table>
+<div class="callout warn"><span class="t">Alpine and Python: measure before you commit</span>Alpine uses musl, not glibc, so manylinux wheels do not apply and pip compiles from source. A pandas/numpy/scipy image can take 15 minutes to build and end up <em>larger</em> than the slim variant, and musl's allocator has measurably worse performance for some workloads. For compiled languages Alpine is excellent; for the scientific Python stack, <code>-slim</code> usually wins on both size and build time.</div>
+
+<h3>Non-root, properly</h3>
+<pre><code class="language-dockerfile">RUN groupadd -r app -g 10001 \
+ &amp;&amp; useradd -r -u 10001 -g app -d /app -s /sbin/nologin app
+COPY --chown=app:app . /app
+USER 10001:10001           # numeric UID, so Kubernetes runAsNonRoot can verify it
+</code></pre>
+<p>Use a numeric UID: <code>runAsNonRoot: true</code> in a Pod spec cannot resolve a username to a UID and will refuse to start the container with <code>CreateContainerConfigError: container has runAsNonRoot and image has non-numeric user</code>. Pick a high UID (10000+) to avoid colliding with host users. A non-root process cannot bind ports below 1024, so listen on 8080 and map it — in Kubernetes a Service maps 80 to 8080 transparently.</p>
+
+<h3>Scanning and SBOMs</h3>
+<pre><code class="language-bash">trivy image --severity HIGH,CRITICAL registry.corp/platform/api:1.4.2
+trivy image --ignore-unfixed --exit-code 1 --severity CRITICAL myapp:1.4.2   # CI gate
+grype registry.corp/platform/api:1.4.2
+docker scout cves myapp:1.4.2
+
+syft myapp:1.4.2 -o spdx-json &gt; sbom.spdx.json      # the customer WILL ask for this
+trivy sbom sbom.spdx.json
+cosign sign --key cosign.key registry.corp/platform/api:1.4.2
+cosign verify --key cosign.pub registry.corp/platform/api:1.4.2
+</code></pre>
+<div class="callout tip"><span class="t">Base image updates fix most findings</span>The large majority of CVEs in a scan report come from the OS layer, not your code. Rebuilding weekly on a refreshed base often clears 80% of findings with zero code changes. Use <code>--ignore-unfixed</code> so the gate blocks on things you can actually act on, and keep a documented <code>.trivyignore</code> with an expiry date and a justification for each accepted risk — that file is what you hand to the customer's security reviewer.</div>
+
+<h2>Running Containers</h2>
+<p class="lead">The run-time flags are where theory meets the customer's host. Get ports, mounts, environment and limits right and most "it doesn't work here" problems never happen.</p>
+
+<pre><code class="language-bash">docker run -d \
+  --name api \
+  --restart unless-stopped \
+  -p 127.0.0.1:8080:8080 \
+  -e APP_ENV=prod \
+  --env-file ./prod.env \
+  -v api-data:/var/lib/app \
+  -v /etc/ssl/corp-root.pem:/etc/ssl/certs/corp-root.pem:ro \
+  --memory 2g --memory-reservation 1g \
+  --cpus 1.5 \
+  --pids-limit 256 \
+  --read-only --tmpfs /tmp:rw,noexec,nosuid,size=128m \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL \
+  --health-cmd 'curl -fsS http://127.0.0.1:8080/healthz || exit 1' \
+  --health-interval 30s --health-timeout 3s --health-retries 3 \
+  registry.corp/platform/api:1.4.2
+</code></pre>
+
+<h3>Ports</h3>
+<table>
+<tr><th>Flag</th><th>Result</th></tr>
+<tr><td><code>-p 8080:8080</code></td><td>Binds <strong>0.0.0.0:8080</strong> on the host — reachable from the whole network</td></tr>
+<tr><td><code>-p 127.0.0.1:8080:8080</code></td><td>Loopback only. The right default on a shared or internet-facing host</td></tr>
+<tr><td><code>-p 8080:80</code></td><td>Host 8080 to container 80</td></tr>
+<tr><td><code>-P</code></td><td>Publish every <code>EXPOSE</code>d port to a random high host port</td></tr>
+<tr><td><code>--network host</code></td><td>No network namespace; container uses the host stack directly. Linux only</td></tr>
+</table>
+<div class="callout danger"><span class="t">Docker punches through the firewall</span>On Linux, Docker writes its own iptables rules in the <code>DOCKER</code> chain, which are evaluated <em>before</em> most ufw/firewalld rules. A container published with <code>-p 5432:5432</code> can be reachable from the internet even though <code>ufw status</code> says the port is denied. Always bind to <code>127.0.0.1</code> unless you deliberately intend public exposure, and tell the customer's security team what you published.</div>
+
+<h3>Volumes versus bind mounts</h3>
+<pre><code class="language-bash">docker volume create api-data
+docker run -v api-data:/var/lib/app …          # named volume: Docker-managed, portable
+docker run -v "$PWD/config:/etc/app:ro" …      # bind mount: host path, exact control
+docker run --mount type=bind,src="$PWD/config",dst=/etc/app,readonly …   # explicit syntax
+docker run --tmpfs /tmp:rw,noexec,nosuid,size=64m …                      # RAM-backed
+
+docker volume inspect api-data --format '{{.Mountpoint}}'
+docker volume ls -f dangling=true
+docker run --rm -v api-data:/data -v "$PWD:/backup" alpine \
+  tar czf /backup/api-data-$(date +%F).tgz -C /data .
+</code></pre>
+<table>
+<tr><th></th><th>Named volume</th><th>Bind mount</th></tr>
+<tr><td>Location</td><td><code>/var/lib/docker/volumes/…</code></td><td>Any host path you choose</td></tr>
+<tr><td>Permissions</td><td>Docker initialises from the image</td><td>Host UIDs apply directly — the usual source of permission errors</td></tr>
+<tr><td>Portability</td><td>Works identically on any host</td><td>Depends on the host layout existing</td></tr>
+<tr><td>Best for</td><td>Databases, persistent state</td><td>Local dev source mounting, injecting config and certs</td></tr>
+</table>
+<div class="callout note"><span class="t">Bind-mount permission denied</span>The container's UID must be able to read the host path. If the container runs as UID 10001 and the host directory is <code>0700 root:root</code>, it fails regardless of what is inside. Either <code>chown 10001</code> the host path, mount read-only and loosen to <code>0755</code>, or match UIDs with <code>--user "$(id -u):$(id -g)"</code>. On SELinux hosts add <code>:z</code> (shared) or <code>:Z</code> (private) to the mount, or the relabel never happens and every access is denied.</div>
+
+<h3>Restart policies and resources</h3>
+<table>
+<tr><th>Policy</th><th>Behaviour</th></tr>
+<tr><td><code>no</code></td><td>Default. Never restarts</td></tr>
+<tr><td><code>on-failure[:5]</code></td><td>Restart on non-zero exit, up to N times</td></tr>
+<tr><td><code>unless-stopped</code></td><td>Always restart except when you explicitly stopped it — survives daemon restart. The usual choice</td></tr>
+<tr><td><code>always</code></td><td>Restart even if you stopped it, after a daemon restart</td></tr>
+</table>
+<pre><code class="language-bash">docker stats --no-stream
+# CONTAINER  CPU %   MEM USAGE / LIMIT     MEM %   NET I/O        PIDS
+# api        48.21%  1.43GiB / 2GiB        71.52%  1.2GB / 840MB  38
+
+docker update --memory 3g --cpus 2 api      # change limits on a running container
+docker inspect api --format '{{.State.OOMKilled}}'   # true = it hit the memory limit
+</code></pre>
+<div class="callout warn"><span class="t">Runtimes do not see cgroup limits automatically</span>A JVM before 10 (and without <code>-XX:+UseContainerSupport</code>) reads host RAM and sizes its heap for 64 GB inside a 2 GB container — then gets OOMKilled. Use <code>-XX:MaxRAMPercentage=75</code>. Node needs <code>--max-old-space-size</code>. Python libraries that size thread pools from <code>os.cpu_count()</code> will create 96 threads on a 1-CPU limit; set <code>OMP_NUM_THREADS</code>, <code>MKL_NUM_THREADS</code> and framework-specific equivalents explicitly.</div>
+
+<h2>Docker Networking</h2>
+<p class="lead">"The API container can't reach the database container" is the Compose-era version of the connectivity problem. Three facts resolve nearly all of it: which network each container is on, what name DNS resolves, and which port the process inside is actually bound to.</p>
+
+<table>
+<tr><th>Driver</th><th>Behaviour</th><th>Use for</th></tr>
+<tr><td><code>bridge</code> (default)</td><td>Containers on <code>docker0</code>, <strong>no DNS by name</strong>, NAT to the host</td><td>Legacy; avoid for multi-container work</td></tr>
+<tr><td><strong>user-defined bridge</strong></td><td>Same, plus an embedded DNS server resolving container and service names</td><td>Everything. This is what Compose creates</td></tr>
+<tr><td><code>host</code></td><td>No network namespace; shares the host stack</td><td>Max throughput, port scanners, Linux only</td></tr>
+<tr><td><code>none</code></td><td>Loopback only</td><td>Air-gapped testing, batch jobs with no network need</td></tr>
+<tr><td><code>macvlan</code></td><td>Container gets its own MAC and an IP on the physical LAN</td><td>Legacy apps that must appear as a LAN host</td></tr>
+</table>
+
+<pre><code class="language-bash">docker network create --driver bridge appnet
+docker network create --driver bridge --subnet 172.28.0.0/16 --gateway 172.28.0.1 appnet
+docker run -d --name db --network appnet postgres:16
+docker run -d --name api --network appnet -e DB_HOST=db myapp:1.4.2
+docker network inspect appnet --format '{{json .Containers}}' | jq
+docker network connect othernet api      # attach a running container to a second network
+docker network disconnect appnet api
+</code></pre>
+<p>On a user-defined bridge, <code>db</code> resolves to the database container's IP from inside <code>api</code> — that is Docker's embedded DNS at <code>127.0.0.11</code>. It does <strong>not</strong> work on the default bridge, which is why beginners end up using the deprecated <code>--link</code>.</p>
+
+<div class="callout note"><span class="t">localhost inside a container is the container</span><code>DB_HOST=localhost</code> in a container means "this container", not the host and not the database container. Use the service name on a shared network. To reach a service on the host machine, use <code>host.docker.internal</code> (Docker Desktop, and on Linux with <code>--add-host=host.docker.internal:host-gateway</code>) or the bridge gateway IP. And remember the port you connect to is the <em>container's</em> port, not the published host port: <code>api</code> talks to <code>db:5432</code> even if the host mapping is <code>15432:5432</code>.</div>
+
+<pre><code class="language-bash"># Debug from inside, without installing anything in the app image
+docker run --rm -it --network appnet nicolaka/netshoot bash
+  dig db
+  nc -zv db 5432
+  curl -v http://api:8080/healthz
+  ss -tulpn
+
+# Or join the target container's network namespace directly
+docker run --rm -it --network container:api nicolaka/netshoot ss -tulpn
+</code></pre>
+<p>That last form is the one to remember: it puts a fully-equipped debug container inside the <em>exact</em> network namespace of your minimal distroless app container, so <code>ss</code>, <code>tcpdump</code> and <code>curl</code> all see what the app sees — without adding a single byte to the production image.</p>
+
+<h2>Docker Compose for a Realistic Prototype</h2>
+<p class="lead">Compose is how you hand a customer a working stack. One file, one command, and their engineer has the whole system running on a laptop — API, database, vector store, cache and UI. On a two-week engagement this is often what you actually ship first.</p>
+
+<pre><code class="language-yaml"># compose.yaml - RAG prototype: UI + API + Postgres + Qdrant + Redis
+name: ragdemo
+
+x-logging: &amp;default-logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: runtime
+      args:
+        VERSION: ${VERSION:-dev}
+    image: registry.corp/platform/rag-api:${VERSION:-dev}
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD}@db:5432/ragdb
+      QDRANT_URL: http://vectordb:6333
+      REDIS_URL: redis://cache:6379/0
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NO_PROXY: localhost,127.0.0.1,db,vectordb,cache,.internal
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      db:        { condition: service_healthy }
+      vectordb:  { condition: service_healthy }
+      cache:     { condition: service_started }
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits: { cpus: "2.0", memory: 2G }
+    logging: *default-logging
+    networks: [backend, frontend]
+
+  db:
+    image: postgres:16.2-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ragdb
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d ragdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_preload_libraries=vector"
+      - "-c"
+      - "max_connections=200"
+    logging: *default-logging
+    networks: [backend]
+
+  vectordb:
+    image: qdrant/qdrant:v1.9.0
+    restart: unless-stopped
+    volumes:
+      - qdrantdata:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '&gt;/dev/tcp/127.0.0.1/6333'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+    logging: *default-logging
+    networks: [backend]
+
+  cache:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--maxmemory", "512mb",
+              "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redisdata:/data
+    logging: *default-logging
+    networks: [backend]
+
+  ui:
+    build: ./ui
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE: http://localhost:8080
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api: { condition: service_healthy }
+    logging: *default-logging
+    networks: [frontend]
+
+  migrate:
+    image: registry.corp/platform/rag-api:${VERSION:-dev}
+    profiles: ["tools"]
+    env_file: [.env]
+    environment:
+      DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD}@db:5432/ragdb
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [backend]
+    restart: "no"
+
+volumes:
+  pgdata:
+  qdrantdata:
+  redisdata:
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
+</code></pre>
+
+<pre><code class="language-bash">docker compose up -d                       # build if needed, start everything
+docker compose up -d --build               # force rebuild
+docker compose ps                          # status + health + published ports
+docker compose logs -f api                 # follow one service
+docker compose logs --since 10m --tail 100 # bounded
+docker compose exec api bash               # shell in a running service
+docker compose run --rm migrate            # one-off task from the "tools" profile
+docker compose config                      # render the fully-resolved file - debug env vars
+docker compose down                        # stop and remove containers + networks
+docker compose down -v                     # ALSO delete volumes - destroys the database
+docker compose restart api
+docker compose pull &amp;&amp; docker compose up -d   # roll to new images
+</code></pre>
+
+<div class="callout tip"><span class="t">Three details that make a Compose file demo-proof</span>First, <code>depends_on</code> with <code>condition: service_healthy</code> — plain <code>depends_on</code> only waits for the container to <em>start</em>, so your API still races the database and crashes on first boot. Second, <code>${VAR:?message}</code> so a missing secret fails immediately with a clear error instead of starting Postgres with a blank password. Third, the <code>logging</code> anchor — without a size cap, a chatty service fills the customer's laptop disk during a long demo.</div>
+
+<pre><code class="language-bash"># Layering an override for the customer's environment
+# compose.yaml (base, committed)  +  compose.override.yaml (local, auto-loaded)
+docker compose -f compose.yaml -f compose.prod.yaml up -d
+docker compose --profile tools run --rm migrate
+docker compose --env-file .env.staging config   # verify before you run it on their host
+</code></pre>
+<div class="callout warn"><span class="t">Compose is not a production platform</span>It has no rescheduling, no rolling update, no multi-host story. It is excellent for prototypes, demos, CI environments and single-box edge installs. The moment the customer asks about high availability, zero-downtime deploys or horizontal scaling, that is the Kubernetes conversation — and the Compose file you already wrote is the specification you translate from.</div>
+
+<h2>Debugging Containers</h2>
+<p class="lead">A container is a process with a restricted view. Every debugging technique reduces to one of: read its output, get inside its namespaces, or read its configuration from the outside.</p>
+
+<pre><code class="language-bash">docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+docker logs --tail 200 --timestamps api
+docker logs -f --since 5m api
+docker inspect api | jq '.[0].State'
+docker inspect api --format '{{.State.ExitCode}} {{.State.Error}} {{.State.OOMKilled}}'
+docker exec -it api sh                      # /bin/sh exists more often than bash
+docker exec -u 0 -it api sh                 # as root, when you need to install tooling
+docker top api                              # processes, mapped to HOST pids
+docker diff api                             # files changed vs the image - revealing
+docker stats --no-stream api
+docker cp api:/app/config.yaml ./           # pull a file out for inspection
+docker events --since 10m                   # the daemon's own timeline
+</code></pre>
+
+<h3>Exit codes</h3>
+<table>
+<tr><th>Code</th><th>Meaning</th><th>First thing to check</th></tr>
+<tr><td>0</td><td>Clean exit</td><td>A foreground process that finished — your CMD probably daemonised itself</td></tr>
+<tr><td>1</td><td>Generic application error</td><td><code>docker logs</code>; usually a config or connection failure at startup</td></tr>
+<tr><td>125</td><td>Docker itself failed</td><td>Bad flag, invalid mount, unknown network</td></tr>
+<tr><td>126</td><td>Command found but not executable</td><td>Missing <code>chmod +x</code>, or a CRLF line ending in an entrypoint script</td></tr>
+<tr><td>127</td><td>Command not found</td><td>Wrong path, or the binary needs a shell/libc that distroless lacks</td></tr>
+<tr><td>137</td><td>128+9, SIGKILL</td><td><strong>OOMKilled</strong> — check <code>.State.OOMKilled</code>; or a stop timeout expired</td></tr>
+<tr><td>139</td><td>128+11, SIGSEGV</td><td>Native crash; often an architecture mismatch or a bad shared library</td></tr>
+<tr><td>143</td><td>128+15, SIGTERM</td><td>Normal stop — the app shut down when asked</td></tr>
+</table>
+
+<h3>Debugging an image that will not start at all</h3>
+<pre><code class="language-bash">docker run --rm -it --entrypoint sh myapp:1.4.2        # bypass ENTRYPOINT, look around
+docker run --rm -it --entrypoint sh myapp:1.4.2 -c 'ls -la /app; id; env | sort'
+docker create --name tmp myapp:1.4.2 &amp;&amp; docker export tmp | tar -tv | head -50
+docker run --rm -it --network container:api nicolaka/netshoot   # debug its network
+docker run --rm -it -v api-data:/data alpine ls -la /data       # inspect a volume
+dive myapp:1.4.2                                       # layer-by-layer size explorer
+</code></pre>
+
+<h3>"It works on my machine" — the real failure modes</h3>
+<div class="grid c2">
+  <div class="card"><h4>Architecture mismatch</h4><p>Built <code>arm64</code> on a Mac, ran on <code>amd64</code>. Symptom: <code>exec format error</code> or <code>exec /app: no such file or directory</code> on a binary that clearly exists. Fix: <code>docker buildx build --platform linux/amd64</code>. Check with <code>docker image inspect --format '{{.Architecture}}'</code>.</p></div>
+  <div class="card"><h4>Stale build cache</h4><p>A <code>RUN apt-get update</code> layer cached from last month installs stale packages, or a <code>COPY</code> cache hit hides a changed file. Confirm with <code>docker build --no-cache</code>.</p></div>
+  <div class="card"><h4>Missing runtime library</h4><p>Works in the builder stage, fails in runtime because <code>libpq5</code> was never installed in the final stage. Symptom: <code>ImportError: libpq.so.5: cannot open shared object file</code>. Check with <code>ldd</code> inside the image.</p></div>
+  <div class="card"><h4>Env present locally, absent in the image</h4><p>Your shell exported <code>OPENAI_API_KEY</code>; the container never received it. <code>docker exec api env | sort</code> is the one-command check.</p></div>
+  <div class="card"><h4>Bound to 127.0.0.1 inside</h4><p>The app listens on loopback inside its own namespace, so the published port connects to nothing. It must bind <code>0.0.0.0</code>. Verify with <code>docker exec api ss -tulpn</code>.</p></div>
+  <div class="card"><h4>File permissions after USER</h4><p><code>COPY</code> without <code>--chown</code> leaves files owned by root; the app runs as UID 10001 and cannot write its cache directory. <code>docker exec -u 10001 api touch /app/cache/x</code> reproduces it instantly.</p></div>
+  <div class="card"><h4>Corporate CA missing</h4><p>Outbound HTTPS fails with "unknown authority" because the image trusts public roots only. Copy the corporate root into the image or mount it, and set <code>REQUESTS_CA_BUNDLE</code> / <code>NODE_EXTRA_CA_CERTS</code> / <code>SSL_CERT_FILE</code>.</p></div>
+  <div class="card"><h4>Clock and timezone</h4><p>Containers inherit the host clock but default to UTC. Signature validation and JWT expiry fail if the host clock drifts. <code>docker exec api date -u</code> versus the host.</p></div>
+</div>
+
+<h2>The Kubernetes Mental Model</h2>
+<p class="lead">Kubernetes is a control loop over a declarative API. You write down the state you want; a set of controllers continuously compares that to reality and acts to close the gap. Every object, every failure mode and every debugging step makes sense once you hold that one idea firmly.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="300" height="180" rx="8" fill="#eff4ff" stroke="#1e3a8a" stroke-width="2"/>
+  <text x="170" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">CONTROL PLANE</text>
+  <rect x="38" y="56" width="120" height="36" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <text x="98" y="79" text-anchor="middle" font-size="11" fill="#1e3a8a">kube-apiserver</text>
+  <rect x="182" y="56" width="120" height="36" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <text x="242" y="79" text-anchor="middle" font-size="11" fill="#1e3a8a">etcd</text>
+  <rect x="38" y="102" width="120" height="36" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <text x="98" y="125" text-anchor="middle" font-size="11" fill="#1e3a8a">scheduler</text>
+  <rect x="182" y="102" width="120" height="36" rx="5" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <text x="242" y="125" text-anchor="middle" font-size="11" fill="#1e3a8a">controller-mgr</text>
+  <rect x="38" y="148" width="264" height="34" rx="5" fill="#ffffff" stroke="#0891b2" stroke-width="2"/>
+  <text x="170" y="169" text-anchor="middle" font-size="11" fill="#1e3a8a">cloud-controller-manager</text>
+
+  <line x1="320" y1="110" x2="410" y2="110" stroke="#6b7688" stroke-width="2"/>
+  <text x="365" y="102" text-anchor="middle" font-size="10" fill="#6b7688">watch /</text>
+  <text x="365" y="126" text-anchor="middle" font-size="10" fill="#6b7688">report</text>
+
+  <rect x="410" y="20" width="330" height="84" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <text x="575" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">NODE 1</text>
+  <rect x="424" y="50" width="96" height="40" rx="5" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="472" y="74" text-anchor="middle" font-size="10" fill="#1e3a8a">kubelet</text>
+  <rect x="528" y="50" width="96" height="40" rx="5" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="576" y="74" text-anchor="middle" font-size="10" fill="#1e3a8a">kube-proxy</text>
+  <rect x="632" y="50" width="96" height="40" rx="5" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="680" y="68" text-anchor="middle" font-size="10" fill="#1e3a8a">pods</text>
+  <text x="680" y="82" text-anchor="middle" font-size="9" fill="#0891b2">containerd</text>
+
+  <rect x="410" y="116" width="330" height="84" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <text x="575" y="136" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">NODE 2</text>
+  <rect x="424" y="146" width="96" height="40" rx="5" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="472" y="170" text-anchor="middle" font-size="10" fill="#1e3a8a">kubelet</text>
+  <rect x="528" y="146" width="96" height="40" rx="5" fill="#e3e8ef" stroke="#6b7688" stroke-width="2"/>
+  <text x="576" y="170" text-anchor="middle" font-size="10" fill="#1e3a8a">kube-proxy</text>
+  <rect x="632" y="146" width="96" height="40" rx="5" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="680" y="164" text-anchor="middle" font-size="10" fill="#1e3a8a">pods</text>
+  <text x="680" y="178" text-anchor="middle" font-size="9" fill="#0891b2">containerd</text>
+
+  <rect x="20" y="222" width="720" height="56" rx="8" fill="#ffffff" stroke="#e3e8ef" stroke-width="2"/>
+  <text x="36" y="244" font-size="11" font-weight="700" fill="#1e3a8a">THE RECONCILIATION LOOP</text>
+  <text x="36" y="265" font-size="11" fill="#6b7688">kubectl apply -&gt; apiserver validates -&gt; etcd stores DESIRED state -&gt; controller observes ACTUAL -&gt; acts to close the gap -&gt; repeat forever</text>
+</svg>
+<div class="cap">You never create a container. You record intent; controllers make reality match it, continuously.</div>
+</div>
+
+<h3>The components</h3>
+<table>
+<tr><th>Component</th><th>Role</th><th>When it is the problem</th></tr>
+<tr><td><code>kube-apiserver</code></td><td>The only thing that talks to etcd; REST API, authn/authz, admission</td><td><code>kubectl</code> hangs or returns 401/403; webhook timeouts block every apply</td></tr>
+<tr><td><code>etcd</code></td><td>Consistent key-value store of all cluster state</td><td>Slow etcd = slow everything. Disk latency is the usual culprit</td></tr>
+<tr><td><code>kube-scheduler</code></td><td>Assigns pending pods to nodes based on resources, affinity, taints</td><td>Pods stuck <code>Pending</code> with "0/5 nodes are available"</td></tr>
+<tr><td><code>controller-manager</code></td><td>Runs the loops: Deployment, ReplicaSet, Node, Job, endpoints</td><td>Replicas never created; endpoints never populated</td></tr>
+<tr><td><code>kubelet</code></td><td>Node agent: pulls images, starts containers, runs probes, reports status</td><td><code>NotReady</code> node, <code>ImagePullBackOff</code>, probe failures</td></tr>
+<tr><td><code>kube-proxy</code> / CNI</td><td>Service VIP routing (iptables/IPVS) and pod networking</td><td>Service IP unreachable while the pod IP works</td></tr>
+<tr><td>CoreDNS</td><td>Cluster DNS for Services</td><td>Name resolution fails cluster-wide; check it first in any networking incident</td></tr>
+</table>
+
+<h3>Why it exists (the honest version)</h3>
+<p>Kubernetes solves scheduling across many machines, self-healing when a node dies, rolling updates with health gating, service discovery and load balancing, declarative configuration with rollback, and horizontal autoscaling — all behind one API with a consistent extension model. That is a genuinely large amount of operational work it removes.</p>
+<div class="callout warn"><span class="t">And when it is the wrong answer</span>A single-service prototype on one VM does not need a cluster; systemd or Compose is less to run, less to secure and less to explain. If the customer has no platform team, introducing Kubernetes transfers an operational burden they cannot carry after you leave. The FDE judgement is to match the platform to what the customer can actually operate on their own — and to say so out loud even when they asked for Kubernetes by name.</div>
+
+<h2>Core Objects, With Worked YAML</h2>
+<p class="lead">You will spend most of your Kubernetes time with about ten object types. Here is each one, what it is for, and YAML you can adapt rather than invent.</p>
+
+<h3>Pod — the unit of scheduling</h3>
+<p>A Pod is one or more containers that share a network namespace (same IP, same localhost, same port space) and can share volumes. You rarely create one directly; you create a Deployment that creates them. But understanding the Pod spec is essential because every higher object embeds it as <code>template</code>.</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-shell
+  namespace: ragdemo
+  labels: { app: debug }
+spec:
+  terminationGracePeriodSeconds: 5
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    fsGroup: 10001
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+    - name: shell
+      image: nicolaka/netshoot:latest
+      command: ["sleep", "3600"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: { drop: ["ALL"] }
+      resources:
+        requests: { cpu: 50m, memory: 64Mi }
+        limits:   { cpu: 200m, memory: 256Mi }
+      volumeMounts:
+        - { name: tmp, mountPath: /tmp }
+  volumes:
+    - name: tmp
+      emptyDir: { sizeLimit: 64Mi }
+</code></pre>
+<p>Multi-container patterns worth knowing: a <strong>sidecar</strong> runs alongside (log shipper, proxy); an <strong>init container</strong> runs to completion before app containers start (schema migration, waiting for a dependency, fetching config); an <strong>ambassador</strong> proxies outbound connections. Containers in a Pod are always co-scheduled on one node — that is the defining property.</p>
+
+<h3>Deployment — what you actually write</h3>
+<p>Deployment manages ReplicaSets; a ReplicaSet manages Pods. On an update, the Deployment creates a new ReplicaSet and shifts replicas across according to the rollout strategy, keeping old ReplicaSets around for rollback.</p>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-api
+  namespace: ragdemo
+  labels: { app.kubernetes.io/name: rag-api, app.kubernetes.io/version: "1.4.2" }
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # at most 1 extra pod above replicas during rollout
+      maxUnavailable: 0    # never drop below 3 ready - zero-downtime
+  selector:
+    matchLabels: { app: rag-api }      # IMMUTABLE after creation
+  template:
+    metadata:
+      labels: { app: rag-api }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        checksum/config: "{{ sha256sum of the ConfigMap }}"   # forces rollout on config change
+    spec:
+      serviceAccountName: rag-api
+      imagePullSecrets:
+        - name: corp-registry
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app: rag-api }
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.36
+          command: ['sh','-c','until nc -z postgres 5432; do echo waiting; sleep 2; done']
+      containers:
+        - name: api
+          image: registry.corp/platform/rag-api@sha256:9f2c1a3b7e4d5c6a8b9f0e1d2c3b4a5968778899aabbccddeeff00112233445566
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 8080, protocol: TCP }
+          env:
+            - name: LOG_LEVEL
+              valueFrom: { configMapKeyRef: { name: rag-api-config, key: log_level } }
+            - name: DATABASE_PASSWORD
+              valueFrom: { secretKeyRef: { name: rag-api-secrets, key: db_password } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+          envFrom:
+            - configMapRef: { name: rag-api-config }
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits:   { cpu: "2",  memory: 2Gi }
+          startupProbe:
+            httpGet: { path: /healthz, port: http }
+            failureThreshold: 30
+            periodSeconds: 5          # allows up to 150 s to start
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec: { command: ["sh","-c","sleep 5"] }   # let endpoints drain first
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: cache, mountPath: /app/.cache }
+            - { name: tmp,   mountPath: /tmp }
+            - { name: corp-ca, mountPath: /etc/ssl/certs/corp-root.pem, subPath: corp-root.pem, readOnly: true }
+      volumes:
+        - name: cache
+          emptyDir: { sizeLimit: 512Mi }
+        - name: tmp
+          emptyDir: { sizeLimit: 128Mi }
+        - name: corp-ca
+          configMap: { name: corp-ca-bundle }
+      terminationGracePeriodSeconds: 45
+</code></pre>
+<div class="callout tip"><span class="t">The preStop sleep is not a hack</span>When a Pod is deleted, two things happen in parallel: the kubelet sends SIGTERM, and the endpoints controller removes the Pod from Service endpoints. The second propagates to every kube-proxy asynchronously, so for a second or two traffic still arrives at a shutting-down Pod. A short <code>preStop</code> sleep plus a graceful shutdown in the app removes the 502 spike that customers notice during every deploy.</div>
+
+<h3>Service — stable networking</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: rag-api
+  namespace: ragdemo
+spec:
+  type: ClusterIP                 # default: a virtual IP reachable only inside the cluster
+  selector: { app: rag-api }      # matches POD labels, not the Deployment name
+  ports:
+    - name: http
+      port: 80                    # the Service port
+      targetPort: http            # the container port (name or number)
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rag-api-headless
+spec:
+  clusterIP: None                 # headless: DNS returns pod IPs directly, no VIP
+  selector: { app: rag-api }
+  ports: [{ port: 8080 }]
+</code></pre>
+<table>
+<tr><th>Type</th><th>What it creates</th><th>Reachable from</th><th>Use for</th></tr>
+<tr><td><code>ClusterIP</code></td><td>A virtual IP + DNS name</td><td>Inside the cluster only</td><td>Nearly everything</td></tr>
+<tr><td><code>NodePort</code></td><td>Opens the same high port (30000–32767) on <em>every</em> node</td><td>Anyone who can reach a node</td><td>Bare metal without a load balancer; quick demos</td></tr>
+<tr><td><code>LoadBalancer</code></td><td>NodePort + asks the cloud provider for an external LB</td><td>The internet or an internal VNet</td><td>Cloud clusters; one LB per Service gets expensive</td></tr>
+<tr><td><code>ExternalName</code></td><td>A CNAME record, no proxying</td><td>n/a</td><td>Pointing an in-cluster name at an external database</td></tr>
+<tr><td>Headless</td><td>DNS A records for each Pod</td><td>Inside the cluster</td><td>StatefulSets, client-side load balancing, gRPC</td></tr>
+</table>
+<p>Service DNS follows a fixed pattern: <code>&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local</code>. Inside the same namespace, <code>rag-api</code> is enough; across namespaces you need <code>rag-api.ragdemo</code>. This is the single most common cause of "connection refused" in a multi-namespace install.</p>
+
+<h3>Ingress — HTTP routing from outside</h3>
+<pre><code class="language-yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rag
+  namespace: ragdemo
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "25m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    cert-manager.io/cluster-issuer: corp-ca-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [rag.apps.corp.example.com]
+      secretName: rag-tls
+  rules:
+    - host: rag.apps.corp.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: rag-api
+                port: { number: 80 }
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rag-ui
+                port: { number: 80 }
+</code></pre>
+<p>An Ingress object is inert without an Ingress <em>controller</em> (ingress-nginx, Traefik, HAProxy, or a cloud ALB controller) actually running in the cluster. Annotation names are controller-specific and do not port across. The newer Gateway API is the standards-track replacement with better multi-tenancy, but ingress-nginx is what you will find installed at most customers today.</p>
+
+<h3>ConfigMap and Secret</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ConfigMap
+metadata: { name: rag-api-config, namespace: ragdemo }
+data:
+  log_level: "info"
+  max_tokens: "2048"
+  NO_PROXY: "localhost,127.0.0.1,.svc,.cluster.local,10.0.0.0/8"
+  app.yaml: |
+    retriever:
+      top_k: 8
+      rerank: true
+    limits:
+      request_timeout_s: 30
+---
+apiVersion: v1
+kind: Secret
+metadata: { name: rag-api-secrets, namespace: ragdemo }
+type: Opaque
+stringData:                       # stringData is plaintext at apply; data is base64
+  db_password: "change-me-in-a-real-cluster"
+  openai_api_key: "sk-..."
+</code></pre>
+<pre><code class="language-bash">kubectl create configmap rag-api-config --from-file=app.yaml --from-literal=log_level=info \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic rag-api-secrets --from-env-file=.env.prod
+kubectl create secret docker-registry corp-registry \
+  --docker-server=registry.corp.example.com:5000 \
+  --docker-username=svc_k8s --docker-password="$REG_PASS"
+kubectl get secret rag-api-secrets -o jsonpath='{.data.db_password}' | base64 -d
+</code></pre>
+<div class="callout danger"><span class="t">Kubernetes Secrets are base64, not encryption</span>Anyone with <code>get secret</code> RBAC in the namespace, or read access to etcd, can recover the plaintext. Minimum bar: enable encryption at rest on the apiserver, restrict Secret RBAC tightly, and never commit Secret manifests to git. Better: External Secrets Operator or the Secrets Store CSI driver pulling from Vault, AWS Secrets Manager or Azure Key Vault, so the cluster holds a reference rather than the value.</div>
+<p>Mounted ConfigMaps update in-place (within a minute or so) but environment variables from them do <strong>not</strong> — the process must restart. The <code>checksum/config</code> annotation pattern in the Deployment template forces a rolling restart whenever the ConfigMap changes, which is how Helm charts solve this.</p>
+
+<h3>Job and CronJob</h3>
+<pre><code class="language-yaml">apiVersion: batch/v1
+kind: Job
+metadata: { name: db-migrate-1-4-2, namespace: ragdemo }
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 900
+  ttlSecondsAfterFinished: 3600     # auto-clean the Job object
+  template:
+    spec:
+      restartPolicy: Never          # or OnFailure; NEVER "Always" for a Job
+      containers:
+        - name: migrate
+          image: registry.corp/platform/rag-api:1.4.2
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - secretRef: { name: rag-api-secrets }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: reindex, namespace: ragdemo }
+spec:
+  schedule: "30 2 * * *"
+  timeZone: "Asia/Kolkata"          # Kubernetes 1.27+
+  concurrencyPolicy: Forbid         # Allow | Forbid | Replace
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: reindex
+              image: registry.corp/platform/rag-api:1.4.2
+              command: ["python", "-m", "jobs.reindex"]
+              resources:
+                requests: { cpu: 500m, memory: 1Gi }
+                limits:   { cpu: "2",  memory: 4Gi }
+</code></pre>
+
+<h3>PersistentVolumeClaim</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: { name: qdrant-data, namespace: ragdemo }
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: gp3            # omit to use the cluster default
+  resources:
+    requests: { storage: 100Gi }
+</code></pre>
+<table>
+<tr><th>Access mode</th><th>Meaning</th><th>Typical backing</th></tr>
+<tr><td><code>ReadWriteOnce</code></td><td>Mounted read-write by one <em>node</em></td><td>EBS, Azure Disk, GCE PD, most block storage</td></tr>
+<tr><td><code>ReadWriteOncePod</code></td><td>Exactly one Pod (1.22+)</td><td>Strict single-writer databases</td></tr>
+<tr><td><code>ReadOnlyMany</code></td><td>Read-only by many nodes</td><td>Shared reference data</td></tr>
+<tr><td><code>ReadWriteMany</code></td><td>Read-write by many nodes</td><td>NFS, EFS, Azure Files, CephFS — not available on plain block storage</td></tr>
+</table>
+<p>For stateful workloads use a StatefulSet rather than a Deployment: it gives stable network identities (<code>db-0</code>, <code>db-1</code>), ordered rollout, and a <code>volumeClaimTemplates</code> block that gives each replica its own PVC. Note that deleting a StatefulSet does <em>not</em> delete its PVCs — by design, and a frequent source of orphaned storage cost at customers.</p>
+
+<h3>Namespace and ResourceQuota</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Namespace
+metadata:
+  name: ragdemo
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata: { name: ragdemo-quota, namespace: ragdemo }
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "16"
+    limits.memory: 32Gi
+    persistentvolumeclaims: "6"
+    count/pods: "40"
+---
+apiVersion: v1
+kind: LimitRange
+metadata: { name: ragdemo-defaults, namespace: ragdemo }
+spec:
+  limits:
+    - type: Container
+      default:        { cpu: 500m, memory: 512Mi }
+      defaultRequest: { cpu: 100m, memory: 128Mi }
+      max:            { cpu: "4",  memory: 8Gi }
+</code></pre>
+<div class="callout warn"><span class="t">A quota makes requests mandatory</span>Once a ResourceQuota sets <code>requests.cpu</code>, every Pod in that namespace must declare requests or it is rejected outright with <code>failed quota: must specify cpu,memory</code>. A LimitRange supplies defaults so existing manifests keep working. Customers almost always have quotas on shared clusters — assume they do and set requests from the start.</div>
+
+<h2>kubectl Fluency</h2>
+<p class="lead">Twenty-five commands cover essentially all day-to-day work. Learn the output formatting flags too — <code>-o jsonpath</code> and <code>-o custom-columns</code> turn kubectl into a data source you can script against.</p>
+
+<h3>Contexts and kubeconfig</h3>
+<pre><code class="language-bash">kubectl config get-contexts
+kubectl config current-context
+kubectl config use-context acme-prod
+kubectl config set-context --current --namespace=ragdemo    # stop typing -n everywhere
+kubectl config view --minify --raw                           # the ACTIVE context, with creds
+
+export KUBECONFIG=~/.kube/acme-prod.yaml                     # one file per customer
+export KUBECONFIG=~/.kube/config:~/.kube/acme.yaml           # merge several
+kubectl cluster-info
+kubectl version --short
+kubectl auth can-i create deployments -n ragdemo
+kubectl auth can-i --list -n ragdemo                         # everything you are allowed
+</code></pre>
+<div class="callout tip"><span class="t">Make the context visible</span>Running <code>kubectl delete</code> against the wrong cluster is a career event. Put the context and namespace in your shell prompt (kube-ps1, starship) and keep each customer's kubeconfig in a separate file selected by an explicit <code>export KUBECONFIG=</code> — never merged into your default config where a stray <code>use-context</code> can bite you.</div>
+
+<h3>The commands that matter</h3>
+<pre><code class="language-bash">kubectl get pods -o wide                       # adds node, pod IP, nominated node
+kubectl get pods -w                            # watch changes live
+kubectl get pods -A                            # all namespaces
+kubectl get pods -l app=rag-api                # by label selector
+kubectl get all -n ragdemo                     # common types (NOT literally everything)
+kubectl get events --sort-by=.lastTimestamp -n ragdemo | tail -30
+kubectl describe pod rag-api-7d4f8b6c9-xk2mq   # spec + status + EVENTS. Read the bottom first
+kubectl logs rag-api-7d4f8b6c9-xk2mq -f
+kubectl logs -l app=rag-api --tail=100 --prefix --all-containers
+kubectl logs rag-api-7d4f8b6c9-xk2mq --previous    # the CRASHED container's output
+kubectl exec -it rag-api-7d4f8b6c9-xk2mq -- sh
+kubectl exec rag-api-7d4f8b6c9-xk2mq -c api -- env | sort
+kubectl port-forward svc/rag-api 8080:80
+kubectl port-forward pod/rag-api-7d4f8b6c9-xk2mq 8080:8080
+kubectl apply -f manifests/ --recursive
+kubectl apply -k overlays/prod                 # kustomize
+kubectl diff -f deploy.yaml                    # what WOULD change - run this first
+kubectl rollout status deploy/rag-api --timeout=120s
+kubectl rollout history deploy/rag-api
+kubectl rollout undo deploy/rag-api --to-revision=3
+kubectl rollout restart deploy/rag-api         # re-roll without changing the spec
+kubectl scale deploy/rag-api --replicas=5
+kubectl set image deploy/rag-api api=registry.corp/platform/rag-api:1.4.3
+kubectl top pods --sort-by=memory              # needs metrics-server
+kubectl top nodes
+kubectl cp ragdemo/rag-api-xk2mq:/app/dump.json ./dump.json
+kubectl debug -it rag-api-xk2mq --image=nicolaka/netshoot --target=api   # ephemeral container
+kubectl explain deployment.spec.strategy.rollingUpdate   # built-in schema docs
+kubectl api-resources | grep -i ingress        # what types exist, short names, group
+</code></pre>
+
+<h3>Output formatting</h3>
+<pre><code class="language-bash">kubectl get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\n"}{end}'
+kubectl get pods -o jsonpath='{.items[*].spec.containers[*].image}' | tr ' ' '\n' | sort -u
+kubectl get pod rag-api-xk2mq -o jsonpath='{.status.containerStatuses[0].restartCount}'
+kubectl get nodes -o custom-columns=\
+'NAME:.metadata.name,READY:.status.conditions[-1].type,CPU:.status.capacity.cpu,MEM:.status.capacity.memory'
+kubectl get deploy -A -o json | jq -r '
+  .items[] | select(.spec.template.spec.containers[].resources.limits == null)
+  | "\(.metadata.namespace)/\(.metadata.name) has no limits"'
+kubectl get pods --field-selector status.phase!=Running,status.phase!=Succeeded -A
+kubectl get pods --sort-by='.status.containerStatuses[0].restartCount' -A | tail -20
+kubectl get secret rag-api-secrets -o go-template='{{range $k,$v := .data}}{{$k}}={{$v|base64decode}}{{"\n"}}{{end}}'
+</code></pre>
+
+<h3>describe vs logs vs events</h3>
+<table>
+<tr><th>Tool</th><th>Answers</th><th>Use when</th></tr>
+<tr><td><code>describe</code></td><td>What the control plane thinks: scheduling decisions, image pulls, probe results, mount failures</td><td>The Pod never started, or is restarting. The <strong>Events</strong> block at the bottom is the answer 80% of the time</td></tr>
+<tr><td><code>logs</code></td><td>What the application printed</td><td>The container started and then misbehaved. Add <code>--previous</code> after a crash</td></tr>
+<tr><td><code>get events</code></td><td>Cluster-wide timeline including node pressure, evictions, scheduler messages</td><td>Several things broke at once, or the Pod object was deleted before you could describe it</td></tr>
+</table>
+<div class="callout note"><span class="t">Events expire</span>Default retention is one hour. If a customer reports a problem from last night, the events are gone — you need the logs (if the Pod object still exists), the application's own logging backend, or <code>kubectl get pods -o yaml</code> for <code>lastState.terminated</code>, which preserves the exit code and reason of the previous container run.</div>
+
+<h2>Scheduling and Reliability</h2>
+<p class="lead">Requests and limits are the two numbers that determine whether your workload gets scheduled, whether it gets throttled, and whether it gets killed first when a node runs out of memory. Most production incidents in a customer cluster trace back to these being wrong or absent.</p>
+
+<h3>Requests versus limits</h3>
+<pre><code class="language-yaml">resources:
+  requests:            # used by the SCHEDULER to pick a node; a reservation
+    cpu: 250m          # 0.25 of a core
+    memory: 512Mi
+  limits:              # enforced by the KERNEL via cgroups at runtime
+    cpu: "2"
+    memory: 2Gi
+</code></pre>
+<p>CPU is compressible: exceeding the limit causes throttling (the process is paused within each 100 ms period), not termination. Memory is not compressible: exceeding the limit causes an immediate OOM kill with exit code 137. That asymmetry drives the standard advice — set memory request equal to memory limit, and be generous or omit CPU limits entirely if latency matters more than noisy-neighbour fairness.</p>
+
+<table>
+<tr><th>QoS class</th><th>Condition</th><th>Eviction order under node pressure</th></tr>
+<tr><td><code>Guaranteed</code></td><td>Every container has requests == limits for both CPU and memory</td><td>Evicted <strong>last</strong></td></tr>
+<tr><td><code>Burstable</code></td><td>At least one request set, but not matching limits</td><td>Evicted second, worst-offender-over-request first</td></tr>
+<tr><td><code>BestEffort</code></td><td>No requests or limits at all</td><td>Evicted <strong>first</strong>, always</td></tr>
+</table>
+<pre><code class="language-bash">kubectl get pod rag-api-xk2mq -o jsonpath='{.status.qosClass}'
+kubectl describe node ip-10-0-3-21 | sed -n '/Allocated resources/,/^Events/p'
+# Resource  Requests      Limits
+# cpu       3250m (81%)   9 (225%)       <- overcommitted on limits; fine, but watch throttling
+# memory    7409Mi (62%)  16Gi (137%)
+kubectl top pod --containers -n ragdemo
+</code></pre>
+<div class="callout warn"><span class="t">CPU limits cause latency you will be blamed for</span>A pod with <code>limits.cpu: "1"</code> that briefly needs 1.5 cores is throttled — the kernel freezes it for the rest of the 100 ms period. The symptom is p99 latency spikes with CPU utilisation that looks comfortable. Check <code>container_cpu_cfs_throttled_seconds_total</code> in Prometheus. For latency-sensitive services, many teams set requests carefully and omit CPU limits entirely.</div>
+
+<h3>Probes</h3>
+<table>
+<tr><th>Probe</th><th>On failure</th><th>Purpose</th><th>Get wrong and…</th></tr>
+<tr><td><code>startupProbe</code></td><td>Kills the container</td><td>Protects slow starters; disables the other two until it passes</td><td>Without it, a 90-second JVM start is killed by liveness at 30 s, forever</td></tr>
+<tr><td><code>readinessProbe</code></td><td>Removes the Pod from Service endpoints</td><td>Traffic gating — no restart</td><td>Too aggressive = flapping endpoints and intermittent 503s</td></tr>
+<tr><td><code>livenessProbe</code></td><td><strong>Restarts</strong> the container</td><td>Recover from deadlock only</td><td>Pointing it at a dependency turns a database blip into a cluster-wide restart storm</td></tr>
+</table>
+<pre><code class="language-yaml">startupProbe:    { httpGet: {path: /healthz, port: 8080}, failureThreshold: 30, periodSeconds: 5 }
+readinessProbe:  { httpGet: {path: /readyz,  port: 8080}, periodSeconds: 10, failureThreshold: 3 }
+livenessProbe:   { httpGet: {path: /healthz, port: 8080}, periodSeconds: 20, failureThreshold: 3 }
+</code></pre>
+<p>Design the endpoints deliberately: <code>/healthz</code> should answer "is this process alive and not deadlocked" with no external calls at all; <code>/readyz</code> may check that the database pool and model are loaded, because failing readiness only removes traffic. Conflating them is the single most common probe mistake.</p>
+
+<h3>HPA, PDB, and disruption</h3>
+<pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: rag-api, namespace: ragdemo }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: rag-api }
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+    - type: Pods
+      pods:
+        metric: { name: http_requests_inflight }
+        target: { type: AverageValue, averageValue: "30" }
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies: [{ type: Percent, value: 100, periodSeconds: 30 }]
+    scaleDown:
+      stabilizationWindowSeconds: 300      # scale down slowly, avoid flapping
+      policies: [{ type: Percent, value: 25, periodSeconds: 60 }]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: rag-api, namespace: ragdemo }
+spec:
+  minAvailable: 2                           # or maxUnavailable: 1
+  selector:
+    matchLabels: { app: rag-api }
+</code></pre>
+<p>HPA utilisation is calculated against the CPU <strong>request</strong>, not the limit — so a tiny request makes the HPA scale out constantly. A PDB constrains <em>voluntary</em> disruptions only: node drains, cluster upgrades, descheduler evictions. It does not protect against a node crashing. Set one for anything the customer considers production, or their next cluster upgrade will drain all your replicas simultaneously.</p>
+
+<h3>Placement: affinity, taints, tolerations</h3>
+<pre><code class="language-yaml">spec:
+  nodeSelector: { "node.kubernetes.io/instance-type": "g5.xlarge" }
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - { key: topology.kubernetes.io/zone, operator: In, values: [ap-south-1a, ap-south-1b] }
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels: { app: rag-api }
+</code></pre>
+<p>A <strong>taint</strong> on a node repels pods; a <strong>toleration</strong> on a pod lets it ignore a specific taint. That is how GPU nodes, spot instances and dedicated node pools are reserved. Effects: <code>NoSchedule</code> (do not place new pods), <code>PreferNoSchedule</code> (soft), <code>NoExecute</code> (also evict pods already running). Anti-affinity on <code>kubernetes.io/hostname</code> spreads replicas across nodes so one node failure does not take the whole service down — use <code>preferred</code> rather than <code>required</code> on small clusters or your pods will sit Pending.</p>
+
+<h2>Configuration and Packaging: Helm and Kustomize</h2>
+<p class="lead">Raw YAML does not survive three environments. You need either templating (Helm) or patching (Kustomize). Customers usually have a strong existing preference; know both well enough to work in either.</p>
+
+<h3>Helm chart structure</h3>
+<pre><code class="language-text">rag-api/
+├── Chart.yaml          # name, version, appVersion, dependencies
+├── values.yaml         # DEFAULTS - the chart's public interface
+├── values.schema.json  # optional JSON Schema validation of values
+├── templates/
+│   ├── _helpers.tpl    # named template fragments (labels, names)
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   ├── ingress.yaml
+│   ├── configmap.yaml
+│   ├── serviceaccount.yaml
+│   ├── hpa.yaml
+│   ├── pdb.yaml
+│   ├── NOTES.txt       # printed after install - put the access URL here
+│   └── tests/
+│       └── test-connection.yaml
+└── charts/             # vendored sub-charts
+</code></pre>
+<pre><code class="language-yaml"># values.yaml
+replicaCount: 3
+image:
+  repository: registry.corp/platform/rag-api
+  tag: ""                       # defaults to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+imagePullSecrets: [{ name: corp-registry }]
+resources:
+  requests: { cpu: 250m, memory: 512Mi }
+  limits:   { cpu: "2",  memory: 2Gi }
+ingress:
+  enabled: true
+  className: nginx
+  host: rag.apps.corp.example.com
+  tls: true
+config:
+  logLevel: info
+  topK: 8
+externalSecrets:
+  enabled: false
+nodeSelector: {}
+tolerations: []
+affinity: {}
+</code></pre>
+<pre><code class="language-yaml"># templates/deployment.yaml (excerpt)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rag-api.fullname" . }}
+  labels: {{- include "rag-api.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "rag-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels: {{- include "rag-api.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rag-api.serviceAccountName" . }}
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports: [{ name: http, containerPort: 8080 }]
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+</code></pre>
+<pre><code class="language-bash">helm lint ./rag-api
+helm template rag-api ./rag-api -f values-prod.yaml      # render locally, read the YAML
+helm install rag-api ./rag-api -n ragdemo --create-namespace -f values-prod.yaml
+helm upgrade --install rag-api ./rag-api -n ragdemo -f values-prod.yaml \
+  --set image.tag=1.4.3 --atomic --timeout 5m --wait
+helm diff upgrade rag-api ./rag-api -f values-prod.yaml  # plugin; invaluable before prod
+helm history rag-api -n ragdemo
+helm rollback rag-api 3 -n ragdemo
+helm get values rag-api -n ragdemo                       # what is ACTUALLY deployed
+helm get manifest rag-api -n ragdemo
+helm uninstall rag-api -n ragdemo
+helm package ./rag-api &amp;&amp; helm push rag-api-0.3.1.tgz oci://registry.corp/charts
+</code></pre>
+<div class="callout tip"><span class="t">--atomic and --wait</span>Without them, a failed upgrade leaves the release half-applied and the customer looking at a broken service. <code>--atomic</code> rolls back automatically on failure; <code>--wait</code> blocks until resources are ready. Always use both for anything that is not a sandbox, and always run <code>helm diff upgrade</code> or <code>helm template | kubectl diff -f -</code> before touching a production namespace.</div>
+
+<h3>Kustomize</h3>
+<pre><code class="language-text">base/
+  kustomization.yaml
+  deployment.yaml
+  service.yaml
+overlays/
+  dev/   { kustomization.yaml, replica-patch.yaml }
+  prod/  { kustomization.yaml, replica-patch.yaml, resources-patch.yaml }
+</code></pre>
+<pre><code class="language-yaml"># overlays/prod/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ragdemo
+resources: [../../base]
+commonLabels: { environment: prod }
+images:
+  - name: registry.corp/platform/rag-api
+    newTag: 1.4.2
+replicas:
+  - { name: rag-api, count: 5 }
+configMapGenerator:
+  - name: rag-api-config
+    literals: [log_level=warn, top_k=8]
+patches:
+  - path: resources-patch.yaml
+    target: { kind: Deployment, name: rag-api }
+</code></pre>
+<pre><code class="language-bash">kubectl kustomize overlays/prod            # render
+kubectl apply -k overlays/prod
+kubectl diff -k overlays/prod
+</code></pre>
+<table>
+<tr><th></th><th>Helm</th><th>Kustomize</th></tr>
+<tr><td>Mechanism</td><td>Go text templating + values</td><td>Strategic merge and JSON patches on plain YAML</td></tr>
+<tr><td>Distribution</td><td>Versioned, packageable, an ecosystem of public charts</td><td>Plain directories in git</td></tr>
+<tr><td>Release tracking</td><td>Built in: history, rollback, hooks</td><td>None; relies on git plus your GitOps tool</td></tr>
+<tr><td>Readability</td><td>Templates become dense and hard to debug</td><td>Base files are valid YAML you can read directly</td></tr>
+<tr><td>Built into kubectl</td><td>No, separate binary</td><td>Yes, <code>-k</code></td></tr>
+<tr><td>Use when</td><td>Shipping software to others; many knobs; third-party dependencies</td><td>Your own app across a few environments; GitOps with Argo CD or Flux</td></tr>
+</table>
+<p>They compose: it is common to <code>helm template</code> a third-party chart and then post-process with Kustomize, and Argo CD supports exactly that pattern. For an FDE shipping a product into many customers, Helm is usually the right answer because the chart <em>is</em> the configuration contract you hand over.</p>
+
+<h2>Security in a Customer Cluster</h2>
+<p class="lead">You are a guest in a cluster someone else is accountable for. Everything you deploy will be reviewed against their policy. Knowing the controls in advance means you write compliant manifests the first time instead of iterating through rejections for a week.</p>
+
+<h3>RBAC</h3>
+<pre><code class="language-yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rag-api
+  namespace: ragdemo
+automountServiceAccountToken: false      # the app does not call the API - do not hand it a token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role                                # Role = namespaced; ClusterRole = cluster-wide
+metadata: { name: rag-api-reader, namespace: ragdemo }
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["rag-api-config"]     # narrow to the exact object
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: { name: rag-api-reader, namespace: ragdemo }
+subjects:
+  - { kind: ServiceAccount, name: rag-api, namespace: ragdemo }
+roleRef: { kind: Role, name: rag-api-reader, apiGroup: rbac.authorization.k8s.io }
+</code></pre>
+<pre><code class="language-bash">kubectl auth can-i --list --as=system:serviceaccount:ragdemo:rag-api -n ragdemo
+kubectl auth can-i delete pods --as=system:serviceaccount:ragdemo:rag-api -n ragdemo
+kubectl get rolebinding,clusterrolebinding -A -o json | jq -r '
+  .items[] | select(.roleRef.name=="cluster-admin")
+  | "\(.kind) \(.metadata.name) -> \([.subjects[]?.name] | join(","))"'
+</code></pre>
+<p>RBAC is purely additive — there are no deny rules. Permissions are the union of every binding that applies to you. The audit question to ask any customer cluster is "who is bound to cluster-admin", and the answer is frequently longer than it should be.</p>
+
+<h3>Pod Security Admission</h3>
+<p>PodSecurityPolicy was removed in 1.25. Its replacement, Pod Security Admission, is a namespace label enforcing one of three profiles.</p>
+<table>
+<tr><th>Profile</th><th>Allows</th><th>Blocks</th></tr>
+<tr><td><code>privileged</code></td><td>Everything</td><td>Nothing — for system namespaces only</td></tr>
+<tr><td><code>baseline</code></td><td>Most normal workloads</td><td>Privileged containers, host namespaces, hostPath, most capabilities</td></tr>
+<tr><td><code>restricted</code></td><td>Hardened workloads only</td><td>Also requires <code>runAsNonRoot</code>, <code>allowPrivilegeEscalation: false</code>, <code>drop: ALL</code>, <code>seccompProfile: RuntimeDefault</code>, no hostPorts</td></tr>
+</table>
+<pre><code class="language-yaml"># A pod spec that passes "restricted" - memorise this block
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  fsGroup: 10001
+  seccompProfile: { type: RuntimeDefault }
+containers:
+  - name: api
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities: { drop: ["ALL"] }
+</code></pre>
+<p><code>readOnlyRootFilesystem: true</code> is the one that breaks working applications: anything writing to <code>/tmp</code>, a cache directory or a log file now fails. The fix is an <code>emptyDir</code> mounted at each writable path, which is better practice anyway. Many customers also run OPA Gatekeeper or Kyverno with additional policies — ask for the policy set on day one and test against it with <code>kubectl apply --dry-run=server</code>.</p>
+
+<h3>Network policies</h3>
+<pre><code class="language-yaml">apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: default-deny-all, namespace: ragdemo }
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: rag-api-allow, namespace: ragdemo }
+spec:
+  podSelector:
+    matchLabels: { app: rag-api }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: ingress-nginx } }
+      ports: [{ protocol: TCP, port: 8080 }]
+  egress:
+    - to: [{ podSelector: { matchLabels: { app: postgres } } }]
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to:                                   # CoreDNS - forget this and everything breaks
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: kube-system } }
+          podSelector: { matchLabels: { k8s-app: kube-dns } }
+      ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
+</code></pre>
+<div class="callout danger"><span class="t">Default-deny without a DNS rule breaks everything</span>Applying a default-deny egress policy and forgetting UDP/TCP 53 to kube-dns produces a cluster where every pod can reach nothing and the error messages all look like application bugs. Add the DNS rule in the same commit as the deny rule, every time. Also check the CNI actually enforces NetworkPolicy — Calico, Cilium and Weave do; the plain AWS VPC CNI without add-ons silently ignores them, so your policies look applied and enforce nothing.</div>
+
+<h3>Image pull secrets and private registries</h3>
+<pre><code class="language-bash">kubectl create secret docker-registry corp-registry \
+  --docker-server=registry.corp.example.com:5000 \
+  --docker-username=svc_k8s --docker-password="$REG_PASS" \
+  --docker-email=noreply@corp.example.com -n ragdemo
+
+# Attach to a ServiceAccount so every pod using it inherits the secret
+kubectl patch serviceaccount rag-api -n ragdemo \
+  -p '{"imagePullSecrets":[{"name":"corp-registry"}]}'
+</code></pre>
+
+<h3>Real secrets management</h3>
+<pre><code class="language-yaml">apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata: { name: rag-api-secrets, namespace: ragdemo }
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { name: corp-vault, kind: ClusterSecretStore }
+  target:
+    name: rag-api-secrets
+    creationPolicy: Owner
+  data:
+    - secretKey: db_password
+      remoteRef: { key: kv/ragdemo/postgres, property: password }
+    - secretKey: openai_api_key
+      remoteRef: { key: kv/ragdemo/llm, property: api_key }
+</code></pre>
+<div class="grid c3">
+  <div class="card"><h4>External Secrets Operator</h4><p>Syncs from Vault, AWS Secrets Manager, Azure Key Vault or GCP SM into a native Secret. Git holds only a reference. The most common choice at enterprises today.</p></div>
+  <div class="card"><h4>Secrets Store CSI driver</h4><p>Mounts secrets as files straight from the external store — the value never becomes a Kubernetes Secret object at all. Stronger, slightly more friction.</p></div>
+  <div class="card"><h4>Sealed Secrets</h4><p>Encrypt with a cluster-held public key; the ciphertext is safe in git. Simple and self-contained, but rotation and key management are on you.</p></div>
+</div>
+
+<h2>Debugging a Broken Pod</h2>
+<p class="lead">This is the runbook. Start at the Pod's status string and follow the branch — almost every Kubernetes failure resolves in under five minutes with this sequence.</p>
+
+<div class="pipeline">
+  <span class="step">kubectl get pods</span><span class="arrow">&rarr;</span>
+  <span class="step">read STATUS</span><span class="arrow">&rarr;</span>
+  <span class="step">describe &rarr; Events</span><span class="arrow">&rarr;</span>
+  <span class="step">logs (--previous)</span><span class="arrow">&rarr;</span>
+  <span class="step">exec / debug</span><span class="arrow">&rarr;</span>
+  <span class="step">fix &amp; verify</span>
+</div>
+
+<h3>ImagePullBackOff / ErrImagePull</h3>
+<p><code>describe</code> shows <code>Failed to pull image … rpc error</code>. Read the exact error text — it names the cause.</p>
+<table>
+<tr><th>Error fragment</th><th>Cause</th><th>Fix</th></tr>
+<tr><td><code>manifest unknown</code> / <code>not found</code></td><td>Wrong tag or repo path</td><td>Verify with <code>crane ls</code> or <code>skopeo inspect</code>; check for a typo and for the registry path prefix the customer requires</td></tr>
+<tr><td><code>unauthorized</code> / <code>authentication required</code></td><td>Missing or wrong imagePullSecret</td><td>Check it exists in the <em>same namespace</em> and is attached to the pod or its ServiceAccount</td></tr>
+<tr><td><code>x509: certificate signed by unknown authority</code></td><td>Registry uses a corporate CA the nodes do not trust</td><td>CA bundle must be installed on every <strong>node</strong>, in containerd's config — not in your pod</td></tr>
+<tr><td><code>dial tcp … i/o timeout</code></td><td>Nodes have no route or egress to the registry</td><td>Air-gapped cluster: mirror the image internally first</td></tr>
+<tr><td><code>toomanyrequests</code></td><td>Docker Hub anonymous rate limit</td><td>Authenticate, or mirror to the internal registry</td></tr>
+<tr><td><code>no match for platform</code></td><td>arm64 image, amd64 nodes</td><td>Rebuild with buildx for the right platform</td></tr>
+</table>
+<pre><code class="language-bash">kubectl describe pod rag-api-xk2mq | grep -A5 Events
+kubectl get secret corp-registry -n ragdemo -o jsonpath='{.data.\.dockerconfigjson}' | base64 -d | jq
+kubectl get pod rag-api-xk2mq -o jsonpath='{.spec.imagePullSecrets}'
+</code></pre>
+
+<h3>CrashLoopBackOff</h3>
+<p>The container starts and exits repeatedly; the kubelet backs off exponentially (10 s, 20 s, 40 s … capped at 5 min). CrashLoopBackOff is a <em>symptom</em>, never a cause — the cause is in the previous container's output.</p>
+<pre><code class="language-bash">kubectl logs rag-api-xk2mq --previous          # THE command for this state
+kubectl get pod rag-api-xk2mq -o jsonpath='{.status.containerStatuses[0].lastState.terminated}' | jq
+# { "exitCode": 137, "reason": "OOMKilled", "startedAt": "...", "finishedAt": "..." }
+kubectl describe pod rag-api-xk2mq | grep -E 'Last State|Exit Code|Reason|Restart Count'
+</code></pre>
+<ul class="checklist">
+<li>Exit 1 with a stack trace — application config error: missing env var, bad DSN, unreachable dependency</li>
+<li>Exit 137 with <code>OOMKilled</code> — memory limit too low, or a real leak. Raise the limit once to confirm, then investigate properly</li>
+<li>Exit 127 — command not found; wrong path or a distroless image with no shell for a shell-form command</li>
+<li>Exit 126 — not executable; missing <code>chmod +x</code> or CRLF line endings in an entrypoint script</li>
+<li>Exit 0 immediately — your command finished; the process daemonised itself or the CMD is wrong</li>
+<li>No logs at all — the failure is before your code runs: check <code>describe</code> for mount and secret errors</li>
+</ul>
+<pre><code class="language-bash"># Keep it alive long enough to look around
+kubectl run debug --image=registry.corp/platform/rag-api:1.4.2 --restart=Never \
+  --command -- sleep 3600
+kubectl exec -it debug -- sh
+# Or, for a distroless image with no shell, attach an ephemeral container:
+kubectl debug -it rag-api-xk2mq --image=busybox:1.36 --target=api -- sh
+</code></pre>
+
+<h3>Pending</h3>
+<pre><code class="language-bash">kubectl describe pod rag-api-xk2mq | tail -20
+# Warning  FailedScheduling  0/5 nodes are available:
+#   2 Insufficient cpu, 1 node(s) had untolerated taint {gpu: true},
+#   2 node(s) didn't match pod anti-affinity rules.
+</code></pre>
+<ul class="checklist">
+<li><code>Insufficient cpu/memory</code> — requests exceed anything free. Check <code>kubectl describe node | grep -A8 "Allocated resources"</code>; lower requests or add capacity</li>
+<li><code>untolerated taint</code> — add a toleration, or target a different node pool</li>
+<li><code>didn't match node selector / affinity</code> — your constraint cannot be satisfied; check node labels</li>
+<li><code>had volume node affinity conflict</code> — the PV is in zone A, the pod is being placed in zone B</li>
+<li><code>pod has unbound immediate PersistentVolumeClaims</code> — no matching StorageClass, or the provisioner is broken. <code>kubectl get pvc,sc</code></li>
+<li>Pending with <strong>no</strong> events — exceeded a ResourceQuota, or an admission webhook is failing. <code>kubectl get events -n ragdemo</code></li>
+</ul>
+
+<h3>Running but not Ready</h3>
+<pre><code class="language-bash">kubectl get pods            # 0/1 Running - the container is up, readiness is failing
+kubectl describe pod rag-api-xk2mq | grep -A3 Readiness
+# Warning  Unhealthy  Readiness probe failed: Get "http://10.244.2.7:8080/readyz":
+#                     dial tcp 10.244.2.7:8080: connect: connection refused
+kubectl exec rag-api-xk2mq -- wget -qO- http://127.0.0.1:8080/readyz
+kubectl exec rag-api-xk2mq -- ss -tulpn
+</code></pre>
+<p>Connection refused from the probe but success from inside usually means the app bound <code>127.0.0.1</code> instead of <code>0.0.0.0</code> — the kubelet probes the Pod IP, not loopback. Other causes: the probe port does not match the container port, the path returns a non-2xx, <code>initialDelaySeconds</code> is too short for startup, or the readiness endpoint checks a dependency that is genuinely down.</p>
+
+<h3>503 through the Ingress</h3>
+<ol class="steps">
+<li><b>Does the Service have endpoints?</b><code>kubectl get endpoints rag-api -n ragdemo</code>. Empty means the Service selector does not match any <em>ready</em> Pod labels. Compare <code>kubectl get svc rag-api -o jsonpath='{.spec.selector}'</code> with <code>kubectl get pods --show-labels</code>. This is the cause more often than anything else.</li>
+<li><b>Does the Pod work directly?</b><code>kubectl port-forward pod/rag-api-xk2mq 8080:8080</code> then <code>curl localhost:8080/healthz</code>. If this fails, the problem is the app, not the network.</li>
+<li><b>Does the Service work?</b><code>kubectl port-forward svc/rag-api 8080:80</code>. If the Pod works but the Service does not, check <code>targetPort</code> against the actual container port.</li>
+<li><b>Does in-cluster DNS resolve?</b><code>kubectl run t --rm -it --image=nicolaka/netshoot --restart=Never -- sh</code>, then <code>dig rag-api.ragdemo.svc.cluster.local</code> and <code>curl http://rag-api.ragdemo/healthz</code>.</li>
+<li><b>Is the Ingress wired up?</b><code>kubectl describe ingress rag</code> — check the backend shows real endpoint IPs, not <code>&lt;none&gt;</code>, and that <code>ingressClassName</code> matches a controller that exists.</li>
+<li><b>Read the controller's own logs</b><code>kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx --tail=100</code>. Upstream connect errors, TLS handshake failures and the exact upstream address all appear here.</li>
+<li><b>Check NetworkPolicy</b>A default-deny in the namespace without an allow rule from the ingress-controller namespace produces exactly this symptom, with timeouts rather than refusals.</li>
+</ol>
+
+<h3>Node-level problems</h3>
+<pre><code class="language-bash">kubectl get nodes
+kubectl describe node ip-10-0-3-21 | grep -A10 Conditions
+# MemoryPressure  False / DiskPressure True / PIDPressure False / Ready True
+kubectl get events -A --field-selector reason=Evicted
+kubectl get pods -A -o wide --field-selector spec.nodeName=ip-10-0-3-21
+kubectl cordon ip-10-0-3-21                                   # stop new scheduling
+kubectl drain ip-10-0-3-21 --ignore-daemonsets --delete-emptydir-data --grace-period=60
+kubectl uncordon ip-10-0-3-21
+</code></pre>
+<p><code>DiskPressure: True</code> triggers image garbage collection and then pod eviction — usually caused by image sprawl or a pod writing unbounded data to an <code>emptyDir</code>. <code>NotReady</code> normally means the kubelet stopped reporting: check <code>systemctl status kubelet</code> and <code>journalctl -u kubelet -n 200</code> on the node itself if you have access.</p>
+
+<h2>Deploying Into a Customer's Environment</h2>
+<p class="lead">The technical work is often the easy half. Getting your image through an air gap, past a security review, and running inside a policy-enforced namespace with no egress is the part that determines whether the engagement lands on time.</p>
+
+<h3>Air-gapped registries</h3>
+<ol class="steps">
+<li><b>Enumerate every image</b>Not just yours — Postgres, Redis, the vector store, ingress-nginx, cert-manager, the metrics server, every sidecar, and every init container. <code>helm template . | grep -Eo 'image: .*' | sort -u</code> is the starting point, and <code>kubectl get pods -A -o jsonpath='{..image}' | tr ' ' '\n' | sort -u</code> catches what you missed.</li>
+<li><b>Pin to digests</b>Resolve every tag to a digest before you mirror, so what you validated is provably what ships.</li>
+<li><b>Mirror</b><code>skopeo copy --all docker://upstream/img:tag docker://registry.corp/mirror/img:tag</code> — <code>--all</code> preserves the multi-arch manifest list. For a true air gap, <code>skopeo sync --src docker --dest dir</code> to a directory, carry it across, then <code>skopeo sync --src dir --dest docker</code>.</li>
+<li><b>Rewrite references</b>Helm values with an <code>image.registry</code> prefix, or a Kustomize <code>images:</code> block, or a cluster-wide <code>ImageContentSourcePolicy</code> / containerd mirror config so the rewrite happens at the node.</li>
+<li><b>Scan on the inside</b>Run Trivy with a pre-downloaded vulnerability database (<code>trivy --cache-dir ./trivy-cache image --skip-db-update</code>) — the scanner itself needs updates it cannot fetch.</li>
+<li><b>Document the provenance</b>Source image, digest, scan date, SBOM, and who approved it. The customer's auditors will ask, possibly months later.</li>
+</ol>
+<pre><code class="language-bash">helm template rag ./rag-api -f values-prod.yaml \
+  | grep -Eo 'image: *"?[^"]+' | awk '{print $2}' | tr -d '"' | sort -u
+
+for img in $(cat images.txt); do
+  skopeo copy --all --retry-times 3 "docker://$img" \
+    "docker://registry.corp/mirror/${img#*/}" || echo "FAILED $img" &gt;&gt; failures.txt
+done
+</code></pre>
+
+<h3>Private CA certificates</h3>
+<pre><code class="language-yaml"># Distribute the corporate root to every pod that makes outbound TLS calls
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: corp-ca-bundle, namespace: ragdemo }
+data:
+  corp-root.pem: |
+    -----BEGIN CERTIFICATE-----
+    MIIF...
+    -----END CERTIFICATE-----
+---
+# in the pod spec
+volumeMounts:
+  - { name: corp-ca, mountPath: /etc/ssl/certs/corp-root.pem, subPath: corp-root.pem, readOnly: true }
+env:
+  - { name: REQUESTS_CA_BUNDLE,  value: /etc/ssl/certs/corp-root.pem }   # Python requests
+  - { name: SSL_CERT_FILE,       value: /etc/ssl/certs/corp-root.pem }   # OpenSSL, Go
+  - { name: NODE_EXTRA_CA_CERTS, value: /etc/ssl/certs/corp-root.pem }   # Node.js
+  - { name: CURL_CA_BUNDLE,      value: /etc/ssl/certs/corp-root.pem }
+</code></pre>
+<p>Java is the exception — it uses its own truststore, so you need an init container running <code>keytool -importcert -cacerts -storepass changeit -noprompt -alias corp -file /ca/corp-root.pem</code>, or a base image with the cert already imported. The registry CA is separate again: that must be trusted by containerd on each node, which is a cluster-admin change, not something you can do from a manifest.</p>
+
+<h3>Egress restrictions</h3>
+<pre><code class="language-yaml">env:
+  - name: HTTPS_PROXY
+    value: http://proxy.corp.example.com:3128
+  - name: HTTP_PROXY
+    value: http://proxy.corp.example.com:3128
+  - name: NO_PROXY
+    value: "localhost,127.0.0.1,.svc,.svc.cluster.local,.cluster.local,10.0.0.0/8,169.254.169.254,.internal"
+</code></pre>
+<div class="callout danger"><span class="t">The NO_PROXY list is not optional</span>Omit <code>.svc</code> and <code>.cluster.local</code> and every in-cluster call — to Postgres, to the vector store, to the Kubernetes API — is routed to a corporate proxy that cannot resolve cluster-internal names. The symptom is a 30-second hang followed by a connection error on calls that obviously should work locally. Omit <code>169.254.169.254</code> and cloud credential fetching (IRSA, workload identity) breaks. Set both upper- and lowercase variants, because libraries disagree about which they read.</div>
+
+<h3>The pre-flight checklist before you ask for a deployment window</h3>
+<ul class="checklist">
+<li>Image mirrored to the internal registry, pinned by digest, scanned, SBOM attached</li>
+<li>Runs as a numeric non-root UID with <code>allowPrivilegeEscalation: false</code> and <code>drop: ALL</code></li>
+<li><code>readOnlyRootFilesystem: true</code> with <code>emptyDir</code> volumes for every writable path</li>
+<li>CPU and memory requests <em>and</em> limits set on every container — a ResourceQuota will reject you otherwise</li>
+<li>Startup, readiness and liveness probes defined, with the startup probe sized for the real cold-start time</li>
+<li>PodDisruptionBudget and anti-affinity so the next cluster upgrade does not take you down</li>
+<li>NetworkPolicy written, including the DNS egress rule, and tested in a namespace with default-deny</li>
+<li>Secrets sourced from the customer's vault, not from a manifest in git</li>
+<li>Corporate CA mounted and the right per-runtime env var set</li>
+<li>Proxy variables set with a complete <code>NO_PROXY</code></li>
+<li>Manifests render cleanly through their policy engine: <code>kubectl apply --dry-run=server</code></li>
+<li>Rollback path rehearsed: <code>helm rollback</code> or <code>kubectl rollout undo</code>, tested in staging</li>
+<li>Logs go to stdout in the format their aggregation stack expects; metrics exposed on a scrapeable port</li>
+<li>A one-page runbook: what it is, what it depends on, how to restart it, who to call</li>
+</ul>
+<div class="callout ok"><span class="t">Start the approval process on day one</span>At a regulated customer, image approval, firewall exceptions and namespace provisioning routinely take two to three weeks of calendar time while taking two hours of actual work. Submit the request before you have finished building, with a placeholder image if necessary. The engineers who deliver on time are usually the ones who started the paperwork early, not the ones who wrote better YAML.</div>
+
+<h2>Interview Questions</h2>
+<p class="lead">These come up constantly in FDE, platform and SRE loops. Answer with the mechanism, then the operational consequence — that combination is what distinguishes someone who has run this in production.</p>
+
+<div class="qa"><div class="q">What is a container, really? How is it different from a VM?</div><div class="a">A container is a normal Linux process that the kernel has placed into a set of namespaces and cgroups. Namespaces control what it can see — PID namespace so it has its own process tree with your app as PID 1, mount namespace for its own filesystem view, network namespace for its own interfaces and port space, plus UTS, IPC and user namespaces. cgroups control what it can consume — CPU quota, memory ceiling, I/O weight, PID count. The filesystem comes from stacked read-only image layers plus a thin writable layer, usually via overlayfs. A VM, by contrast, virtualises hardware and boots a complete guest kernel on a hypervisor. The practical differences follow directly: containers start in under a second and cost megabytes because there is no kernel to boot; they share the host kernel, so a Linux container cannot run natively on Windows and a kernel exploit from inside a container compromises the host. That last point is why customers care about running as non-root, dropping capabilities, and seccomp profiles — and why workloads with hard multi-tenancy requirements sometimes use Kata Containers or Firecracker to get a lightweight VM boundary back.</div></div>
+
+<div class="qa"><div class="q">Your image is 1.4 GB. How do you get it under 200 MB?</div><div class="a">First I measure where it actually went with <code>docker history</code> and <code>dive</code>, because guessing wastes time. Then, in rough order of impact: introduce a multi-stage build so compilers and dev headers — build-essential, gcc, libpq-dev, the full Node toolchain — exist only in the builder stage and never reach the runtime image; that is typically 400–600 MB on its own. Switch the final stage to a slim or distroless base. Collapse package installation into a single <code>RUN</code> with <code>--no-install-recommends</code> and <code>rm -rf /var/lib/apt/lists/*</code> in the same layer, since cleanup in a later layer frees nothing. Add a proper <code>.dockerignore</code> so <code>.git</code>, <code>node_modules</code>, test fixtures and local virtualenvs never enter the build context. For Node, <code>npm prune --omit=dev</code> after the build; for Python, install into a venv in the builder and copy only the venv. I would be cautious about jumping to Alpine for a Python service — musl means no manylinux wheels, so pip compiles from source and the image can end up larger and far slower to build. And I would verify the result with a CVE scan, because the size reduction usually drops the vulnerability count by an order of magnitude too, which is what the customer's security review actually cares about.</div></div>
+
+<div class="qa"><div class="q">Walk me through what happens when you run <code>kubectl apply -f deployment.yaml</code>.</div><div class="a">kubectl reads the file, merges it with the previous applied configuration annotation, and sends a request to the kube-apiserver. The apiserver authenticates the caller, authorises via RBAC, runs mutating admission webhooks (which might inject a sidecar or defaults), validates the object against the schema, runs validating admission webhooks and Pod Security Admission, then persists it to etcd. The Deployment controller is watching Deployments; it sees the new spec and creates or updates a ReplicaSet with a pod-template hash. The ReplicaSet controller sees a replica count it has not satisfied and creates Pod objects with <code>nodeName</code> unset. The scheduler watches for unscheduled Pods, filters nodes by resource requests, taints, affinity and volume topology, scores the survivors, and binds the Pod to a node. The kubelet on that node sees a Pod bound to it, pulls the image through containerd, sets up the sandbox and CNI networking, mounts volumes, starts the containers, and begins running probes. Once readiness passes, the endpoints controller adds the Pod IP to the Service's EndpointSlice, kube-proxy programs iptables or IPVS rules on every node, and traffic starts flowing. Every one of those stages is a place it can get stuck, which is exactly why <code>kubectl describe</code> and the Events list are the first things I read when a Pod is not where I expect it.</div></div>
+
+<div class="qa"><div class="q">A pod is in CrashLoopBackOff. Diagnose it.</div><div class="a">CrashLoopBackOff is never the cause, only the kubelet's exponential backoff after repeated exits. The first command is <code>kubectl logs &lt;pod&gt; --previous</code>, because plain <code>logs</code> shows the current container which may have just started and printed nothing. In parallel I read <code>kubectl get pod -o jsonpath='{.status.containerStatuses[0].lastState.terminated}'</code> for the exit code and reason. Exit 1 with a stack trace is an application or configuration failure — a missing environment variable, a bad connection string, a dependency that is not up. Exit 137 with reason OOMKilled means it exceeded its memory limit; I raise it once to confirm the diagnosis and then look at whether it is a genuine leak or just a limit set from a guess. Exit 127 is command not found — often a shell-form command in a distroless image. Exit 126 is not executable, frequently CRLF line endings in an entrypoint script written on Windows. Exit 0 immediately means the process completed, so the CMD is wrong or the app daemonised itself. If there are no logs at all, the failure is before my code runs, so I go to <code>describe</code> and look for mount failures, missing secrets or ConfigMaps. To get hands-on I either run the image with <code>--command -- sleep 3600</code> so it stays up, or attach an ephemeral debug container with <code>kubectl debug --target</code>, which works even on a distroless image with no shell.</div></div>
+
+<div class="qa"><div class="q">Explain requests versus limits, and what happens when each is exceeded.</div><div class="a">Requests are what the scheduler uses to decide whether a Pod fits on a node; they are a reservation and the node's allocatable capacity is divided among them. Limits are enforced at runtime by the kernel through cgroups. The two resources behave completely differently. CPU is compressible: exceeding the limit causes CFS throttling — the process is frozen for the remainder of each 100 ms period — so the symptom is latency, not failure, and it is invisible in average CPU utilisation. Memory is incompressible: exceeding the limit means an immediate OOM kill with exit code 137 and no chance to clean up. The combination also determines QoS class: requests equal to limits on every container gives Guaranteed, which is evicted last under node pressure; some requests set gives Burstable; nothing set gives BestEffort, which is evicted first. My practical defaults are memory request equal to memory limit so the pod is predictable and never surprises the node, a CPU request based on measured steady-state usage, and a CPU limit that is either generous or absent for latency-sensitive services because throttling causes p99 spikes that customers notice. I also check whether the runtime honours the cgroup — an older JVM or a library sizing thread pools from <code>os.cpu_count()</code> will read host values and badly over-provision inside a small limit.</div></div>
+
+<div class="qa"><div class="q">Difference between liveness, readiness and startup probes?</div><div class="a">Readiness controls traffic: if it fails, the Pod is removed from the Service's endpoints and receives no requests, but it is not restarted. Liveness controls lifecycle: if it fails, the kubelet kills and restarts the container. Startup gates the other two: while it is running, liveness and readiness are suspended, which is how you protect a slow-starting application without having to set a huge <code>initialDelaySeconds</code> on liveness. The classic production incident comes from pointing a liveness probe at an endpoint that checks the database — when the database has a brief hiccup, every replica fails liveness simultaneously, all restart, the cold-start thundering herd hits the database again, and a five-second blip becomes a twenty-minute outage. So liveness should test only "is this process alive and not deadlocked", with no external dependencies; readiness is where it is safe to check dependencies, because the only consequence is traffic shedding. I also make sure readiness fails during shutdown and pair it with a short <code>preStop</code> sleep, since endpoint removal propagates asynchronously and without that gap you get a burst of 502s on every deploy.</div></div>
+
+<div class="qa"><div class="q">How does a request get from an external user to a container?</div><div class="a">DNS resolves the hostname to the external IP of a cloud load balancer or the node IPs behind a DNS record. The load balancer forwards to a NodePort on some node, where the ingress controller's Service is listening. The ingress controller — nginx, Traefik, an ALB controller — terminates TLS, matches the Host header and path against Ingress rules, and selects a backend Service. Importantly, modern ingress controllers do not route through the Service's cluster IP; they watch EndpointSlices and proxy straight to a Pod IP, which is why they can do their own load balancing and session affinity. If traffic does go via a ClusterIP, kube-proxy has programmed iptables or IPVS rules on every node that DNAT the virtual IP to one of the ready backend Pod IPs. The packet then traverses the CNI — a veth pair into the Pod's network namespace, possibly via an overlay like VXLAN, possibly native VPC routing — and arrives at the container's listening socket. For debugging I walk that chain backwards: check endpoints exist, port-forward to the Pod, then to the Service, then test DNS from inside the cluster, then read the ingress controller logs. The layer where it stops failing tells you exactly which component is broken.</div></div>
+
+<div class="qa"><div class="q">Helm or Kustomize?</div><div class="a">They solve adjacent problems. Helm is templating plus release management: it renders Go templates against a values file and tracks installed releases so you get <code>helm history</code>, <code>helm rollback</code>, hooks and atomic upgrades. Kustomize is patching: the base files are valid YAML you can read and <code>kubectl apply</code> directly, and overlays apply strategic merge patches on top. My rule is that if I am distributing software to other people — which as an FDE I usually am — Helm wins, because the chart's <code>values.yaml</code> is a documented configuration contract and the customer can version, review and upgrade it like any other dependency. If I am managing my own application across a few environments in a GitOps repo, Kustomize is less machinery and the diffs are readable. They also compose: Argo CD can render a Helm chart and then apply Kustomize patches, which is how teams customise a third-party chart without forking it. The practical warnings are that Helm templates become genuinely painful to debug once they grow conditionals — <code>helm template</code> and <code>helm diff upgrade</code> are non-negotiable before any production apply — and that Kustomize alone has no rollback story, so you are relying on git and your deployment tool for that.</div></div>
+
+<div class="qa"><div class="q">How do you deploy into an air-gapped customer cluster?</div><div class="a">The first step is enumerating every image, not just mine — the database, cache, vector store, ingress controller, cert-manager, metrics-server, every sidecar and init container. <code>helm template | grep image:</code> gets most of it. I resolve each tag to a digest so what I validated is provably what ships, then mirror with <code>skopeo copy --all</code> to preserve multi-arch manifests, or <code>skopeo sync</code> to a directory for physical transfer across the gap. On the inside I rewrite references through Helm values with a registry prefix, a Kustomize <code>images:</code> block, or a node-level containerd mirror so the rewrite is transparent. Three things routinely bite people: the registry's TLS certificate is signed by the corporate CA, which must be trusted by containerd on every node — that is a cluster-admin change, not something a manifest can fix; vulnerability scanners need their database pre-staged because they cannot phone home; and any Helm chart that pulls a dependency at install time will fail, so charts must be fully vendored. I also budget calendar time deliberately — image approval and firewall exceptions at a regulated customer are routinely two to three weeks of waiting for two hours of work, so I start that process on day one with a placeholder if necessary.</div></div>
+
+<div class="qa"><div class="q">What is a Service, and why does my pod get "connection refused" calling another service?</div><div class="a">A Service is a stable virtual IP and DNS name that load-balances across the set of Pods matching its label selector and currently passing readiness. The backing implementation is an EndpointSlice maintained by the endpoints controller plus iptables or IPVS rules programmed by kube-proxy on every node. For "connection refused" I check four things in order. First, does the Service have endpoints at all — <code>kubectl get endpoints</code>; empty is the most common cause and means the selector does not match any ready Pod's labels, usually because someone matched the Deployment name instead of the pod template labels, or because every Pod is failing readiness. Second, is the name right — cross-namespace calls need <code>service.namespace</code> or the FQDN, and using the bare name from another namespace fails silently. Third, is the port right — the Service <code>port</code> is what clients dial and <code>targetPort</code> is the container port; mixing them up gives exactly this error. Fourth, is the application bound to <code>0.0.0.0</code> rather than <code>127.0.0.1</code> inside the container, which I verify with <code>kubectl exec -- ss -tulpn</code>. If all four are fine I look at NetworkPolicy — but note that a policy drop usually produces a timeout rather than a refusal, so the error text itself narrows the search.</div></div>
+
+<div class="qa"><div class="q">What does <code>readOnlyRootFilesystem: true</code> break, and how do you fix it?</div><div class="a">It breaks anything that writes outside an explicitly mounted volume: temp files in <code>/tmp</code>, a framework's cache directory, a log file written to disk, a PID or lock file, a Python <code>__pycache__</code>, a Node package cache, SQLite's journal. The fix is not to turn it off; it is to mount an <code>emptyDir</code> at each path that genuinely needs to be writable, with a <code>sizeLimit</code> so a runaway write cannot trigger DiskPressure on the node and evict every pod. I find the paths empirically — run the container, watch it fail, add a mount, repeat, or use <code>docker diff</code> on a locally running container which lists exactly which files were modified relative to the image. Applications should also be configured to log to stdout rather than a file, which is what the cluster's log aggregation expects anyway. It is worth doing properly because <code>readOnlyRootFilesystem</code> is part of the <code>restricted</code> Pod Security profile that most enterprise clusters enforce, so if I do not solve it at build time the customer's admission controller will reject my deployment and I will be solving it under time pressure instead.</div></div>
+
+<div class="qa"><div class="q">When would you tell a customer not to use Kubernetes?</div><div class="a">When the operational cost exceeds the benefit, which is more often than the industry admits. If they are running one or two services with predictable load on a couple of VMs, systemd units with a reverse proxy, or Docker Compose on a single host, delivers the same outcome with a fraction of the surface area to secure, upgrade and debug. If they have no platform team and no on-call rotation, handing them a cluster means handing them a system nobody can operate once I leave — cluster upgrades, certificate rotation, CNI troubleshooting and etcd maintenance are real recurring work. If their workload is genuinely serverless-shaped, a managed container service or a function platform removes the cluster entirely. I would push toward Kubernetes when they need multi-service orchestration with real service discovery, horizontal autoscaling, zero-downtime rolling deploys with health gating, self-healing across node failures, or when they already run a cluster and adding my workload is marginal cost rather than new cost. The honest version of this conversation is also good consulting: recommending less infrastructure than the customer expected builds the credibility you need for the recommendations where you do say yes.</div></div>
+
+<h2>Hands-On Lab Plan</h2>
+<p class="lead">Nothing here is learned by reading. Work through these on a local cluster — kind, k3d or minikube are all sufficient, and <code>kind create cluster --config kind.yaml</code> with three nodes gives you realistic scheduling behaviour on a laptop.</p>
+
+<h3>Setup</h3>
+<pre><code class="language-bash">kind create cluster --name lab --config - &lt;&lt;'EOF'
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - { containerPort: 80,  hostPort: 8080, protocol: TCP }
+      - { containerPort: 443, hostPort: 8443, protocol: TCP }
+  - role: worker
+  - role: worker
+EOF
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+</code></pre>
+
+<h3>Week 1 — Docker</h3>
+<table>
+<tr><th>Day</th><th>Build this</th><th>Prove it</th></tr>
+<tr><td>1</td><td>A naive single-stage Dockerfile for a FastAPI app</td><td>Record the size and the rebuild time after a one-character source change</td></tr>
+<tr><td>2</td><td>Reorder for cache; add <code>.dockerignore</code></td><td>Rebuild time drops from minutes to seconds. Record both numbers</td></tr>
+<tr><td>3</td><td>Convert to multi-stage with a slim runtime and a non-root numeric UID</td><td>Image under 200 MB; <code>docker run</code> shows <code>uid=10001</code></td></tr>
+<tr><td>4</td><td>Add healthcheck, resource limits, read-only rootfs with tmpfs</td><td><code>docker inspect</code> shows healthy; the app still writes to <code>/tmp</code></td></tr>
+<tr><td>5</td><td>Scan with Trivy, generate an SBOM, fix the top findings</td><td>Zero fixable CRITICAL; SBOM file produced</td></tr>
+<tr><td>6</td><td>The full Compose stack: API + Postgres + Qdrant + Redis + UI</td><td><code>docker compose up -d</code> from a clean machine, end-to-end request works</td></tr>
+<tr><td>7</td><td>Break it deliberately: wrong port, wrong network, missing env, OOM limit</td><td>Diagnose each from the error message alone, under two minutes</td></tr>
+</table>
+
+<h3>Week 2 — Kubernetes</h3>
+<table>
+<tr><th>Day</th><th>Build this</th><th>Prove it</th></tr>
+<tr><td>8</td><td>Deployment + Service + ConfigMap + Secret for the API</td><td><code>kubectl port-forward svc/…</code> returns 200</td></tr>
+<tr><td>9</td><td>Ingress with a host rule; the UI and API on different paths</td><td><code>curl -H 'Host: rag.local' localhost:8080/api/healthz</code></td></tr>
+<tr><td>10</td><td>StatefulSet + PVC for Postgres; an init container that waits for it</td><td>Delete the Pod; data survives; the API reconnects</td></tr>
+<tr><td>11</td><td>Probes, requests/limits, PDB, anti-affinity, HPA</td><td>Load-test until the HPA scales; <code>kubectl drain</code> respects the PDB</td></tr>
+<tr><td>12</td><td>Package it as a Helm chart with dev and prod values</td><td><code>helm upgrade --install --atomic</code>, then <code>helm rollback</code> successfully</td></tr>
+<tr><td>13</td><td>RBAC, a restricted-profile namespace, default-deny NetworkPolicy</td><td>Everything still works after the policies are applied</td></tr>
+<tr><td>14</td><td>Air-gap simulation: a local registry, no internet, mirror everything</td><td>Full install on a cluster with egress blocked</td></tr>
+</table>
+
+<h3>Deliberate failure drills</h3>
+<details><summary>Drill 1 — Six broken pods</summary><div class="body">
+<p>Create one Pod for each failure mode and diagnose it from <code>kubectl get pods</code> output alone before touching anything else. (a) An image tag that does not exist, then the same image in a private registry with no pull secret — note the different <code>describe</code> messages. (b) A container whose command exits 1 after printing a config error. (c) A memory limit of 32Mi on a JVM. (d) Requests of 100 CPU so nothing can schedule it. (e) A readiness probe on port 9090 when the app listens on 8080. (f) A Service whose selector has a typo so endpoints stay empty. For each, write down the <strong>one</strong> command that revealed the cause. The goal is a reflex, not a search.</p>
+</div></details>
+
+<details><summary>Drill 2 — Zero-downtime rollout</summary><div class="body">
+<p>Run a continuous load generator (<code>hey -z 300s -c 20 http://rag.local/api/healthz</code>) while you roll out a new image. Record the error count. Now do it four more times, each with one change: <code>maxUnavailable: 0</code>; a correct readiness probe; a <code>preStop</code> sleep of 5 seconds; graceful shutdown in the application with a <code>terminationGracePeriodSeconds</code> that exceeds the longest request. Plot the error count after each change. Seeing it go from several hundred dropped requests to zero teaches the mechanism far better than reading about it, and it is a demo customers find genuinely persuasive.</p>
+</div></details>
+
+<details><summary>Drill 3 — Air-gapped install, end to end</summary><div class="body">
+<p>Run a local registry (<code>docker run -d -p 5000:5000 registry:2</code>), mirror every image your Helm chart references into it, then recreate the kind cluster with no internet access (block egress with an iptables rule or run it on a disconnected VM). Install the chart. You will discover, in roughly this order: an image you forgot (probably a sidecar or the ingress controller's webhook job), a chart dependency fetched at install time, a scanner that cannot update its database, and a CA trust problem on the registry. Each of those is a real finding you would otherwise make for the first time in front of a customer.</p>
+</div></details>
+
+<details><summary>Drill 4 — Resource exhaustion</summary><div class="body">
+<p>Deploy three workloads with QoS classes Guaranteed, Burstable and BestEffort. Use a memory-hungry pod to drive a node toward MemoryPressure and observe which gets evicted first — the ordering is not theoretical, you can watch it happen in <code>kubectl get events --field-selector reason=Evicted</code>. Then set a CPU limit of 500m on a CPU-bound service, run a load test, and correlate the p99 latency spike with <code>container_cpu_cfs_throttled_seconds_total</code>. Finally fill a node's disk with an unbounded <code>emptyDir</code> write and watch DiskPressure trigger image garbage collection and then pod eviction. These three behaviours explain the majority of mysterious production incidents in customer clusters.</p>
+</div></details>
+
+<div class="callout ok"><span class="t">The bar to aim for</span>Given a customer cluster you have never seen, a repository you did not write and two hours before a demo, you should be able to build an image that passes their security policy, deploy it into a namespace with quotas and default-deny networking, expose it through their ingress, and diagnose anything that goes wrong from the Pod status string without reaching for a search engine. Everything in this guide exists to make that two-hour window comfortable.</div>

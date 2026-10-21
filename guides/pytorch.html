@@ -1,0 +1,680 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PyTorch — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">AI/ML Frameworks</div>
+  <h1>PyTorch</h1>
+  <div class="subtitle">A hands-on tour of PyTorch — tensors, autograd, nn.Module, training loops, GPU, checkpoints, and torch.compile — built for real work and interviews.</div>
+  <div class="tags"><span>pytorch</span><span>deep-learning</span><span>autograd</span><span>tensors</span><span>gpu</span><span>training-loop</span><span>torch.compile</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~14 min read &middot; 2,983 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-pytorch-is-amp-why-it-matters">What PyTorch Is &amp; Why It Matters</a></li><li><a href="#setup-amp-getting-started">Setup &amp; Getting Started</a></li><li><a href="#tensors-the-core-data-structure">Tensors: The Core Data Structure</a></li><li><a href="#autograd-automatic-differentiation">Autograd: Automatic Differentiation</a></li><li><a href="#building-models-with-nn-module">Building Models with nn.Module</a></li><li><a href="#loss-functions-amp-optimizers">Loss Functions &amp; Optimizers</a></li><li><a href="#datasets-amp-dataloader">Datasets &amp; DataLoader</a></li><li><a href="#the-training-loop">The Training Loop</a></li><li><a href="#gpu-cuda-amp-devices">GPU, CUDA &amp; Devices</a></li><li><a href="#saving-amp-loading-checkpoints">Saving &amp; Loading Checkpoints</a></li><li><a href="#torch-compile-amp-faster-inference">torch.compile &amp; Faster Inference</a></li><li><a href="#worked-mini-example-xor-in-30-lines">Worked Mini-Example: XOR in 30 Lines</a></li><li><a href="#cheat-sheet-reference">Cheat-Sheet Reference</a></li><li><a href="#best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-pytorch-is-amp-why-it-matters">What PyTorch Is &amp; Why It Matters</h2>
+<p class="lead">PyTorch is an open-source tensor and automatic-differentiation library that has become the dominant framework for deep-learning research and, increasingly, production. It feels like NumPy with GPU acceleration and a built-in gradient engine — you write ordinary Python, and PyTorch records what you do so it can differentiate it.</p>
+
+<p>Its killer feature is the <strong>define-by-run</strong> (dynamic) computation graph: the graph is built on the fly as your code executes, so control flow, loops, and conditionals are just normal Python. This is why nearly every modern model — Transformers, diffusion models, LLMs — ships a PyTorch reference implementation first.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Tensors</h4>N-dimensional arrays with GPU support and a NumPy-like API.</div>
+  <div class="card"><h4>Autograd</h4>Automatic reverse-mode differentiation over any tensor computation.</div>
+  <div class="card"><h4>nn &amp; optim</h4>Composable layers, loss functions, and gradient-based optimizers.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 260" width="720" height="260">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/></marker>
+  </defs>
+  <rect x="20" y="30" width="140" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="90" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Data</text>
+  <text x="90" y="74" font-size="11" text-anchor="middle" fill="#1a2233">Dataset / DataLoader</text>
+
+  <rect x="200" y="30" width="140" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="270" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Model</text>
+  <text x="270" y="74" font-size="11" text-anchor="middle" fill="#1a2233">nn.Module (forward)</text>
+
+  <rect x="380" y="30" width="140" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="450" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Loss</text>
+  <text x="450" y="74" font-size="11" text-anchor="middle" fill="#1a2233">criterion(out, y)</text>
+
+  <rect x="560" y="30" width="140" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="630" y="56" font-size="13" text-anchor="middle" fill="#1a2233">Autograd</text>
+  <text x="630" y="74" font-size="11" text-anchor="middle" fill="#1a2233">loss.backward()</text>
+
+  <rect x="380" y="170" width="140" height="60" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="450" y="196" font-size="13" text-anchor="middle" fill="#1a2233">Optimizer</text>
+  <text x="450" y="214" font-size="11" text-anchor="middle" fill="#1a2233">optim.step()</text>
+
+  <rect x="200" y="170" width="140" height="60" rx="8" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="270" y="196" font-size="13" text-anchor="middle" fill="#1a2233">Updated weights</text>
+  <text x="270" y="214" font-size="11" text-anchor="middle" fill="#1a2233">param -= lr * grad</text>
+
+  <line x1="160" y1="60" x2="196" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="340" y1="60" x2="376" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="520" y1="60" x2="556" y2="60" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="630" y1="90" x2="630" y2="150" stroke="#2563eb" stroke-width="2"/>
+  <line x1="630" y1="150" x2="522" y2="195" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="380" y1="200" x2="342" y2="200" stroke="#2563eb" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="270" y1="170" x2="270" y2="92" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4" marker-end="url(#ah)"/>
+  <text x="300" y="135" font-size="11" fill="#b45309">next iteration</text>
+</svg><div class="cap">Fig 1. The canonical PyTorch training loop as a data flow.</div></div>
+
+<div class="callout note"><span class="t">Mental model</span> A tensor is data + metadata (shape, dtype, device). When <code>requires_grad=True</code>, every operation also records a node in a graph so gradients can flow backward later.</div>
+
+<h2 id="setup-amp-getting-started">Setup &amp; Getting Started</h2>
+<p>Install the build matched to your hardware. The official selector at pytorch.org emits the exact command for your CUDA/ROCm/CPU target.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># CPU-only</span>
+pip install torch torchvision torchaudio
+
+<span class="hljs-comment"># CUDA 12.4 build (NVIDIA GPU)</span>
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+<span class="hljs-comment"># Verify</span>
+python -c <span class="hljs-string">&quot;import torch; print(torch.__version__, torch.cuda.is_available())&quot;</span></code></pre>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># Pick the best available device (CUDA &gt; Apple MPS &gt; CPU)</span>
+device = (
+    <span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available()
+    <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;mps&quot;</span> <span class="hljs-keyword">if</span> torch.backends.mps.is_available()
+    <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>
+)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Using <span class="hljs-subst">{device}</span>&quot;</span>)</code></pre>
+
+<div class="callout tip"><span class="t">Tip</span> Pin versions in production. PyTorch, torchvision, and the CUDA build must agree — mismatches are the single most common install failure.</div>
+
+<h2 id="tensors-the-core-data-structure">Tensors: The Core Data Structure</h2>
+<p>Everything in PyTorch is a <code>torch.Tensor</code>. The API deliberately mirrors NumPy, so most intuition transfers directly.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># Creation</span>
+a = torch.tensor([[<span class="hljs-number">1.</span>, <span class="hljs-number">2.</span>], [<span class="hljs-number">3.</span>, <span class="hljs-number">4.</span>]])   <span class="hljs-comment"># from data</span>
+z = torch.zeros(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>)                      <span class="hljs-comment"># shape (2,3) of zeros</span>
+o = torch.ones_like(a)                     <span class="hljs-comment"># same shape/dtype as a</span>
+r = torch.randn(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>)                      <span class="hljs-comment"># standard normal</span>
+rng = torch.arange(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>, <span class="hljs-number">2</span>)               <span class="hljs-comment"># [0,2,4,6,8]</span>
+
+<span class="hljs-comment"># Attributes</span>
+<span class="hljs-built_in">print</span>(a.shape, a.dtype, a.device)          <span class="hljs-comment"># torch.Size([2,2]) torch.float32 cpu</span>
+
+<span class="hljs-comment"># Reshaping (view shares memory; reshape may copy)</span>
+x = torch.arange(<span class="hljs-number">12</span>)
+x2 = x.view(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>)
+x3 = x.reshape(<span class="hljs-number">2</span>, <span class="hljs-number">6</span>)
+x4 = x2.unsqueeze(<span class="hljs-number">0</span>)                        <span class="hljs-comment"># add a batch dim -&gt; (1,3,4)</span>
+x5 = x4.squeeze(<span class="hljs-number">0</span>)                          <span class="hljs-comment"># remove size-1 dims</span>
+
+<span class="hljs-comment"># Indexing &amp; slicing (NumPy-style)</span>
+<span class="hljs-built_in">print</span>(a[<span class="hljs-number">0</span>])        <span class="hljs-comment"># first row</span>
+<span class="hljs-built_in">print</span>(a[:, <span class="hljs-number">1</span>])     <span class="hljs-comment"># second column</span>
+<span class="hljs-built_in">print</span>(a[a &gt; <span class="hljs-number">2</span>])    <span class="hljs-comment"># boolean mask</span></code></pre>
+
+<h3>Broadcasting &amp; Elementwise Math</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs">m = torch.ones(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>)
+bias = torch.tensor([<span class="hljs-number">1.</span>, <span class="hljs-number">2.</span>, <span class="hljs-number">3.</span>, <span class="hljs-number">4.</span>])
+<span class="hljs-built_in">print</span>((m + bias).shape)      <span class="hljs-comment"># (3,4): bias broadcast across rows</span>
+
+<span class="hljs-comment"># Matrix multiply: @ or matmul; * is elementwise</span>
+A = torch.randn(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>)
+B = torch.randn(<span class="hljs-number">3</span>, <span class="hljs-number">5</span>)
+C = A @ B                    <span class="hljs-comment"># (2,5)</span>
+
+<span class="hljs-comment"># Reductions along axes</span>
+t = torch.randn(<span class="hljs-number">4</span>, <span class="hljs-number">6</span>)
+<span class="hljs-built_in">print</span>(t.<span class="hljs-built_in">sum</span>(dim=<span class="hljs-number">0</span>).shape)    <span class="hljs-comment"># (6,) sum over rows</span>
+<span class="hljs-built_in">print</span>(t.mean(dim=<span class="hljs-number">1</span>).shape)   <span class="hljs-comment"># (4,) mean over columns</span>
+<span class="hljs-built_in">print</span>(t.argmax(dim=<span class="hljs-number">1</span>))       <span class="hljs-comment"># index of max per row</span></code></pre>
+
+<div class="diagram"><svg viewBox="0 0 680 190" width="680" height="190">
+  <text x="20" y="24" font-size="13" fill="#1a2233">Tensor memory layout (contiguous, row-major)</text>
+  <rect x="20" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="40" y="65" font-size="12" text-anchor="middle">0</text>
+  <rect x="60" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="80" y="65" font-size="12" text-anchor="middle">1</text>
+  <rect x="100" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="120" y="65" font-size="12" text-anchor="middle">2</text>
+  <rect x="140" y="40" width="40" height="40" fill="#eff4ff" stroke="#2563eb"/><text x="160" y="65" font-size="12" text-anchor="middle">3</text>
+  <rect x="180" y="40" width="40" height="40" fill="#ecfdf5" stroke="#059669"/><text x="200" y="65" font-size="12" text-anchor="middle">4</text>
+  <rect x="220" y="40" width="40" height="40" fill="#ecfdf5" stroke="#059669"/><text x="240" y="65" font-size="12" text-anchor="middle">5</text>
+  <text x="20" y="110" font-size="12" fill="#1a2233">Underlying 1D storage, stride (3,1) interprets it as shape (2,3):</text>
+  <rect x="20" y="125" width="120" height="30" fill="#eff4ff" stroke="#2563eb"/><text x="80" y="145" font-size="12" text-anchor="middle">row 0: [0,1,2]</text>
+  <rect x="140" y="125" width="120" height="30" fill="#ecfdf5" stroke="#059669"/><text x="200" y="145" font-size="12" text-anchor="middle">row 1: [3,4,5]</text>
+  <text x="300" y="145" font-size="12" fill="#b45309">.view() just changes strides — no copy</text>
+</svg><div class="cap">Fig 2. A tensor is a 1D storage buffer plus shape/stride metadata; views reinterpret the same bytes.</div></div>
+
+<div class="callout warn"><span class="t">Watch out</span> <code>view()</code> requires contiguous memory. After operations like <code>transpose()</code> you may need <code>.contiguous()</code> first, or use <code>reshape()</code> which copies when needed.</div>
+
+<h2 id="autograd-automatic-differentiation">Autograd: Automatic Differentiation</h2>
+<p>Autograd is the engine that makes training possible. Set <code>requires_grad=True</code> on a tensor and PyTorch records every operation into a dynamic graph. Calling <code>.backward()</code> walks that graph in reverse, applying the chain rule to populate each leaf's <code>.grad</code>.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">x = torch.tensor(<span class="hljs-number">2.0</span>, requires_grad=<span class="hljs-literal">True</span>)
+y = x ** <span class="hljs-number">3</span> + <span class="hljs-number">2</span> * x          <span class="hljs-comment"># y = x^3 + 2x</span>
+y.backward()                 <span class="hljs-comment"># dy/dx = 3x^2 + 2 = 14 at x=2</span>
+<span class="hljs-built_in">print</span>(x.grad)                <span class="hljs-comment"># tensor(14.)</span>
+
+<span class="hljs-comment"># Vector case: provide a gradient (upstream) or reduce to a scalar</span>
+w = torch.randn(<span class="hljs-number">3</span>, requires_grad=<span class="hljs-literal">True</span>)
+loss = (w ** <span class="hljs-number">2</span>).<span class="hljs-built_in">sum</span>()
+loss.backward()
+<span class="hljs-built_in">print</span>(w.grad)                <span class="hljs-comment"># 2*w</span></code></pre>
+
+<div class="diagram"><svg viewBox="0 0 680 220" width="680" height="220">
+  <defs><marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#059669"/></marker>
+  <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker></defs>
+  <text x="20" y="22" font-size="13" fill="#2563eb">Forward (build graph) →</text>
+  <text x="400" y="22" font-size="13" fill="#b45309">← Backward (chain rule)</text>
+  <rect x="20" y="50" width="90" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="65" y="78" font-size="12" text-anchor="middle">x (leaf)</text>
+  <rect x="160" y="50" width="90" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="205" y="78" font-size="12" text-anchor="middle">pow(3)</text>
+  <rect x="300" y="50" width="90" height="46" rx="6" fill="#eff4ff" stroke="#2563eb"/><text x="345" y="78" font-size="12" text-anchor="middle">add</text>
+  <rect x="440" y="50" width="90" height="46" rx="6" fill="#ecfdf5" stroke="#059669"/><text x="485" y="78" font-size="12" text-anchor="middle">y (loss)</text>
+  <line x1="110" y1="73" x2="156" y2="73" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="250" y1="73" x2="296" y2="73" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="390" y1="73" x2="436" y2="73" stroke="#059669" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="436" y1="150" x2="390" y2="150" stroke="#b45309" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="296" y1="150" x2="250" y2="150" stroke="#b45309" stroke-width="2" marker-end="url(#ah3)"/>
+  <line x1="156" y1="150" x2="110" y2="150" stroke="#b45309" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="40" y="155" font-size="11" fill="#b45309">x.grad</text>
+  <text x="170" y="140" font-size="11" fill="#b45309">grad_fn</text>
+  <text x="310" y="140" font-size="11" fill="#b45309">grad_fn</text>
+  <text x="450" y="140" font-size="11" fill="#b45309">dy/dy=1</text>
+</svg><div class="cap">Fig 3. Autograd records each op's <code>grad_fn</code> during the forward pass, then applies the chain rule in reverse.</div></div>
+
+<h3>Controlling the Graph</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Disable tracking for inference / updates (saves memory, speeds up)</span>
+<span class="hljs-keyword">with</span> torch.no_grad():
+    preds = model(x)
+
+<span class="hljs-comment"># Detach a tensor from the graph (stop gradient)</span>
+frozen = tensor.detach()
+
+<span class="hljs-comment"># Zero grads each step — gradients ACCUMULATE by default!</span>
+optimizer.zero_grad()        <span class="hljs-comment"># or model.zero_grad(set_to_none=True)</span></code></pre>
+
+<div class="callout danger"><span class="t">Gotcha</span> Gradients accumulate across <code>.backward()</code> calls. Forgetting <code>zero_grad()</code> is the #1 silent training bug — your updates become sums of stale gradients.</div>
+
+<h2 id="building-models-with-nn-module">Building Models with nn.Module</h2>
+<p><code>nn.Module</code> is the base class for all models and layers. You declare submodules in <code>__init__</code> and define the computation in <code>forward</code>. PyTorch automatically tracks parameters for you.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">import</span> torch.nn.functional <span class="hljs-keyword">as</span> F
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MLP</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_dim, hidden, out_dim</span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.fc1 = nn.Linear(in_dim, hidden)
+        <span class="hljs-variable language_">self</span>.fc2 = nn.Linear(hidden, out_dim)
+        <span class="hljs-variable language_">self</span>.dropout = nn.Dropout(<span class="hljs-number">0.2</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):
+        x = F.relu(<span class="hljs-variable language_">self</span>.fc1(x))
+        x = <span class="hljs-variable language_">self</span>.dropout(x)
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.fc2(x)          <span class="hljs-comment"># logits (no softmax here)</span>
+
+model = MLP(<span class="hljs-number">784</span>, <span class="hljs-number">256</span>, <span class="hljs-number">10</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">sum</span>(p.numel() <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> model.parameters()))  <span class="hljs-comment"># param count</span>
+<span class="hljs-built_in">print</span>(model)                                         <span class="hljs-comment"># pretty structure</span></code></pre>
+
+<div class="grid c2">
+  <div class="card"><h4>Common layers</h4><code>Linear</code>, <code>Conv2d</code>, <code>LSTM</code>, <code>MultiheadAttention</code>, <code>Embedding</code>, <code>BatchNorm2d</code>, <code>LayerNorm</code>, <code>Dropout</code>.</div>
+  <div class="card"><h4>Containers</h4><code>nn.Sequential</code> for linear stacks, <code>nn.ModuleList</code> / <code>nn.ModuleDict</code> when you need Python control flow over submodules.</div>
+</div>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Quick stacks with Sequential</span>
+net = nn.Sequential(
+    nn.Linear(<span class="hljs-number">784</span>, <span class="hljs-number">256</span>), nn.ReLU(),
+    nn.Linear(<span class="hljs-number">256</span>, <span class="hljs-number">10</span>),
+)
+
+<span class="hljs-comment"># train() vs eval() changes Dropout / BatchNorm behaviour</span>
+model.train()   <span class="hljs-comment"># dropout active, BN uses batch stats</span>
+model.<span class="hljs-built_in">eval</span>()    <span class="hljs-comment"># dropout off, BN uses running stats</span></code></pre>
+
+<div class="callout warn"><span class="t">Don't forget</span> <code>model.eval()</code> before validation/inference, and <code>model.train()</code> before training. Mixing them up produces wrong metrics and unstable BatchNorm.</div>
+
+<h2 id="loss-functions-amp-optimizers">Loss Functions &amp; Optimizers</h2>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch.optim <span class="hljs-keyword">as</span> optim
+
+criterion = nn.CrossEntropyLoss()        <span class="hljs-comment"># expects raw logits + int class labels</span>
+<span class="hljs-comment"># criterion = nn.MSELoss()               # regression</span>
+<span class="hljs-comment"># criterion = nn.BCEWithLogitsLoss()     # binary, numerically stable</span>
+
+optimizer = optim.AdamW(model.parameters(), lr=<span class="hljs-number">1e-3</span>, weight_decay=<span class="hljs-number">1e-2</span>)
+<span class="hljs-comment"># optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)</span>
+
+<span class="hljs-comment"># Learning-rate schedule</span>
+scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=<span class="hljs-number">50</span>)</code></pre>
+
+<table>
+<tr><th>Optimizer</th><th>When to use</th><th>Notes</th></tr>
+<tr><td>SGD + momentum</td><td>CNNs, when you can tune LR</td><td>Often best final accuracy; needs schedule</td></tr>
+<tr><td>Adam</td><td>Fast prototyping, sparse grads</td><td>Robust defaults, adaptive per-param LR</td></tr>
+<tr><td>AdamW</td><td>Transformers / modern default</td><td>Decoupled weight decay — prefer over Adam</td></tr>
+<tr><td>RMSprop</td><td>RNNs, RL</td><td>Non-stationary objectives</td></tr>
+</table>
+
+<h2 id="datasets-amp-dataloader">Datasets &amp; DataLoader</h2>
+<p>A <code>Dataset</code> maps indices to samples; a <code>DataLoader</code> wraps it to provide batching, shuffling, and parallel loading.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> Dataset, DataLoader
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CSVDataset</span>(<span class="hljs-title class_ inherited__">Dataset</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, X, y</span>):
+        <span class="hljs-variable language_">self</span>.X = torch.as_tensor(X, dtype=torch.float32)
+        <span class="hljs-variable language_">self</span>.y = torch.as_tensor(y, dtype=torch.long)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__len__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.X)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__getitem__</span>(<span class="hljs-params">self, idx</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.X[idx], <span class="hljs-variable language_">self</span>.y[idx]
+
+train_ds = CSVDataset(X_train, y_train)
+train_loader = DataLoader(
+    train_ds, batch_size=<span class="hljs-number">64</span>, shuffle=<span class="hljs-literal">True</span>,
+    num_workers=<span class="hljs-number">4</span>,          <span class="hljs-comment"># parallel CPU workers</span>
+    pin_memory=<span class="hljs-literal">True</span>,        <span class="hljs-comment"># faster host-&gt;GPU transfer</span>
+    drop_last=<span class="hljs-literal">True</span>,
+)</code></pre>
+
+<div class="callout tip"><span class="t">Throughput tip</span> Combine <code>num_workers&gt;0</code>, <code>pin_memory=True</code>, and <code>non_blocking=True</code> on <code>.to(device)</code> to overlap data transfer with compute. On Windows, guard the entry point with <code>if __name__ == "__main__":</code> when using workers.</div>
+
+<h2 id="the-training-loop">The Training Loop</h2>
+<p>PyTorch does not hide the loop — you write it. The five steps are always the same: forward, loss, zero grads, backward, step.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">model.to(device)
+
+<span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_epochs):
+    model.train()
+    running = <span class="hljs-number">0.0</span>
+    <span class="hljs-keyword">for</span> xb, yb <span class="hljs-keyword">in</span> train_loader:
+        xb = xb.to(device, non_blocking=<span class="hljs-literal">True</span>)
+        yb = yb.to(device, non_blocking=<span class="hljs-literal">True</span>)
+
+        optimizer.zero_grad(set_to_none=<span class="hljs-literal">True</span>)   <span class="hljs-comment"># 1. clear old grads</span>
+        logits = model(xb)                       <span class="hljs-comment"># 2. forward</span>
+        loss = criterion(logits, yb)             <span class="hljs-comment"># 3. compute loss</span>
+        loss.backward()                          <span class="hljs-comment"># 4. backprop</span>
+        optimizer.step()                         <span class="hljs-comment"># 5. update weights</span>
+
+        running += loss.item() * xb.size(<span class="hljs-number">0</span>)
+    scheduler.step()
+
+    <span class="hljs-comment"># ---- validation ----</span>
+    model.<span class="hljs-built_in">eval</span>()
+    correct = total = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        <span class="hljs-keyword">for</span> xb, yb <span class="hljs-keyword">in</span> val_loader:
+            xb, yb = xb.to(device), yb.to(device)
+            pred = model(xb).argmax(dim=<span class="hljs-number">1</span>)
+            correct += (pred == yb).<span class="hljs-built_in">sum</span>().item()
+            total += yb.size(<span class="hljs-number">0</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;epoch <span class="hljs-subst">{epoch}</span>: loss=<span class="hljs-subst">{running/<span class="hljs-built_in">len</span>(train_ds):<span class="hljs-number">.4</span>f}</span> acc=<span class="hljs-subst">{correct/total:<span class="hljs-number">.3</span>f}</span>&quot;</span>)</code></pre>
+
+<div class="pipeline">
+  <span class="step">zero_grad</span><span class="arrow">-&gt;</span>
+  <span class="step">forward</span><span class="arrow">-&gt;</span>
+  <span class="step">loss</span><span class="arrow">-&gt;</span>
+  <span class="step">backward</span><span class="arrow">-&gt;</span>
+  <span class="step">step</span>
+</div>
+
+<h3>Mixed Precision (AMP)</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">from</span> torch.amp <span class="hljs-keyword">import</span> autocast, GradScaler
+
+scaler = GradScaler(<span class="hljs-string">&quot;cuda&quot;</span>)
+<span class="hljs-keyword">for</span> xb, yb <span class="hljs-keyword">in</span> train_loader:
+    xb, yb = xb.to(device), yb.to(device)
+    optimizer.zero_grad(set_to_none=<span class="hljs-literal">True</span>)
+    <span class="hljs-keyword">with</span> autocast(<span class="hljs-string">&quot;cuda&quot;</span>, dtype=torch.float16):   <span class="hljs-comment"># or bfloat16</span>
+        loss = criterion(model(xb), yb)
+    scaler.scale(loss).backward()      <span class="hljs-comment"># scale to avoid fp16 underflow</span>
+    scaler.step(optimizer)
+    scaler.update()</code></pre>
+<div class="callout ok"><span class="t">Why</span> AMP runs most ops in fp16/bf16 for ~2x speed and ~half the memory on modern GPUs, keeping a fp32 master copy for stability.</div>
+
+<h2 id="gpu-cuda-amp-devices">GPU, CUDA &amp; Devices</h2>
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Move model and data to GPU — BOTH must be on the same device</span>
+model = model.to(<span class="hljs-string">&quot;cuda&quot;</span>)
+x = x.to(<span class="hljs-string">&quot;cuda&quot;</span>)
+
+<span class="hljs-comment"># Device-agnostic code</span>
+x = x.to(device)
+
+<span class="hljs-comment"># Inspect / manage memory</span>
+<span class="hljs-built_in">print</span>(torch.cuda.memory_allocated() / <span class="hljs-number">1e9</span>, <span class="hljs-string">&quot;GB&quot;</span>)
+torch.cuda.empty_cache()           <span class="hljs-comment"># return cached blocks to the driver</span>
+
+<span class="hljs-comment"># Multi-GPU (single node, simplest): DataParallel is legacy;</span>
+<span class="hljs-comment"># prefer DistributedDataParallel (DDP) for real workloads</span>
+<span class="hljs-comment"># torchrun --nproc_per_node=4 train.py</span></code></pre>
+
+<table>
+<tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+<tr><td>RuntimeError: Expected all tensors on same device</td><td>Model on GPU, data on CPU (or vice versa)</td><td><code>.to(device)</code> both</td></tr>
+<tr><td>CUDA out of memory</td><td>Batch too large / grads retained</td><td>Smaller batch, AMP, <code>no_grad</code>, grad accumulation</td></tr>
+<tr><td>Slow GPU utilization</td><td>Data loading bottleneck</td><td>More workers, <code>pin_memory</code>, prefetch</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">OOM tip</span> <code>loss.item()</code> or <code>float(loss)</code> detaches the scalar. Accumulating <code>running += loss</code> (the tensor, not <code>.item()</code>) keeps the whole graph alive and leaks memory across the epoch.</div>
+
+<h2 id="saving-amp-loading-checkpoints">Saving &amp; Loading Checkpoints</h2>
+<p>Save the <code>state_dict</code> (a dict of tensors), not the whole model object — it is portable and version-robust.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-comment"># Save a full training checkpoint</span>
+torch.save({
+    <span class="hljs-string">&quot;epoch&quot;</span>: epoch,
+    <span class="hljs-string">&quot;model_state&quot;</span>: model.state_dict(),
+    <span class="hljs-string">&quot;optim_state&quot;</span>: optimizer.state_dict(),
+    <span class="hljs-string">&quot;scheduler_state&quot;</span>: scheduler.state_dict(),
+    <span class="hljs-string">&quot;best_acc&quot;</span>: best_acc,
+}, <span class="hljs-string">&quot;checkpoint.pt&quot;</span>)
+
+<span class="hljs-comment"># Restore</span>
+ckpt = torch.load(<span class="hljs-string">&quot;checkpoint.pt&quot;</span>, map_location=device, weights_only=<span class="hljs-literal">True</span>)
+model.load_state_dict(ckpt[<span class="hljs-string">&quot;model_state&quot;</span>])
+optimizer.load_state_dict(ckpt[<span class="hljs-string">&quot;optim_state&quot;</span>])
+start_epoch = ckpt[<span class="hljs-string">&quot;epoch&quot;</span>] + <span class="hljs-number">1</span></code></pre>
+
+<div class="callout danger"><span class="t">Security</span> As of recent PyTorch, pass <code>weights_only=True</code> to <code>torch.load</code> for untrusted files — the default was flipped to <code>True</code> to block arbitrary-code execution via pickle. Only disable it for files you fully trust.</div>
+
+<h2 id="torch-compile-amp-faster-inference">torch.compile &amp; Faster Inference</h2>
+<p>Introduced in PyTorch 2.0, <code>torch.compile</code> JIT-compiles your model into fused, optimized kernels via TorchInductor — often a large speedup with a one-line change and no code rewrite.</p>
+
+<div class="code-label">PYTHON</div><pre><code class="hljs">model = torch.<span class="hljs-built_in">compile</span>(model)          <span class="hljs-comment"># default mode</span>
+<span class="hljs-comment"># model = torch.compile(model, mode=&quot;max-autotune&quot;)  # longer warmup, faster steady-state</span>
+
+<span class="hljs-comment"># First call traces &amp; compiles (slow); subsequent calls are fast.</span></code></pre>
+
+<h3>Inference-time checklist</h3>
+<div class="code-label">PYTHON</div><pre><code class="hljs">model.<span class="hljs-built_in">eval</span>()
+<span class="hljs-keyword">with</span> torch.inference_mode():           <span class="hljs-comment"># like no_grad but faster (no view tracking)</span>
+    out = model(x.to(device))
+    probs = torch.softmax(out, dim=<span class="hljs-number">1</span>)
+    pred = probs.argmax(dim=<span class="hljs-number">1</span>)</code></pre>
+
+<div class="grid c3">
+  <div class="card"><h4>TorchScript</h4><code>torch.jit.script/trace</code> → serialized, Python-free deployment.</div>
+  <div class="card"><h4>ONNX</h4><code>torch.onnx.export</code> → run in other runtimes (TensorRT, ORT).</div>
+  <div class="card"><h4>Quantization</h4>int8 weights/activations shrink models and speed up CPU inference.</div>
+</div>
+
+<h2 id="worked-mini-example-xor-in-30-lines">Worked Mini-Example: XOR in 30 Lines</h2>
+<details><summary>Show the full runnable example</summary><div class="body">
+<div class="code-label">PYTHON</div><pre><code class="hljs"><span class="hljs-keyword">import</span> torch, torch.nn <span class="hljs-keyword">as</span> nn, torch.optim <span class="hljs-keyword">as</span> optim
+
+X = torch.tensor([[<span class="hljs-number">0.</span>,<span class="hljs-number">0.</span>],[<span class="hljs-number">0.</span>,<span class="hljs-number">1.</span>],[<span class="hljs-number">1.</span>,<span class="hljs-number">0.</span>],[<span class="hljs-number">1.</span>,<span class="hljs-number">1.</span>]])
+y = torch.tensor([[<span class="hljs-number">0.</span>],[<span class="hljs-number">1.</span>],[<span class="hljs-number">1.</span>],[<span class="hljs-number">0.</span>]])
+
+model = nn.Sequential(
+    nn.Linear(<span class="hljs-number">2</span>, <span class="hljs-number">8</span>), nn.Tanh(),
+    nn.Linear(<span class="hljs-number">8</span>, <span class="hljs-number">1</span>),
+)
+criterion = nn.BCEWithLogitsLoss()
+opt = optim.Adam(model.parameters(), lr=<span class="hljs-number">0.05</span>)
+
+<span class="hljs-keyword">for</span> step <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">2000</span>):
+    opt.zero_grad()
+    loss = criterion(model(X), y)
+    loss.backward()
+    opt.step()
+
+model.<span class="hljs-built_in">eval</span>()
+<span class="hljs-keyword">with</span> torch.inference_mode():
+    preds = (torch.sigmoid(model(X)) &gt; <span class="hljs-number">0.5</span>).<span class="hljs-built_in">float</span>()
+<span class="hljs-built_in">print</span>(preds.squeeze().tolist())   <span class="hljs-comment"># [0.0, 1.0, 1.0, 0.0]</span></code></pre>
+</div></details>
+
+<h2 id="cheat-sheet-reference">Cheat-Sheet Reference</h2>
+<table>
+<tr><th>Task</th><th>Code</th></tr>
+<tr><td>To GPU</td><td><code>t.to("cuda")</code> / <code>t.cuda()</code></td></tr>
+<tr><td>NumPy ↔ Tensor</td><td><code>torch.from_numpy(a)</code> / <code>t.numpy()</code></td></tr>
+<tr><td>No-grad block</td><td><code>with torch.no_grad():</code></td></tr>
+<tr><td>Add/remove dim</td><td><code>t.unsqueeze(0)</code> / <code>t.squeeze()</code></td></tr>
+<tr><td>Concatenate</td><td><code>torch.cat([a,b], dim=0)</code></td></tr>
+<tr><td>Stack new axis</td><td><code>torch.stack([a,b])</code></td></tr>
+<tr><td>Scalar out</td><td><code>t.item()</code></td></tr>
+<tr><td>Clip grads</td><td><code>nn.utils.clip_grad_norm_(params, 1.0)</code></td></tr>
+<tr><td>Count params</td><td><code>sum(p.numel() for p in m.parameters())</code></td></tr>
+<tr><td>Seed everything</td><td><code>torch.manual_seed(0)</code></td></tr>
+</table>
+
+<h3>PyTorch vs NumPy vs TensorFlow</h3>
+<table>
+<tr><th>Aspect</th><th>PyTorch</th><th>NumPy</th><th>TensorFlow</th></tr>
+<tr><td>GPU</td><td>Yes</td><td>No</td><td>Yes</td></tr>
+<tr><td>Autodiff</td><td>Yes (dynamic)</td><td>No</td><td>Yes (eager + graph)</td></tr>
+<tr><td>Graph</td><td>Define-by-run</td><td>—</td><td>Eager default, tf.function</td></tr>
+<tr><td>Research share</td><td>Dominant</td><td>—</td><td>Declining</td></tr>
+</table>
+
+<h2 id="best-practices-amp-common-pitfalls">Best Practices &amp; Common Pitfalls</h2>
+<div class="callout ok"><span class="t">Do</span> Use <code>zero_grad(set_to_none=True)</code>, pass logits to <code>CrossEntropyLoss</code> (never pre-softmax), seed RNGs for reproducibility, and move the model to the device <em>before</em> constructing the optimizer.</div>
+<div class="callout tip"><span class="t">Do</span> Profile with <code>torch.profiler</code> and prefer <code>AdamW</code> + a cosine schedule as a strong modern default. Checkpoint every epoch and keep the best-by-validation copy.</div>
+<div class="callout warn"><span class="t">Avoid</span> Calling <code>.cuda()</code> on data but not the model (device mismatch); accumulating loss tensors instead of <code>.item()</code>; forgetting <code>eval()</code>; applying softmax before <code>CrossEntropyLoss</code>.</div>
+<div class="callout danger"><span class="t">Never</span> Load untrusted checkpoints with <code>weights_only=False</code>, and never leave <code>requires_grad=True</code> on inputs during inference — it silently builds graphs and wastes memory.</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between a dynamic and a static computation graph, and which does PyTorch use?</div><div class="a">PyTorch builds a <strong>dynamic</strong> (define-by-run) graph: the graph is constructed as the forward pass executes, so Python control flow works naturally and debugging is easy. Static-graph frameworks define the whole graph first, then execute it — faster to optimize but harder to debug. <code>torch.compile</code> now gives PyTorch much of the static-graph performance while keeping the eager programming model.</div></div>
+
+<div class="qa"><div class="q">Why must you call optimizer.zero_grad() each iteration?</div><div class="a">Because <code>.backward()</code> <em>accumulates</em> gradients into <code>.grad</code> rather than overwriting them. Without zeroing, each step uses the sum of all previous gradients, corrupting training. (Accumulation is intentional — it lets you simulate larger batches by delaying the <code>step</code>.)</div></div>
+
+<div class="qa"><div class="q">What does requires_grad do, and what is a leaf tensor?</div><div class="a"><code>requires_grad=True</code> tells autograd to track operations on that tensor so gradients can be computed. A <strong>leaf</strong> is a tensor created directly by the user (e.g. model parameters) rather than as the result of an op; only leaves with <code>requires_grad</code> accumulate <code>.grad</code> after <code>backward()</code>.</div></div>
+
+<div class="qa"><div class="q">When would you use torch.no_grad() vs detach() vs torch.inference_mode()?</div><div class="a"><code>no_grad()</code> is a context that disables graph tracking for everything inside — used during validation. <code>detach()</code> returns a single tensor cut off from the graph. <code>inference_mode()</code> is like <code>no_grad</code> but even faster because it also skips view/version tracking; use it for pure forward-only inference.</div></div>
+
+<div class="qa"><div class="q">Why pass raw logits to CrossEntropyLoss instead of softmax probabilities?</div><div class="a"><code>nn.CrossEntropyLoss</code> fuses <code>LogSoftmax</code> + <code>NLLLoss</code> internally for numerical stability (the log-sum-exp trick avoids overflow/underflow). Applying softmax yourself first double-counts the normalization and produces wrong, unstable gradients.</div></div>
+
+<div class="qa"><div class="q">What is the difference between model.train() and model.eval()?</div><div class="a">They toggle layer behaviour. In <code>train()</code>, Dropout randomly zeros activations and BatchNorm uses per-batch statistics while updating running estimates. In <code>eval()</code>, Dropout is a no-op and BatchNorm uses the stored running mean/variance. They do <em>not</em> disable gradients — pair <code>eval()</code> with <code>no_grad()</code>.</div></div>
+
+<div class="qa"><div class="q">How do view() and reshape() differ?</div><div class="a"><code>view()</code> returns a tensor sharing the same storage and requires the data to be contiguous — it only changes strides. <code>reshape()</code> returns a view when possible but silently copies when the layout prevents a view. Use <code>view()</code> when you want to guarantee no copy, <code>reshape()</code> when you just want the shape.</div></div>
+
+<div class="qa"><div class="q">What causes a CUDA out-of-memory error and how do you reduce memory?</div><div class="a">Common causes: batch size too large, holding onto tensors still attached to the graph (e.g. accumulating <code>loss</code> instead of <code>loss.item()</code>), or retaining the graph with <code>retain_graph=True</code>. Fixes: lower batch size, use AMP, gradient accumulation, <code>torch.no_grad()</code> for eval, gradient checkpointing, and free references so Python can garbage-collect.</div></div>
+
+<div class="qa"><div class="q">Why save state_dict() rather than the whole model?</div><div class="a">A <code>state_dict</code> is just an <code>OrderedDict</code> of tensors — it is portable, inspectable, and does not pickle your class definitions or file paths. Saving the whole model via pickle breaks if you refactor the class or move modules, and is a code-execution security risk on load.</div></div>
+
+<div class="qa"><div class="q">What does torch.compile do and when should you use it?</div><div class="a">It traces your model with TorchDynamo and compiles fused kernels via TorchInductor, typically giving a sizeable speedup with one line and no rewrite. Use it once your model is correct and stable; expect a slow first iteration (compilation) and watch for recompilations caused by changing input shapes (control with <code>dynamic=True</code>).</div></div>
+
+<div class="qa"><div class="q">How does DistributedDataParallel differ from DataParallel?</div><div class="a"><code>DataParallel</code> runs on one process, splitting a batch across GPUs with a single Python GIL — simple but slow and now discouraged. <code>DistributedDataParallel</code> runs one process per GPU, each with its own data shard, syncing gradients via all-reduce. DDP scales far better across GPUs and nodes and is the recommended approach.</div></div>
+
+<div class="qa"><div class="q">What is gradient accumulation and why is it useful?</div><div class="a">Instead of calling <code>optimizer.step()</code> every batch, you run <code>backward()</code> on several small batches (letting grads accumulate) and step once every N batches, dividing loss by N. This simulates a batch N times larger than fits in memory — crucial for training big models on limited GPUs.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+  <li><strong>Official tutorials</strong> — the "Deep Learning with PyTorch: A 60 Minute Blitz" and "Learn the Basics" tracks at pytorch.org/tutorials.</li>
+  <li><strong>Autograd mechanics</strong> — read the official autograd docs to understand the graph, hooks, and custom <code>autograd.Function</code>.</li>
+  <li><strong>Ecosystem</strong> — <em>torchvision</em>, <em>torchaudio</em>, <em>Hugging Face Transformers</em>, and <em>PyTorch Lightning</em> for less boilerplate.</li>
+  <li><strong>Scaling</strong> — DistributedDataParallel, FSDP (Fully Sharded Data Parallel), and <em>torchrun</em> for multi-GPU/multi-node training.</li>
+  <li><strong>Performance</strong> — <code>torch.profiler</code>, <code>torch.compile</code> modes, CUDA graphs, and quantization/pruning for deployment.</li>
+  <li><strong>Build something</strong> — reimplement a small Transformer or ResNet from scratch; nothing cements the API like writing the training loop yourself.</li>
+</ul>
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

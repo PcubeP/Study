@@ -1,0 +1,412 @@
+<h2>What Eclipse Is and Why It Matters</h2>
+<p class="lead">Eclipse is a free, open-source, extensible Integrated Development Environment (IDE) built on a modular plug-in architecture. It is the foundation beneath Java tooling, SAP's ABAP Development Tools (ADT), and dozens of other language and vendor toolchains — understanding it well pays off across enterprise and interview contexts alike.</p>
+
+<p>At its heart Eclipse is not "a Java editor" — it is a <strong>platform</strong>. The small Equinox runtime (an implementation of the OSGi module system) boots a bus of plug-ins, and everything you see — editors, views, the compiler, the debugger — is a plug-in contributed on top. This is why the same application can host Java (JDT), C/C++ (CDT), web tooling, and SAP ADT simultaneously.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Open &amp; free</h4>Eclipse Public License (EPL). No per-seat cost, strong enterprise adoption, long-term releases every quarter.</div>
+  <div class="card"><h4>Extensible</h4>OSGi/Equinox plug-in model. The Marketplace adds language support, linters, Git clients, and vendor tools.</div>
+  <div class="card"><h4>Vendor platform</h4>SAP ADT, Spring Tool Suite, and many commercial IDEs ship <em>as</em> Eclipse distributions.</div>
+</div>
+
+<div class="diagram"><svg viewBox="0 0 720 320" width="720" height="320">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker>
+  </defs>
+  <rect x="20" y="20" width="680" height="60" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="46" text-anchor="middle" font-size="15" fill="#1e3a8a" font-weight="bold">Workbench UI — Perspectives, Editors, Views</text>
+  <text x="360" y="66" text-anchor="middle" font-size="12" fill="#1a2233">SWT / JFace widget toolkit</text>
+
+  <rect x="20" y="110" width="210" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="125" y="140" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">JDT</text>
+  <text x="125" y="160" text-anchor="middle" font-size="11" fill="#1a2233">Java editor, compiler, debug</text>
+
+  <rect x="255" y="110" width="210" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="360" y="140" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">SAP ADT / CDT / PDT</text>
+  <text x="360" y="160" text-anchor="middle" font-size="11" fill="#1a2233">Language plug-ins</text>
+
+  <rect x="490" y="110" width="210" height="70" rx="8" fill="#ecfdf5" stroke="#059669"/>
+  <text x="595" y="140" text-anchor="middle" font-size="13" fill="#059669" font-weight="bold">EGit / Marketplace</text>
+  <text x="595" y="160" text-anchor="middle" font-size="11" fill="#1a2233">Team &amp; ecosystem plug-ins</text>
+
+  <rect x="20" y="210" width="680" height="50" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="360" y="240" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="bold">Eclipse Platform Runtime (resources, workspace, extension registry)</text>
+
+  <rect x="20" y="280" width="680" height="30" rx="8" fill="#1a2233"/>
+  <text x="360" y="300" text-anchor="middle" font-size="12" fill="#ffffff">Equinox — OSGi module container  •  JVM</text>
+
+  <line x1="125" y1="180" x2="125" y2="208" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="360" y1="180" x2="360" y2="208" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="595" y1="180" x2="595" y2="208" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="360" y1="260" x2="360" y2="278" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar)"/>
+</svg><div class="cap">Fig 1. The layered Eclipse architecture: a JVM runs the Equinox OSGi container, which boots the Platform Runtime, which hosts language plug-ins (JDT, ADT, CDT) and the Workbench UI.</div></div>
+
+<div class="callout note"><span class="t">Mental model</span> Think "operating system for developer tools." The Platform provides the kernel (resources, extension points); plug-ins are the installable apps. SAP ADT is just an especially large, well-integrated set of apps.</div>
+
+<h2>Getting Started: Install &amp; First Launch</h2>
+
+<p>The easiest entry point is the <strong>Eclipse Installer</strong> (Oometo/"Eclipse Installer") which lets you pick a packaged distribution. Common packages:</p>
+
+<table>
+  <tr><th>Package</th><th>Contains</th><th>Use for</th></tr>
+  <tr><td>Eclipse IDE for Java Developers</td><td>JDT, Git, Maven, Gradle (Buildship)</td><td>General Java/backend work</td></tr>
+  <tr><td>Eclipse IDE for Enterprise Java and Web</td><td>Above + WTP, servers, JPA, REST</td><td>Jakarta EE / web apps</td></tr>
+  <tr><td>Eclipse IDE for C/C++ (CDT)</td><td>CDT, GDB integration</td><td>Native development</td></tr>
+  <tr><td>ABAP Development Tools (ADT)</td><td>SAP plug-ins on an Eclipse base</td><td>ABAP / SAP BTP ABAP environment</td></tr>
+</table>
+
+<pre><code class="language-bash"># macOS/Linux: unpack and launch
+tar -xzf eclipse-java-2026-03-R-linux-gtk-x86_64.tar.gz
+cd eclipse &amp;&amp; ./eclipse
+
+# Point Eclipse at a specific JDK by editing eclipse.ini (BEFORE the -vmargs line):
+#   -vm
+#   /opt/jdk-21/bin/java
+
+# Launch into a specific workspace without the chooser dialog
+./eclipse -data /home/me/workspaces/payments
+
+# Clean the OSGi cache if plug-ins misbehave after an install
+./eclipse -clean</code></pre>
+
+<div class="callout tip"><span class="t">eclipse.ini</span> Most startup problems (wrong JVM, out-of-memory, slow GC) are fixed in <span class="kbd">eclipse.ini</span>. Keep <code>-vm</code> explicit so Eclipse never guesses the JDK. Bump heap with <code>-Xmx2g</code> after <code>-vmargs</code>.</div>
+
+<h2>Workspaces &amp; Projects</h2>
+
+<p>A <strong>workspace</strong> is a directory that holds your projects plus a hidden <code>.metadata/</code> folder containing all your settings, indexes, and view layouts. A <strong>project</strong> is a folder inside (or linked into) the workspace with Eclipse metadata files. This two-level model is the single most important concept to internalize.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 300" width="700" height="300">
+  <defs>
+    <marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker>
+  </defs>
+  <rect x="20" y="20" width="300" height="260" rx="8" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="170" y="44" text-anchor="middle" font-size="14" fill="#1e3a8a" font-weight="bold">Workspace: ~/ws/payments</text>
+
+  <rect x="40" y="60" width="260" height="40" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+  <text x="52" y="85" font-size="12" fill="#b45309">.metadata/  (settings, indexes, layouts)</text>
+
+  <rect x="40" y="110" width="260" height="70" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="52" y="132" font-size="12" fill="#059669" font-weight="bold">project: billing-service/</text>
+  <text x="52" y="150" font-size="11" fill="#1a2233">.project  .classpath  .settings/</text>
+  <text x="52" y="168" font-size="11" fill="#1a2233">src/  bin/  pom.xml</text>
+
+  <rect x="40" y="190" width="260" height="70" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="52" y="212" font-size="12" fill="#059669" font-weight="bold">project: shared-model/</text>
+  <text x="52" y="230" font-size="11" fill="#1a2233">.project  .classpath</text>
+  <text x="52" y="248" font-size="11" fill="#1a2233">src/</text>
+
+  <rect x="400" y="90" width="280" height="120" rx="8" fill="#ffffff" stroke="#0891b2"/>
+  <text x="540" y="114" text-anchor="middle" font-size="13" fill="#0891b2" font-weight="bold">.project file</text>
+  <text x="415" y="140" font-size="11" fill="#1a2233">&lt;name&gt; project name</text>
+  <text x="415" y="160" font-size="11" fill="#1a2233">&lt;natures&gt; e.g. javanature</text>
+  <text x="415" y="180" font-size="11" fill="#1a2233">&lt;buildSpec&gt; builders to run</text>
+
+  <line x1="300" y1="145" x2="398" y2="130" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar2)"/>
+</svg><div class="cap">Fig 2. A workspace contains projects; each project carries .project (natures + builders) and .classpath. The workspace .metadata holds UI state and preferences.</div></div>
+
+<h3>Key metadata files</h3>
+<table>
+  <tr><th>File</th><th>Role</th><th>Commit to VCS?</th></tr>
+  <tr><td><code>.project</code></td><td>Project name, natures, builders</td><td>Often yes</td></tr>
+  <tr><td><code>.classpath</code></td><td>Source folders, output, library/dependency entries</td><td>Debatable (Maven/Gradle regenerate it)</td></tr>
+  <tr><td><code>.settings/*.prefs</code></td><td>Per-project compiler/formatter settings</td><td>Yes — keeps teams consistent</td></tr>
+  <tr><td><code>.metadata/</code></td><td>Workspace-wide state (never shared)</td><td>Never</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Maven/Gradle caveat</span> With m2e or Buildship, the <code>.classpath</code> is <em>generated</em> from <code>pom.xml</code>/<code>build.gradle</code>. Edit the build file, not the classpath, and use <span class="kbd">Alt</span>+<span class="kbd">F5</span> (Maven → Update Project) to resync.</div>
+
+<p>A <strong>nature</strong> tags a project with capabilities (Java, Maven, ABAP). A <strong>builder</strong> is an incremental process triggered on save/change — the Java builder compiles only the changed compilation units and their dependents, which is why Eclipse feels instant compared to a full command-line rebuild.</p>
+
+<h4>Working sets</h4>
+<p>Large workspaces (50+ projects) become unmanageable. <strong>Working sets</strong> are named groups you filter the Package Explorer by — e.g. "payments-core", "payments-tests" — without physically moving projects.</p>
+
+<h2>Perspectives, Editors &amp; Views</h2>
+
+<p>Three concepts control the entire UI:</p>
+
+<div class="grid c3">
+  <div class="card"><h4>View</h4>A panel showing one thing: Package Explorer, Console, Problems, Outline, Debug, Call Hierarchy. Non-modal, dockable.</div>
+  <div class="card"><h4>Editor</h4>Where you edit a resource. Multiple can tile. The center of the workbench; dirty state shown with a <code>*</code>.</div>
+  <div class="card"><h4>Perspective</h4>A saved arrangement of views + editors tuned for a task: <em>Java</em>, <em>Debug</em>, <em>Git</em>, <em>ABAP</em>.</div>
+</div>
+
+<div class="pipeline"><span class="step">Open resource</span><span class="arrow">-&gt;</span><span class="step">Editor opens</span><span class="arrow">-&gt;</span><span class="step">Switch perspective</span><span class="arrow">-&gt;</span><span class="step">Views rearrange</span></div>
+
+<p>Switch perspectives from the top-right toolbar or <span class="kbd">Window</span> → <span class="kbd">Perspective</span>. The <strong>Debug</strong> perspective auto-activates when you hit a breakpoint; the <strong>Java</strong> perspective is where you spend most time. Reset a mangled layout with <span class="kbd">Window</span> → <span class="kbd">Perspective</span> → <span class="kbd">Reset Perspective</span>.</p>
+
+<div class="callout tip"><span class="t">Quick Access</span> Press <span class="kbd">Ctrl</span>+<span class="kbd">3</span> (<span class="kbd">Cmd</span>+<span class="kbd">3</span>) to fuzzy-search <em>any</em> command, view, preference, or file. It is the single most powerful navigation key — learn it before any other shortcut.</div>
+
+<h2>The Java Editor: Features That Matter</h2>
+
+<p>The JDT editor is a semantic editor — it understands your code's AST, not just text. That unlocks content assist, quick fixes, and refactoring.</p>
+
+<h3>Content assist &amp; code generation</h3>
+<pre><code class="language-java">public class Order {
+    private String id;
+    private List&lt;LineItem&gt; items;
+    private BigDecimal total;
+
+    // Alt+Shift+S opens the Source menu:
+    //  - Generate Getters and Setters
+    //  - Generate Constructor using Fields
+    //  - Generate hashCode() and equals()
+    //  - Generate toString()
+    //  - Override/Implement Methods...
+
+    // Ctrl+Space = content assist. Type the start of a method and complete.
+    // "sysout" + Ctrl+Space  ->  System.out.println();   (a template)
+    // "foreach" + Ctrl+Space ->  expands to an enhanced for loop
+}</code></pre>
+
+<h3>Quick Fix &amp; Quick Assist</h3>
+<p>A lightbulb/red marker means Quick Fix is available. Place the caret on the error and press <span class="kbd">Ctrl</span>+<span class="kbd">1</span>:</p>
+
+<table>
+  <tr><th>Situation</th><th>Ctrl+1 offers</th></tr>
+  <tr><td>Unresolved type</td><td>Add import / create class / create interface</td></tr>
+  <tr><td>Unhandled exception</td><td>Surround with try/catch, or add throws clause</td></tr>
+  <tr><td>Unused variable</td><td>Remove, or assign to new local</td></tr>
+  <tr><td>Method does not exist</td><td>Create method in target type with inferred signature</td></tr>
+  <tr><td>Assignment expression</td><td>Assign to new local variable / field (Quick Assist)</td></tr>
+</table>
+
+<h3>Navigation</h3>
+<table>
+  <tr><th>Action</th><th>Shortcut</th></tr>
+  <tr><td>Open Type (any class on classpath)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">T</span></td></tr>
+  <tr><td>Open Resource (any file)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">R</span></td></tr>
+  <tr><td>Jump to declaration</td><td><span class="kbd">F3</span> (or Ctrl+click)</td></tr>
+  <tr><td>Open Type Hierarchy</td><td><span class="kbd">F4</span></td></tr>
+  <tr><td>Open Call Hierarchy</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Alt</span>+<span class="kbd">H</span></td></tr>
+  <tr><td>Find References in Workspace</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">G</span></td></tr>
+  <tr><td>Quick Outline (in-file jump)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">O</span></td></tr>
+  <tr><td>Last edit location</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Q</span></td></tr>
+  <tr><td>Back / Forward navigation</td><td><span class="kbd">Alt</span>+<span class="kbd">Left</span> / <span class="kbd">Alt</span>+<span class="kbd">Right</span></td></tr>
+</table>
+
+<h2>Build, Run &amp; Launch Configurations</h2>
+
+<p>Eclipse builds continuously (<strong>Project → Build Automatically</strong> is on by default). Running creates a <strong>launch configuration</strong> — a reusable, named recipe stored under Run → Run Configurations.</p>
+
+<div class="diagram"><svg viewBox="0 0 700 230" width="700" height="230">
+  <defs>
+    <marker id="ar3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/></marker>
+  </defs>
+  <rect x="20" y="90" width="120" height="50" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="80" y="112" text-anchor="middle" font-size="12" fill="#1e3a8a">Save .java</text>
+  <text x="80" y="130" text-anchor="middle" font-size="11" fill="#1a2233">source change</text>
+
+  <rect x="190" y="90" width="130" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="255" y="112" text-anchor="middle" font-size="12" fill="#059669">Incremental</text>
+  <text x="255" y="130" text-anchor="middle" font-size="11" fill="#1a2233">Java builder</text>
+
+  <rect x="370" y="90" width="130" height="50" rx="6" fill="#ffffff" stroke="#0891b2"/>
+  <text x="435" y="112" text-anchor="middle" font-size="12" fill="#0891b2">.class in bin/</text>
+  <text x="435" y="130" text-anchor="middle" font-size="11" fill="#1a2233">+ Problems view</text>
+
+  <rect x="550" y="90" width="130" height="50" rx="6" fill="#1a2233"/>
+  <text x="615" y="112" text-anchor="middle" font-size="12" fill="#ffffff">Launch config</text>
+  <text x="615" y="130" text-anchor="middle" font-size="11" fill="#ffffff">runs JVM</text>
+
+  <line x1="140" y1="115" x2="188" y2="115" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar3)"/>
+  <line x1="320" y1="115" x2="368" y2="115" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar3)"/>
+  <line x1="500" y1="115" x2="548" y2="115" stroke="#94a3b8" stroke-width="2" marker-end="url(#ar3)"/>
+</svg><div class="cap">Fig 3. Save-driven incremental build: only changed units recompile, errors land in the Problems view, and a launch configuration starts the JVM.</div></div>
+
+<table>
+  <tr><th>Action</th><th>Shortcut</th></tr>
+  <tr><td>Run last launched</td><td><span class="kbd">Ctrl</span>+<span class="kbd">F11</span></td></tr>
+  <tr><td>Debug last launched</td><td><span class="kbd">F11</span></td></tr>
+  <tr><td>Run current class/test (context)</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">X</span>, then <span class="kbd">J</span> (Java) / <span class="kbd">T</span> (JUnit)</td></tr>
+</table>
+
+<p>A launch config captures: main class, program arguments, VM arguments (<code>-Xmx</code>, system properties), environment variables, classpath, and the JRE. Export it to a file so teammates share the same run setup.</p>
+
+<h2>Debugging &amp; Breakpoints</h2>
+
+<p>Eclipse's debugger is a standout feature. Set a breakpoint by double-clicking the editor gutter, then launch in Debug mode. Execution halts and the Debug perspective opens with Variables, Breakpoints, and the call stack.</p>
+
+<h3>Breakpoint types</h3>
+<div class="grid c2">
+  <div class="card"><h4>Line breakpoint</h4>Halts at a line. Add a <strong>condition</strong> (e.g. <code>order.getTotal().signum() &lt; 0</code>) so it only triggers when it matters, or a <strong>hit count</strong>.</div>
+  <div class="card"><h4>Exception breakpoint</h4>Breaks when a given exception is thrown — caught, uncaught, or both. Priceless for "where does this NPE originate?"</div>
+  <div class="card"><h4>Method breakpoint</h4>Breaks on entry/exit of a method, even in libraries without source.</div>
+  <div class="card"><h4>Watchpoint (field)</h4>Breaks when a field is read or modified — find who mutates shared state.</div>
+</div>
+
+<table>
+  <tr><th>Debug action</th><th>Shortcut</th><th>Meaning</th></tr>
+  <tr><td>Step Into</td><td><span class="kbd">F5</span></td><td>Enter the called method</td></tr>
+  <tr><td>Step Over</td><td><span class="kbd">F6</span></td><td>Execute line, don't descend</td></tr>
+  <tr><td>Step Return</td><td><span class="kbd">F7</span></td><td>Run to end of current method</td></tr>
+  <tr><td>Resume</td><td><span class="kbd">F8</span></td><td>Continue to next breakpoint</td></tr>
+  <tr><td>Toggle breakpoint</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">B</span></td><td>On the current line</td></tr>
+</table>
+
+<pre><code class="language-java">public BigDecimal applyDiscount(Order order, Discount d) {
+    BigDecimal base = order.getTotal();           // breakpoint here
+    BigDecimal factor = d.rate();                 // Variables view shows 'base'
+    // Select the expression below and press Ctrl+Shift+I to "Inspect"
+    // or Ctrl+Shift+D to "Display" its live value without stopping to log.
+    return base.multiply(BigDecimal.ONE.subtract(factor));
+}</code></pre>
+
+<div class="callout tip"><span class="t">Power moves</span> <strong>Drop to Frame</strong> re-runs the current method from the top without restarting. <strong>Hot Code Replace</strong> lets you edit a method body while stopped and continue with the new code (works for method-body changes, not signature/field changes). Use <strong>Expressions</strong> view to evaluate arbitrary Java against the paused state.</div>
+
+<div class="callout warn"><span class="t">Conditional breakpoint cost</span> A condition is evaluated on <em>every</em> pass of that line — expensive conditions in hot loops slow the target JVM noticeably. Prefer hit-count or a narrower location when possible.</div>
+
+<h2>Refactoring</h2>
+
+<p>Because the editor is AST-aware, refactorings are safe and workspace-wide — they update every reference, not just text matches. The refactor menu is <span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">T</span>.</p>
+
+<table>
+  <tr><th>Refactoring</th><th>Shortcut</th><th>What it does</th></tr>
+  <tr><td>Rename</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">R</span></td><td>Rename symbol + all references, incl. getters/JavaDoc</td></tr>
+  <tr><td>Extract Method</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">M</span></td><td>Pull selection into a new method, infer params/returns</td></tr>
+  <tr><td>Extract Local Variable</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">L</span></td><td>Introduce a variable for the selected expression</td></tr>
+  <tr><td>Inline</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">I</span></td><td>Replace a variable/method with its body</td></tr>
+  <tr><td>Change Method Signature</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">C</span></td><td>Add/reorder/remove params; updates all callers</td></tr>
+  <tr><td>Move</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">V</span></td><td>Move class/member to another package/type</td></tr>
+</table>
+
+<details><summary>Show: Extract Method worked example</summary><div class="body">
+<pre><code class="language-java">// BEFORE — select the two lines and press Alt+Shift+M
+public void checkout(Cart cart) {
+    BigDecimal sum = BigDecimal.ZERO;
+    for (Item i : cart.items()) sum = sum.add(i.price());   // selected
+    cart.setTotal(sum);                                      // selected
+}
+
+// AFTER — Eclipse infers the parameter and call site
+public void checkout(Cart cart) {
+    computeAndSetTotal(cart);
+}
+private void computeAndSetTotal(Cart cart) {
+    BigDecimal sum = BigDecimal.ZERO;
+    for (Item i : cart.items()) sum = sum.add(i.price());
+    cart.setTotal(sum);
+}</code></pre>
+</div></details>
+
+<div class="callout ok"><span class="t">Preview first</span> Every refactoring offers a Preview with a diff of affected files. On a large codebase, always preview Rename/Change Signature before applying — it catches surprising reflective or test-only references.</div>
+
+<h2>Plugins &amp; the Marketplace</h2>
+
+<p>Extend Eclipse via <strong>Help → Eclipse Marketplace</strong> (drag-and-drop install) or <strong>Help → Install New Software</strong> (point at a p2 update site URL). Everything is OSGi bundles resolved by the p2 provisioning system.</p>
+
+<table>
+  <tr><th>Plug-in</th><th>Adds</th></tr>
+  <tr><td>EGit</td><td>Git integration (usually pre-bundled)</td></tr>
+  <tr><td>Buildship</td><td>Gradle import, tasks, sync</td></tr>
+  <tr><td>m2e</td><td>Maven import and lifecycle integration</td></tr>
+  <tr><td>SonarLint</td><td>On-the-fly static analysis / code smells</td></tr>
+  <tr><td>Spring Tools 4</td><td>Spring Boot support, live beans, YAML assist</td></tr>
+  <tr><td>ABAP Development Tools</td><td>SAP ABAP + BTP ABAP environment</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Install vs. restart</span> p2 computes a dependency-consistent set and typically requires a restart. If an install fails, uncheck "Contact all update sites" or verify the target release train (e.g. <span class="badge">2026-03</span>) matches your Eclipse version.</div>
+
+<h2>Java &amp; SAP ADT Usage</h2>
+
+<p><strong>ABAP Development Tools (ADT)</strong> is SAP's modern, Eclipse-based front end for ABAP, replacing much of the classic SAP GUI SE80 workflow. It installs as plug-ins onto a standard Eclipse Java package via the SAP update site.</p>
+
+<h3>ADT concepts mapped to Eclipse</h3>
+<table>
+  <tr><th>Eclipse concept</th><th>ADT meaning</th></tr>
+  <tr><td>Project</td><td>An <strong>ABAP Project</strong> bound to a system connection + client + user</td></tr>
+  <tr><td>Perspective</td><td>The <strong>ABAP</strong> perspective (Project Explorer, Outline, Problems, ABAP Console)</td></tr>
+  <tr><td>Editor</td><td>Source-based editors for classes, programs, CDS views, Core Data Services, Behavior Definitions</td></tr>
+  <tr><td>Run/Debug</td><td><span class="kbd">F8</span> runs an ABAP program/console; the ABAP debugger attaches on the server</td></tr>
+  <tr><td>Marketplace/update site</td><td><code>tools.hana.ondemand.com/[release]</code> p2 site for ADT</td></tr>
+</table>
+
+<pre><code class="language-bash"># Typical ADT install:
+# Help -> Install New Software -> Add...
+#   Name:     ADT
+#   Location: https://tools.hana.ondemand.com/latest
+# Select "ABAP Development Tools" -> Next -> accept -> restart
+# Then: File -> New -> ABAP Project -> choose system from SAP Logon / service key</code></pre>
+
+<pre><code class="language-abap">CLASS zcl_greeter DEFINITION PUBLIC CREATE PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES if_oo_adt_classrun.   " enables F8 "ABAP Application (Console)"
+ENDCLASS.
+
+CLASS zcl_greeter IMPLEMENTATION.
+  METHOD if_oo_adt_classrun~main.
+    out-&gt;write( |Hello from ADT at { sy-datum }| ).
+  ENDMETHOD.
+ENDCLASS.</code></pre>
+
+<p>In ADT you still get Eclipse's refactoring UX (rename, extract), content assist (<span class="kbd">Ctrl</span>+<span class="kbd">Space</span>), quick fix (<span class="kbd">Ctrl</span>+<span class="kbd">1</span>), and the same navigation keys. ABAP activation (the server-side "compile") is <span class="kbd">Ctrl</span>+<span class="kbd">F3</span>; "Where-Used List" is <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">G</span>.</p>
+
+<div class="callout tip"><span class="t">For SAP engineers</span> The muscle memory transfers both ways: shortcuts learned for Java navigation and refactoring work almost identically in ADT, so investing in Eclipse fluency pays off across your whole SAP toolchain.</div>
+
+<h2>Cheat-Sheet: Essential Shortcuts</h2>
+
+<table>
+  <tr><th>Category</th><th>Action</th><th>Windows/Linux</th></tr>
+  <tr><td>Navigate</td><td>Quick Access (do anything)</td><td><span class="kbd">Ctrl</span>+<span class="kbd">3</span></td></tr>
+  <tr><td>Navigate</td><td>Open Type / Resource</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">T</span> / <span class="kbd">R</span></td></tr>
+  <tr><td>Edit</td><td>Content assist</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Space</span></td></tr>
+  <tr><td>Edit</td><td>Quick Fix</td><td><span class="kbd">Ctrl</span>+<span class="kbd">1</span></td></tr>
+  <tr><td>Edit</td><td>Format source</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">F</span></td></tr>
+  <tr><td>Edit</td><td>Organize imports</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">O</span></td></tr>
+  <tr><td>Edit</td><td>Comment / uncomment line</td><td><span class="kbd">Ctrl</span>+<span class="kbd">/</span></td></tr>
+  <tr><td>Edit</td><td>Move line up/down</td><td><span class="kbd">Alt</span>+<span class="kbd">Up</span> / <span class="kbd">Down</span></td></tr>
+  <tr><td>Edit</td><td>Duplicate line</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Alt</span>+<span class="kbd">Down</span></td></tr>
+  <tr><td>Edit</td><td>Delete line</td><td><span class="kbd">Ctrl</span>+<span class="kbd">D</span></td></tr>
+  <tr><td>Source</td><td>Source menu / Generate</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">S</span></td></tr>
+  <tr><td>Refactor</td><td>Refactor menu / Rename</td><td><span class="kbd">Alt</span>+<span class="kbd">Shift</span>+<span class="kbd">T</span> / <span class="kbd">R</span></td></tr>
+  <tr><td>Run</td><td>Run / Debug last</td><td><span class="kbd">Ctrl</span>+<span class="kbd">F11</span> / <span class="kbd">F11</span></td></tr>
+  <tr><td>Search</td><td>Find References</td><td><span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">G</span></td></tr>
+  <tr><td>Search</td><td>File/text search dialog</td><td><span class="kbd">Ctrl</span>+<span class="kbd">H</span></td></tr>
+</table>
+
+<div class="callout note"><span class="t">macOS</span> Swap <span class="kbd">Ctrl</span> → <span class="kbd">Cmd</span> for most of these; <span class="kbd">F3</span>/<span class="kbd">F4</span> may need Fn depending on keyboard settings.</div>
+
+<h2>Best Practices &amp; Common Pitfalls</h2>
+
+<div class="callout ok"><span class="t">Do</span> Share <code>.settings/</code> (formatter + compiler level + save actions) via VCS so the whole team's diffs stay clean. Enable Save Actions: format + organize imports on save.</div>
+<div class="callout ok"><span class="t">Do</span> Let the build tool own dependencies (Maven/Gradle). Treat Eclipse's view as a projection of the build model, resynced with Update Project.</div>
+<div class="callout tip"><span class="t">Tip</span> One workspace per unrelated effort keeps indexes small and startup fast. Use Working Sets to tame a big workspace rather than opening everything at once.</div>
+<div class="callout warn"><span class="t">Pitfall</span> Committing <code>.metadata/</code> or machine-specific <code>.classpath</code> entries. Add them to <code>.gitignore</code>; they contain absolute paths and personal UI state.</div>
+<div class="callout danger"><span class="t">Pitfall</span> A corrupted workspace index causes phantom errors ("red" code that compiles fine). Fix with <strong>Project → Clean…</strong>, or launch with <code>-clean</code>, or (last resort) delete <code>.metadata/.plugins/org.eclipse.core.resources/.snap</code>.</div>
+<div class="callout warn"><span class="t">Pitfall</span> Wrong JRE/compiler compliance level produces confusing errors (e.g. records "not supported"). Check <strong>Project → Properties → Java Build Path</strong> and <strong>Java Compiler</strong>.</div>
+
+<h2>Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between a workspace and a project in Eclipse?</div><div class="a">A workspace is a top-level directory holding one or more projects plus a <code>.metadata/</code> folder of IDE-wide settings, indexes, and UI layout. A project is a folder with Eclipse metadata (<code>.project</code>, <code>.classpath</code>, <code>.settings/</code>) describing its natures, builders, and build path. Settings cascade: workspace defaults can be overridden per project.</div></div>
+
+<div class="qa"><div class="q">How does Eclipse achieve such fast builds?</div><div class="a">The Java builder is <em>incremental</em>. It tracks dependencies between compilation units and recompiles only changed units and their dependents when you save, rather than rebuilding everything. State is cached in the workspace. "Build Automatically" keeps the Problems view live without an explicit compile step.</div></div>
+
+<div class="qa"><div class="q">What is a perspective, and how does it relate to views and editors?</div><div class="a">A perspective is a named, saved arrangement of views and editor area tuned for a task (Java, Debug, Git, ABAP). Views are supporting panels (Package Explorer, Console); editors edit resources in the central area. Switching perspectives rearranges views but keeps open editors.</div></div>
+
+<div class="qa"><div class="q">You have an intermittent NullPointerException deep in a loop. How do you debug it efficiently in Eclipse?</div><div class="a">Set a Java exception breakpoint on <code>NullPointerException</code> (Breakpoints view → Add Java Exception Breakpoint) so execution halts exactly where it's thrown, even uncaught. Alternatively, set a conditional line breakpoint that triggers only when the suspect reference is null. Then inspect the stack, use the Expressions view, and Drop to Frame to replay.</div></div>
+
+<div class="qa"><div class="q">What does the OSGi/Equinox foundation give Eclipse?</div><div class="a">A dynamic module system: plug-ins are OSGi bundles with versioned dependencies that can be installed, started, stopped, and resolved at runtime via the p2 provisioning system. This modularity is why the same IDE hosts wildly different toolchains (JDT, CDT, SAP ADT) and why the Marketplace works.</div></div>
+
+<div class="qa"><div class="q">Which files should and shouldn't be committed to version control?</div><div class="a">Commit <code>.settings/</code> (formatter, compiler compliance, save actions) to standardize the team. <code>.project</code> is usually fine. Be cautious with <code>.classpath</code> if Maven/Gradle regenerates it. Never commit <code>.metadata/</code> — it holds machine-specific UI state and absolute paths.</div></div>
+
+<div class="qa"><div class="q">Rename refactoring vs. find-and-replace — why does it matter?</div><div class="a">Rename is AST-aware: it updates every binding reference across the workspace (including qualified names, imports, and optionally JavaDoc and getters/setters) while leaving unrelated same-named symbols untouched. Textual find-and-replace is blind to scope and binding, so it both misses and over-matches. Rename also offers a preview diff.</div></div>
+
+<div class="qa"><div class="q">What is a launch configuration and why export it?</div><div class="a">It's a named, reusable run recipe capturing the main class/entry point, program and VM arguments, environment, classpath, and JRE. Exporting it (or storing it as a shared launch file in the project) lets teammates run with identical settings, avoiding "works on my machine" launch drift.</div></div>
+
+<div class="qa"><div class="q">What is Hot Code Replace and its limits?</div><div class="a">While paused in the debugger, you can edit a method body and continue running with the new bytecode — no restart. It relies on the JVM's redefinition support and only works for method-body changes; adding/removing fields, methods, or changing signatures requires a restart.</div></div>
+
+<div class="qa"><div class="q">How is SAP's ADT related to Eclipse?</div><div class="a">ADT (ABAP Development Tools) is a set of Eclipse plug-ins installed from SAP's p2 update site onto a standard Eclipse base. It provides an ABAP perspective, source-based editors (classes, CDS, RAP behavior definitions), server-side activation and debugging, and reuses Eclipse's navigation/refactoring/content-assist. It's SAP's modern replacement for much of SE80.</div></div>
+
+<div class="qa"><div class="q">Code looks "red" with errors but compiles fine on the command line. What's happening and how do you fix it?</div><div class="a">Usually a stale or corrupted workspace index/build state, or a mismatched compiler compliance level / JRE. Fixes: Project → Clean, Maven/Gradle → Update Project to resync the classpath, verify Java Compiler level matches the source features used, and if needed restart with <code>-clean</code> to rebuild OSGi/caches.</div></div>
+
+<div class="qa"><div class="q">What is the single most useful keyboard shortcut and why?</div><div class="a"><span class="kbd">Ctrl</span>+<span class="kbd">3</span> (Quick Access). It fuzzy-searches every command, view, preference, perspective, and recent file, so you can invoke anything without hunting through menus — a universal command palette that also teaches you where features live.</div></div>
+
+<h2>Further Learning</h2>
+<ul>
+  <li>Work through the built-in <strong>Help → Welcome</strong> cheat sheets and the official Eclipse Platform / JDT documentation.</li>
+  <li>Memorize ten shortcuts a week from the cheat-sheet table above; verify with <span class="kbd">Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">L</span> (list all key bindings).</li>
+  <li>Learn <strong>Save Actions</strong> and share a team <strong>formatter profile</strong> via <code>.settings/</code>.</li>
+  <li>Explore <strong>templates</strong> (Preferences → Java → Editor → Templates) and write your own code snippets.</li>
+  <li>For SAP: do SAP's ADT tutorials on the BTP ABAP environment and the RAP (RESTful Application Programming) model.</li>
+  <li>Dig into the plug-in development side (PDE) if you want to build your own Eclipse extensions on OSGi.</li>
+  <li>Compare with IntelliJ IDEA and VS Code to understand each IDE's trade-offs for your stack.</li>
+</ul>

@@ -1,0 +1,933 @@
+<h2>Azure Overview &amp; Global Infrastructure</h2>
+<p class="lead">Microsoft Azure is the world's second-largest public cloud, operating in 60+ regions across 140+ countries. It offers over 200 products and services covering compute, storage, networking, AI, databases, DevOps, and security — all accessible through a shared, pay-as-you-go infrastructure.</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Geographies</h4>
+    <p>High-level boundaries (e.g., United States, Europe, Asia Pacific) that preserve data residency and compliance. Each geography contains 1+ regions.</p>
+  </div>
+  <div class="card">
+    <h4>Regions</h4>
+    <p>Discrete data-center clusters within a geography. Examples: <span class="badge">East US</span> <span class="badge">West Europe</span> <span class="badge">Southeast Asia</span>. Each region is isolated from others to limit blast radius.</p>
+  </div>
+  <div class="card">
+    <h4>Availability Zones (AZs)</h4>
+    <p>Physically separate data centers inside a region with independent power, cooling, and networking. At least 3 AZs per zone-enabled region. Latency between AZs is &lt;2 ms.</p>
+  </div>
+</div>
+
+<div class="diagram">
+  <svg viewBox="0 0 680 260" width="680" height="260">
+    <!-- Background -->
+    <rect x="0" y="0" width="680" height="260" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1"/>
+    <!-- Geography label -->
+    <rect x="10" y="10" width="660" height="240" rx="8" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 3"/>
+    <text x="340" y="28" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">Geography: Europe</text>
+    <!-- Region 1 -->
+    <rect x="30" y="40" width="290" height="200" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="175" y="58" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e3a8a">Region: West Europe (Amsterdam)</text>
+    <!-- AZ 1 -->
+    <rect x="45" y="66" width="75" height="160" rx="4" fill="#2563eb" fill-opacity="0.08" stroke="#2563eb" stroke-width="1"/>
+    <text x="82" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e3a8a">AZ 1</text>
+    <rect x="53" y="90" width="59" height="28" rx="3" fill="#2563eb" fill-opacity="0.6"/>
+    <text x="82" y="108" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <rect x="53" y="124" width="59" height="28" rx="3" fill="#0891b2" fill-opacity="0.7"/>
+    <text x="82" y="142" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <rect x="53" y="158" width="59" height="28" rx="3" fill="#059669" fill-opacity="0.7"/>
+    <text x="82" y="176" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <!-- AZ 2 -->
+    <rect x="132" y="66" width="75" height="160" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+    <text x="169" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e3a8a">AZ 2</text>
+    <rect x="140" y="90" width="59" height="28" rx="3" fill="#2563eb" fill-opacity="0.6"/>
+    <text x="169" y="108" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <rect x="140" y="124" width="59" height="28" rx="3" fill="#0891b2" fill-opacity="0.7"/>
+    <text x="169" y="142" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <rect x="140" y="158" width="59" height="28" rx="3" fill="#059669" fill-opacity="0.7"/>
+    <text x="169" y="176" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <!-- AZ 3 -->
+    <rect x="219" y="66" width="75" height="160" rx="4" fill="#fff7ed" stroke="#b45309" stroke-width="1"/>
+    <text x="256" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e3a8a">AZ 3</text>
+    <rect x="227" y="90" width="59" height="28" rx="3" fill="#2563eb" fill-opacity="0.6"/>
+    <text x="256" y="108" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <rect x="227" y="124" width="59" height="28" rx="3" fill="#0891b2" fill-opacity="0.7"/>
+    <text x="256" y="142" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <rect x="227" y="158" width="59" height="28" rx="3" fill="#059669" fill-opacity="0.7"/>
+    <text x="256" y="176" text-anchor="middle" font-size="10" fill="white">Datacenter</text>
+    <!-- Region 2 -->
+    <rect x="360" y="40" width="300" height="200" rx="6" fill="#eff4ff" stroke="#2563eb" stroke-width="1.5"/>
+    <text x="510" y="58" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e3a8a">Region: North Europe (Dublin)</text>
+    <!-- AZs simplified -->
+    <rect x="375" y="66" width="80" height="160" rx="4" fill="#2563eb" fill-opacity="0.08" stroke="#2563eb" stroke-width="1"/>
+    <text x="415" y="155" text-anchor="middle" font-size="11" fill="#1e3a8a">AZ 1</text>
+    <rect x="470" y="66" width="80" height="160" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+    <text x="510" y="155" text-anchor="middle" font-size="11" fill="#1e3a8a">AZ 2</text>
+    <rect x="565" y="66" width="80" height="160" rx="4" fill="#fff7ed" stroke="#b45309" stroke-width="1"/>
+    <text x="605" y="155" text-anchor="middle" font-size="11" fill="#1e3a8a">AZ 3</text>
+    <!-- Connecting arrow between regions -->
+    <line x1="320" y1="140" x2="360" y2="140" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="340" y="134" text-anchor="middle" font-size="9" fill="#94a3b8">Peering</text>
+  </svg>
+  <div class="cap">Azure Geography → Region → Availability Zone hierarchy. AZs share low-latency interconnects but have independent power and cooling to eliminate single points of failure.</div>
+</div>
+
+<h3>Region Pairs</h3>
+<p>Most Azure regions are paired with another region in the same geography at least 300 miles apart. During planned maintenance Microsoft updates only one region in a pair at a time. Region pairs are used for geo-redundant storage (GRS) replication and Azure Site Recovery.</p>
+
+<table>
+  <tr><th>Region</th><th>Paired With</th><th>Geography</th></tr>
+  <tr><td>East US</td><td>West US</td><td>United States</td></tr>
+  <tr><td>North Europe (Dublin)</td><td>West Europe (Amsterdam)</td><td>Europe</td></tr>
+  <tr><td>East Asia (Hong Kong)</td><td>Southeast Asia (Singapore)</td><td>Asia Pacific</td></tr>
+  <tr><td>Australia East</td><td>Australia Southeast</td><td>Australia</td></tr>
+  <tr><td>Brazil South</td><td>South Central US</td><td>Cross-geography</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Note</span> Sovereign clouds (Azure Government, Azure China 21Vianet) are physically and logically isolated from the global Azure public cloud and have separate endpoints.</div>
+
+<h2>Subscriptions, Resource Groups &amp; Management Hierarchy</h2>
+<p class="lead">Azure organizes resources in a four-level management hierarchy: Management Groups → Subscriptions → Resource Groups → Resources. Policies and RBAC roles applied at higher levels cascade down.</p>
+
+<div class="pipeline">
+  <span class="step">Management Group</span>
+  <span class="arrow">-></span>
+  <span class="step">Subscription</span>
+  <span class="arrow">-></span>
+  <span class="step">Resource Group</span>
+  <span class="arrow">-></span>
+  <span class="step">Resource</span>
+</div>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Management Groups</h4>
+    <p>Container for multiple subscriptions. Used by enterprises to apply Azure Policy and RBAC at scale. Up to 6 levels of hierarchy, with the root "Tenant Root Group" at the top.</p>
+  </div>
+  <div class="card">
+    <h4>Subscriptions</h4>
+    <p>Billing boundary and trust boundary. Each subscription is linked to an Entra ID tenant. Hard limits apply per subscription (e.g., 980 resource groups, 800 deployments per RG).</p>
+  </div>
+  <div class="card">
+    <h4>Resource Groups</h4>
+    <p>Logical container for related resources sharing the same lifecycle. Resources in a group can span multiple regions. Tags, policies, and RBAC apply at the group level.</p>
+  </div>
+  <div class="card">
+    <h4>Resources</h4>
+    <p>Individual services (VMs, storage accounts, databases, etc.). A resource belongs to exactly one resource group but can interact with resources in other groups or subscriptions.</p>
+  </div>
+</div>
+
+<div class="callout tip"><span class="t">Tip</span> Use separate resource groups per environment (dev/staging/prod) and per application. This makes cost tracking, lifecycle management, and least-privilege RBAC straightforward.</div>
+
+<div class="callout warn"><span class="t">Pitfall</span> Deleting a resource group deletes all resources inside it with no undo. Always use resource locks (<code>CanNotDelete</code> or <code>ReadOnly</code>) on production resource groups to prevent accidental deletion.</p></div>
+
+<h3>Azure Tags</h3>
+<p>Tags are key-value metadata pairs attached to resources or resource groups. They don't affect functionality but are critical for cost reporting, automation, and compliance. A resource can have up to 50 tags.</p>
+
+<pre><code class="language-bash">az tag create --resource-id /subscriptions/&lt;sub-id&gt;/resourceGroups/myRG \
+  --tags Environment=Production Owner=TeamA CostCenter=CC-1234</code></pre>
+
+<h2>Compute Services</h2>
+<p class="lead">Azure offers a continuum of compute options from full IaaS control (Virtual Machines) to fully managed serverless (Functions). Choosing the right tier trades control for operational overhead.</p>
+
+<h3>Azure Virtual Machines (VMs)</h3>
+<p>VMs are the fundamental IaaS building block. You pick an OS image, VM size (CPU/RAM), managed disks, and networking. Azure provides the hypervisor (Hyper-V) but you manage the OS, patches, and runtime.</p>
+
+<h4>VM Series Cheat Sheet</h4>
+<table>
+  <tr><th>Series</th><th>Optimized For</th><th>Example Sizes</th><th>Use Case</th></tr>
+  <tr><td>B (Burstable)</td><td>Variable CPU load</td><td>B2s, B4ms</td><td>Dev/test, low-traffic web</td></tr>
+  <tr><td>D (General)</td><td>Balanced CPU/RAM</td><td>D4s v5, D16s v5</td><td>Web servers, small databases</td></tr>
+  <tr><td>E (Memory)</td><td>High RAM</td><td>E8s v5, E64s v5</td><td>SAP HANA, in-memory caches</td></tr>
+  <tr><td>F (Compute)</td><td>High CPU</td><td>F8s v2, F72s v2</td><td>Batch processing, gaming</td></tr>
+  <tr><td>N (GPU)</td><td>GPU</td><td>NC6s v3, ND96asr A100</td><td>ML training, rendering</td></tr>
+  <tr><td>L (Storage)</td><td>High disk throughput</td><td>L8s v3, L48s v3</td><td>NoSQL, data warehousing</td></tr>
+</table>
+
+<h4>Availability Options</h4>
+<div class="grid c3">
+  <div class="card">
+    <h4>Availability Sets</h4>
+    <p>Groups VMs across <strong>fault domains</strong> (separate racks) and <strong>update domains</strong> (sequential reboot groups). Protects against rack failures but stays within a single AZ. SLA: 99.95%.</p>
+  </div>
+  <div class="card">
+    <h4>Availability Zones</h4>
+    <p>Deploy VMs across distinct physical datacenters in the same region. Best in-region protection. SLA: 99.99%. Use zone-redundant storage for disks.</p>
+  </div>
+  <div class="card">
+    <h4>VM Scale Sets (VMSS)</h4>
+    <p>Manage a group of identical VMs with auto-scaling (metric-based or schedule). Integrates with Azure Load Balancer and Application Gateway. Supports Spot instances for cost savings.</p>
+  </div>
+</div>
+
+<div class="callout tip"><span class="t">Best Practice</span> Attach managed disks (not unmanaged) to all VMs. Use Premium SSD for production workloads. Enable Azure Backup and Azure Site Recovery for DR. Use Spot VMs for fault-tolerant batch workloads at up to 90% savings.</div>
+
+<h3>Azure App Service</h3>
+<p>A fully managed PaaS platform for hosting web apps, REST APIs, and mobile backends. Supports .NET, Java, Node.js, Python, PHP, Ruby, and custom containers. No VM management required.</p>
+
+<table>
+  <tr><th>Plan Tier</th><th>Features</th><th>Scaling</th><th>Use Case</th></tr>
+  <tr><td>Free / Shared</td><td>Shared infra, no custom domain SSL</td><td>None</td><td>Dev/exploration</td></tr>
+  <tr><td>Basic (B1–B3)</td><td>Dedicated infra, custom domains, SSL</td><td>Manual (1–3 instances)</td><td>Dev/test</td></tr>
+  <tr><td>Standard (S1–S3)</td><td>Auto-scale, staging slots, daily backups</td><td>Auto (up to 10)</td><td>Production</td></tr>
+  <tr><td>Premium v3 (P1v3–P3v3)</td><td>VNet integration, no cold start, more RAM</td><td>Auto (up to 30)</td><td>Enterprise production</td></tr>
+  <tr><td>Isolated v2</td><td>Dedicated VNet, VNET injection, ASE</td><td>Auto (up to 100)</td><td>High-security, compliance</td></tr>
+</table>
+
+<p>Deployment slots allow blue-green deployments — traffic can be gradually shifted from staging to production, then swapped atomically with swap keeping connection strings and app settings pinned to each slot.</p>
+
+<pre><code class="language-bash"># Deploy a Node.js app from GitHub Actions or local zip
+az webapp deployment source config-zip \
+  --resource-group myRG \
+  --name myAppService \
+  --src app.zip
+
+# Swap staging slot to production
+az webapp deployment slot swap \
+  --resource-group myRG \
+  --name myAppService \
+  --slot staging \
+  --target-slot production</code></pre>
+
+<h3>Azure Functions</h3>
+<p>Event-driven, serverless compute that runs code in response to triggers (HTTP, Timer, Storage queues, Event Hubs, Cosmos DB change feed, etc.). Billed per execution (first 1 million free) and GB-seconds of memory consumption.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Consumption Plan</h4>
+    <p>True serverless — pay only when running. Auto-scales to zero. Cold start latency (typically 200–500 ms for .NET). Max execution timeout: 5 minutes default, 10 minutes max.</p>
+  </div>
+  <div class="card">
+    <h4>Premium Plan</h4>
+    <p>Pre-warmed workers eliminate cold starts. VNet integration. Unlimited execution duration. Higher baseline cost but predictable latency. Ideal for mission-critical functions.</p>
+  </div>
+</div>
+
+<pre><code class="language-python">import azure.functions as func
+import logging
+
+app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
+
+@app.route(route="hello")
+def http_trigger(req: func.HttpRequest) -&gt; func.HttpResponse:
+    name = req.params.get("name", "World")
+    return func.HttpResponse(f"Hello, {name}!", status_code=200)</code></pre>
+
+<h3>Azure Kubernetes Service (AKS)</h3>
+<p>Managed Kubernetes: Azure provisions and manages the control plane (API server, etcd, scheduler) at no charge. You pay only for the agent node VMs. AKS integrates deeply with Entra ID for RBAC, Azure CNI for networking, Azure Monitor for observability, and Azure Container Registry for images.</p>
+
+<pre><code class="language-bash"># Create an AKS cluster with 3 nodes in availability zones
+az aks create \
+  --resource-group myRG \
+  --name myAKS \
+  --node-count 3 \
+  --zones 1 2 3 \
+  --enable-managed-identity \
+  --network-plugin azure \
+  --enable-oidc-issuer \
+  --enable-workload-identity \
+  --generate-ssh-keys
+
+# Get credentials
+az aks get-credentials --resource-group myRG --name myAKS</code></pre>
+
+<div class="callout note"><span class="t">Note</span> AKS node pools support multiple VM SKUs. Use system node pools for system pods and separate user node pools for workloads. Enable cluster autoscaler on user pools for cost-efficient auto-scaling.</div>
+
+<h2>Azure Storage Services</h2>
+<p class="lead">Every Azure storage account is an abstraction over distributed, durable object storage. All data is replicated at least 3 times. A single storage account supports Blob, Table, Queue, and Files simultaneously.</p>
+
+<h3>Storage Account Redundancy Options</h3>
+<table>
+  <tr><th>Redundancy</th><th>Copies</th><th>Failure Scope</th><th>SLA (read/write)</th></tr>
+  <tr><td><span class="badge">LRS</span> Locally Redundant</td><td>3 in 1 datacenter</td><td>Single device/rack</td><td>99.9% / 99.9%</td></tr>
+  <tr><td><span class="badge">ZRS</span> Zone Redundant</td><td>3 across AZs</td><td>Single AZ</td><td>99.9% / 99.9%</td></tr>
+  <tr><td><span class="badge g">GRS</span> Geo-Redundant</td><td>6 (3+3 in pair)</td><td>Region failure</td><td>99.9% / 99.9%</td></tr>
+  <tr><td><span class="badge g">GZRS</span> Geo-Zone Redundant</td><td>6 (ZRS+3 in pair)</td><td>AZ + region failure</td><td>99.99% read / 99.9% write</td></tr>
+  <tr><td><span class="badge o">RA-GRS</span> Read-Access Geo</td><td>6 (GRS + secondary read)</td><td>Region failure</td><td>99.99% read / 99.9% write</td></tr>
+</table>
+
+<h3>Blob Storage</h3>
+<p>Object/blob storage for unstructured data (images, videos, backups, logs, static websites). Organized as: Storage Account → Container → Blob.</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Block Blob</h4>
+    <p>Most common type. Optimized for streaming and storing text or binary files. Supports upload from 100 MB chunks. Max blob size: 190.7 TB.</p>
+  </div>
+  <div class="card">
+    <h4>Append Blob</h4>
+    <p>Optimized for append operations only. Ideal for logging scenarios where data is written sequentially. Cannot modify existing blocks.</p>
+  </div>
+  <div class="card">
+    <h4>Page Blob</h4>
+    <p>Used internally for Azure VM managed disks. Supports random read/write access in 512-byte pages. Max size: 8 TB.</p>
+  </div>
+</div>
+
+<h4>Access Tiers</h4>
+<table>
+  <tr><th>Tier</th><th>Storage Cost</th><th>Access Cost</th><th>Best For</th></tr>
+  <tr><td>Hot</td><td>High</td><td>Low</td><td>Frequently accessed data</td></tr>
+  <tr><td>Cool</td><td>Medium</td><td>Medium</td><td>Infrequently accessed, stored 30+ days</td></tr>
+  <tr><td>Cold</td><td>Low</td><td>Higher</td><td>Rarely accessed, stored 90+ days</td></tr>
+  <tr><td>Archive</td><td>Very low</td><td>Very high + rehydrate time</td><td>Long-term backup, compliance (180+ days)</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Tip</span> Use Lifecycle Management policies to automatically tier blobs to Cool/Archive after a defined number of days since modification. This can cut storage costs by 70%+ for log archives.</div>
+
+<h3>Azure Table Storage</h3>
+<p>A NoSQL key-value store for large amounts of structured, non-relational data. Each entity (row) has a PartitionKey and RowKey as the composite primary key. Queries on non-key attributes require full-partition scans — design your PartitionKey carefully. For richer NoSQL, prefer Azure Cosmos DB.</p>
+
+<h3>Azure Queue Storage</h3>
+<p>Simple message queue for decoupling application components. Messages up to 64 KB. Visibility timeout allows workers to claim a message without deleting it — if processing fails and timeout expires, the message becomes visible again. Max TTL: 7 days (configurable to -1 for infinite).</p>
+
+<h3>Azure Files</h3>
+<p>Fully managed file shares accessible over SMB 3.x and NFS 4.1. Can be mounted on Windows, Linux, and macOS. Azure File Sync allows caching shares on-premises Windows servers, enabling a cloud-tiered hybrid storage model.</p>
+
+<pre><code class="language-bash"># Mount an Azure file share on Linux
+sudo mount -t cifs //&lt;account&gt;.file.core.windows.net/&lt;share&gt; /mnt/azfiles \
+  -o vers=3.0,username=&lt;account&gt;,password=&lt;key&gt;,dir_mode=0777,file_mode=0777</code></pre>
+
+<h2>Azure Networking</h2>
+<p class="lead">Azure Virtual Networks provide private, isolated network segments in the cloud. All connectivity — whether VNet-to-VNet, on-premises, or internet-facing — flows through well-defined networking constructs.</p>
+
+<div class="diagram">
+  <svg viewBox="0 0 720 340" width="720" height="340">
+    <!-- Background -->
+    <rect x="0" y="0" width="720" height="340" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+    <!-- VNet border -->
+    <rect x="15" y="15" width="690" height="310" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4"/>
+    <text x="360" y="34" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e3a8a">Virtual Network: 10.0.0.0/16</text>
+    <!-- Public Subnet -->
+    <rect x="30" y="45" width="200" height="240" rx="6" fill="white" stroke="#059669" stroke-width="1.5"/>
+    <text x="130" y="63" text-anchor="middle" font-size="11" font-weight="bold" fill="#059669">Public Subnet 10.0.1.0/24</text>
+    <!-- Load Balancer -->
+    <rect x="55" y="72" width="150" height="40" rx="4" fill="#059669" fill-opacity="0.15" stroke="#059669" stroke-width="1"/>
+    <text x="130" y="87" text-anchor="middle" font-size="11" font-weight="bold" fill="#059669">Azure Load Balancer</text>
+    <text x="130" y="102" text-anchor="middle" font-size="10" fill="#059669">Public IP: 40.x.x.x</text>
+    <!-- VM in public subnet -->
+    <rect x="55" y="125" width="65" height="40" rx="4" fill="#2563eb" fill-opacity="0.2" stroke="#2563eb"/>
+    <text x="87" y="140" text-anchor="middle" font-size="10" fill="#1e3a8a">VM</text>
+    <text x="87" y="155" text-anchor="middle" font-size="9" fill="#1e3a8a">10.0.1.4</text>
+    <rect x="140" y="125" width="65" height="40" rx="4" fill="#2563eb" fill-opacity="0.2" stroke="#2563eb"/>
+    <text x="172" y="140" text-anchor="middle" font-size="10" fill="#1e3a8a">VM</text>
+    <text x="172" y="155" text-anchor="middle" font-size="9" fill="#1e3a8a">10.0.1.5</text>
+    <!-- NSG label -->
+    <rect x="55" y="180" width="150" height="30" rx="3" fill="#b45309" fill-opacity="0.1" stroke="#b45309" stroke-width="1" stroke-dasharray="4 2"/>
+    <text x="130" y="200" text-anchor="middle" font-size="10" font-weight="bold" fill="#b45309">NSG: allow 80,443 inbound</text>
+    <!-- Private Subnet -->
+    <rect x="260" y="45" width="200" height="240" rx="6" fill="white" stroke="#0891b2" stroke-width="1.5"/>
+    <text x="360" y="63" text-anchor="middle" font-size="11" font-weight="bold" fill="#0891b2">Private Subnet 10.0.2.0/24</text>
+    <!-- App Tier VMs -->
+    <rect x="280" y="72" width="65" height="40" rx="4" fill="#0891b2" fill-opacity="0.2" stroke="#0891b2"/>
+    <text x="312" y="87" text-anchor="middle" font-size="10" fill="#1a2233">App VM</text>
+    <text x="312" y="102" text-anchor="middle" font-size="9" fill="#1a2233">10.0.2.4</text>
+    <rect x="375" y="72" width="65" height="40" rx="4" fill="#0891b2" fill-opacity="0.2" stroke="#0891b2"/>
+    <text x="407" y="87" text-anchor="middle" font-size="10" fill="#1a2233">App VM</text>
+    <text x="407" y="102" text-anchor="middle" font-size="9" fill="#1a2233">10.0.2.5</text>
+    <!-- DB in private subnet -->
+    <rect x="285" y="135" width="150" height="40" rx="4" fill="#059669" fill-opacity="0.2" stroke="#059669"/>
+    <text x="360" y="152" text-anchor="middle" font-size="10" fill="#1a2233">Azure SQL / Cosmos DB</text>
+    <text x="360" y="167" text-anchor="middle" font-size="9" fill="#1a2233">Private Endpoint</text>
+    <!-- NSG private label -->
+    <rect x="285" y="195" width="150" height="30" rx="3" fill="#b45309" fill-opacity="0.1" stroke="#b45309" stroke-width="1" stroke-dasharray="4 2"/>
+    <text x="360" y="215" text-anchor="middle" font-size="10" font-weight="bold" fill="#b45309">NSG: deny internet, allow LB</text>
+    <!-- Gateway Subnet -->
+    <rect x="490" y="45" width="200" height="240" rx="6" fill="white" stroke="#b45309" stroke-width="1.5"/>
+    <text x="590" y="63" text-anchor="middle" font-size="11" font-weight="bold" fill="#b45309">Gateway Subnet 10.0.255.0/27</text>
+    <!-- VPN Gateway -->
+    <rect x="515" y="80" width="150" height="45" rx="4" fill="#b45309" fill-opacity="0.15" stroke="#b45309"/>
+    <text x="590" y="97" text-anchor="middle" font-size="11" font-weight="bold" fill="#b45309">VPN Gateway</text>
+    <text x="590" y="114" text-anchor="middle" font-size="10" fill="#b45309">Site-to-Site / P2S</text>
+    <!-- On-premises box -->
+    <rect x="525" y="150" width="130" height="50" rx="4" fill="#1a2233" fill-opacity="0.08" stroke="#1a2233"/>
+    <text x="590" y="170" text-anchor="middle" font-size="11" fill="#1a2233">On-Premises</text>
+    <text x="590" y="185" text-anchor="middle" font-size="10" fill="#1a2233">Network</text>
+    <!-- Internet cloud label -->
+    <ellipse cx="90" cy="290" rx="60" ry="22" fill="none" stroke="#94a3b8" stroke-dasharray="5 3"/>
+    <text x="90" y="294" text-anchor="middle" font-size="11" fill="#94a3b8">Internet</text>
+    <!-- Arrows -->
+    <line x1="130" y1="115" x2="130" y2="125" stroke="#059669" stroke-width="2" marker-end="url(#arr)"/>
+    <line x1="130" y1="265" x2="90" y2="268" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <line x1="230" y1="140" x2="260" y2="140" stroke="#2563eb" stroke-width="2" stroke-dasharray="4 2"/>
+    <line x1="590" y1="195" x2="590" y2="200" stroke="#b45309" stroke-width="2"/>
+    <defs>
+      <marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+        <polygon points="0 0, 7 3.5, 0 7" fill="#059669"/>
+      </marker>
+    </defs>
+  </svg>
+  <div class="cap">Three-tier Azure VNet architecture: public subnet (Load Balancer + web VMs), private subnet (app VMs + database via Private Endpoint), and gateway subnet for on-premises connectivity.</div>
+</div>
+
+<h3>Key Networking Components</h3>
+
+<h4>Virtual Network (VNet)</h4>
+<p>A logically isolated network with a defined private IP address space (CIDR). VNets are regional — they cannot span regions. Subnets segment the address space; each subnet must be within the VNet's CIDR.</p>
+
+<h4>Network Security Groups (NSGs)</h4>
+<p>Stateful Layer-4 firewall rules applied to subnets or individual NICs. Rules have priority (100–4096, lower = higher priority), direction (Inbound/Outbound), source/destination (IP, tag, CIDR), port, and protocol. Default deny-all at the bottom.</p>
+
+<table>
+  <tr><th>Priority</th><th>Name</th><th>Direction</th><th>Source</th><th>Dest Port</th><th>Action</th></tr>
+  <tr><td>100</td><td>Allow-HTTPS</td><td>Inbound</td><td>Internet</td><td>443</td><td>Allow</td></tr>
+  <tr><td>200</td><td>Allow-HTTP</td><td>Inbound</td><td>Internet</td><td>80</td><td>Allow</td></tr>
+  <tr><td>300</td><td>Block-RDP-from-public</td><td>Inbound</td><td>Internet</td><td>3389</td><td>Deny</td></tr>
+  <tr><td>65500</td><td>DenyAllInBound</td><td>Inbound</td><td>Any</td><td>Any</td><td>Deny (default)</td></tr>
+</table>
+
+<h4>Azure Load Balancer</h4>
+<p>Layer-4 (TCP/UDP) load balancer. The <strong>Standard SKU</strong> supports AZs, outbound rules, and HA ports. The Basic SKU is free but lacks zone redundancy and SLA. Use Application Gateway (Layer 7) when you need URL-based routing, SSL termination, or WAF.</p>
+
+<h4>VNet Peering</h4>
+<p>Connects two VNets privately over Microsoft backbone — no gateway required, no bandwidth overhead, low latency. Peering is non-transitive: A↔B and B↔C does not mean A↔C. Use Azure Virtual WAN or hub-spoke topology for transitive routing at scale.</p>
+
+<div class="callout warn"><span class="t">Pitfall</span> Once a VNet is created, you cannot resize its address space without deleting subnets with active resources. Plan your CIDR blocks generously (at least /16 for production VNets) before deployment.</div>
+
+<h2>Identity &amp; Access Management (Entra ID / Azure AD)</h2>
+<p class="lead">Microsoft Entra ID (formerly Azure Active Directory) is the cloud-based identity and access management service underpinning all Azure authentication. Every Azure subscription trusts exactly one Entra ID tenant.</p>
+
+<h3>Core Identity Concepts</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Users &amp; Groups</h4>
+    <p>User objects represent individuals. Groups aggregate users for role assignments. Security groups are used for RBAC; Microsoft 365 groups include mailboxes and Teams. Dynamic membership rules use ODATA filter expressions.</p>
+  </div>
+  <div class="card">
+    <h4>Service Principals &amp; Managed Identities</h4>
+    <p>Non-human identities for apps and services. <strong>Managed Identities</strong> (system-assigned or user-assigned) have their credentials managed entirely by Azure — no secrets to rotate, ideal for VM-to-KeyVault or AKS workload identity patterns.</p>
+  </div>
+  <div class="card">
+    <h4>Azure RBAC</h4>
+    <p>Role assignments bind a <em>security principal</em> (user/group/service principal) to a <em>role definition</em> (set of permissions) at a <em>scope</em> (management group/subscription/RG/resource). Roles are additive — deny assignments override.</p>
+  </div>
+</div>
+
+<h4>Built-in Roles Cheat Sheet</h4>
+<table>
+  <tr><th>Role</th><th>Permissions</th><th>Common Use</th></tr>
+  <tr><td>Owner</td><td>Full control including RBAC management</td><td>Subscription admins</td></tr>
+  <tr><td>Contributor</td><td>Create/manage all resources, no RBAC</td><td>DevOps engineers</td></tr>
+  <tr><td>Reader</td><td>View all resources, no modifications</td><td>Auditors, read-only access</td></tr>
+  <tr><td>User Access Admin</td><td>Manage RBAC only, no resource access</td><td>Delegated RBAC management</td></tr>
+  <tr><td>Storage Blob Data Contributor</td><td>Read/write/delete blobs</td><td>App identities accessing Blob</td></tr>
+  <tr><td>AcrPush / AcrPull</td><td>Push or pull container images</td><td>CI/CD pipelines, AKS kubelet</td></tr>
+  <tr><td>Key Vault Secrets User</td><td>Read secret values</td><td>App identities reading secrets</td></tr>
+</table>
+
+<h3>Conditional Access &amp; MFA</h3>
+<p>Conditional Access policies enforce MFA, device compliance, or block access based on conditions: user group membership, location (named locations / IP ranges), app being accessed, device state (compliant/hybrid-joined), sign-in risk (from Entra ID Protection). This is the primary zero-trust enforcement mechanism.</p>
+
+<div class="callout tip"><span class="t">Best Practice</span> Always prefer Managed Identity over service principals with client secrets. When service principals are required, use certificate credentials and rotate them regularly. Store secrets in Azure Key Vault and reference them by URI — never hardcode in environment variables or config files.</div>
+
+<h2>IaaS vs PaaS vs SaaS</h2>
+<p class="lead">The service model determines which layers of the stack you manage versus what Microsoft manages. This directly affects TCO, agility, and operational burden.</p>
+
+<div class="diagram">
+  <svg viewBox="0 0 680 280" width="680" height="280">
+    <!-- Background -->
+    <rect x="0" y="0" width="680" height="280" rx="8" fill="#f8fafc" stroke="#94a3b8"/>
+    <!-- Layers list -->
+    <text x="10" y="28" font-size="11" font-weight="bold" fill="#1a2233">Stack Layer</text>
+    <!-- Layer labels on left -->
+    <text x="10" y="58" font-size="11" fill="#1a2233">Applications</text>
+    <text x="10" y="88" font-size="11" fill="#1a2233">Data</text>
+    <text x="10" y="118" font-size="11" fill="#1a2233">Runtime</text>
+    <text x="10" y="148" font-size="11" fill="#1a2233">Middleware</text>
+    <text x="10" y="178" font-size="11" fill="#1a2233">OS</text>
+    <text x="10" y="208" font-size="11" fill="#1a2233">Virtualization</text>
+    <text x="10" y="238" font-size="11" fill="#1a2233">Servers</text>
+    <text x="10" y="268" font-size="11" fill="#1a2233">Networking</text>
+    <!-- On-Premises column -->
+    <text x="170" y="28" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e3a8a">On-Premises</text>
+    <rect x="120" y="37" width="100" height="238" rx="4" fill="#2563eb" fill-opacity="0.2" stroke="#2563eb"/>
+    <text x="170" y="160" text-anchor="middle" font-size="10" fill="#1e3a8a">You Manage</text>
+    <text x="170" y="175" text-anchor="middle" font-size="10" fill="#1e3a8a">Everything</text>
+    <!-- IaaS column -->
+    <text x="320" y="28" text-anchor="middle" font-size="12" font-weight="bold" fill="#0891b2">IaaS (e.g., VMs)</text>
+    <!-- Azure managed (bottom) -->
+    <rect x="270" y="187" width="100" height="88" rx="4" fill="#0891b2" fill-opacity="0.5" stroke="#0891b2" stroke-width="1.5"/>
+    <text x="320" y="225" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Azure</text>
+    <text x="320" y="240" text-anchor="middle" font-size="10" fill="white">Managed</text>
+    <!-- You manage (top) -->
+    <rect x="270" y="37" width="100" height="145" rx="0" fill="#0891b2" fill-opacity="0.15" stroke="#0891b2"/>
+    <text x="320" y="108" text-anchor="middle" font-size="10" fill="#0891b2">You Manage</text>
+    <!-- PaaS column -->
+    <text x="470" y="28" text-anchor="middle" font-size="12" font-weight="bold" fill="#059669">PaaS (App Service)</text>
+    <rect x="420" y="97" width="100" height="178" rx="4" fill="#059669" fill-opacity="0.5" stroke="#059669" stroke-width="1.5"/>
+    <text x="470" y="182" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Azure</text>
+    <text x="470" y="197" text-anchor="middle" font-size="10" fill="white">Managed</text>
+    <rect x="420" y="37" width="100" height="55" rx="0" fill="#059669" fill-opacity="0.15" stroke="#059669"/>
+    <text x="470" y="68" text-anchor="middle" font-size="10" fill="#059669">You Manage</text>
+    <!-- SaaS column -->
+    <text x="610" y="28" text-anchor="middle" font-size="12" font-weight="bold" fill="#b45309">SaaS (M365)</text>
+    <rect x="560" y="37" width="100" height="238" rx="4" fill="#b45309" fill-opacity="0.5" stroke="#b45309" stroke-width="1.5"/>
+    <text x="610" y="155" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Azure</text>
+    <text x="610" y="170" text-anchor="middle" font-size="10" fill="white">Managed</text>
+    <text x="610" y="185" text-anchor="middle" font-size="10" fill="white">Everything</text>
+    <!-- Horizontal lines -->
+    <line x1="105" y1="42" x2="660" y2="42" stroke="#94a3b8" stroke-width="0.5"/>
+    <line x1="105" y1="72" x2="660" y2="72" stroke="#94a3b8" stroke-width="0.5"/>
+    <line x1="105" y1="102" x2="660" y2="102" stroke="#94a3b8" stroke-width="0.5"/>
+    <line x1="105" y1="132" x2="660" y2="132" stroke="#94a3b8" stroke-width="0.5"/>
+    <line x1="105" y1="162" x2="660" y2="162" stroke="#94a3b8" stroke-width="0.5"/>
+    <line x1="105" y1="192" x2="660" y2="192" stroke="#94a3b8" stroke-width="0.5"/>
+    <line x1="105" y1="222" x2="660" y2="222" stroke="#94a3b8" stroke-width="0.5"/>
+    <line x1="105" y1="252" x2="660" y2="252" stroke="#94a3b8" stroke-width="0.5"/>
+  </svg>
+  <div class="cap">Shared responsibility model: as you move from IaaS to PaaS to SaaS, Azure takes over progressively more stack layers, reducing your operational burden but also your control.</div>
+</div>
+
+<table>
+  <tr><th>Model</th><th>You Manage</th><th>Azure Manages</th><th>Azure Examples</th></tr>
+  <tr><td><span class="badge">IaaS</span></td><td>OS, runtime, middleware, apps, data</td><td>Hypervisor, servers, storage, networking</td><td>VMs, VMSS, managed disks</td></tr>
+  <tr><td><span class="badge g">PaaS</span></td><td>Applications and data only</td><td>OS patches, runtime, scaling, HA infra</td><td>App Service, AKS, Azure SQL, Functions</td></tr>
+  <tr><td><span class="badge o">SaaS</span></td><td>User configuration and data</td><td>Entire application stack</td><td>Microsoft 365, Dynamics 365, Azure DevOps</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Interview Insight</span> IaaS is preferred when you need OS-level control (custom kernel modules, specific OS tuning), compliance mandates dictating VM-level isolation, or lift-and-shift migrations. PaaS is preferred when developer productivity matters more than infrastructure control, or when rapid scaling and reduced ops are priorities.</div>
+
+<h2>Azure Pricing Model &amp; Cost Management</h2>
+<p class="lead">Azure uses a pay-as-you-go model: you pay for what you consume, measured per second/minute/hour depending on the service. Several commitment models reduce cost significantly.</p>
+
+<h3>Pricing Dimensions</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Compute (VMs)</h4>
+    <p>Billed per second of running time. Size (vCPU + RAM), OS license (Windows costs more), and region affect the rate. Use <strong>Azure Pricing Calculator</strong> for estimates.</p>
+  </div>
+  <div class="card">
+    <h4>Storage</h4>
+    <p>Charged on: GB stored per month, number of operations (read/write/list), and data egress (outbound transfer). Ingress to Azure is free.</p>
+  </div>
+  <div class="card">
+    <h4>Networking</h4>
+    <p>VNet creation and inbound bandwidth are free. Outbound data transfer, VNet peering traffic, VPN Gateway, and ExpressRoute circuits are billed separately.</p>
+  </div>
+</div>
+
+<h4>Cost Optimization Strategies</h4>
+<table>
+  <tr><th>Strategy</th><th>Savings</th><th>Commitment</th><th>Best For</th></tr>
+  <tr><td>Reserved Instances (1-yr)</td><td>Up to 40%</td><td>1 year upfront/monthly</td><td>Predictable baseline workloads</td></tr>
+  <tr><td>Reserved Instances (3-yr)</td><td>Up to 65%</td><td>3 years upfront/monthly</td><td>Stable long-term workloads</td></tr>
+  <tr><td>Azure Hybrid Benefit</td><td>Up to 49%</td><td>Bring-your-own Windows/SQL license</td><td>On-premises SA license holders</td></tr>
+  <tr><td>Spot VMs</td><td>Up to 90%</td><td>Evictable, no SLA</td><td>Fault-tolerant batch, ML training</td></tr>
+  <tr><td>Dev/Test Pricing</td><td>Significant</td><td>MSDN subscription required</td><td>Non-production environments</td></tr>
+  <tr><td>Auto-shutdown / scale-in</td><td>Variable</td><td>None</td><td>VMs idle overnight/weekends</td></tr>
+</table>
+
+<h3>Azure Cost Management + Billing</h3>
+<p>Use Azure Cost Management (built into the portal) to set budgets with alert thresholds, analyze spending by resource group/tag/service, and view forecasts. Cost Advisor surfaces actionable recommendations like right-sizing VMs or deleting unused resources.</p>
+
+<pre><code class="language-bash"># View cost breakdown for a resource group
+az costmanagement query \
+  --type Usage \
+  --scope "subscriptions/&lt;sub-id&gt;" \
+  --dataset-aggregation '{"totalCost":{"name":"PreTaxCost","function":"Sum"}}' \
+  --dataset-grouping '[{"type":"Dimension","name":"ResourceGroup"}]' \
+  --timeframe MonthToDate</code></pre>
+
+<div class="callout warn"><span class="t">Pitfall</span> Egress costs are frequently overlooked. Transferring data out of Azure (to internet or cross-region) is charged. Architect workloads so compute and data storage are in the same region, and use Azure CDN to cache content close to users rather than serving directly from origin every time.</div>
+
+<h2>Azure CLI &amp; Portal</h2>
+<p class="lead">Azure resources can be managed through the Azure Portal (GUI), Azure CLI (cross-platform command-line), Azure PowerShell, REST API, or client SDKs. All methods call the same underlying Azure Resource Manager API.</p>
+
+<h3>Azure CLI Essentials</h3>
+<pre><code class="language-bash"># Authenticate and set subscription
+az login
+az account set --subscription "My Subscription"
+az account show
+
+# Resource group operations
+az group create --name myRG --location eastus
+az group list --output table
+az group delete --name myRG --yes --no-wait
+
+# VM operations
+az vm create \
+  --resource-group myRG \
+  --name myVM \
+  --image Ubuntu2204 \
+  --size Standard_B2s \
+  --admin-username azureuser \
+  --generate-ssh-keys \
+  --zone 1
+
+az vm start --resource-group myRG --name myVM
+az vm stop --resource-group myRG --name myVM
+az vm deallocate --resource-group myRG --name myVM  # Stops billing for compute
+
+# Query with JMESPath
+az vm list --query "[].{Name:name, RG:resourceGroup, Size:hardwareProfile.vmSize}" \
+  --output table</code></pre>
+
+<h3>CLI Output Formats</h3>
+<table>
+  <tr><th>Format</th><th>Flag</th><th>Use When</th></tr>
+  <tr><td>JSON (default)</td><td><code>-o json</code></td><td>Parsing in scripts, SDK ingestion</td></tr>
+  <tr><td>Table</td><td><code>-o table</code></td><td>Quick human-readable overview</td></tr>
+  <tr><td>YAML</td><td><code>-o yaml</code></td><td>Config management, GitOps</td></tr>
+  <tr><td>TSV</td><td><code>-o tsv</code></td><td>Feeding values to shell variables</td></tr>
+  <tr><td>None</td><td><code>-o none</code></td><td>Silent execution in automation</td></tr>
+</table>
+
+<h3>Azure Cloud Shell</h3>
+<p>A browser-based shell available inside the Azure Portal. Comes pre-installed with Azure CLI, Azure PowerShell, kubectl, Terraform, and Helm. State is persisted in an Azure Files share. Useful for quick ad-hoc management without a local tool installation.</p>
+
+<div class="callout tip"><span class="t">Tip</span> Use <code>az configure --defaults group=myRG location=eastus</code> to set default resource group and location, saving repetitive flags in subsequent commands.</div>
+
+<h2>Infrastructure as Code: ARM Templates &amp; Bicep</h2>
+<p class="lead">Azure Resource Manager (ARM) is the unified deployment and management service. All Azure deployments — portal, CLI, SDK — go through ARM. ARM templates (JSON) and Bicep (domain-specific language) codify infrastructure declaratively.</p>
+
+<h3>ARM Template Structure</h3>
+<pre><code class="language-json">{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "defaultValue": "myVM",
+      "metadata": { "description": "Name of the virtual machine" }
+    }
+  },
+  "variables": {
+    "nicName": "[concat(parameters('vmName'), '-nic')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-11-01",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "properties": { ... }
+    }
+  ],
+  "outputs": {
+    "vmId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+    }
+  }
+}</code></pre>
+
+<h3>Bicep: The Modern IaC Language</h3>
+<p>Bicep is a transparent abstraction over ARM templates — it compiles to ARM JSON but with a cleaner syntax, type safety, modules, and better IDE support. Bicep is the recommended IaC path for new Azure projects (Terraform is popular for multi-cloud).</p>
+
+<pre><code class="language-bash">// Bicep example: Storage account
+param location string = resourceGroup().location
+param storageAccountName string = 'st${uniqueString(resourceGroup().id)}'
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: storageAccountName
+  location: location
+  sku: {
+    name: 'Standard_ZRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+  }
+}
+
+output storageAccountId string = storageAccount.id</code></pre>
+
+<pre><code class="language-bash"># Compile Bicep to ARM JSON
+az bicep build --file main.bicep
+
+# Deploy Bicep directly
+az deployment group create \
+  --resource-group myRG \
+  --template-file main.bicep \
+  --parameters storageAccountName=mySA2026
+
+# What-if preview (dry run)
+az deployment group what-if \
+  --resource-group myRG \
+  --template-file main.bicep</code></pre>
+
+<details>
+  <summary>ARM Deployment Modes: Incremental vs Complete</summary>
+  <div class="body">
+    <p><strong>Incremental (default):</strong> Adds or updates resources declared in the template. Resources in the resource group NOT in the template are left untouched. Safe for day-to-day deployments.</p>
+    <p><strong>Complete:</strong> Deletes resources in the resource group that are NOT in the template. Use with extreme caution — this is the "desired state" mode. Great for ensuring no configuration drift but can delete manually-created resources.</p>
+    <pre><code class="language-bash">az deployment group create \
+  --resource-group myRG \
+  --template-file main.bicep \
+  --mode Complete</code></pre>
+  </div>
+</details>
+
+<div class="callout tip"><span class="t">Best Practice</span> Use Bicep modules to break large templates into reusable components. Store modules in a shared Bicep registry (Azure Container Registry supports Bicep registries) and version them. Use <code>what-if</code> before every production deployment.</div>
+
+<div class="callout warn"><span class="t">Pitfall</span> ARM/Bicep templates have an 800-deployment history limit per resource group. Old deployments pile up in CI/CD pipelines. Use <code>az deployment group delete</code> scripts or the <code>--name</code> flag with stable names to overwrite history entries rather than accumulating 800 and hitting the limit.</div>
+
+<h2>Azure DevOps</h2>
+<p class="lead">Azure DevOps is an integrated suite of tools for planning, building, testing, and deploying software. It can be used alongside GitHub (Microsoft owns both) or as a standalone DevOps platform.</p>
+
+<h3>Azure DevOps Services</h3>
+<div class="grid c3">
+  <div class="card">
+    <h4>Azure Boards</h4>
+    <p>Agile work tracking: Epics, Features, User Stories, Tasks, and Bugs. Kanban boards, backlogs, sprints, and burndown charts. Integrates with GitHub commits and PRs for end-to-end traceability.</p>
+  </div>
+  <div class="card">
+    <h4>Azure Repos</h4>
+    <p>Git repositories (unlimited private) or TFVC. Supports pull requests with code review, branch policies (require PR, require CI pass, minimum reviewer count), and protected branches.</p>
+  </div>
+  <div class="card">
+    <h4>Azure Pipelines</h4>
+    <p>CI/CD pipeline service. Supports YAML pipelines (pipeline-as-code) and Classic (GUI) pipelines. Can build Linux, Windows, macOS. Integrates with any source: GitHub, Bitbucket, Azure Repos. Multi-stage pipelines with approvals and gates.</p>
+  </div>
+  <div class="card">
+    <h4>Azure Test Plans</h4>
+    <p>Manual and exploratory testing with test case management. Linked to Boards work items. Captures screenshots, video, and system info during test execution for richer bug reports.</p>
+  </div>
+  <div class="card">
+    <h4>Azure Artifacts</h4>
+    <p>Universal package feeds supporting NuGet, npm, Maven, PyPI, and Universal Packages. Upstream sources allow proxying public registries, caching packages internally, and enforcing provenance.</p>
+  </div>
+  <div class="card">
+    <h4>Environments &amp; Gates</h4>
+    <p>Deployment environments (dev/staging/prod) with pre/post-deployment approvals. Automatic checks can query Azure Monitor alerts, invoke REST APIs, or run inline scripts before proceeding.</p>
+  </div>
+</div>
+
+<h3>Azure Pipelines YAML Example</h3>
+<pre><code class="language-yaml">trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.11'
+          - script: |
+              pip install -r requirements.txt
+              pytest tests/ --junitxml=junit.xml
+            displayName: 'Run tests'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFiles: 'junit.xml'
+
+  - stage: Deploy
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployWebApp
+        environment: production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: 'MyAzureServiceConnection'
+                    appType: webAppLinux
+                    appName: 'myAppService'
+                    package: '$(Pipeline.Workspace)/**/*.zip'</code></pre>
+
+<div class="callout note"><span class="t">Note</span> Azure Pipelines can also trigger GitHub Actions workflows or be triggered by them. Microsoft-hosted agents include 1,800 free minutes/month per organization. Use self-hosted agents for private VNet deployments, custom tooling, or higher throughput.</div>
+
+<h2>Monitoring: Azure Monitor &amp; Log Analytics</h2>
+<p class="lead">Azure Monitor is the unified observability platform that collects metrics, logs, and traces from Azure resources, applications, and on-premises infrastructure. It feeds dashboards, alerts, and autoscale rules.</p>
+
+<div class="pipeline">
+  <span class="step">Data Sources (VMs, Apps, AKS)</span>
+  <span class="arrow">-></span>
+  <span class="step">Azure Monitor</span>
+  <span class="arrow">-></span>
+  <span class="step">Metrics + Logs</span>
+  <span class="arrow">-></span>
+  <span class="step">Alerts / Dashboards / Autoscale</span>
+</div>
+
+<h3>Metrics vs Logs</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Azure Monitor Metrics</h4>
+    <p>Time-series numerical data (CPU %, memory MB, request count). Collected every 1 minute. Retained for 93 days. Ideal for real-time dashboards, autoscale triggers, and threshold alerts. Query with Metrics Explorer or the REST API.</p>
+  </div>
+  <div class="card">
+    <h4>Azure Monitor Logs (Log Analytics)</h4>
+    <p>Structured log data stored in a Log Analytics workspace. Queried with Kusto Query Language (KQL). Retained 30 days by default (up to 730 days). Supports custom logs, Syslog, Windows Event logs, and application traces (via App Insights).</p>
+  </div>
+</div>
+
+<h3>Kusto Query Language (KQL) Examples</h3>
+<pre><code class="language-bash">// Top 5 VMs by average CPU (last hour)
+Perf
+| where TimeGenerated &gt; ago(1h)
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| summarize AvgCPU = avg(CounterValue) by Computer
+| top 5 by AvgCPU desc
+
+// Find failed HTTP requests in App Insights
+requests
+| where timestamp &gt; ago(24h)
+| where success == false
+| summarize count() by resultCode, name
+| order by count_ desc
+
+// Alert-ready: VMs with disk &gt; 90% used
+Perf
+| where CounterName == "% Used Space"
+| where CounterValue &gt; 90
+| summarize arg_max(TimeGenerated, *) by Computer, InstanceName</code></pre>
+
+<h3>Diagnostic Settings</h3>
+<p>Each Azure resource can emit Platform Logs (Activity Log, Resource Logs) and Metrics to multiple destinations via Diagnostic Settings: Log Analytics workspace, Storage Account (archival), Event Hub (stream to SIEM), or Azure Monitor partner integrations (Datadog, Splunk). Enable diagnostic settings via CLI, ARM, or Policy.</p>
+
+<pre><code class="language-bash">az monitor diagnostic-settings create \
+  --name "myDiagSettings" \
+  --resource /subscriptions/&lt;sub-id&gt;/resourceGroups/myRG/providers/Microsoft.Compute/virtualMachines/myVM \
+  --workspace /subscriptions/&lt;sub-id&gt;/resourceGroups/myRG/providers/Microsoft.OperationalInsights/workspaces/myLAW \
+  --metrics '[{"category":"AllMetrics","enabled":true}]' \
+  --logs '[{"categoryGroup":"allLogs","enabled":true}]'</code></pre>
+
+<h3>Alerts</h3>
+<p>Azure Monitor Alerts can be triggered by: metric thresholds (static or dynamic/anomaly-based), log search queries (KQL), Activity Log events, Resource Health changes, or Smart Detection (App Insights anomaly detection). Action Groups define the notification/response: email, SMS, webhook, Logic App, Azure Function, ITSM ticketing.</p>
+
+<div class="callout tip"><span class="t">Best Practice</span> Create a centralized Log Analytics workspace per environment (dev/prod) rather than per resource. Enable the VM Insights and Container Insights solutions for pre-built dashboards. Set up a budget alert in Azure Cost Management alongside performance alerts — cost anomalies are often the first indicator of a misconfigured auto-scale rule.</div>
+
+<h2>Security &amp; Compliance Best Practices</h2>
+<p class="lead">Azure security is a shared responsibility. Microsoft secures the cloud infrastructure; you secure what you put in the cloud. Microsoft Defender for Cloud provides unified security posture management across Azure, on-premises, and multi-cloud environments.</p>
+
+<h3>Key Security Services</h3>
+<div class="grid c2">
+  <div class="card">
+    <h4>Microsoft Defender for Cloud</h4>
+    <p>Provides a Secure Score (0-100%) based on security recommendations. Covers: servers (EDR via Defender for Endpoint), containers (image scanning, AKS threat detection), SQL (brute-force detection, SQL injection alerts), Key Vault, and more. CSPM and CWPP in one pane.</p>
+  </div>
+  <div class="card">
+    <h4>Azure Key Vault</h4>
+    <p>Centralized secrets management for keys, secrets, and certificates. Supports HSM-backed keys (Premium tier). Access is controlled by Entra ID + Key Vault access policies or RBAC. Full audit log via Diagnostic Settings. Integrates natively with App Service, AKS, VMs, and Azure DevOps.</p>
+  </div>
+  <div class="card">
+    <h4>Azure Policy</h4>
+    <p>Enforce governance rules at scale. Policies can Audit (report non-compliance), Deny (block deployment), DeployIfNotExists (auto-remediate), or Append (add required tags). Assign built-in or custom policies at management group/subscription/RG scope. Initiatives bundle related policies (e.g., CIS Benchmark initiative).</p>
+  </div>
+  <div class="card">
+    <h4>Microsoft Sentinel</h4>
+    <p>Cloud-native SIEM + SOAR. Ingests signals from Defender products, Azure Activity Log, and third-party connectors. Uses ML-based analytics rules to detect threats. Playbooks (Logic Apps) automate response actions like isolating VMs or blocking user sign-ins.</p>
+  </div>
+</div>
+
+<h4>Security Checklist</h4>
+<table>
+  <tr><th>Control</th><th>Service/Feature</th><th>Priority</th></tr>
+  <tr><td>Enable MFA for all users</td><td>Entra ID Conditional Access</td><td><span class="badge">Critical</span></td></tr>
+  <tr><td>No public IPs on VMs unless required</td><td>NSG + Azure Bastion</td><td><span class="badge">Critical</span></td></tr>
+  <tr><td>Encrypt data at rest</td><td>Azure Disk Encryption, Storage SSE</td><td><span class="badge">Critical</span></td></tr>
+  <tr><td>Store secrets in Key Vault</td><td>Azure Key Vault + Managed Identity</td><td><span class="badge">Critical</span></td></tr>
+  <tr><td>Enable Defender for Cloud (Standard)</td><td>Microsoft Defender for Cloud</td><td><span class="badge g">High</span></td></tr>
+  <tr><td>Apply Azure Policy for resource guardrails</td><td>Azure Policy + Management Groups</td><td><span class="badge g">High</span></td></tr>
+  <tr><td>Enable resource locks on production RGs</td><td>Azure Resource Locks</td><td><span class="badge g">High</span></td></tr>
+  <tr><td>Review Secure Score weekly</td><td>Defender for Cloud</td><td><span class="badge o">Medium</span></td></tr>
+</table>
+
+<h2>Azure Cheat Sheet: Quick Reference</h2>
+
+<h3>Service Mapping by Category</h3>
+<table>
+  <tr><th>Category</th><th>IaaS / Low-level</th><th>PaaS / Managed</th><th>Serverless</th></tr>
+  <tr><td>Compute</td><td>Virtual Machines, VMSS</td><td>App Service, AKS</td><td>Azure Functions, Container Apps</td></tr>
+  <tr><td>Storage</td><td>Managed Disks, Azure Files</td><td>Azure Blob, Azure Data Lake</td><td>—</td></tr>
+  <tr><td>Database</td><td>SQL on VM</td><td>Azure SQL, Cosmos DB, PostgreSQL Flexible</td><td>—</td></tr>
+  <tr><td>Messaging</td><td>—</td><td>Service Bus, Event Hubs</td><td>Event Grid, Queue Storage</td></tr>
+  <tr><td>Networking</td><td>VNet, NIC, NSG, LB, VPN GW</td><td>Application Gateway, Front Door</td><td>Azure DNS</td></tr>
+  <tr><td>Identity</td><td>—</td><td>Entra ID, B2C</td><td>—</td></tr>
+  <tr><td>AI/ML</td><td>NC-series GPU VMs</td><td>Azure Machine Learning, AI Foundry</td><td>Cognitive Services APIs</td></tr>
+  <tr><td>DevOps</td><td>—</td><td>Azure DevOps, GitHub Actions</td><td>—</td></tr>
+  <tr><td>Monitoring</td><td>—</td><td>Azure Monitor, Log Analytics</td><td>Application Insights</td></tr>
+</table>
+
+<h3>Common Azure CLI Patterns</h3>
+<pre><code class="language-bash"># List all resources in a subscription
+az resource list --output table
+
+# Get resource IDs for scripting
+az vm list --query "[].id" --output tsv
+
+# Check what's running (and costing money)
+az vm list --show-details --query "[?powerState!='VM deallocated'].{Name:name, State:powerState, RG:resourceGroup}" --output table
+
+# Lock a resource group
+az lock create --name "NoDelete" --lock-type CanNotDelete \
+  --resource-group myRG
+
+# List role assignments at subscription scope
+az role assignment list --scope /subscriptions/&lt;sub-id&gt; --output table
+
+# Enable a system-assigned managed identity on a VM
+az vm identity assign --resource-group myRG --name myVM
+
+# Grant managed identity access to Key Vault
+az keyvault set-policy --name myKV \
+  --object-id &lt;managed-identity-object-id&gt; \
+  --secret-permissions get list</code></pre>
+
+<h2>Interview Q&amp;A</h2>
+<p class="lead">Common Azure interview questions with concise, technically precise answers for cloud engineering, DevOps, and solution architect roles.</p>
+
+<div class="qa">
+  <div class="q">What is the difference between an Availability Set and Availability Zones in Azure?</div>
+  <div class="a">An Availability Set protects against single-rack (fault domain) and rolling-reboot (update domain) failures within a single physical datacenter. It provides a 99.95% VM SLA. Availability Zones are physically separate datacenters within the same Azure region, each with independent power, cooling, and networking. Distributing VMs across AZs protects against datacenter-level failures and provides a 99.99% VM SLA. AZs are the preferred choice when the region supports them; Availability Sets are a fallback for regions without AZs or for legacy architectures.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How does Azure RBAC work, and what is the difference between Owner, Contributor, and Reader roles?</div>
+  <div class="a">Azure RBAC (Role-Based Access Control) is an authorization system built on Azure Resource Manager. A role assignment has three components: a security principal (user, group, service principal, or managed identity), a role definition (a collection of allowed actions/notActions/dataActions), and a scope (management group, subscription, resource group, or resource). Roles are additive — deny assignments explicitly override allows. Owner: full control including the ability to delegate access via RBAC. Contributor: can create and manage all resource types but cannot grant access to others. Reader: can view all resources but cannot make changes.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Explain the difference between NSGs and Azure Firewall. When would you use each?</div>
+  <div class="a">NSGs are free Layer-4 (TCP/UDP) stateful ACLs applied to subnets or NICs within a VNet. They filter traffic based on IP address, port, and protocol. They lack application-layer awareness, threat intelligence, and centralized management. Azure Firewall is a managed, stateful L3-L7 firewall as a service with built-in high availability and cloud scalability. It adds: FQDN filtering, application rules (URL-based), network rules, threat intelligence-based filtering, TLS inspection, and IDPS (Premium SKU). Use NSGs for micro-segmentation within a VNet (subnet-level controls). Use Azure Firewall in a hub-spoke topology to centrally govern all ingress, egress, and east-west traffic across VNets and on-premises networks.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is a Managed Identity, and why is it preferred over a service principal with a client secret?</div>
+  <div class="a">A Managed Identity is an Entra ID identity automatically managed by Azure for a resource (like a VM, App Service, or AKS pod). Azure handles credential rotation — there is no client secret or certificate to store or rotate. The resource's application code calls the Azure IMDS endpoint (169.254.169.254) to get a short-lived token transparently. This eliminates the most common secret sprawl vulnerability (secrets in config files, environment variables, or source code). Service principals with client secrets require manual secret rotation and secure secret storage. System-assigned MIs are tied to a single resource lifecycle; user-assigned MIs can be shared across multiple resources.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is the purpose of VNet peering, and what are its limitations?</div>
+  <div class="a">VNet peering connects two VNets over Microsoft's backbone network with low latency and no bandwidth overhead — traffic stays private and never traverses the public internet. Address spaces of peered VNets must not overlap. Peering is non-transitive: if VNet A is peered with B and B is peered with C, traffic cannot flow from A to C without direct peering or routing through a hub (NVA, Azure Firewall, or Virtual WAN). Global VNet peering crosses regions. Peering is free for traffic within the same region, but cross-region peering incurs data transfer charges.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How does Azure Blob Storage Lifecycle Management work, and what tiers are available?</div>
+  <div class="a">Lifecycle Management policies automatically transition blobs between tiers (Hot → Cool → Cold → Archive) or delete blobs based on rules evaluated once per day. Rules match blobs by prefix or blob index tags and act on: last-modified time, last-access time, or blob creation time. The four tiers are: Hot (frequent access, highest storage cost, lowest access cost), Cool (infrequent access, stored ≥30 days, ~50% cheaper storage than Hot), Cold (rare access, stored ≥90 days), and Archive (offline, must be rehydrated to Hot/Cool before reading — takes up to 15 hours for Standard priority or 1 hour for High priority). Rehydration from Archive is charged separately and can be expensive if done frequently — plan data access patterns before archiving.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is the difference between Azure ARM templates and Bicep? When would you choose Terraform instead?</div>
+  <div class="a">ARM templates are JSON documents that describe Azure infrastructure declaratively. They can be verbose, difficult to read, and error-prone due to JSON's lack of comments and expressions. Bicep is a domain-specific language that compiles to ARM JSON — it offers cleaner syntax, type safety, modules, and IDE support while retaining full ARM capability. Every Bicep feature maps 1:1 to ARM. Choose Bicep when working in Azure-only environments and wanting a Microsoft-supported, first-party IaC tool. Choose Terraform when managing multi-cloud infrastructure (Azure + AWS + GCP), when your team has existing Terraform expertise, or when you need a rich module ecosystem from the Terraform Registry. Both support state management; Terraform's state is external (Blob backend for Azure) while ARM/Bicep state lives in the Azure Resource Manager itself.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is Azure Monitor Log Analytics, and how do you query it?</div>
+  <div class="a">Azure Monitor Log Analytics is a managed log aggregation and analytics service backed by a Log Analytics workspace. It stores structured log data from Azure resources, VMs (via agents), AKS (Container Insights), applications (Application Insights), and custom sources. Data is queried using Kusto Query Language (KQL), a read-only, SQL-like language optimized for time-series analysis. Key operators include: <code>where</code> (filter), <code>summarize</code> (aggregate), <code>project</code> (select columns), <code>join</code> (combine tables), <code>extend</code> (add computed columns), <code>order by</code> / <code>top</code>. Queries can be used in dashboards (Azure Workbooks), alerts (Log Alert rules), or exported via REST/SDK. Default retention is 30 days; interactive retention can be extended up to 730 days.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Explain the Azure shared responsibility model. What does the customer always own?</div>
+  <div class="a">In the Azure shared responsibility model, Microsoft is always responsible for physical infrastructure (datacenters, hardware, networking, hypervisor). What the customer manages varies by service model: IaaS — customer manages OS, middleware, runtime, applications, and data. PaaS — customer manages applications and data only (Microsoft handles OS and platform patches). SaaS — customer is responsible only for data, accounts, and access configuration. Regardless of service model, the customer always retains responsibility for: data classification and encryption, identity and access management (who can access what), client endpoint security, and compliance obligations specific to their industry. Microsoft never manages a customer's Entra ID tenant configuration, RBAC assignments, or the data itself.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do Azure Pipelines stages, environments, and approvals work together for a safe CD process?</div>
+  <div class="a">In Azure Pipelines YAML, a pipeline is divided into stages (e.g., Build, Deploy-Staging, Deploy-Production). A stage contains jobs, which contain steps. Deployment jobs reference Environments — named logical targets (dev, staging, prod) that track deployment history and can hold approval gates. When a deployment job targets an environment with a required approver configured, the pipeline pauses at that stage and sends notifications to designated approvers. Approvers review deployment details (which commit, which build, test results) and approve or reject. Pre-deployment checks can also call REST APIs, invoke Azure Functions, or query Azure Monitor for active alerts before proceeding. This combination ensures that every production deployment requires explicit human sign-off and passes automated health gates, preventing accidental or unsafe releases.</div>
+</div>
+
+<div class="callout ok"><span class="t">Study Tip</span> For AZ-900 (Fundamentals), focus on service categories and the shared responsibility model. For AZ-104 (Admin), master VNet configuration, RBAC, and ARM templates. For AZ-204 (Developer), deepen knowledge of App Service, Functions, Cosmos DB, and Key Vault. For AZ-305 (Architect), practice designing multi-region, high-availability, cost-optimized architectures.</div>

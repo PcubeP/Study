@@ -1,0 +1,676 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C / C++ — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Programming Languages</div>
+  <h1>C / C++</h1>
+  <div class="subtitle">A systems-programmer's guide to the memory model, pointers, RAII, templates, the STL, and the undefined-behavior pitfalls that separate working code from code that only looks like it works.</div>
+  <div class="tags"><span>c</span><span>c++</span><span>memory-management</span><span>pointers</span><span>raii</span><span>stl</span><span>smart-pointers</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~17 min read &middot; 3,806 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-c-and-c-are-and-why-they-still-matter">What C and C++ Are, and Why They Still Matter</a></li><li><a href="#setup-and-getting-started">Setup and Getting Started</a></li><li><a href="#the-memory-model-stack-heap-and-everything-between">The Memory Model: Stack, Heap, and Everything Between</a></li><li><a href="#pointers-arrays-and-the-address-of-operator">Pointers, Arrays, and the Address-of Operator</a></li><li><a href="#structs-classes-and-the-object-model">Structs, Classes, and the Object Model</a></li><li><a href="#raii-the-idea-that-defines-modern-c">RAII: The Idea That Defines Modern C++</a></li><li><a href="#references-copy-move-and-the-rule-of-five">References, Copy, Move, and the Rule of Five</a></li><li><a href="#smart-pointers-ownership-without-leaks">Smart Pointers: Ownership Without Leaks</a></li><li><a href="#templates-and-generic-programming">Templates and Generic Programming</a></li><li><a href="#the-stl-containers-iterators-algorithms">The STL: Containers, Iterators, Algorithms</a></li><li><a href="#worked-mini-example-a-word-frequency-counter">Worked Mini-Example: A Word-Frequency Counter</a></li><li><a href="#compilation-and-linking-in-depth">Compilation and Linking in Depth</a></li><li><a href="#undefined-behavior-the-dragons">Undefined Behavior: The Dragons</a></li><li><a href="#cheat-sheet-and-c-vs-c-comparison">Cheat Sheet and C vs C++ Comparison</a></li><li><a href="#interview-questions-amp-answers">Interview Questions &amp; Answers</a></li><li><a href="#further-learning">Further Learning</a></li></ol></nav>
+<h2 id="what-c-and-c-are-and-why-they-still-matter">What C and C++ Are, and Why They Still Matter</h2>
+<p class="lead">C is a thin, portable layer over the machine: you manage memory and the compiler trusts you completely. C++ keeps that zero-overhead philosophy but adds abstractions — classes, templates, RAII, the STL — so you can build large systems without paying for features you don't use.</p>
+
+<p>C (1972, Dennis Ritchie) is the <em>lingua franca</em> of systems programming: operating systems, embedded firmware, databases, language runtimes. C++ (1983, Bjarne Stroustrup) layers object-oriented and generic programming on top while preserving C's performance model. Both compile directly to native machine code — there is no virtual machine, no garbage collector, no interpreter standing between your code and the CPU.</p>
+
+<div class="callout note"><span class="t">Core principle</span> C++'s guiding rule is <strong>"you don't pay for what you don't use"</strong> (the zero-overhead principle). An abstraction like <span class="kbd">std::vector</span> compiles to roughly the same code you'd write by hand with raw pointers — but it manages the memory for you.</div>
+
+<div class="diagram"><svg viewBox="0 0 720 300" width="720" height="300">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker>
+  </defs>
+  <text x="360" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">From source to a running process</text>
+  <rect x="20" y="50" width="120" height="54" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="80" y="74" text-anchor="middle" font-size="13" fill="#1a2233">main.cpp</text>
+  <text x="80" y="92" text-anchor="middle" font-size="11" fill="#64748b">source + #include</text>
+  <rect x="190" y="50" width="120" height="54" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="250" y="74" text-anchor="middle" font-size="13" fill="#1a2233">Preprocessor</text>
+  <text x="250" y="92" text-anchor="middle" font-size="11" fill="#64748b">expands macros</text>
+  <rect x="360" y="50" width="120" height="54" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="420" y="74" text-anchor="middle" font-size="13" fill="#1a2233">Compiler</text>
+  <text x="420" y="92" text-anchor="middle" font-size="11" fill="#64748b">.o object file</text>
+  <rect x="530" y="50" width="120" height="54" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="590" y="74" text-anchor="middle" font-size="13" fill="#1a2233">Linker</text>
+  <text x="590" y="92" text-anchor="middle" font-size="11" fill="#64748b">+ libraries</text>
+  <rect x="360" y="170" width="120" height="54" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="420" y="194" text-anchor="middle" font-size="13" fill="#1a2233">a.out / .exe</text>
+  <text x="420" y="212" text-anchor="middle" font-size="11" fill="#64748b">native binary</text>
+  <line x1="140" y1="77" x2="186" y2="77" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="310" y1="77" x2="356" y2="77" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="480" y1="77" x2="526" y2="77" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="590" y1="104" x2="430" y2="168" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="250" y="260" text-anchor="middle" font-size="12" fill="#64748b">Each .cpp is compiled independently into an object file; the linker resolves cross-file symbols at the end.</text>
+</svg><div class="cap">Fig 1. The translation pipeline — preprocess, compile per translation unit, then link.</div></div>
+
+<h2 id="setup-and-getting-started">Setup and Getting Started</h2>
+<p>You need a compiler toolchain. GCC and Clang are the open-source standards; MSVC ships with Visual Studio on Windows.</p>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Install a toolchain</span>
+<span class="hljs-built_in">sudo</span> apt install build-essential   <span class="hljs-comment"># Debian/Ubuntu: gcc, g++, make</span>
+xcode-select --install             <span class="hljs-comment"># macOS: clang</span>
+<span class="hljs-comment"># Windows: install MSVC (Visual Studio) or MSYS2/MinGW</span>
+
+<span class="hljs-comment"># Compile a single C++ file with warnings on and modern standard</span>
+g++ -std=c++23 -Wall -Wextra -O2 main.cpp -o app
+./app
+
+<span class="hljs-comment"># Compile C</span>
+gcc -std=c17 -Wall -Wextra -O2 main.c -o app
+
+<span class="hljs-comment"># Debug build with sanitizers — catches memory bugs at runtime</span>
+g++ -std=c++23 -g -fsanitize=address,undefined main.cpp -o app</code></pre>
+
+<div class="callout tip"><span class="t">Always</span> compile with <span class="kbd">-Wall -Wextra</span>. During development add <span class="kbd">-fsanitize=address,undefined</span> — AddressSanitizer and UBSan catch use-after-free, buffer overflows, and undefined behavior that would otherwise be silent, intermittent crashes.</div>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-comment">// main.cpp — the canonical starting point</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span>   <span class="hljs-comment">// std::cout, std::endl</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    std::cout &lt;&lt; <span class="hljs-string">&quot;Hello, systems programming\n&quot;</span>;
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;           <span class="hljs-comment">// 0 = success to the OS</span>
+}</code></pre>
+
+<h2 id="the-memory-model-stack-heap-and-everything-between">The Memory Model: Stack, Heap, and Everything Between</h2>
+<p>Understanding where objects live is the single most important mental model in C and C++. A process has distinct memory regions, each with different lifetime and cost semantics.</p>
+
+<div class="diagram"><svg viewBox="0 0 560 360" width="560" height="360">
+  <defs>
+    <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#b45309"/></marker>
+  </defs>
+  <text x="280" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Process address space (low → high)</text>
+  <rect x="160" y="44" width="240" height="40" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="280" y="69" text-anchor="middle" font-size="13" fill="#1a2233">Text / Code (read-only machine code)</text>
+  <rect x="160" y="84" width="240" height="40" fill="#ecfdf5" stroke="#059669"/>
+  <text x="280" y="109" text-anchor="middle" font-size="13" fill="#1a2233">Data / BSS (globals, statics)</text>
+  <rect x="160" y="124" width="240" height="70" fill="#fff7ed" stroke="#b45309"/>
+  <text x="280" y="152" text-anchor="middle" font-size="13" fill="#1a2233">Heap</text>
+  <text x="280" y="172" text-anchor="middle" font-size="11" fill="#64748b">malloc / new — grows up</text>
+  <line x1="280" y1="194" x2="280" y2="230" stroke="#b45309" stroke-width="2" marker-end="url(#ah2)"/>
+  <line x1="280" y1="300" x2="280" y2="264" stroke="#2563eb" stroke-width="2" marker-end="url(#ah2)"/>
+  <rect x="160" y="300" width="240" height="40" fill="#eff4ff" stroke="#1e3a8a"/>
+  <text x="280" y="325" text-anchor="middle" font-size="13" fill="#1a2233">Stack (locals, call frames) — grows down</text>
+  <text x="470" y="150" font-size="11" fill="#64748b">dynamic,</text>
+  <text x="470" y="166" font-size="11" fill="#64748b">you free it</text>
+  <text x="455" y="315" font-size="11" fill="#64748b">automatic</text>
+</svg><div class="cap">Fig 2. Stack grows downward, heap upward; they share the free space between them.</div></div>
+
+<div class="grid c2">
+  <div class="card"><h4>Stack</h4>Automatic lifetime. Allocation is a single register adjustment — essentially free. Freed automatically when the enclosing scope exits. Limited size (often 1-8 MB). Perfect for most local variables.</div>
+  <div class="card"><h4>Heap</h4>Dynamic lifetime that you control. Allocation (<span class="kbd">malloc</span>/<span class="kbd">new</span>) is comparatively expensive and may fail. You are responsible for freeing it — forget, and you leak; free twice, and you corrupt.</div>
+</div>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">demo</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">int</span> x = <span class="hljs-number">42</span>;              <span class="hljs-comment">// stack: freed when demo() returns</span>
+    <span class="hljs-type">int</span> arr[<span class="hljs-number">100</span>];            <span class="hljs-comment">// stack: 400 bytes, freed automatically</span>
+
+    <span class="hljs-type">int</span>* p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">7</span>);     <span class="hljs-comment">// heap: p is on the stack, *p is on the heap</span>
+    <span class="hljs-keyword">delete</span> p;                <span class="hljs-comment">// you MUST free it</span>
+
+    <span class="hljs-comment">// Prefer this — RAII cleans up automatically (see below):</span>
+    <span class="hljs-keyword">auto</span> up = std::<span class="hljs-built_in">make_unique</span>&lt;<span class="hljs-type">int</span>&gt;(<span class="hljs-number">7</span>);
+}   <span class="hljs-comment">// up&#x27;s destructor frees the heap int here</span></code></pre>
+
+<h2 id="pointers-arrays-and-the-address-of-operator">Pointers, Arrays, and the Address-of Operator</h2>
+<p>A pointer is a variable whose value is a memory address. This is the heart of C. Arrays decay to pointers, which is both powerful and the source of countless bugs.</p>
+
+<div class="code-label">C</div><pre><code class="hljs"><span class="hljs-type">int</span> n = <span class="hljs-number">10</span>;
+<span class="hljs-type">int</span>* p = &amp;n;        <span class="hljs-comment">// p holds the address of n</span>
+<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\n&quot;</span>, *p);  <span class="hljs-comment">// dereference: prints 10</span>
+*p = <span class="hljs-number">20</span>;             <span class="hljs-comment">// writes through the pointer; n is now 20</span>
+
+<span class="hljs-type">int</span> a[<span class="hljs-number">5</span>] = {<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>};
+<span class="hljs-type">int</span>* q = a;          <span class="hljs-comment">// array decays to pointer to its first element</span>
+<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\n&quot;</span>, *(q + <span class="hljs-number">2</span>));  <span class="hljs-comment">// pointer arithmetic: prints a[2] == 3</span>
+<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\n&quot;</span>, q[<span class="hljs-number">2</span>]);      <span class="hljs-comment">// identical — a[i] is sugar for *(a + i)</span>
+
+<span class="hljs-comment">// A pointer is NULL / nullptr when it points to nothing:</span>
+<span class="hljs-type">int</span>* nothing = <span class="hljs-literal">NULL</span>;   <span class="hljs-comment">// C</span>
+<span class="hljs-type">int</span>* better  = nullptr; <span class="hljs-comment">// C++ — type-safe null</span></code></pre>
+
+<div class="diagram"><svg viewBox="0 0 640 220" width="640" height="220">
+  <defs>
+    <marker id="ah3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker>
+  </defs>
+  <text x="320" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Pointer p holds the address of n</text>
+  <rect x="60" y="60" width="130" height="60" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="125" y="84" text-anchor="middle" font-size="13" fill="#1a2233">p</text>
+  <text x="125" y="104" text-anchor="middle" font-size="12" fill="#64748b">0x7ffe10</text>
+  <rect x="430" y="60" width="150" height="60" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="505" y="84" text-anchor="middle" font-size="13" fill="#1a2233">n = 20</text>
+  <text x="505" y="104" text-anchor="middle" font-size="12" fill="#64748b">@ 0x7ffe10</text>
+  <line x1="190" y1="90" x2="426" y2="90" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah3)"/>
+  <text x="308" y="80" text-anchor="middle" font-size="12" fill="#1e3a8a">*p reads/writes here</text>
+  <text x="320" y="175" text-anchor="middle" font-size="12" fill="#64748b">&amp;n gives the address · *p follows it back to the value</text>
+</svg><div class="cap">Fig 3. The address-of (&amp;) and dereference (*) operators are inverses.</div></div>
+
+<div class="callout warn"><span class="t">Array decay</span> When you pass an array to a function, you pass a pointer — the size is lost. <code>sizeof</code> inside the function returns the pointer size, not the array size. In C++ prefer <span class="kbd">std::array</span> or <span class="kbd">std::span</span>, which carry their length.</div>
+
+<h3>const correctness</h3>
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-type">const</span> <span class="hljs-type">int</span>* p1;        <span class="hljs-comment">// pointer to const int: can&#x27;t change *p1, can change p1</span>
+<span class="hljs-type">int</span>* <span class="hljs-type">const</span> p2 = &amp;n;   <span class="hljs-comment">// const pointer: can change *p2, can&#x27;t change p2</span>
+<span class="hljs-type">const</span> <span class="hljs-type">int</span>* <span class="hljs-type">const</span> p3 = &amp;n; <span class="hljs-comment">// both fixed</span>
+<span class="hljs-comment">// Read right-to-left: p1 is a pointer to an int that is const.</span></code></pre>
+
+<h2 id="structs-classes-and-the-object-model">Structs, Classes, and the Object Model</h2>
+<p>A <code>struct</code> groups data. In C++ a <code>class</code> adds member functions, access control, constructors, and destructors. The only difference between <code>struct</code> and <code>class</code> in C++ is the default access level (public vs private).</p>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">Point</span> {        <span class="hljs-comment">// C-style aggregate, still valid C++</span>
+    <span class="hljs-type">double</span> x, y;
+};
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Account</span> {
+    <span class="hljs-type">double</span> balance_;              <span class="hljs-comment">// private by default</span>
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Account</span><span class="hljs-params">(<span class="hljs-type">double</span> initial)</span> : balance_(initial) {</span>}  <span class="hljs-comment">// constructor</span>
+
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">deposit</span><span class="hljs-params">(<span class="hljs-type">double</span> amt)</span> </span>{ balance_ += amt; }
+    <span class="hljs-function"><span class="hljs-type">double</span> <span class="hljs-title">balance</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> balance_; } <span class="hljs-comment">// const member: promises no mutation</span>
+
+    ~<span class="hljs-built_in">Account</span>() { <span class="hljs-comment">/* destructor: runs when object dies */</span> }
+};
+
+Account a{<span class="hljs-number">100.0</span>};
+a.<span class="hljs-built_in">deposit</span>(<span class="hljs-number">50</span>);
+std::cout &lt;&lt; a.<span class="hljs-built_in">balance</span>();  <span class="hljs-comment">// 150</span></code></pre>
+
+<div class="callout tip"><span class="t">Member initializer lists</span> Initialize members with <code>: balance_(initial)</code> rather than assigning inside the constructor body. It is required for <code>const</code> and reference members, and avoids a wasteful default-construct-then-assign.</div>
+
+<h2 id="raii-the-idea-that-defines-modern-c">RAII: The Idea That Defines Modern C++</h2>
+<p class="lead">Resource Acquisition Is Initialization: tie every resource (memory, file handle, lock, socket) to the lifetime of an object. The constructor acquires; the destructor releases. Because destructors run deterministically when scope exits — even during exceptions — you cannot forget to clean up.</p>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;fstream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;mutex&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">write_log</span><span class="hljs-params">(std::mutex&amp; m, <span class="hljs-type">const</span> std::string&amp; msg)</span> </span>{
+    <span class="hljs-function">std::lock_guard&lt;std::mutex&gt; <span class="hljs-title">lock</span><span class="hljs-params">(m)</span></span>;  <span class="hljs-comment">// acquires lock in constructor</span>
+    <span class="hljs-function">std::ofstream <span class="hljs-title">file</span><span class="hljs-params">(<span class="hljs-string">&quot;log.txt&quot;</span>, std::ios::app)</span></span>; <span class="hljs-comment">// opens file (RAII)</span>
+    file &lt;&lt; msg &lt;&lt; <span class="hljs-string">&#x27;\n&#x27;</span>;
+    <span class="hljs-comment">// No manual unlock, no manual close:</span>
+    <span class="hljs-comment">// ~ofstream closes the file, ~lock_guard releases the mutex,</span>
+    <span class="hljs-comment">// AUTOMATICALLY, even if an exception is thrown above.</span>
+}</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 680 200" width="680" height="200">
+  <text x="340" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Object lifetime drives resource lifetime</text>
+  <rect x="30" y="50" width="140" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="100" y="72" text-anchor="middle" font-size="12" fill="#1a2233">enter scope</text>
+  <text x="100" y="90" text-anchor="middle" font-size="11" fill="#64748b">constructor</text>
+  <rect x="200" y="50" width="150" height="50" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="275" y="72" text-anchor="middle" font-size="12" fill="#1a2233">acquire resource</text>
+  <text x="275" y="90" text-anchor="middle" font-size="11" fill="#64748b">lock / open / alloc</text>
+  <rect x="380" y="50" width="130" height="50" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="445" y="78" text-anchor="middle" font-size="12" fill="#1a2233">use it</text>
+  <rect x="540" y="50" width="120" height="50" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="600" y="72" text-anchor="middle" font-size="12" fill="#1a2233">leave scope</text>
+  <text x="600" y="90" text-anchor="middle" font-size="11" fill="#64748b">destructor frees</text>
+  <defs><marker id="ah4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker></defs>
+  <line x1="170" y1="75" x2="196" y2="75" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="350" y1="75" x2="376" y2="75" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah4)"/>
+  <line x1="510" y1="75" x2="536" y2="75" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah4)"/>
+  <text x="340" y="150" text-anchor="middle" font-size="12" fill="#64748b">The destructor is guaranteed to run on every exit path — normal return, break, or thrown exception.</text>
+</svg><div class="cap">Fig 4. RAII: cleanup is attached to scope exit, making leaks structurally impossible.</div></div>
+
+<h2 id="references-copy-move-and-the-rule-of-five">References, Copy, Move, and the Rule of Five</h2>
+<p>A reference is an alias for an existing object — it cannot be null and cannot be reseated. C++11 added <em>rvalue references</em> and move semantics, letting you transfer ownership of resources instead of copying them.</p>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">inc</span><span class="hljs-params">(<span class="hljs-type">int</span>&amp; r)</span> </span>{ r++; }   <span class="hljs-comment">// lvalue reference: modifies the caller&#x27;s variable</span>
+<span class="hljs-type">int</span> v = <span class="hljs-number">5</span>; <span class="hljs-built_in">inc</span>(v);          <span class="hljs-comment">// v == 6</span>
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">print</span><span class="hljs-params">(<span class="hljs-type">const</span> std::string&amp; s)</span></span>; <span class="hljs-comment">// const ref: pass big objects without copying</span>
+
+<span class="hljs-comment">// Move semantics: steal the guts of a temporary instead of deep-copying</span>
+<span class="hljs-function">std::vector&lt;<span class="hljs-type">int</span>&gt; <span class="hljs-title">make</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-function">std::vector&lt;<span class="hljs-type">int</span>&gt; <span class="hljs-title">big</span><span class="hljs-params">(<span class="hljs-number">1&#x27;000&#x27;000</span>, <span class="hljs-number">0</span>)</span></span>;
+    <span class="hljs-keyword">return</span> big;             <span class="hljs-comment">// moved out, not copied (also NRVO)</span>
+}
+std::vector&lt;<span class="hljs-type">int</span>&gt; data = <span class="hljs-built_in">make</span>();      <span class="hljs-comment">// cheap</span>
+std::vector&lt;<span class="hljs-type">int</span>&gt; copy = data;        <span class="hljs-comment">// deep copy (expensive)</span>
+std::vector&lt;<span class="hljs-type">int</span>&gt; moved = std::<span class="hljs-built_in">move</span>(data); <span class="hljs-comment">// steals data&#x27;s buffer; data now empty</span></code></pre>
+
+<div class="callout note"><span class="t">Rule of Five / Rule of Zero</span> If you define any of destructor, copy constructor, copy assignment, move constructor, or move assignment, you usually need all five. Better: the <strong>Rule of Zero</strong> — design classes so members (vectors, smart pointers) manage resources, and you write none of the five.</div>
+
+<table>
+<tr><th>Operation</th><th>Signature</th><th>When it runs</th></tr>
+<tr><td>Copy constructor</td><td><code>T(const T&amp;)</code></td><td><code>T b = a;</code></td></tr>
+<tr><td>Copy assignment</td><td><code>T&amp; operator=(const T&amp;)</code></td><td><code>b = a;</code></td></tr>
+<tr><td>Move constructor</td><td><code>T(T&amp;&amp;)</code></td><td><code>T b = std::move(a);</code></td></tr>
+<tr><td>Move assignment</td><td><code>T&amp; operator=(T&amp;&amp;)</code></td><td><code>b = std::move(a);</code></td></tr>
+<tr><td>Destructor</td><td><code>~T()</code></td><td>scope exit / <code>delete</code></td></tr>
+</table>
+
+<h2 id="smart-pointers-ownership-without-leaks">Smart Pointers: Ownership Without Leaks</h2>
+<p>Raw <code>new</code>/<code>delete</code> is error-prone. Smart pointers encode <em>ownership</em> in the type and apply RAII to heap memory. In modern C++ you should almost never write a bare <code>delete</code>.</p>
+
+<div class="grid c3">
+  <div class="card"><h4>unique_ptr</h4>Sole owner, zero overhead. Move-only — cannot be copied. The default choice. <code>std::make_unique&lt;T&gt;(args)</code>.</div>
+  <div class="card"><h4>shared_ptr</h4>Shared ownership via an atomic reference count. Frees when the last owner dies. Slight overhead. <code>std::make_shared&lt;T&gt;(args)</code>.</div>
+  <div class="card"><h4>weak_ptr</h4>Non-owning observer of a <code>shared_ptr</code>. Breaks reference cycles. <code>lock()</code> to get a temporary <code>shared_ptr</code>.</div>
+</div>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;memory&gt;</span></span>
+
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">Node</span> { <span class="hljs-type">int</span> val; std::shared_ptr&lt;Node&gt; next; };
+
+<span class="hljs-keyword">auto</span> u = std::<span class="hljs-built_in">make_unique</span>&lt;<span class="hljs-type">int</span>&gt;(<span class="hljs-number">42</span>);  <span class="hljs-comment">// sole owner</span>
+<span class="hljs-comment">// auto u2 = u;                      // ERROR: can&#x27;t copy a unique_ptr</span>
+<span class="hljs-keyword">auto</span> u2 = std::<span class="hljs-built_in">move</span>(u);              <span class="hljs-comment">// OK: ownership transferred, u is now null</span>
+
+<span class="hljs-keyword">auto</span> s1 = std::<span class="hljs-built_in">make_shared</span>&lt;Node&gt;();  <span class="hljs-comment">// refcount = 1</span>
+<span class="hljs-keyword">auto</span> s2 = s1;                        <span class="hljs-comment">// refcount = 2</span>
+<span class="hljs-comment">// memory freed automatically when both s1 and s2 go out of scope</span>
+
+<span class="hljs-comment">// Pass ownership vs. borrow:</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">consume</span><span class="hljs-params">(std::unique_ptr&lt;<span class="hljs-type">int</span>&gt; owned)</span></span>;   <span class="hljs-comment">// takes ownership (by value)</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">observe</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">int</span>&amp; borrowed)</span></span>;          <span class="hljs-comment">// just looks, no ownership</span></code></pre>
+
+<div class="callout danger"><span class="t">Cyclic leak</span> Two <code>shared_ptr</code>s pointing at each other never reach refcount 0 — a leak that smart pointers alone won't catch. Break the cycle by making one direction a <code>weak_ptr</code>.</div>
+
+<h2 id="templates-and-generic-programming">Templates and Generic Programming</h2>
+<p>Templates let you write code once that works for any type, resolved at compile time with no runtime cost. The STL is built entirely on them. C++20 <em>concepts</em> make template requirements explicit and error messages readable.</p>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;concepts&gt;</span></span>
+
+<span class="hljs-comment">// Function template</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-function">T <span class="hljs-title">max_of</span><span class="hljs-params">(T a, T b)</span> </span>{ <span class="hljs-keyword">return</span> a &gt; b ? a : b; }
+
+<span class="hljs-comment">// Class template</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Box</span> {
+    T value_;
+<span class="hljs-keyword">public</span>:
+    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Box</span><span class="hljs-params">(T v)</span> : value_(std::move(v)) {</span>}
+    <span class="hljs-function"><span class="hljs-type">const</span> T&amp; <span class="hljs-title">get</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>{ <span class="hljs-keyword">return</span> value_; }
+};
+
+<span class="hljs-comment">// C++20 concept: constrain the type</span>
+<span class="hljs-keyword">template</span> &lt;std::integral T&gt;        <span class="hljs-comment">// only accepts integer types</span>
+<span class="hljs-function">T <span class="hljs-title">double_it</span><span class="hljs-params">(T x)</span> </span>{ <span class="hljs-keyword">return</span> x * <span class="hljs-number">2</span>; }
+
+<span class="hljs-keyword">auto</span> m = <span class="hljs-built_in">max_of</span>(<span class="hljs-number">3</span>, <span class="hljs-number">7</span>);           <span class="hljs-comment">// T = int</span>
+<span class="hljs-keyword">auto</span> s = <span class="hljs-built_in">max_of</span>&lt;std::string&gt;(<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>);
+Box&lt;<span class="hljs-type">double</span>&gt; b{<span class="hljs-number">3.14</span>};
+<span class="hljs-comment">// double_it(3.5);               // compile error: double is not integral</span></code></pre>
+
+<div class="callout tip"><span class="t">Compile-time cost</span> Templates are instantiated per type, which grows binary size and compile times. That is the price for runtime zero-overhead generics — a trade C++ deliberately makes.</div>
+
+<h2 id="the-stl-containers-iterators-algorithms">The STL: Containers, Iterators, Algorithms</h2>
+<p>The Standard Template Library is three interlocking parts: <strong>containers</strong> hold data, <strong>iterators</strong> traverse it, and <strong>algorithms</strong> operate on iterator ranges. This separation means one algorithm works across all containers.</p>
+
+<div class="diagram"><svg viewBox="0 0 680 180" width="680" height="180">
+  <defs><marker id="ah5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#1e3a8a"/></marker></defs>
+  <text x="340" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a2233">Algorithms talk to containers through iterators</text>
+  <rect x="40" y="60" width="150" height="60" rx="6" fill="#ecfdf5" stroke="#059669"/>
+  <text x="115" y="86" text-anchor="middle" font-size="13" fill="#1a2233">Container</text>
+  <text x="115" y="104" text-anchor="middle" font-size="11" fill="#64748b">vector, map, set…</text>
+  <rect x="265" y="60" width="150" height="60" rx="6" fill="#eff4ff" stroke="#2563eb"/>
+  <text x="340" y="86" text-anchor="middle" font-size="13" fill="#1a2233">Iterator</text>
+  <text x="340" y="104" text-anchor="middle" font-size="11" fill="#64748b">begin() … end()</text>
+  <rect x="490" y="60" width="150" height="60" rx="6" fill="#fff7ed" stroke="#b45309"/>
+  <text x="565" y="86" text-anchor="middle" font-size="13" fill="#1a2233">Algorithm</text>
+  <text x="565" y="104" text-anchor="middle" font-size="11" fill="#64748b">sort, find, count…</text>
+  <line x1="190" y1="90" x2="261" y2="90" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah5)"/>
+  <line x1="490" y1="90" x2="419" y2="90" stroke="#1e3a8a" stroke-width="2" marker-end="url(#ah5)"/>
+  <text x="340" y="160" text-anchor="middle" font-size="12" fill="#64748b">N containers + M algorithms interoperate through one iterator interface, not N×M special cases.</text>
+</svg><div class="cap">Fig 5. The iterator abstraction decouples algorithms from container internals.</div></div>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;map&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;numeric&gt;</span></span>
+
+std::vector&lt;<span class="hljs-type">int</span>&gt; v{<span class="hljs-number">5</span>, <span class="hljs-number">2</span>, <span class="hljs-number">8</span>, <span class="hljs-number">1</span>, <span class="hljs-number">9</span>};
+std::<span class="hljs-built_in">sort</span>(v.<span class="hljs-built_in">begin</span>(), v.<span class="hljs-built_in">end</span>());               <span class="hljs-comment">// 1 2 5 8 9</span>
+<span class="hljs-type">int</span> total = std::<span class="hljs-built_in">accumulate</span>(v.<span class="hljs-built_in">begin</span>(), v.<span class="hljs-built_in">end</span>(), <span class="hljs-number">0</span>);  <span class="hljs-comment">// 25</span>
+<span class="hljs-keyword">auto</span> it = std::<span class="hljs-built_in">find</span>(v.<span class="hljs-built_in">begin</span>(), v.<span class="hljs-built_in">end</span>(), <span class="hljs-number">8</span>);  <span class="hljs-comment">// iterator to 8</span>
+
+<span class="hljs-comment">// Range-based for (C++11) and ranges (C++20)</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> x : v) std::cout &lt;&lt; x &lt;&lt; <span class="hljs-string">&#x27; &#x27;</span>;
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;ranges&gt;</span></span>
+<span class="hljs-keyword">namespace</span> rng = std::ranges;
+<span class="hljs-keyword">auto</span> evens = v | std::views::<span class="hljs-built_in">filter</span>([](<span class="hljs-type">int</span> x){ <span class="hljs-keyword">return</span> x % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>; });
+
+std::map&lt;std::string, <span class="hljs-type">int</span>&gt; counts;
+counts[<span class="hljs-string">&quot;apple&quot;</span>]++;        <span class="hljs-comment">// inserts {&quot;apple&quot;, 1} if absent, then increments</span></code></pre>
+
+<table>
+<tr><th>Container</th><th>Underlying</th><th>Lookup</th><th>Insert</th><th>Ordered?</th></tr>
+<tr><td><code>vector</code></td><td>dynamic array</td><td>O(1) index</td><td>O(1) amortized push_back</td><td>insertion order</td></tr>
+<tr><td><code>deque</code></td><td>chunked array</td><td>O(1) index</td><td>O(1) both ends</td><td>insertion order</td></tr>
+<tr><td><code>list</code></td><td>doubly linked</td><td>O(n)</td><td>O(1) with iterator</td><td>insertion order</td></tr>
+<tr><td><code>map</code> / <code>set</code></td><td>red-black tree</td><td>O(log n)</td><td>O(log n)</td><td>sorted by key</td></tr>
+<tr><td><code>unordered_map</code></td><td>hash table</td><td>O(1) average</td><td>O(1) average</td><td>no</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Default to vector</span> Contiguous memory means cache-friendliness that usually beats "theoretically faster" node-based containers. Reach for <code>vector</code> first; profile before switching.</div>
+
+<h2 id="worked-mini-example-a-word-frequency-counter">Worked Mini-Example: A Word-Frequency Counter</h2>
+<p>This small program ties the pieces together — streams, strings, an unordered_map, and an algorithm — in idiomatic modern C++.</p>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;sstream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;algorithm&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-type">const</span> std::string text =
+        <span class="hljs-string">&quot;the quick brown fox the lazy dog the fox&quot;</span>;
+
+    std::unordered_map&lt;std::string, <span class="hljs-type">int</span>&gt; freq;
+    <span class="hljs-function">std::istringstream <span class="hljs-title">in</span><span class="hljs-params">(text)</span></span>;
+    std::string word;
+    <span class="hljs-keyword">while</span> (in &gt;&gt; word) ++freq[word];   <span class="hljs-comment">// operator[] default-constructs 0, then ++</span>
+
+    <span class="hljs-comment">// Move pairs into a vector so we can sort by count (descending)</span>
+    std::vector&lt;std::pair&lt;std::string, <span class="hljs-type">int</span>&gt;&gt; <span class="hljs-built_in">items</span>(freq.<span class="hljs-built_in">begin</span>(), freq.<span class="hljs-built_in">end</span>());
+    std::<span class="hljs-built_in">sort</span>(items.<span class="hljs-built_in">begin</span>(), items.<span class="hljs-built_in">end</span>(),
+              [](<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; a, <span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; b){ <span class="hljs-keyword">return</span> a.second &gt; b.second; });
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; [w, c] : items)   <span class="hljs-comment">// structured bindings (C++17)</span>
+        std::cout &lt;&lt; w &lt;&lt; <span class="hljs-string">&quot;: &quot;</span> &lt;&lt; c &lt;&lt; <span class="hljs-string">&#x27;\n&#x27;</span>;
+    <span class="hljs-comment">// the: 3, fox: 2, quick/brown/lazy/dog: 1</span>
+}</code></pre>
+
+<h2 id="compilation-and-linking-in-depth">Compilation and Linking in Depth</h2>
+<p>C and C++ use <em>separate compilation</em>: each <code>.cpp</code> (a translation unit) is compiled independently. Headers are copied in textually by the preprocessor. The linker stitches the resulting object files together.</p>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-comment">// math.h — declarations (the interface)</span>
+<span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> MATH_H          <span class="hljs-comment">// include guard: prevents double-inclusion</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> MATH_H</span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span></span>;  <span class="hljs-comment">// declaration only</span>
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+
+<span class="hljs-comment">// math.cpp — definition (the implementation)</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;math.h&quot;</span></span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-type">int</span> a, <span class="hljs-type">int</span> b)</span> </span>{ <span class="hljs-keyword">return</span> a + b; }
+
+<span class="hljs-comment">// main.cpp — uses the declaration</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;math.h&quot;</span></span>
+<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">add</span>(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>); }</code></pre>
+
+<div class="code-label">BASH</div><pre><code class="hljs"><span class="hljs-comment"># Compile each unit, then link</span>
+g++ -c math.cpp -o math.o     <span class="hljs-comment"># -c = compile only, no link</span>
+g++ -c main.cpp -o main.o
+g++ math.o main.o -o app      <span class="hljs-comment"># link into executable</span>
+<span class="hljs-comment"># &quot;undefined reference to add&quot; at this stage = linker can&#x27;t find a definition</span></code></pre>
+
+<div class="callout note"><span class="t">Declaration vs definition</span> A <strong>declaration</strong> says "this exists somewhere" (the compiler is happy). A <strong>definition</strong> provides the body (the linker needs exactly one — the One Definition Rule). The classic "undefined reference" error means you declared and used but never linked a definition.</div>
+
+<h2 id="undefined-behavior-the-dragons">Undefined Behavior: The Dragons</h2>
+<p class="lead">Undefined behavior (UB) is the defining hazard of C and C++. The standard imposes no requirements — the program may crash, produce garbage, or appear to work until it doesn't. The compiler assumes UB never happens and optimizes accordingly, so a UB bug can delete your safety checks.</p>
+
+<table>
+<tr><th>Undefined behavior</th><th>Example</th><th>Defense</th></tr>
+<tr><td>Dereferencing null/dangling</td><td><code>*p</code> after <code>delete p</code></td><td>smart pointers, set to nullptr</td></tr>
+<tr><td>Buffer overflow</td><td><code>a[10]</code> on <code>int a[10]</code></td><td><code>.at()</code>, <code>std::span</code>, ASan</td></tr>
+<tr><td>Use-after-free</td><td>returning address of a local</td><td>RAII, don't return <code>&amp;</code>local</td></tr>
+<tr><td>Uninitialized read</td><td><code>int x; use(x);</code></td><td>always initialize</td></tr>
+<tr><td>Signed overflow</td><td><code>INT_MAX + 1</code></td><td>use unsigned / check bounds</td></tr>
+<tr><td>Double free</td><td><code>delete p; delete p;</code></td><td>unique_ptr</td></tr>
+</table>
+
+<div class="code-label">CPP</div><pre><code class="hljs"><span class="hljs-comment">// CLASSIC <span class="hljs-doctag">BUG:</span> returning a dangling reference</span>
+<span class="hljs-function"><span class="hljs-type">const</span> std::string&amp; <span class="hljs-title">broken</span><span class="hljs-params">()</span> </span>{
+    std::string local = <span class="hljs-string">&quot;oops&quot;</span>;
+    <span class="hljs-keyword">return</span> local;             <span class="hljs-comment">// local destroyed on return — UB to use result</span>
+}
+
+<span class="hljs-comment">// Dangling pointer from use-after-free</span>
+<span class="hljs-type">int</span>* p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">5</span>);
+<span class="hljs-keyword">delete</span> p;
+std::cout &lt;&lt; *p;              <span class="hljs-comment">// UB: reading freed memory</span>
+
+<span class="hljs-comment">// Off-by-one buffer overflow</span>
+<span class="hljs-type">int</span> a[<span class="hljs-number">3</span>];
+<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt;= <span class="hljs-number">3</span>; ++i) a[i] = i;  <span class="hljs-comment">// writes a[3] — out of bounds!</span></code></pre>
+
+<div class="callout danger"><span class="t">Never ignore UB</span> "It works on my machine" is UB's favorite disguise. A read of uninitialized memory can pass tests for months, then corrupt data in production under a new compiler or optimization level. Run ASan/UBSan in CI.</div>
+
+<h2 id="cheat-sheet-and-c-vs-c-comparison">Cheat Sheet and C vs C++ Comparison</h2>
+<table>
+<tr><th>Task</th><th>C</th><th>C++ (modern)</th></tr>
+<tr><td>Heap alloc</td><td><code>malloc/free</code></td><td><code>make_unique</code> / <code>make_shared</code></td></tr>
+<tr><td>Dynamic array</td><td>manual <code>realloc</code></td><td><code>std::vector</code></td></tr>
+<tr><td>String</td><td><code>char*</code> + <code>strcpy</code></td><td><code>std::string</code></td></tr>
+<tr><td>Null</td><td><code>NULL</code></td><td><code>nullptr</code></td></tr>
+<tr><td>Generic code</td><td>macros / <code>void*</code></td><td>templates / concepts</td></tr>
+<tr><td>Error handling</td><td>return codes / <code>errno</code></td><td>exceptions / <code>std::expected</code></td></tr>
+<tr><td>I/O</td><td><code>printf/scanf</code></td><td><code>std::cout</code> / <code>std::format</code></td></tr>
+<tr><td>Constants</td><td><code>#define</code></td><td><code>constexpr</code></td></tr>
+</table>
+
+<div class="pipeline"><span class="step">write code</span><span class="arrow">-&gt;</span><span class="step">-Wall -Wextra</span><span class="arrow">-&gt;</span><span class="step">sanitizers</span><span class="arrow">-&gt;</span><span class="step">profile</span><span class="arrow">-&gt;</span><span class="step">optimize</span></div>
+
+<h3>Best practices</h3>
+<div class="callout ok"><span class="t">Do</span> Prefer stack and RAII; use <code>std::vector</code>/<code>std::string</code> over raw arrays and <code>char*</code>; pass big objects by <code>const&amp;</code>; mark functions and members <code>const</code> and <code>noexcept</code> where true; use <code>auto</code> for obvious types; initialize every variable; follow the Rule of Zero.</div>
+<div class="callout warn"><span class="t">Avoid</span> Raw <code>new</code>/<code>delete</code>; C-style casts (use <code>static_cast</code>); owning raw pointers; macros for constants or functions; <code>using namespace std;</code> in headers; returning references/pointers to locals.</div>
+
+<h2 id="interview-questions-amp-answers">Interview Questions &amp; Answers</h2>
+
+<div class="qa"><div class="q">What is the difference between the stack and the heap?</div><div class="a">The stack holds automatic local variables and call frames; allocation is a cheap pointer bump and cleanup is automatic on scope exit, but size is limited. The heap is for dynamic-lifetime objects you allocate (<code>new</code>/<code>malloc</code>) and must free; allocation is slower and can fail or fragment. Prefer the stack and RAII.</div></div>
+
+<div class="qa"><div class="q">What is RAII and why is it central to C++?</div><div class="a">Resource Acquisition Is Initialization binds a resource's lifetime to an object's lifetime: the constructor acquires, the destructor releases. Because destructors run deterministically on every scope exit — including during stack unwinding from an exception — resources (memory, locks, files) can't be leaked. It is the foundation of smart pointers, <code>lock_guard</code>, and <code>fstream</code>.</div></div>
+
+<div class="qa"><div class="q">unique_ptr vs shared_ptr — when do you use each?</div><div class="a"><code>unique_ptr</code> models sole ownership with zero overhead and is move-only; it's the default. <code>shared_ptr</code> models shared ownership via an atomic reference count, with the cost of that counter and potential cycles. Use <code>shared_ptr</code> only when ownership is genuinely shared, and use <code>weak_ptr</code> to break cycles.</div></div>
+
+<div class="qa"><div class="q">What is a dangling pointer, and how do you prevent one?</div><div class="a">A pointer that refers to memory which has been freed or whose object has gone out of scope. Dereferencing it is undefined behavior. Prevent it with RAII and smart pointers, by never returning the address of a local, and by not keeping raw pointers to objects you don't own. AddressSanitizer catches most at runtime.</div></div>
+
+<div class="qa"><div class="q">Explain the Rule of Five and the Rule of Zero.</div><div class="a">If a class manages a resource and you define one of {destructor, copy ctor, copy assign, move ctor, move assign}, you likely need all five, because the compiler-generated versions won't handle the resource correctly. The Rule of Zero says: avoid this entirely by composing from members (vectors, smart pointers) that already manage their resources, so you write none of the five.</div></div>
+
+<div class="qa"><div class="q">What is move semantics and what problem does it solve?</div><div class="a">Move semantics (C++11) let you transfer ownership of a resource (like a vector's heap buffer) from a temporary or soon-dead object instead of deep-copying it. An rvalue reference (<code>T&amp;&amp;</code>) binds to such objects; the move constructor steals the pointer and nulls the source. It turns an O(n) copy of a returned container into an O(1) pointer swap.</div></div>
+
+<div class="qa"><div class="q">Why pass by const reference?</div><div class="a">Passing <code>const T&amp;</code> avoids copying a potentially large object while guaranteeing the function won't modify it. It also lets the function accept temporaries. For small, cheap-to-copy types (int, pointers) pass by value instead.</div></div>
+
+<div class="qa"><div class="q">What is undefined behavior and why is it dangerous?</div><div class="a">UB is a program construct for which the standard imposes no requirements — out-of-bounds access, signed overflow, use-after-free, uninitialized reads. The compiler assumes UB never occurs and may optimize away checks around it, so bugs are nondeterministic and can silently appear to work. There's no portable guarantee of a crash; always test with sanitizers.</div></div>
+
+<div class="qa"><div class="q">How does the compilation model work — declaration vs definition?</div><div class="a">Each translation unit is compiled independently into an object file; headers are textually included. A declaration tells the compiler a name's type exists; a definition provides its body. The One Definition Rule requires exactly one definition across the program. The linker resolves symbols across object files — a missing definition yields "undefined reference" at link time, not compile time.</div></div>
+
+<div class="qa"><div class="q">vector vs list — which and why?</div><div class="a"><code>vector</code> is a contiguous dynamic array: O(1) random access and excellent cache locality, O(1) amortized <code>push_back</code>, but O(n) middle insertion. <code>list</code> is a doubly linked list: O(1) splice/insert given an iterator but O(n) traversal and poor cache behavior. In practice <code>vector</code> wins almost always because cache locality dominates; prefer it unless you have measured a need for stable node addresses or frequent middle splicing.</div></div>
+
+<div class="qa"><div class="q">What does a virtual function do, and what is the vtable?</div><div class="a">A <code>virtual</code> function enables runtime polymorphism: the call dispatches to the derived override based on the dynamic type. Implementations use a per-class vtable (array of function pointers); each polymorphic object stores a hidden vptr to its class's vtable. Always declare a <code>virtual</code> (or protected non-virtual) destructor in a base class you delete through a base pointer, or you get UB.</div></div>
+
+<div class="qa"><div class="q">What is the difference between a pointer and a reference?</div><div class="a">A reference is an alias to an existing object: it must be initialized, can't be null, and can't be reseated. A pointer is a variable holding an address: it can be null, reassigned, and do arithmetic. Use references for "must refer to something" parameters; use pointers (ideally smart pointers) when you need nullability, reseating, or ownership transfer.</div></div>
+
+<h2 id="further-learning">Further Learning</h2>
+<ul>
+<li>Read <em>A Tour of C++</em> (Stroustrup) for a fast, authoritative modern overview, and the <strong>C++ Core Guidelines</strong> for day-to-day rules.</li>
+<li>Keep <a>cppreference.com</a> open — it is the definitive, accurate reference for the standard library and language.</li>
+<li>Practice with sanitizers (ASan, UBSan, TSan) and Valgrind until catching UB becomes second nature.</li>
+<li>Learn CMake and a package manager (vcpkg or Conan) to build real multi-file projects and pull in dependencies.</li>
+<li>Study the newer standards incrementally: C++17 (structured bindings, <code>std::optional</code>), C++20 (concepts, ranges, modules), C++23 (<code>std::expected</code>, <code>std::print</code>).</li>
+<li>For interviews, implement classic data structures from scratch (dynamic array, hash map, LRU cache) in C++ to cement memory and ownership reasoning.</li>
+</ul>
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>

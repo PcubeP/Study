@@ -1,0 +1,1506 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Forward Deployed Engineer Playbook — Study Guide</title>
+<style>/* ============================================================
+   Study Guide Design System
+   Print-optimized (A4) + interactive HTML. Light theme, dark code.
+   ============================================================ */
+:root{
+  --ink:#1a2233; --ink-soft:#3d4759; --muted:#6b7688;
+  --bg:#ffffff; --bg-soft:#f6f8fb; --line:#e3e8ef;
+  --brand:#2563eb; --brand-ink:#1e3a8a; --brand-soft:#eff4ff;
+  --accent:#0891b2; --ok:#059669; --ok-soft:#ecfdf5;
+  --warn:#b45309; --warn-soft:#fffbeb; --danger:#dc2626; --danger-soft:#fef2f2;
+  --tip:#7c3aed; --tip-soft:#f5f3ff;
+  --code-bg:#0f172a; --code-ink:#e2e8f0;
+  --radius:12px; --mono:"Cascadia Code", "JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:var(--sans);color:var(--ink);line-height:1.6;margin:0;background:var(--bg);font-size:15px}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* ---------- Cover / header ---------- */
+.cover{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#0891b2 100%);color:#fff;
+  padding:56px 48px;border-radius:0;margin-bottom:8px}
+.cover .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;opacity:.85}
+.cover h1{font-size:42px;line-height:1.1;margin:12px 0 8px;font-weight:800}
+.cover .subtitle{font-size:18px;opacity:.92;max-width:640px;font-weight:400}
+.cover .tags{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.cover .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:999px;font-size:12.5px;font-weight:600}
+.cover .meta{margin-top:22px;font-size:13px;opacity:.8}
+
+/* ---------- Typography ---------- */
+h2{font-size:27px;margin:44px 0 14px;padding-bottom:8px;border-bottom:3px solid var(--brand-soft);
+  color:var(--brand-ink);font-weight:800}
+h3{font-size:20px;margin:28px 0 10px;color:var(--ink);font-weight:700}
+h4{font-size:16px;margin:20px 0 8px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+p{margin:10px 0}
+a{color:var(--brand);text-decoration:none}
+ul,ol{margin:10px 0;padding-left:26px}
+li{margin:5px 0}
+strong{color:var(--ink);font-weight:700}
+hr{border:none;border-top:1px solid var(--line);margin:32px 0}
+.lead{font-size:17px;color:var(--ink-soft)}
+
+/* ---------- Table of contents ---------- */
+.toc{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:20px 26px;margin:22px 0}
+.toc h4{margin-top:0}
+.toc ol{columns:2;column-gap:36px}
+.toc a{color:var(--ink-soft);font-weight:600}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--radius);padding:14px 18px 14px 44px;margin:16px 0;position:relative;
+  border:1px solid var(--line);background:var(--bg-soft);page-break-inside:avoid}
+.callout::before{position:absolute;left:14px;top:13px;font-size:18px;font-weight:800}
+.callout.note{background:var(--brand-soft);border-color:#c7d7fe}.callout.note::before{content:"ℹ";color:var(--brand)}
+.callout.tip{background:var(--tip-soft);border-color:#ddd6fe}.callout.tip::before{content:"✦";color:var(--tip)}
+.callout.warn{background:var(--warn-soft);border-color:#fde68a}.callout.warn::before{content:"⚠";color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#fecaca}.callout.danger::before{content:"✕";color:var(--danger)}
+.callout.ok{background:var(--ok-soft);border-color:#a7f3d0}.callout.ok::before{content:"✓";color:var(--ok)}
+.callout .t{font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- Cards / grids ---------- */
+.grid{display:grid;gap:16px;margin:18px 0}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+  box-shadow:0 1px 3px rgba(16,24,40,.04);page-break-inside:avoid}
+.card h4{margin-top:0;color:var(--brand-ink)}
+.card.soft{background:var(--bg-soft)}
+
+/* ---------- Diagram frame ---------- */
+.diagram{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;margin:20px 0;text-align:center;page-break-inside:avoid}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font-size:13px;color:var(--muted);margin-top:10px;font-style:italic}
+
+/* ---------- Code ---------- */
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:var(--radius);padding:16px 18px;
+  overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:14px 0;page-break-inside:avoid}
+pre code{font-family:var(--mono);white-space:pre}
+:not(pre)>code{background:#eef1f6;color:#b91c1c;padding:2px 6px;border-radius:5px;font-family:var(--mono);font-size:.88em}
+.code-label{background:#1e293b;color:#94a3b8;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:6px 14px;border-radius:8px 8px 0 0;margin:14px 0 -14px;display:inline-block;letter-spacing:.03em}
+.code-label + pre{border-top-left-radius:0}
+
+/* highlight.js github-dark-ish tokens */
+.hljs-comment,.hljs-quote{color:#7c8798;font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name{color:#93c5fd}
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{color:#86efac}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-type{color:#fca5a5}
+.hljs-title,.hljs-title.function_,.hljs-section{color:#fcd34d}
+.hljs-attribute,.hljs-meta,.hljs-symbol{color:#f9a8d4}
+.hljs-tag{color:#cbd5e1}.hljs-params{color:#e2e8f0}.hljs-property{color:#c4b5fd}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;page-break-inside:avoid}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:var(--brand-ink);color:#fff;font-weight:700}
+tr:nth-child(even) td{background:var(--bg-soft)}
+table.compare th:first-child{background:var(--ink)}
+
+/* ---------- Misc ---------- */
+.badge{display:inline-block;background:var(--brand-soft);color:var(--brand-ink);border:1px solid #c7d7fe;
+  padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin:2px}
+.badge.g{background:var(--ok-soft);color:#065f46;border-color:#a7f3d0}
+.badge.o{background:var(--warn-soft);color:#92400e;border-color:#fde68a}
+.kbd{background:#fff;border:1px solid #cbd5e1;border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+  font-family:var(--mono);font-size:12px;box-shadow:0 1px 0 #e2e8f0}
+.pipeline{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:18px 0}
+.pipeline .step{background:var(--brand-soft);border:1px solid #c7d7fe;color:var(--brand-ink);
+  padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px}
+.pipeline .arrow{color:var(--brand);font-size:22px;padding:0 8px}
+
+/* interactive: collapsible (HTML only) */
+details{border:1px solid var(--line);border-radius:var(--radius);padding:0;margin:14px 0;background:var(--bg-soft)}
+details>summary{cursor:pointer;padding:12px 18px;font-weight:700;color:var(--brand-ink);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brand)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 18px 14px}
+
+.qa{border-left:4px solid var(--brand);padding:4px 0 4px 16px;margin:14px 0}
+.qa .q{font-weight:700;color:var(--brand-ink)}
+.qa .a{color:var(--ink-soft);margin-top:4px}
+
+/* ---------- Top bar / back-to-top (HTML only) ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--bg-soft);
+  border-bottom:1px solid var(--line);font-size:13px;font-weight:700;position:sticky;top:0;z-index:20}
+.topbar .sp{flex:1}
+.topbar button{font:inherit;font-weight:700;color:var(--brand-ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;cursor:pointer}
+.topbar button:hover{background:var(--brand-soft);border-color:#c7d7fe}
+.totop{position:fixed;right:18px;bottom:18px;width:40px;height:40px;border-radius:50%;background:var(--brand);
+  color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;
+  box-shadow:0 2px 8px rgba(16,24,40,.25);opacity:.85;z-index:20}
+.totop:hover{opacity:1}
+
+/* ---------- Checklists & step lists ---------- */
+.checklist{list-style:none;padding-left:0;margin:14px 0}
+.checklist li{position:relative;padding:7px 0 7px 32px;border-bottom:1px dashed var(--line)}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";position:absolute;left:6px;top:6px;font-size:16px;color:var(--brand)}
+.checklist li.done::before{content:"☑";color:var(--ok)}
+
+.steps{counter-reset:s;list-style:none;padding-left:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:4px 0 14px 44px;border-left:2px solid var(--line);margin-left:14px}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:-15px;top:0;width:28px;height:28px;border-radius:50%;
+  background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.steps>li b,.steps>li strong{display:block;color:var(--brand-ink)}
+
+/* ---------- Key-value fact strip ---------- */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.facts .f{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.facts .f b{display:block;font-size:19px;color:var(--brand-ink);line-height:1.2}
+.facts .f span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+
+/* ---------- Responsive ---------- */
+@media (max-width:760px){
+  body{font-size:14.5px}
+  .cover{padding:36px 22px}.cover h1{font-size:31px}.cover .subtitle{font-size:16px}
+  .wrap{padding:0 16px 48px}
+  .grid.c2,.grid.c3{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  h2{font-size:23px}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  table td,table th{white-space:normal;min-width:130px}
+}
+
+/* ---------- Print ---------- */
+@page{size:A4;margin:16mm 0}
+@media print{
+  .wrap{max-width:none;padding:0 16mm}
+  .cover{margin:0 0 8px;border-radius:0}
+  h2{page-break-after:avoid}
+  h3,h4{page-break-after:avoid}
+  details{border-color:var(--line)}
+  details:not([open]) .body{display:block}   /* expand all for print */
+  details>summary::before{content:""}
+  a{color:var(--ink)}
+  .no-print{display:none}
+}
+</style></head><body>
+<nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
+<span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>
+<header class="cover">
+  <div class="kicker">Career & Role</div>
+  <h1>Forward Deployed Engineer Playbook</h1>
+  <div class="subtitle">From Palantir Roots to AI-Era Practice — How to Think, Build, Deploy, Communicate and Build a Career as a Forward Deployed Engineer</div>
+  <div class="tags"><span>fde</span><span>forward-deployed</span><span>customer-engineering</span><span>palantir</span><span>prototyping</span><span>stakeholders</span><span>career</span><span>ai-startup</span><span>solutions-engineering</span><span>deployment</span><span>llm</span><span>rag</span><span>technical-sales</span><span>curriculum</span><span>engagement-economics</span><span>value-measurement</span><span>first-90-days</span><span>compensation</span><span>founder</span></div>
+  <div class="meta">Study Pack &middot; Comprehensive reference &amp; interview prep &middot; ~57 min read &middot; 12,510 words</div>
+</header>
+<main class="wrap">
+<nav class="toc"><h4>Contents</h4><ol><li><a href="#what-is-a-forward-deployed-engineer">What Is a Forward Deployed Engineer?</a></li><li><a href="#fde-vs-swe-vs-sre-vs-solutions-architect">FDE vs SWE vs SRE vs Solutions Architect</a></li><li><a href="#the-fde-mindset">The FDE Mindset</a></li><li><a href="#day-in-the-life-of-a-forward-deployed-engineer">Day-in-the-Life of a Forward Deployed Engineer</a></li><li><a href="#fde-engagement-lifecycle">FDE Engagement Lifecycle</a></li><li><a href="#core-skills-of-an-fde">Core Skills of an FDE</a></li><li><a href="#discovery-and-requirements-gathering">Discovery and Requirements Gathering</a></li><li><a href="#the-rapid-prototyping-cycle">The Rapid Prototyping Cycle</a></li><li><a href="#deploying-in-customer-environments">Deploying in Customer Environments</a></li><li><a href="#technical-credibility-with-non-technical-stakeholders">Technical Credibility with Non-Technical Stakeholders</a></li><li><a href="#communication-frameworks">Communication Frameworks</a></li><li><a href="#the-ai-ml-forward-deployed-engineer">The AI / ML Forward Deployed Engineer</a></li><li><a href="#managing-ambiguity-and-common-challenges">Managing Ambiguity and Common Challenges</a></li><li><a href="#the-fde-technical-curriculum">The FDE Technical Curriculum</a></li><li><a href="#the-fde-field-toolkit">The FDE Field Toolkit</a></li><li><a href="#your-first-90-days-in-an-fde-role">Your First 90 Days in an FDE Role</a></li><li><a href="#engagement-economics-scoping-pricing-and-margin">Engagement Economics: Scoping, Pricing and Margin</a></li><li><a href="#proving-value-measurement-and-the-business-case">Proving Value: Measurement and the Business Case</a></li><li><a href="#security-compliance-and-legal-realities-on-customer-sites">Security, Compliance and Legal Realities on Customer Sites</a></li><li><a href="#remote-hybrid-and-multi-site-deployments">Remote, Hybrid and Multi-Site Deployments</a></li><li><a href="#preparing-and-interviewing-for-fde-roles">Preparing and Interviewing for FDE Roles</a></li><li><a href="#levels-career-paths-and-compensation">Levels, Career Paths and Compensation</a></li><li><a href="#from-fde-to-founder">From FDE to Founder</a></li></ol></nav>
+<h2 id="what-is-a-forward-deployed-engineer">What Is a Forward Deployed Engineer?</h2>
+
+<p class="lead">A Forward Deployed Engineer (FDE) is a technical professional embedded directly in a customer's environment to understand their real problems, build working solutions at speed, and drive meaningful adoption of complex software — combining deep engineering skill with the communication instincts of a consultant.</p>
+
+<p>Unlike a traditional software engineer who ships features from headquarters, an FDE operates at the customer's site, inside their data, and alongside their people. The goal is not just to integrate software but to make it indispensable by solving problems the customer did not fully know how to articulate.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Palantir-Style FDE (Origin)</h4>
+    <p>Palantir Technologies coined the term and built a delivery model around it. FDEs (internally sometimes called "deployment strategists" or forward-deployed software engineers) were embedded at government agencies, hedge funds, and hospitals for months or years. They built Gotham and Foundry workflows on-site, trained operators, and fed real pain points back to product teams. The model treated engineering deployments like military forward operating bases — close to the action, adaptive, and self-sufficient.</p>
+  </div>
+  <div class="card">
+    <h4>AI-Startup Style FDE (Modern)</h4>
+    <p>Today dozens of AI companies — Glean, Scale AI, Cohere, Mistral, and many stealth-mode startups — run FDE programs. The modern variant is faster and more prototype-driven: a two-week sprint replaces a six-month residency. FDEs deploy LLM pipelines, RAG systems, and agentic workflows against customer data, then hand off a production-ready system. Speed of demo defines credibility; the engineer who ships a working prototype on day three wins the deal.</p>
+  </div>
+</div>
+
+<div class="callout note"><span class="t">Role Naming</span> Job titles vary widely: Forward Deployed Engineer, Field Engineer, Customer Engineer, Solutions Engineer, Deployment Engineer, Technical Customer Success Engineer. The FDE moniker specifically implies the ability to write and deploy production-quality code — not just configure off-the-shelf tools.</div>
+
+<p>The FDE lives at the intersection of three disciplines that rarely overlap in the same person: <strong>software engineering</strong> (ability to build), <strong>domain understanding</strong> (ability to translate business need into technical spec), and <strong>communication</strong> (ability to present, persuade, and train). Remove any one leg and the stool falls.</p>
+
+
+<h2 id="fde-vs-swe-vs-sre-vs-solutions-architect">FDE vs SWE vs SRE vs Solutions Architect</h2>
+
+<p class="lead">Understanding what an FDE is not is as important as understanding what it is. The role draws from adjacent titles but has a distinct charter.</p>
+
+<table>
+  <tr>
+    <th>Dimension</th>
+    <th>Software Engineer (SWE)</th>
+    <th>Site Reliability Engineer (SRE)</th>
+    <th>Solutions Architect (SA)</th>
+    <th>Forward Deployed Engineer (FDE)</th>
+  </tr>
+  <tr>
+    <td><strong>Primary Output</strong></td>
+    <td>Product features shipped to all customers</td>
+    <td>Reliability, uptime, toil reduction</td>
+    <td>Architecture designs, RFP responses, slide decks</td>
+    <td>Working deployments at a specific customer</td>
+  </tr>
+  <tr>
+    <td><strong>Proximity to Customer</strong></td>
+    <td>Indirect — through PM/roadmap</td>
+    <td>Operational — via monitoring, incidents</td>
+    <td>Pre-sales — demo environments, PoCs</td>
+    <td>Direct — co-located or daily sync</td>
+  </tr>
+  <tr>
+    <td><strong>Writes Code?</strong></td>
+    <td>Yes — production core</td>
+    <td>Yes — automation, tooling</td>
+    <td>Sometimes — demo scripts only</td>
+    <td>Yes — customer-specific integrations</td>
+  </tr>
+  <tr>
+    <td><strong>Ambiguity Tolerance Required</strong></td>
+    <td>Low-Medium (requirements defined by PM)</td>
+    <td>Medium (incident response is fuzzy)</td>
+    <td>High (pre-sales is exploratory)</td>
+    <td>Very High (customer does not know what they want)</td>
+  </tr>
+  <tr>
+    <td><strong>Success Metric</strong></td>
+    <td>Feature shipped, tests green</td>
+    <td>SLA met, incident count reduced</td>
+    <td>Deal won, technical win achieved</td>
+    <td>Customer using the product in production, measurable value delivered</td>
+  </tr>
+  <tr>
+    <td><strong>Feedback Loop Speed</strong></td>
+    <td>Sprint cycle (2 weeks)</td>
+    <td>Alert-driven (near-real-time)</td>
+    <td>Sales cycle (weeks to months)</td>
+    <td>Daily or same-day iteration</td>
+  </tr>
+  <tr>
+    <td><strong>Travel &amp; On-site Time</strong></td>
+    <td>Rare</td>
+    <td>Rare (cloud-managed)</td>
+    <td>Moderate (pre-sales visits)</td>
+    <td>High — often 50–80% of time on customer sites</td>
+  </tr>
+</table>
+
+<div class="callout tip"><span class="t">Career Path Tip</span> Many SAs transition into FDE roles as they want to write more code; many SWEs transition as they want more customer impact. The FDE role is an excellent lever for those who find pure product engineering too indirect but pure sales too non-technical.</div>
+
+
+<h2 id="the-fde-mindset">The FDE Mindset</h2>
+
+<p class="lead">Technical skill gets an FDE in the room. Mindset determines whether they make an impact. Three principles define how top FDEs think.</p>
+
+<h3>Principle 1 — Radical Ownership</h3>
+<p>An FDE does not wait for a PM to define the backlog or a manager to escalate a blocker. When a customer's data pipeline is broken at 11 pm before a board demo, the FDE fixes it. When the integration team's API breaks the prototype, the FDE writes a workaround rather than filing a ticket. This mirrors the Palantir "founder mindset" — you own the outcome, not just the task.</p>
+
+<div class="callout warn"><span class="t">Anti-Pattern</span> "That's not my job" is career-ending language in an FDE role. The charter is outcome ownership, not task ownership. When in doubt, pick it up.</div>
+
+<h3>Principle 2 — Bias to Action and Demo</h3>
+<p>In enterprise sales and deployment cycles, words are cheap. A 20-slide deck explaining what the product <em>could</em> do loses to a two-hour sprint that produces a working demo against the customer's own data. FDEs learn to default to building over planning. "Let me show you" beats "Let me explain to you" every time.</p>
+
+<p>This manifests in a specific behavior: the first response to a vague customer requirement is a quick prototype, not a specification document. Prototypes make requirements concrete. A customer who struggles to articulate what they want will immediately say "yes, like that — but make the chart green and add a filter for region" when they see something real.</p>
+
+<h3>Principle 3 — Customer Obsession Without Losing Product Discipline</h3>
+<p>FDEs serve the customer deeply, but not blindly. Saying yes to every customer request creates unmaintainable one-off solutions. The best FDEs balance deep empathy — genuinely understanding the customer's business pressures, org politics, and user frustrations — with honest pushback on requests that would harm the customer in the long run (over-customisation, workarounds that prevent upgrades, feature requests that belong on the product roadmap).</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Comfort with Ambiguity</h4>
+    <p>Requirements are vague. Stakeholders conflict. Data is messy. FDEs treat ambiguity as raw material, not a blocker. They set short-cycle experiments to resolve uncertainty rather than waiting for perfect information.</p>
+  </div>
+  <div class="card">
+    <h4>Ruthless Prioritisation</h4>
+    <p>Ten things matter; three are critical path. FDEs triage constantly: What is the one thing, if delivered by Friday, that will lock in the renewal? Everything else is downstream.</p>
+  </div>
+  <div class="card">
+    <h4>Feedback as Fuel</h4>
+    <p>FDEs treat user feedback — even harsh feedback — as the most valuable signal in the system. A user saying "this is useless" is data about the gap between the product and their mental model. Pursue it, not defend against it.</p>
+  </div>
+</div>
+
+
+<h2 id="day-in-the-life-of-a-forward-deployed-engineer">Day-in-the-Life of a Forward Deployed Engineer</h2>
+
+<p class="lead">No two days are identical, but patterns emerge across engagements. Below is a representative day during an active customer deployment.</p>
+
+<table>
+  <tr>
+    <th>Time</th>
+    <th>Activity</th>
+    <th>FDE Focus</th>
+  </tr>
+  <tr>
+    <td>08:00</td>
+    <td>Async standup with home team (Slack / Loom)</td>
+    <td>Surface blockers from yesterday; flag product bugs; share customer insight</td>
+  </tr>
+  <tr>
+    <td>08:30</td>
+    <td>Review overnight logs / data pipeline runs</td>
+    <td>Catch data quality issues before the customer sees them; proactive beats reactive</td>
+  </tr>
+  <tr>
+    <td>09:00</td>
+    <td>Discovery session with a business analyst on the customer side</td>
+    <td>Understand current-state workflow in granular detail; identify manual steps that could be automated</td>
+  </tr>
+  <tr>
+    <td>10:30</td>
+    <td>Focused coding sprint — integrate new data source / build feature</td>
+    <td>Heads-down build time; target a shippable increment by end of day</td>
+  </tr>
+  <tr>
+    <td>12:30</td>
+    <td>Lunch with customer practitioners (analysts, engineers)</td>
+    <td>Informal trust-building; surface frustrations that never make it to formal meetings</td>
+  </tr>
+  <tr>
+    <td>13:30</td>
+    <td>Live demo of morning's build to practitioner group</td>
+    <td>Fast feedback; validate direction; capture "that's not quite right" moments as requirements</td>
+  </tr>
+  <tr>
+    <td>14:30</td>
+    <td>Stakeholder update meeting (manager/director level)</td>
+    <td>BLUF briefing: what was built, what it proves, what comes next, what is needed from them</td>
+  </tr>
+  <tr>
+    <td>15:30</td>
+    <td>Iteration sprint based on afternoon demo feedback</td>
+    <td>Close the loop while the feedback is fresh; show updated version before leaving</td>
+  </tr>
+  <tr>
+    <td>17:00</td>
+    <td>Async write-up: discovery notes, decisions log, next-day plan</td>
+    <td>Institutional memory; keeps home team and customer aligned; reduces meeting load</td>
+  </tr>
+  <tr>
+    <td>18:00</td>
+    <td>Escalation call with product team (if needed)</td>
+    <td>Translate customer pain into product-team language; advocate for priority change</td>
+  </tr>
+</table>
+
+<div class="callout tip"><span class="t">Time Management Pattern</span> Protect at least 3–4 continuous hours per day for building. Fragmented meetings destroy the deep-work windows that produce prototypes. FDEs learn to batch meetings into morning/afternoon blocks and guard coding time ruthlessly.</div>
+
+
+<h2 id="fde-engagement-lifecycle">FDE Engagement Lifecycle</h2>
+
+<p class="lead">Every FDE engagement moves through recognisable phases, each with its own goals, risks, and deliverables. Understanding the lifecycle helps you anticipate what comes next and prepare accordingly.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 760 160" width="760" height="160">
+  <!-- Background -->
+  <rect width="760" height="160" fill="#f8fafc" rx="8"/>
+
+  <!-- Stage boxes -->
+  <!-- 1: Discovery -->
+  <rect x="10" y="40" width="110" height="60" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="65" y="65" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#1e3a8a">Discovery</text>
+  <text x="65" y="82" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#2563eb">Interviews &amp;</text>
+  <text x="65" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#2563eb">Data Audit</text>
+
+  <!-- Arrow 1 -->
+  <path d="M120 70 L140 70" stroke="#2563eb" stroke-width="2" marker-end="url(#arr)"/>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- 2: Design -->
+  <rect x="140" y="40" width="110" height="60" rx="8" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="195" y="65" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#1e3a8a">Design</text>
+  <text x="195" y="82" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#2563eb">Architecture</text>
+  <text x="195" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#2563eb">&amp; Scope</text>
+
+  <!-- Arrow 2 -->
+  <path d="M250 70 L270 70" stroke="#2563eb" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 3: Prototype -->
+  <rect x="270" y="40" width="110" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="325" y="65" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#065f46">Prototype</text>
+  <text x="325" y="82" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#059669">Sprint Build</text>
+  <text x="325" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#059669">&amp; Demo</text>
+
+  <!-- Arrow 3 -->
+  <path d="M380 70 L400 70" stroke="#2563eb" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 4: Pilot -->
+  <rect x="400" y="40" width="110" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="455" y="65" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#065f46">Pilot</text>
+  <text x="455" y="82" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#059669">Real Users,</text>
+  <text x="455" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#059669">Live Data</text>
+
+  <!-- Arrow 4 -->
+  <path d="M510 70 L530 70" stroke="#2563eb" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 5: Harden -->
+  <rect x="530" y="40" width="110" height="60" rx="8" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="585" y="65" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#7c2d12">Harden</text>
+  <text x="585" y="82" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#b45309">Security, Scale,</text>
+  <text x="585" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#b45309">Handoff</text>
+
+  <!-- Arrow 5 -->
+  <path d="M640 70 L660 70" stroke="#2563eb" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 6: Scale -->
+  <rect x="660" y="40" width="90" height="60" rx="8" fill="#eff4ff" stroke="#0891b2" stroke-width="2"/>
+  <text x="705" y="65" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#164e63">Scale</text>
+  <text x="705" y="82" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#0891b2">Expand &amp;</text>
+  <text x="705" y="94" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#0891b2">Renew</text>
+
+  <!-- Duration labels -->
+  <text x="65" y="130" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">1–2 wks</text>
+  <text x="195" y="130" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">3–5 days</text>
+  <text x="325" y="130" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">1–4 wks</text>
+  <text x="455" y="130" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">2–8 wks</text>
+  <text x="585" y="130" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">2–6 wks</text>
+  <text x="705" y="130" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">Ongoing</text>
+</svg>
+<div class="cap">FDE engagement lifecycle — from initial discovery through full production scale. Prototype and Pilot phases often loop several times before hardening begins.</div>
+</div>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Discovery Phase Goals</h4>
+    <p>Map the current-state workflow end-to-end. Identify the "moment of pain" — the specific step where the most time, error, or frustration lives. Audit available data sources for quality, access, and latency. Establish who the real decision-makers are versus the named stakeholders. Produce a one-page problem statement and a data inventory.</p>
+  </div>
+  <div class="card">
+    <h4>Pilot Phase Goals</h4>
+    <p>Get real users on real data in a real workflow — even if the system is imperfect. Measure: Are they using it? Are they completing the workflow faster? What friction points remain? A pilot that produces 10 genuine users and 50 workflow completions is worth more than a polished demo watched once by an executive.</p>
+  </div>
+</div>
+
+
+<h2 id="core-skills-of-an-fde">Core Skills of an FDE</h2>
+
+<p class="lead">FDE roles demand an unusually wide skill surface. Use the matrix below to self-assess and identify growth areas before pursuing or starting a role.</p>
+
+<h3>Technical Skills Matrix</h3>
+
+<table>
+  <tr>
+    <th>Skill Area</th>
+    <th>What It Looks Like in Practice</th>
+    <th>Minimum Bar</th>
+    <th>Differentiator Level</th>
+  </tr>
+  <tr>
+    <td><span class="badge">Data Engineering</span></td>
+    <td>Connecting to customer DBs, writing ETL/ELT pipelines, handling dirty data, building transformation layers</td>
+    <td>SQL proficiency; one ETL framework (dbt, Airflow, Spark)</td>
+    <td>Can assess data quality in minutes; builds robust pipelines under time pressure</td>
+  </tr>
+  <tr>
+    <td><span class="badge">Backend / APIs</span></td>
+    <td>Building REST or GraphQL APIs to expose platform data; writing integration adapters</td>
+    <td>One backend language (Python/FastAPI, Node.js, Java)</td>
+    <td>Writes production-quality integration code in 2–4 hours; understands auth patterns (OAuth, SAML, API keys)</td>
+  </tr>
+  <tr>
+    <td><span class="badge g">AI / ML</span></td>
+    <td>Deploying LLM pipelines, setting up RAG, prompt engineering, fine-tuning evaluation</td>
+    <td>Can deploy a working LangChain/LlamaIndex RAG in a day; understands embeddings and retrieval</td>
+    <td>Evaluates model outputs systematically; knows when NOT to use LLMs; tunes chunking and retrieval strategy</td>
+  </tr>
+  <tr>
+    <td><span class="badge">Cloud Infrastructure</span></td>
+    <td>Standing up environments on AWS/Azure/GCP; managing IAM, VPCs, secrets, cost monitoring</td>
+    <td>Deploy a containerised app to cloud; understand IAM basics</td>
+    <td>Navigates enterprise cloud governance; VPC peering, PrivateLink, air-gapped deployments</td>
+  </tr>
+  <tr>
+    <td><span class="badge">Frontend / Visualisation</span></td>
+    <td>Building dashboards, admin UIs, demo apps using React / Streamlit / Dash</td>
+    <td>Can build a Streamlit or Gradio demo in an hour</td>
+    <td>Builds polished React interfaces; understands UX enough to spot friction before users complain</td>
+  </tr>
+  <tr>
+    <td><span class="badge o">Security &amp; Compliance</span></td>
+    <td>Understanding data residency, encryption at rest/in transit, RBAC, audit logging requirements</td>
+    <td>Knows HTTPS, auth basics, can explain data residency concerns</td>
+    <td>Navigates SOC 2, GDPR, FedRAMP requirements without a compliance team present</td>
+  </tr>
+  <tr>
+    <td><span class="badge">Scripting &amp; Automation</span></td>
+    <td>Writing deployment scripts, data validation scripts, internal tooling</td>
+    <td>Proficient bash/Python scripting; git fluency</td>
+    <td>Automates repetitive customer tasks during the engagement; leaves the customer better than found</td>
+  </tr>
+</table>
+
+<h3>Interpersonal Skills Matrix</h3>
+
+<table>
+  <tr>
+    <th>Skill</th>
+    <th>Why It Matters for an FDE</th>
+    <th>Warning Sign of Weakness</th>
+  </tr>
+  <tr>
+    <td><strong>Active Listening</strong></td>
+    <td>Customers describe symptoms, not root causes. Deep listening surfaces the real problem under the stated problem.</td>
+    <td>Jumping to solutions before the customer finishes speaking; proposing the same answer regardless of what was said</td>
+  </tr>
+  <tr>
+    <td><strong>Stakeholder Mapping</strong></td>
+    <td>Understanding who holds budget, who holds veto power, who will champion adoption — and who will sabotage it</td>
+    <td>Presenting only to the single contact who invited you; getting blindsided by opposition from unseen stakeholders</td>
+  </tr>
+  <tr>
+    <td><strong>Executive Communication</strong></td>
+    <td>Executives have 10 minutes and need the answer first, the evidence second. Failure to adapt causes FDEs to lose the room.</td>
+    <td>Leading with technical detail in exec meetings; 10-slide build-up before revealing the point</td>
+  </tr>
+  <tr>
+    <td><strong>Conflict Navigation</strong></td>
+    <td>Business users and IT/security teams often have opposing goals. FDEs must hold both without creating political fallout.</td>
+    <td>Taking sides in internal customer politics; losing IT's trust while chasing business-user approval</td>
+  </tr>
+  <tr>
+    <td><strong>Expectation Setting</strong></td>
+    <td>Over-promising and under-delivering destroys trust faster than any technical failure. Setting tight, honest scope is a skill.</td>
+    <td>Saying "we can definitely do that" to every request; scope growing without explicit renegotiation</td>
+  </tr>
+  <tr>
+    <td><strong>Storytelling</strong></td>
+    <td>Data does not speak for itself. FDEs narrate the story of the data — the insight it reveals and the action it enables.</td>
+    <td>Showing a chart without explaining what decision it should drive; leaving the "so what" unspoken</td>
+  </tr>
+</table>
+
+
+<h2 id="discovery-and-requirements-gathering">Discovery and Requirements Gathering</h2>
+
+<p class="lead">Discovery is the highest-leverage activity in an FDE engagement. Getting it wrong means building the wrong thing brilliantly. Getting it right means solving a problem the customer has been stuck on for years.</p>
+
+<h3>The Five Questions Framework</h3>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>1. What do you do today?</h4>
+    <p>Walk me through the exact steps, tools, and handoffs of your current workflow. Ask to see it live. Shadow a practitioner. Watch where they pause, click twice, copy-paste between systems, or mutter "this always breaks."</p>
+  </div>
+  <div class="card">
+    <h4>2. Where does it hurt?</h4>
+    <p>Which step costs the most time? Where do errors originate? What requires manual judgment that you wish was automated? Listen for answers measured in person-hours per week — these become your ROI story later.</p>
+  </div>
+  <div class="card">
+    <h4>3. What does done look like?</h4>
+    <p>If this project is a success in six months, what is different? Who is doing what differently? What number has moved? Force the customer to describe a specific future state, not a vague improvement.</p>
+  </div>
+  <div class="card">
+    <h4>4. What has been tried before?</h4>
+    <p>Previous failed projects carry priceless information about real constraints. "We tried that with Vendor X and it failed because..." is not a reason to abandon — it is a map of the minefield you must navigate differently.</p>
+  </div>
+  <div class="card">
+    <h4>5. Who else needs to be in the room?</h4>
+    <p>Whoever you are talking to is probably not the full picture. Who owns the data? Who controls access? Who will actually use this daily? Map the full human system, not just the org chart.</p>
+  </div>
+  <div class="card">
+    <h4>Discovery Artefacts to Produce</h4>
+    <p>One-page problem statement. Data source inventory (name, owner, access method, quality notes). Stakeholder map with influence/interest scores. Draft success criteria with measurable targets. These four documents gate the design phase.</p>
+  </div>
+</div>
+
+<div class="callout warn"><span class="t">Common Discovery Mistake</span> Accepting the first answer. When a customer says "we need a dashboard," the real need is usually a decision that is currently being made slowly or badly. Keep asking "why does that matter?" until you reach the business outcome.</div>
+
+<h3>Data Audit Checklist</h3>
+<p>Before writing a line of code, understand the data landscape:</p>
+
+<div class="pipeline">
+  <span class="step">Identify Sources</span>
+  <span class="arrow">-></span>
+  <span class="step">Check Access &amp; Auth</span>
+  <span class="arrow">-></span>
+  <span class="step">Profile Data Quality</span>
+  <span class="arrow">-></span>
+  <span class="step">Assess Latency</span>
+  <span class="arrow">-></span>
+  <span class="step">Document Gaps</span>
+</div>
+
+<p>Key questions: Is the data in a database, flat files, or an API? Who owns access credentials? What is the null rate on key fields? Is there a data dictionary? What is the update frequency? Are there PII or GDPR-regulated fields?</p>
+
+
+<h2 id="the-rapid-prototyping-cycle">The Rapid Prototyping Cycle</h2>
+
+<p class="lead">The FDE's core delivery mechanism is the rapid prototype — a working, demonstrable system built in hours or days that makes abstract requirements concrete and creates undeniable momentum.</p>
+
+<div class="diagram">
+<svg viewBox="0 0 440 420" width="440" height="420">
+  <rect width="440" height="420" fill="#f8fafc" rx="8"/>
+
+  <!-- Central circle -->
+  <circle cx="220" cy="210" r="55" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="220" y="205" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">Rapid</text>
+  <text x="220" y="222" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">Prototype</text>
+  <text x="220" y="238" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#2563eb">Cycle</text>
+
+  <!-- Stage 1: Discover (top) -->
+  <ellipse cx="220" cy="60" rx="72" ry="30" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="220" y="55" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#1e3a8a">1. Discover</text>
+  <text x="220" y="71" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#2563eb">Define the problem</text>
+  <!-- Arrow down-right -->
+  <path d="M280 80 Q320 130 290 165" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <defs>
+    <marker id="arr2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- Stage 2: Build (right) -->
+  <ellipse cx="370" cy="210" rx="62" ry="30" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="370" y="205" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#065f46">2. Build</text>
+  <text x="370" y="221" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#059669">Hours, not weeks</text>
+  <!-- Arrow down-left -->
+  <path d="M355 238 Q340 290 290 305" stroke="#059669" stroke-width="1.5" fill="none" marker-end="url(#arr3)"/>
+  <defs>
+    <marker id="arr3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- Stage 3: Demo (bottom-right) -->
+  <ellipse cx="310" cy="350" rx="75" ry="30" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="310" y="345" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#065f46">3. Demo</text>
+  <text x="310" y="361" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#059669">Real users, real data</text>
+  <!-- Arrow left -->
+  <path d="M240 368 L185 368" stroke="#b45309" stroke-width="1.5" fill="none" marker-end="url(#arr4)"/>
+  <defs>
+    <marker id="arr4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#b45309"/>
+    </marker>
+  </defs>
+
+  <!-- Stage 4: Capture Feedback (bottom-left) -->
+  <ellipse cx="125" cy="350" rx="80" ry="30" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="125" y="345" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#7c2d12">4. Capture</text>
+  <text x="125" y="361" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#b45309">Feedback &amp; priority</text>
+  <!-- Arrow up-left -->
+  <path d="M88 322 Q68 270 148 255" stroke="#b45309" stroke-width="1.5" fill="none" marker-end="url(#arr5)"/>
+  <defs>
+    <marker id="arr5" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#b45309"/>
+    </marker>
+  </defs>
+
+  <!-- Stage 5: Iterate (left) -->
+  <ellipse cx="72" cy="210" rx="62" ry="30" fill="#f0fdfa" stroke="#0891b2" stroke-width="2"/>
+  <text x="72" y="205" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#164e63">5. Iterate</text>
+  <text x="72" y="221" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#0891b2">Refine or pivot</text>
+  <!-- Arrow up-right -->
+  <path d="M110 183 Q145 130 158 90" stroke="#0891b2" stroke-width="1.5" fill="none" marker-end="url(#arr6)"/>
+  <defs>
+    <marker id="arr6" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#0891b2"/>
+    </marker>
+  </defs>
+</svg>
+<div class="cap">The FDE rapid prototype cycle. Each loop should complete in 1–3 days during early phases; feedback from real users drives the direction of each iteration.</div>
+</div>
+
+<h3>Prototype vs Production Mindset</h3>
+
+<div class="callout note"><span class="t">Timebox Everything</span> A prototype has a time budget, not a quality budget. The goal is to answer a specific question — "can this data source support the use case?" or "will users adopt this interface?" — not to build something you would put in a production code review. Ruthlessly cut scope to stay within the timebox.</div>
+
+<p>The "demo or die" culture of elite FDE teams produces a specific working style: start with the output (the screen the user will see, the number the executive cares about) and work backwards to the minimum data pipeline that can produce it. This is the inverse of traditional engineering, which starts with a clean data model and builds forward.</p>
+
+<div class="grid c3">
+  <div class="card">
+    <h4>Day 1 Prototype</h4>
+    <p>Connect to one data source. Show one meaningful insight. Use Streamlit, Jupyter, or a simple script. The goal is to prove the data exists and contains signal — not to build a product.</p>
+  </div>
+  <div class="card">
+    <h4>Week 1 Prototype</h4>
+    <p>Working end-to-end flow covering the core use case. Real data, real users in the room. Ugly is fine. One or two features fully functional beats five features half-done. Collect 10+ pieces of written feedback.</p>
+  </div>
+  <div class="card">
+    <h4>Month 1 Prototype</h4>
+    <p>Hardened enough for a pilot: authentication, basic error handling, logging. Not production — but runnable by someone other than you. Documentation sufficient for a handoff meeting.</p>
+  </div>
+</div>
+
+
+<h2 id="deploying-in-customer-environments">Deploying in Customer Environments</h2>
+
+<p class="lead">Shipping code in your own laptop's environment is the easy part. The FDE's real skill is navigating the customer's infrastructure, security posture, and organisational constraints to get software running where it needs to run.</p>
+
+<h3>Environment Categories</h3>
+
+<table>
+  <tr>
+    <th>Environment Type</th>
+    <th>Common Industries</th>
+    <th>Key Challenges</th>
+    <th>FDE Approach</th>
+  </tr>
+  <tr>
+    <td><strong>Public Cloud (AWS/Azure/GCP)</strong></td>
+    <td>SaaS companies, tech firms, modern enterprises</td>
+    <td>IAM complexity, cost governance, multi-account structures</td>
+    <td>Understand the customer's cloud org; work within existing VPCs rather than creating new ones; use Terraform/CDK if the team has it</td>
+  </tr>
+  <tr>
+    <td><strong>Private Cloud / On-Prem Data Centre</strong></td>
+    <td>Banks, insurance, healthcare, government</td>
+    <td>Slow provisioning, strict change management, no internet access</td>
+    <td>Package everything as container images; provide air-gap-compatible artefacts; work with the infrastructure team early and often</td>
+  </tr>
+  <tr>
+    <td><strong>Air-Gapped / Classified Network</strong></td>
+    <td>Defence, intelligence, critical infrastructure</td>
+    <td>No external model calls, no pip/npm install, manual artefact transfer</td>
+    <td>Pre-package all dependencies; use locally hosted models (Llama, Mistral); build for zero external network calls</td>
+  </tr>
+  <tr>
+    <td><strong>Hybrid (cloud + on-prem data)</strong></td>
+    <td>Large manufacturers, retailers, utilities</td>
+    <td>Data residency rules, latency between cloud and on-prem, security team friction</td>
+    <td>Map data flows explicitly; use PrivateLink / VPN; separate processing from storage clearly</td>
+  </tr>
+</table>
+
+<div class="callout danger"><span class="t">Security Red Lines</span> Never bypass a customer's security controls, even temporarily "just for the demo." Asking IT to open firewall ports for 24 hours creates a shadow IT risk that may come back to haunt the engagement. Work through proper channels — it takes longer but builds durable trust with the security team.</div>
+
+<h3>Change Management: The Human Side of Deployment</h3>
+<p>Technology deployment fails more often because of people than because of code. When a new system replaces a workflow that a team has used for years, expect resistance — even when the new system is objectively better. FDEs who ignore this reality deploy software that nobody uses.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Identify the Champions Early</h4>
+    <p>Find the one or two practitioners who are excited, curious, and influential among their peers. Invest in making them successful first. Their endorsement to colleagues is worth more than any executive mandate.</p>
+  </div>
+  <div class="card">
+    <h4>Make the Old Way Harder</h4>
+    <p>If the old spreadsheet is still sitting there and the new system requires login, users will choose the spreadsheet. Work with sponsors to sunset the old workflow alongside launching the new one. Adoption follows friction, not enthusiasm.</p>
+  </div>
+</div>
+
+
+<h2 id="technical-credibility-with-non-technical-stakeholders">Technical Credibility with Non-Technical Stakeholders</h2>
+
+<p class="lead">An FDE who can only communicate with engineers will fail. Most decisions about technology adoption are made by people who have never written code — and their approval requires a different kind of demonstration.</p>
+
+<h3>The Stakeholder Map</h3>
+
+<div class="diagram">
+<svg viewBox="0 0 520 400" width="520" height="400">
+  <rect width="520" height="400" fill="#f8fafc" rx="8"/>
+
+  <!-- Axes -->
+  <line x1="60" y1="340" x2="480" y2="340" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="60" y1="340" x2="60" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
+
+  <!-- Axis labels -->
+  <text x="270" y="385" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#64748b">Technical Depth</text>
+  <text x="22" y="190" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#64748b" transform="rotate(-90 22 190)">Decision Authority</text>
+  <text x="65" y="355" font-family="system-ui,sans-serif" font-size="9" fill="#94a3b8">Low</text>
+  <text x="460" y="355" font-family="system-ui,sans-serif" font-size="9" fill="#94a3b8">High</text>
+  <text x="65" y="345" font-family="system-ui,sans-serif" font-size="9" fill="#94a3b8">Low</text>
+  <text x="65" y="50" font-family="system-ui,sans-serif" font-size="9" fill="#94a3b8">High</text>
+
+  <!-- Quadrant dividers -->
+  <line x1="270" y1="30" x2="270" y2="340" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5,4"/>
+  <line x1="60" y1="185" x2="480" y2="185" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5,4"/>
+
+  <!-- Q1: High authority, low technical — Exec Sponsor -->
+  <ellipse cx="155" cy="100" rx="70" ry="32" fill="#eff4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="155" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#1e3a8a">Executive</text>
+  <text x="155" y="112" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#2563eb">Sponsor / VP</text>
+  <text x="155" y="145" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">BLUF + ROI story</text>
+
+  <!-- Q2: High authority, high technical — CTO/Architect -->
+  <ellipse cx="390" cy="100" rx="75" ry="32" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="390" y="96" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#065f46">CTO / Principal</text>
+  <text x="390" y="112" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#059669">Architect</text>
+  <text x="390" y="145" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">Deep architecture review</text>
+
+  <!-- Q3: Low authority, low technical — Business User / Champion -->
+  <ellipse cx="155" cy="270" rx="75" ry="32" fill="#fff7ed" stroke="#b45309" stroke-width="2"/>
+  <text x="155" y="266" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#7c2d12">Business User</text>
+  <text x="155" y="282" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#b45309">/ Champion</text>
+  <text x="155" y="315" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">Workflow demo, quick wins</text>
+
+  <!-- Q4: Low authority, high technical — Engineer / Analyst -->
+  <ellipse cx="390" cy="270" rx="75" ry="32" fill="#f0fdfa" stroke="#0891b2" stroke-width="2"/>
+  <text x="390" y="266" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#164e63">IT / Data</text>
+  <text x="390" y="282" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#0891b2">Engineer / Analyst</text>
+  <text x="390" y="315" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">Technical deep-dive, access</text>
+</svg>
+<div class="cap">Stakeholder map by technical depth vs. decision authority. Each quadrant requires a different communication approach. FDEs must fluently navigate all four.</div>
+</div>
+
+<h3>Techniques for Non-Technical Stakeholders</h3>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>The Analogy Bridge</h4>
+    <p>Connect unfamiliar technology to something the stakeholder already understands. "Our vector database works like a smart library catalogue — instead of searching by exact title, it finds books by meaning, so a search for 'cost reduction strategies' finds documents about 'expense optimisation' even if those words never appear." Never use jargon without immediately offering the analogy.</p>
+  </div>
+  <div class="card">
+    <h4>Live Data Demos Over Slides</h4>
+    <p>Nothing builds credibility faster than typing a real question into a system connected to the customer's own data and getting a useful answer in seconds. A 30-second live demo of their data outweighs a 30-slide deck. If you cannot demo live, bring screenshots from their environment, not generic product screenshots.</p>
+  </div>
+  <div class="card">
+    <h4>Quantify the Pain Before the Solution</h4>
+    <p>Before presenting the solution, establish the cost of the status quo in language the executive cares about: hours per week, error rate per quarter, time-to-decision in days. "Today your analysts spend 14 hours per week on this task. Our system reduces that to 2 hours. At an average fully-loaded cost of €120/hour, that is over €700,000 per year in recovered capacity."</p>
+  </div>
+  <div class="card">
+    <h4>Own the "What Could Go Wrong"</h4>
+    <p>Non-technical stakeholders fear the unknown. When you proactively name the risks — "the main risk here is data quality in the legacy ERP, and here is how we will address it" — you look like the most trustworthy person in the room. Executives who have been burned by technology overpromising will reward honest risk acknowledgement.</p>
+  </div>
+</div>
+
+
+<h2 id="communication-frameworks">Communication Frameworks</h2>
+
+<p class="lead">FDEs are prolific communicators — written updates, verbal briefings, demo narrations, and escalation emails. Two frameworks form the foundation of clear, influential communication.</p>
+
+<h3>BLUF — Bottom Line Up Front</h3>
+<p>Used by the US military and adopted by fast-moving organisations, BLUF demands that every written or verbal communication starts with the key point. The context, evidence, and caveats follow — but the reader gets the answer in the first sentence.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Without BLUF (Burying the Lead)</h4>
+    <p>"We spent Tuesday reviewing the ERP data with the analytics team. We found three data quality issues in the accounts payable table, discussed potential approaches, consulted with the IT team about access to the staging environment, and ran some preliminary analysis. <em>We think the project can still meet the deadline but we need an additional two weeks.</em>"</p>
+  </div>
+  <div class="card">
+    <h4>With BLUF</h4>
+    <p>"<strong>We need a two-week extension to meet the quality bar we both agreed to.</strong> Three data quality issues in accounts payable will take 10 days to resolve properly; rushing them creates a production risk. I have a plan to address all three — details below. I would like to brief you on this Thursday."</p>
+  </div>
+</div>
+
+<h3>The Pyramid Principle for Demos and Presentations</h3>
+<p>Barbara Minto's Pyramid Principle structures communication so the highest-level insight comes first, followed by supporting arguments, followed by evidence. Applied to FDE demos:</p>
+
+<div class="pipeline">
+  <span class="step">Governing Insight</span>
+  <span class="arrow">-></span>
+  <span class="step">3 Supporting Claims</span>
+  <span class="arrow">-></span>
+  <span class="step">Evidence per Claim</span>
+  <span class="arrow">-></span>
+  <span class="step">Call to Action</span>
+</div>
+
+<p>For a typical demo: "This system will reduce your procurement cycle time by 40% [governing insight]. It automates the vendor matching step [claim 1], eliminates the manual data entry into SAP [claim 2], and flags exceptions proactively rather than reactively [claim 3]. Here is each of those working live [evidence]. What I need from you today is sign-off to begin the pilot with the Frankfurt team [call to action]."</p>
+
+<h3>Demo Structure Best Practices</h3>
+
+<div class="callout tip"><span class="t">The Three-Scene Demo</span> Structure every demo in three scenes: (1) Show the painful current state — manually, slowly, with errors visible. (2) Show the new system doing the same task — faster, automatically, with confidence indicators. (3) Show the insight or action enabled by the new capability that was impossible before. Three scenes, under 10 minutes, drives the memorable contrast.</div>
+
+<table>
+  <tr>
+    <th>Demo Element</th>
+    <th>Purpose</th>
+    <th>Common Mistake</th>
+  </tr>
+  <tr>
+    <td>Open with a user story</td>
+    <td>Creates emotional connection; audience imagines themselves in the scenario</td>
+    <td>Opening with a product overview slide; losing the audience in the first 30 seconds</td>
+  </tr>
+  <tr>
+    <td>Use live customer data (or close approximation)</td>
+    <td>Makes the demo tangible and credible; generic data feels abstract</td>
+    <td>Using "ACME Corp" sample data that bears no relation to the customer's domain</td>
+  </tr>
+  <tr>
+    <td>Narrate the "so what"</td>
+    <td>Connects feature to business outcome; audience knows what to conclude</td>
+    <td>Clicking through features in silence; audience fills the silence with scepticism</td>
+  </tr>
+  <tr>
+    <td>Invite a specific question</td>
+    <td>Signals confidence; demonstrates the system can handle the unexpected</td>
+    <td>Steering away from questions; making the audience feel the demo is scripted and fragile</td>
+  </tr>
+  <tr>
+    <td>Close with a concrete next step</td>
+    <td>Moves the engagement forward; prevents demos becoming events with no outcome</td>
+    <td>Ending with "any questions?" without naming who does what by when</td>
+  </tr>
+</table>
+
+
+<h2 id="the-ai-ml-forward-deployed-engineer">The AI / ML Forward Deployed Engineer</h2>
+
+<p class="lead">As AI-native companies proliferate, a specialised variant of the FDE role has emerged: the AI/ML FDE who deploys large language model solutions, retrieval-augmented generation (RAG) systems, and agentic pipelines directly in customer environments.</p>
+
+<h3>LLM Deployment Patterns</h3>
+
+<table>
+  <tr>
+    <th>Pattern</th>
+    <th>Description</th>
+    <th>When to Use</th>
+    <th>Key Risks</th>
+  </tr>
+  <tr>
+    <td><strong>Direct API Integration</strong></td>
+    <td>Customer application calls a hosted LLM API (OpenAI, Anthropic, Azure OpenAI) directly</td>
+    <td>Non-regulated data, cloud-native customer, speed of deployment prioritised</td>
+    <td>Data leaves customer environment; vendor dependency; cost unpredictability at scale</td>
+  </tr>
+  <tr>
+    <td><strong>Self-Hosted Open Model</strong></td>
+    <td>Open-weight model (Llama, Mistral, Qwen) deployed on customer's GPU infrastructure</td>
+    <td>Regulated industries; air-gapped environments; cost at scale; data sovereignty</td>
+    <td>Infrastructure cost and complexity; model quality gap vs frontier models; maintenance burden</td>
+  </tr>
+  <tr>
+    <td><strong>RAG Pipeline</strong></td>
+    <td>LLM grounded in retrieved documents from a vector database populated with customer's proprietary data</td>
+    <td>Knowledge-base Q&amp;A, document search, policy/compliance queries</td>
+    <td>Retrieval quality determines answer quality; chunking strategy is critical; hallucinations still possible</td>
+  </tr>
+  <tr>
+    <td><strong>Fine-Tuned Model</strong></td>
+    <td>Base model fine-tuned on customer's domain data for tone, format, or specialised task</td>
+    <td>Consistent output format required; proprietary terminology; base model underperforms</td>
+    <td>Data quality requirements are high; expensive to maintain as base models update; can reduce generality</td>
+  </tr>
+  <tr>
+    <td><strong>Agentic Pipeline</strong></td>
+    <td>LLM orchestrates tools, APIs, and sub-tasks autonomously to complete multi-step workflows</td>
+    <td>Complex workflows with conditional logic; research tasks; code generation pipelines</td>
+    <td>Reliability and error handling are hard; long chains amplify mistakes; requires robust tool definitions</td>
+  </tr>
+</table>
+
+<h3>RAG System Quality Levers</h3>
+<p>Most AI FDE engagements involve a RAG system. Output quality is determined at four stages, each of which the FDE must tune:</p>
+
+<div class="pipeline">
+  <span class="step">Ingestion &amp; Chunking</span>
+  <span class="arrow">-></span>
+  <span class="step">Embedding Model</span>
+  <span class="arrow">-></span>
+  <span class="step">Retrieval Strategy</span>
+  <span class="arrow">-></span>
+  <span class="step">Generation Prompt</span>
+  <span class="arrow">-></span>
+  <span class="step">Output Evaluation</span>
+</div>
+
+<div class="callout tip"><span class="t">RAG Debugging Heuristic</span> When a RAG system gives a bad answer, ask: (1) Was the relevant document ever ingested? (2) Was it retrieved for this query? (3) Was it ranked high enough to fit in context? (4) Did the prompt instruct the model to use it correctly? Work backwards through the pipeline to find the failure point before touching the generation layer.</div>
+
+<h3>Running AI Workshops with Customers</h3>
+<p>AI/ML FDEs frequently run structured workshops to identify use cases, build internal champions, and transfer knowledge. A well-run workshop accelerates the engagement by weeks.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Use Case Identification Workshop (Half-Day)</h4>
+    <p>Goal: surface the top 5–10 AI use cases the customer has been considering. Structure: (1) 30-min intro on what LLMs can and cannot do reliably. (2) Small-group brainstorm by department. (3) Rapid scoring on value vs. feasibility vs. data-readiness. (4) Top 3 selected for a 2-week prototype sprint. Deliverable: ranked use case backlog with data requirements noted.</p>
+  </div>
+  <div class="card">
+    <h4>Prompt Engineering Workshop (2–3 Hours)</h4>
+    <p>Goal: enable the customer's analysts and domain experts to write effective prompts themselves. Structure: (1) Live examples of prompt impact — show the same request phrased three ways producing wildly different outputs. (2) Hands-on: participants rewrite a failing prompt using chain-of-thought, few-shot examples, or role assignment. (3) Build a shared prompt library for their top use case. Deliverable: documented prompt patterns and a shared Notion/Confluence page of tested examples.</p>
+  </div>
+</div>
+
+<div class="callout note"><span class="t">AI FDE Key Principle</span> The most important skill in AI deployment is knowing when NOT to use an LLM. If the task is deterministic, structured, and has clear rules — use a rules engine or a SQL query. Reserve LLMs for tasks requiring language understanding, synthesis, or reasoning over unstructured content. This judgment builds more credibility than any impressive demo.</div>
+
+
+<h2 id="managing-ambiguity-and-common-challenges">Managing Ambiguity and Common Challenges</h2>
+
+<p class="lead">FDE engagements are rarely clean. The challenges below are near-universal — recognising them early enables proactive management rather than reactive firefighting.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Challenge: Scope Creep</h4>
+    <p><strong>Pattern:</strong> Every demo surfaces three new requests. By week four, the original scope is buried under a list of "while we're at it" additions.</p>
+    <p><strong>Response:</strong> Maintain a written scope document from day one. When new requests arrive, explicitly acknowledge them, log them in a backlog, and say: "That is a great idea and it goes in the backlog. Here is what we agreed is in scope for this sprint. Should we change the scope, or keep to the plan and tackle this next?" Force an explicit trade-off conversation, do not silently absorb additions.</p>
+  </div>
+  <div class="card">
+    <h4>Challenge: No Clear Decision-Maker</h4>
+    <p><strong>Pattern:</strong> Three people each believe they own the project. Decisions require consensus of stakeholders who rarely meet. Every meeting produces "great feedback" with no resolution.</p>
+    <p><strong>Response:</strong> Escalate early by asking your sponsor directly: "Who has the authority to approve X? I need a decision by Thursday to keep the timeline." Document decisions in writing immediately after they are made and send to all stakeholders. Make the cost of indecision visible: "If we do not resolve the data access question by Friday, the pilot slips two weeks."</p>
+  </div>
+  <div class="card">
+    <h4>Challenge: Data That Does Not Exist or Is Not Ready</h4>
+    <p><strong>Pattern:</strong> The promised data source has null rates above 40%, is not yet in the data warehouse, or requires six months of legal review to access.</p>
+    <p><strong>Response:</strong> Reframe the engagement around data that is available now; use synthetic or anonymised data to prove the concept; make the data readiness work a parallel workstream with a named customer owner, not an FDE dependency.</p>
+  </div>
+  <div class="card">
+    <h4>Challenge: Saboteur Stakeholders</h4>
+    <p><strong>Pattern:</strong> Someone in the customer organisation — often a person whose current role or team is threatened by the new system — creates friction, delays access, or poisons the well with key decision-makers.</p>
+    <p><strong>Response:</strong> Identify them early. Find the legitimate concern underneath the resistance (often job security, technical scepticism, or loss of control). Address it directly and privately. Involve them in the solution where possible — people rarely sabotage things they helped build.</p>
+  </div>
+  <div class="card">
+    <h4>Challenge: Pilot That Does Not Convert</h4>
+    <p><strong>Pattern:</strong> A successful prototype and a good pilot, but the customer does not expand to production. The "value" was felt but not quantified; the champion moved roles; the budget cycle shifted.</p>
+    <p><strong>Response:</strong> Quantify value in writing throughout the pilot, not just at the end. Build a business case together with the customer's own finance team — numbers they provided are harder to dismiss than numbers you provided. Identify the next budget cycle and work backwards to when a decision must be made.</p>
+  </div>
+  <div class="card">
+    <h4>Challenge: Isolation from the Product Team</h4>
+    <p><strong>Pattern:</strong> The FDE is building a customisation for this customer that the product team does not know about; or the product team ships a breaking change with no warning; or the FDE's feedback never reaches the roadmap.</p>
+    <p><strong>Response:</strong> Treat the relationship with your product team as a stakeholder relationship with the same rigour as the customer relationship. Weekly syncs, documented pain-point summaries, and explicit escalation paths for critical bugs. FDEs who are the best product advocates internally get features shipped faster.</p>
+  </div>
+</div>
+
+<div class="callout ok"><span class="t">Best Practice</span> Keep a "decisions and assumptions log" — a shared document, updated daily, that records every significant decision made, who made it, and what it assumed. When things go wrong (and they will), this document protects the FDE and the customer relationship by creating a factual record that prevents blame being misassigned.</div>
+
+
+<h2 id="the-fde-technical-curriculum">The FDE Technical Curriculum</h2>
+
+<p class="lead">FDE job descriptions are deliberately broad because the role genuinely is. But breadth without a spine produces a dilettante. The spine is this: you must be able to <em>get data out of a system you did not build, reason over it, put a usable interface in front of it, and run it somewhere the customer's security team will accept</em>. Everything else is elaboration.</p>
+
+<p>The matrix below is the honest skill map. "Must" means you will be blocked in week one without it. "Should" means you will look junior without it. "Nice" means it differentiates you but can be learned on the engagement. Each row links to the companion guide in this pack.</p>
+
+<table>
+  <tr><th>Capability</th><th>Why an FDE needs it</th><th>Level</th><th>Guide</th></tr>
+  <tr><td><strong>Python</strong></td><td>The universal glue: data wrangling, API clients, prototypes, scripts the customer can read</td><td><span class="badge">Must</span></td><td><a href="python.html">Python</a></td></tr>
+  <tr><td><strong>SQL &amp; relational modelling</strong></td><td>Customer value lives in their database. You will write more SQL than you expect</td><td><span class="badge">Must</span></td><td><a href="mysql.html">MySQL</a> · <a href="data-engineering.html">Data Engineering</a></td></tr>
+  <tr><td><strong>Linux &amp; the shell</strong></td><td>The jump host has no IDE. Diagnosis happens over SSH</td><td><span class="badge">Must</span></td><td><a href="linux-shell.html">Linux &amp; the Command Line</a></td></tr>
+  <tr><td><strong>HTTP &amp; REST APIs</strong></td><td>Every integration is an API conversation; every bug report is a status code</td><td><span class="badge">Must</span></td><td><a href="rest-apis.html">REST APIs</a></td></tr>
+  <tr><td><strong>Git</strong></td><td>You will branch, rebase, cherry-pick and untangle on someone else's repo</td><td><span class="badge">Must</span></td><td><a href="git.html">Git &amp; GitHub</a></td></tr>
+  <tr><td><strong>Rapid UI (Streamlit / Gradio / FastAPI)</strong></td><td>A clickable thing on day three is the entire job in miniature</td><td><span class="badge">Must</span></td><td><a href="rapid-prototyping.html">Rapid Prototyping</a></td></tr>
+  <tr><td><strong>Docker</strong></td><td>"Works on my machine" is not a deployment. Containers are the unit of shipping</td><td><span class="badge">Must</span></td><td><a href="docker-kubernetes.html">Docker &amp; Kubernetes</a></td></tr>
+  <tr><td><strong>LLM application patterns (RAG, prompting)</strong></td><td>Most 2026-era FDE work is an LLM system over customer documents and data</td><td><span class="badge">Must</span></td><td><a href="rag.html">RAG</a> · <a href="prompt-engineering.html">Prompt Engineering</a></td></tr>
+  <tr><td><strong>Networking, TLS &amp; enterprise auth</strong></td><td>Half of all deployment failures are DNS, certificates, proxies or SSO</td><td><span class="badge">Must</span></td><td><a href="networking-security.html">Networking &amp; Security</a></td></tr>
+  <tr><td><strong>Agents &amp; tool use</strong></td><td>The current frontier of what customers ask for — and of what quietly fails</td><td><span class="badge o">Should</span></td><td><a href="ai-agents.html">AI Agents &amp; MCP</a></td></tr>
+  <tr><td><strong>Evaluation &amp; guardrails</strong></td><td>"Prove it works" is the question that decides whether a pilot converts</td><td><span class="badge o">Should</span></td><td><a href="llm-evaluation.html">LLM Evaluation</a></td></tr>
+  <tr><td><strong>Kubernetes</strong></td><td>Enterprises deploy to clusters you do not control and cannot <code>kubectl edit</code></td><td><span class="badge o">Should</span></td><td><a href="docker-kubernetes.html">Docker &amp; Kubernetes</a></td></tr>
+  <tr><td><strong>Observability</strong></td><td>You will leave. The system must be debuggable by people who never met you</td><td><span class="badge o">Should</span></td><td><a href="observability.html">Observability</a></td></tr>
+  <tr><td><strong>Enterprise integration (SAP, Salesforce, SFTP…)</strong></td><td>The plumbing <em>is</em> the project in most large accounts</td><td><span class="badge o">Should</span></td><td><a href="enterprise-integration.html">Enterprise Integration</a></td></tr>
+  <tr><td><strong>CI/CD &amp; IaC</strong></td><td>Handover without automation is handover of a liability</td><td><span class="badge o">Should</span></td><td><a href="cicd-devops.html">CI/CD &amp; IaC</a></td></tr>
+  <tr><td><strong>Consulting &amp; discovery technique</strong></td><td>The difference between building the right thing and building a thing</td><td><span class="badge o">Should</span></td><td><a href="consulting-skills.html">Consulting Skills</a></td></tr>
+  <tr><td><strong>Technical writing</strong></td><td>Your documentation outlives your engagement and determines renewal</td><td><span class="badge o">Should</span></td><td><a href="technical-writing.html">Technical Writing</a></td></tr>
+  <tr><td><strong>Front-end (React / TypeScript)</strong></td><td>Needed when the prototype graduates and Streamlit stops being enough</td><td><span class="badge g">Nice</span></td><td><a href="react.html">React</a> · <a href="typescript.html">TypeScript</a></td></tr>
+  <tr><td><strong>Classical ML</strong></td><td>Some problems are a gradient-boosted tree, not a language model. Knowing which is valuable</td><td><span class="badge g">Nice</span></td><td><a href="ml-core-concepts.html">ML Core Concepts</a> · <a href="scikit-learn.html">scikit-learn</a></td></tr>
+  <tr><td><strong>Cloud platform depth (one, not three)</strong></td><td>Customers standardise. Deep on their cloud beats shallow on all of them</td><td><span class="badge g">Nice</span></td><td><a href="azure.html">Azure</a> · <a href="azure-ai-services.html">Azure AI</a></td></tr>
+</table>
+
+<div class="callout tip"><span class="t">The T-shape that actually works</span> Go deep on <strong>one</strong> vertical: either the data/LLM stack or the deployment/platform stack. Be genuinely competent across the rest. The failure mode is being uniformly shallow — you can demo anything and finish nothing. The second failure mode is being deep in something the customer does not need; depth in distributed consensus algorithms will not help you when the blocker is an expired certificate on their reverse proxy.</div>
+
+<h3>A 12-week self-study sequence</h3>
+
+<table>
+  <tr><th>Weeks</th><th>Focus</th><th>Output that proves it</th></tr>
+  <tr><td>1–2</td><td>Python fluency + SQL against a messy public dataset</td><td>A notebook that profiles, cleans and answers three business questions in under four hours</td></tr>
+  <tr><td>3–4</td><td>Linux, SSH, networking, TLS debugging</td><td>Stand up a service on a bare VM behind nginx with a real certificate; break it four ways and fix it</td></tr>
+  <tr><td>5–6</td><td>FastAPI + Streamlit; HTTP and REST design</td><td>A document Q&amp;A app with an API, a UI, auth and a Dockerfile</td></tr>
+  <tr><td>7–8</td><td>RAG, embeddings, retrieval quality</td><td>Measured retrieval recall and answer faithfulness on 50 hand-labelled questions</td></tr>
+  <tr><td>9–10</td><td>Docker, Compose, Kubernetes basics, CI</td><td>The same app deployed to a cluster via a pipeline, with probes and resource limits</td></tr>
+  <tr><td>11</td><td>Observability + evaluation in CI</td><td>Traces, a dashboard, and an eval suite that fails the build on regression</td></tr>
+  <tr><td>12</td><td>Packaging the story</td><td>A ten-minute demo, a one-page architecture doc, a runbook and a handover pack</td></tr>
+</table>
+
+<div class="callout note"><span class="t">Why the output column matters</span> Nobody is impressed that you "studied Kubernetes". They are impressed that you can say: "I deployed a RAG service into a cluster, it failed readiness because the embedding model cold-start exceeded the probe timeout, and here is the <code>startupProbe</code> change that fixed it." Artefacts and war stories are the currency. Build the artefacts deliberately.</div>
+
+
+<h2 id="the-fde-field-toolkit">The FDE Field Toolkit</h2>
+
+<p class="lead">Professionals carry a kit. An FDE arriving at a customer site with nothing but a laptop and good intentions will waste the first two days reinventing things they have already built five times. Standardise your kit; version it; bring it with you.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>The laptop baseline</h4>
+    <p>Everything installed <em>before</em> you arrive, because the customer's network may block package registries. A working Python toolchain (<code>uv</code> or <code>conda</code>), Docker, <code>kubectl</code> plus <code>k9s</code>, a SQL client that speaks Postgres/MySQL/SQL Server/Oracle, an HTTP client (<code>httpie</code>, Bruno or Postman), <code>jq</code>, <code>yq</code>, <code>rg</code>, a terminal multiplexer, your dotfiles in a repo, a VPN client, and a password manager. Keep an offline wheel/image cache for your usual dependencies.</p>
+  </div>
+  <div class="card">
+    <h4>The starter repository</h4>
+    <p>A template you clone on day one: FastAPI skeleton, Streamlit shell, settings via environment variables, structured logging, a Dockerfile, a Compose file with Postgres and a vector store, a <code>Makefile</code>, pre-commit hooks, a test harness, an eval scaffold, and a README that is already 60% written. Reduce day-one setup from six hours to twenty minutes.</p>
+  </div>
+  <div class="card">
+    <h4>The document pack</h4>
+    <p>Reusable skeletons: discovery question bank, problem statement one-pager, data inventory sheet, architecture diagram template, risk/assumption log, weekly status email, demo script, runbook template, handover pack contents, and a value model spreadsheet. Fill them in rather than invent them under pressure.</p>
+  </div>
+  <div class="card">
+    <h4>The diagnostic kit</h4>
+    <p>A folder of small scripts you trust: environment recon (OS, proxy, DNS, egress test, certificate chain dump), database profiling, API latency probe, a file/encoding sniffer for the inevitable fixed-width export, and a support-bundle collector that gathers logs, config and versions into one zip you can email to your home team.</p>
+  </div>
+</div>
+
+<div class="callout warn"><span class="t">Kit hygiene</span> Never carry customer data home in your toolkit, and never let one customer's artefacts leak into another's repository. Keep the kit generic and the engagement data in the engagement's own, access-controlled repository. This is both a contractual obligation and a career-ending mistake if you get it wrong.</div>
+
+<h3>The first-hour environment recon</h3>
+
+<p>Run this before you promise anything. Almost every schedule slip traces back to something in this list being different from what you assumed.</p>
+
+<ul class="checklist">
+  <li>Which OS, distribution and version — and do you have root, sudo, or neither?</li>
+  <li>Is there outbound internet? Through a proxy? Does the proxy do TLS inspection, and where is the corporate CA bundle?</li>
+  <li>Which package registries, container registries and model endpoints are reachable? Test each one explicitly.</li>
+  <li>What is the identity model — local accounts, Active Directory, an IdP? How will your application authenticate users?</li>
+  <li>Where does the data actually live, who owns it, and what is the approved path to read it?</li>
+  <li>What is the deployment target — VM, Kubernetes, serverless, an on-prem appliance? Who approves a deployment?</li>
+  <li>What are the change windows, freeze periods and approval lead times?</li>
+  <li>Who do you call at 9 pm when something is broken, and are they contractually obliged to answer?</li>
+</ul>
+
+
+<h2 id="your-first-90-days-in-an-fde-role">Your First 90 Days in an FDE Role</h2>
+
+<p class="lead">New FDEs fail for predictable reasons: they build before they understand, they promise before they verify, or they stay silent while a problem compounds. A deliberate first ninety days prevents all three.</p>
+
+<ol class="steps">
+  <li><b>Days 1–10 — Learn the product honestly</b>Build the product's own demo end to end, by yourself, without help. Find three things that are broken or confusing and write them down. You cannot deploy what you cannot operate, and your credibility with the home engineering team begins with you reporting real, specific bugs rather than vague complaints.</li>
+  <li><b>Days 11–20 — Learn the accounts</b>Read every existing account's history: what was sold, what was promised, what was delivered, what went wrong. Interview the account executive, the previous FDE and the support lead separately. Their three versions of the same story will tell you where the real risks are.</li>
+  <li><b>Days 21–35 — Shadow, then co-pilot</b>Attend customer calls without speaking except to take notes. Write the notes up and circulate them — this is low-risk, visibly useful, and teaches you the vocabulary of the domain faster than any reading. Then take one workstream end to end with a senior FDE reviewing.</li>
+  <li><b>Days 36–60 — Own a deliverable</b>Take full ownership of something small enough to finish and visible enough to matter: one integration, one dashboard, one evaluation report. Ship it, demo it, document it. One finished thing beats three started things by an enormous margin.</li>
+  <li><b>Days 61–80 — Find the leverage</b>Identify the task you and your colleagues do repeatedly by hand and automate it, or write the document everyone keeps re-explaining. This is how an FDE converts from a pair of hands into an asset.</li>
+  <li><b>Days 81–90 — Establish the cadence</b>Lock in your operating rhythm: weekly customer status, weekly internal sync, a running risk log, a demo every two weeks regardless of whether anyone asked for one. Rhythm is what makes a long engagement survivable.</li>
+</ol>
+
+<div class="callout tip"><span class="t">The 30-day question</span> At day 30, ask your manager one question: "If I am exceptional in this role, what will be different in six months?" The answer tells you what is actually measured — pipeline, renewals, adoption, product feedback, or delivery throughput. Optimise for the real metric, not the one in the job description.</div>
+
+
+<h2 id="engagement-economics-scoping-pricing-and-margin">Engagement Economics: Scoping, Pricing and Margin</h2>
+
+<p class="lead">An FDE who does not understand the commercial shape of their engagement will cheerfully destroy its profitability while feeling helpful. You do not need to own the P&amp;L, but you must understand how the money works, because every scope decision you make is a financial decision.</p>
+
+<h3>How deployment work is paid for</h3>
+
+<table>
+  <tr><th>Model</th><th>How it works</th><th>Who carries risk</th><th>FDE behaviour it creates</th></tr>
+  <tr><td><strong>Bundled with licence</strong></td><td>Deployment effort is "free" with a software subscription; its cost sits in the vendor's margin</td><td>Vendor</td><td>Ruthless scoping. Every extra week erodes gross margin. Push customisation toward configuration</td></tr>
+  <tr><td><strong>Fixed-price services</strong></td><td>A defined scope for a defined fee</td><td>Vendor</td><td>Rigorous change control. Undocumented scope expansion is a direct loss</td></tr>
+  <tr><td><strong>Time &amp; materials</strong></td><td>Billed per day or per hour against a capped estimate</td><td>Customer</td><td>Accurate time recording; transparency; the burn-rate conversation must happen weekly, not at the end</td></tr>
+  <tr><td><strong>Paid pilot / PoC</strong></td><td>A small fee for a time-boxed proof, often creditable against a licence</td><td>Shared</td><td>Design for a decision, not for completeness. The deliverable is evidence, not a product</td></tr>
+  <tr><td><strong>Outcome-based</strong></td><td>Payment tied to a measured business result</td><td>Shared, heavily negotiated</td><td>Obsessive baselining and instrumentation from day one, because you must prove the delta</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The margin trap</span> The most common way an FDE loses money for their company is agreeing to a "small favour" that is not in scope, three weeks running, without a change request. Each one feels like good customer service. Collectively they turn a profitable engagement into a loss and set a precedent that the next request is also free. The fix is not to refuse — it is to <em>name</em> it: "Happy to do that. It is about three days, which is outside the current statement of work. Shall I raise a change request, or should we trade it against the reporting module?"</div>
+
+<h3>Estimating when you genuinely do not know</h3>
+
+<p>FDE work is estimated under more uncertainty than product work. Three techniques that hold up:</p>
+
+<div class="grid c3">
+  <div class="card"><h4>Reference-class estimating</h4><p>Ignore the specifics and ask: how long did the last three integrations of this type actually take? Your gut estimate of <em>this</em> project is optimistic; your record of similar projects is not.</p></div>
+  <div class="card"><h4>Three-point (PERT)</h4><p>Estimate optimistic, likely and pessimistic, then use <code>(O + 4M + P) / 6</code>. The value is less the arithmetic than being forced to articulate what the pessimistic case actually is.</p></div>
+  <div class="card"><h4>Time-boxed discovery spike</h4><p>Refuse to estimate the unknown. Quote two days to investigate, then estimate. "I will tell you on Thursday" is a far more professional answer than a number you invented.</p></div>
+</div>
+
+<p>Whatever technique you use, publish your assumptions alongside the number. An estimate without assumptions is a hostage to fortune: "Six weeks, assuming read-only API access is granted by 14 March, the policy corpus is under 10,000 documents, and no new data source is added." When an assumption breaks, the estimate changes automatically and nobody is surprised.</p>
+
+
+<h2 id="proving-value-measurement-and-the-business-case">Proving Value: Measurement and the Business Case</h2>
+
+<p class="lead">Pilots do not die because the technology failed. They die because nobody could state, in a sentence a CFO accepts, what the organisation got. Measurement is not a reporting afterthought — it is a design input from day one.</p>
+
+<h3>Baseline before you build</h3>
+
+<p>The single highest-leverage hour of an engagement is the one spent establishing the current-state baseline, <em>before</em> your system exists. Once your system is live, the pre-state is unrecoverable and every value claim becomes an argument. Capture: how long the task takes today (observed, not reported), how often it is done, the error or rework rate, the number of people involved, and the cost of the current tooling.</p>
+
+<div class="callout note"><span class="t">Observed beats reported</span> People consistently misestimate their own process times — usually underestimating the exception path and forgetting the waiting. Sit with three users and time the task end to end, including the interruptions. A reported "it takes about ten minutes" routinely turns out to be thirty-five minutes across two systems and one email thread.</div>
+
+<h3>A value model that survives scrutiny</h3>
+
+<table>
+  <tr><th>Layer</th><th>Example metric</th><th>Who cares</th><th>Evidence required</th></tr>
+  <tr><td><strong>Usage</strong></td><td>Weekly active users, queries per user, retention after week four</td><td>You and the champion</td><td>Product telemetry</td></tr>
+  <tr><td><strong>Task</strong></td><td>Minutes per case, first-pass accuracy, escalation rate</td><td>Line manager</td><td>Before/after measurement on the same task</td></tr>
+  <tr><td><strong>Process</strong></td><td>Cases closed per FTE per week, cycle time, backlog age</td><td>Head of function</td><td>Their system of record, not yours</td></tr>
+  <tr><td><strong>Financial</strong></td><td>Cost avoided, revenue enabled, capacity released, payback period</td><td>Sponsor, finance</td><td>Agreed model with agreed assumptions, signed off before launch</td></tr>
+</table>
+
+<div class="callout danger"><span class="t">Do not inflate</span> Multiplying "four minutes saved" by "every employee" by "every day" by "a loaded hourly rate" produces an impressive and completely non-credible number. Finance teams have seen it a thousand times and it destroys your standing. Count only hours that genuinely convert into capacity or cost, discount for adoption that is less than universal, and state the discount openly. A defensible ₹40 lakh is worth more than an indefensible ₹4 crore.</div>
+
+<h3>The pilot-to-production decision pack</h3>
+
+<p>At the end of a pilot, produce one document — eight to twelve pages — with this structure. It is the artefact that converts engineering work into a commercial outcome.</p>
+
+<ol class="steps">
+  <li><b>The decision being asked for</b>One sentence. "Approve rollout to the remaining four regions at a cost of X, or stop."</li>
+  <li><b>What was built</b>Architecture in one diagram, scope in one table, what was explicitly out of scope.</li>
+  <li><b>What was measured</b>Baseline, result, method, sample size, and the honest confidence interval.</li>
+  <li><b>What did not work</b>Named failure modes and their mitigations. Omitting this is the fastest way to lose a sophisticated sponsor.</li>
+  <li><b>What production requires</b>Effort, cost, infrastructure, licences, people, timeline, and the customer-side dependencies.</li>
+  <li><b>Risks and how they are managed</b>Technical, adoption, data, compliance, and key-person risk — with owners.</li>
+  <li><b>The recommendation</b>Yours, stated plainly, including the case for <em>not</em> proceeding if that is the honest answer.</li>
+</ol>
+
+
+<h2 id="security-compliance-and-legal-realities-on-customer-sites">Security, Compliance and Legal Realities on Customer Sites</h2>
+
+<p class="lead">The fastest way to end an FDE career is not a failed demo — it is mishandling customer data, breaching an access policy, or signing up to something the contract does not cover. You operate inside someone else's risk perimeter, under someone else's rules, with your employer's liability attached to your keyboard.</p>
+
+<div class="grid c2">
+  <div class="card">
+    <h4>Data you must never move</h4>
+    <p>Production personal data onto your laptop. Customer datasets into a public model endpoint that is not contractually covered. Credentials into a chat message or a ticket. A database dump into your personal cloud storage "just to look at it on the train". Each of these is a reportable incident at most enterprises and a terminable offence at most vendors.</p>
+  </div>
+  <div class="card">
+    <h4>Access you must not improvise</h4>
+    <p>Sharing an account. Using a colleague's credentials because yours is not provisioned yet. Leaving a port open "temporarily". Disabling certificate verification to make a client work. Every one of these appears in pen-test reports and audit findings with your name attached to the change.</p>
+  </div>
+  <div class="card">
+    <h4>Promises you cannot make</h4>
+    <p>Roadmap commitments, security attestations, SLA figures, indemnities, data residency guarantees, regulatory compliance claims. Say "I will get you a written answer from the team that owns that" — it is not weakness, it is the only correct answer, and sophisticated customers respect it.</p>
+  </div>
+  <div class="card">
+    <h4>Paperwork that gates the work</h4>
+    <p>NDA, master services agreement and statement of work in place; data processing agreement where personal data is involved; security questionnaire completed; background checks and site induction done; your access request raised far earlier than you think necessary. Chase these in week one — they are the most common cause of a late start.</p>
+  </div>
+</div>
+
+<h3>The questions a customer's security team will ask</h3>
+
+<p>Have answers ready before the meeting. The <a href="networking-security.html">Networking &amp; Security</a> guide covers the technical substance; what matters here is that an unprepared FDE in a security review delays the project by weeks.</p>
+
+<ul class="checklist">
+  <li>Where is data processed and stored, in which jurisdiction, and for how long is it retained?</li>
+  <li>Is customer data used to train or improve any model? Can that be contractually disabled?</li>
+  <li>How do users authenticate, and does it integrate with our identity provider and our MFA policy?</li>
+  <li>What is the authorisation model, and can it respect our existing document-level permissions?</li>
+  <li>What egress does the system require, to which endpoints, and can it run fully inside our network?</li>
+  <li>How are secrets stored and rotated? Who on your side has access to our environment, and is it logged?</li>
+  <li>What is logged, where do logs go, and can we ship them to our SIEM?</li>
+  <li>What happens on a vulnerability disclosure, and what is your patch SLA?</li>
+</ul>
+
+<div class="callout tip"><span class="t">Turn the questionnaire into an asset</span> The first time you complete a 300-row enterprise security questionnaire it takes a week. Keep the answers in a maintained internal document with owners per section, and the fifth one takes an afternoon. FDEs who build this library become structurally valuable to their company.</div>
+
+
+<h2 id="remote-hybrid-and-multi-site-deployments">Remote, Hybrid and Multi-Site Deployments</h2>
+
+<p class="lead">The classical FDE model assumed a desk at the customer's office. A great deal of modern deployment work is remote or hybrid, which removes the travel but also removes the ambient information that made on-site work effective. You must deliberately rebuild what proximity used to give you for free.</p>
+
+<table>
+  <tr><th>What proximity provided</th><th>Remote substitute</th></tr>
+  <tr><td>Overhearing the real problem in the corridor</td><td>Standing invitation to the team's own operational standup; ask to be added to their working channel, not just the project channel</td></tr>
+  <tr><td>Reading the room during a demo</td><td>Cameras on, fewer attendees, deliberate pauses, and a named person asked directly for a reaction rather than "any questions?"</td></tr>
+  <tr><td>Watching someone actually do the task</td><td>Recorded screen-shares of the current workflow, with permission; a 20-minute recording is worth an hour of description</td></tr>
+  <tr><td>Being visibly present and therefore trusted</td><td>Relentless written cadence — a short update every single day in their channel, not a long one every fortnight</td></tr>
+  <tr><td>Grabbing a blocker-owner for two minutes</td><td>A named escalation contact with an agreed response expectation, plus a weekly 15-minute slot held with the IT lead whether or not it is needed</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Time zones compound everything</span> An eight-hour offset turns a one-line clarification into a two-day round trip. Defend against it structurally: batch questions into a single daily message, always propose a default ("I will assume X unless you say otherwise by Thursday"), record demos so they can be watched asynchronously, and overlap your working hours deliberately rather than accidentally.</div>
+
+<p>If you travel, travel well: book the site induction before the flight, confirm the laptop and VPN work from their guest network <em>before</em> the day you need them, and plan the on-site days around the things that genuinely require presence — workshops, shadowing, demos, and the relationship-building dinner — rather than heads-down coding you could have done anywhere.</p>
+
+
+<h2 id="preparing-and-interviewing-for-fde-roles">Preparing and Interviewing for FDE Roles</h2>
+
+<p class="lead">FDE interviews are unusual: they test technical depth, communication ability, problem-solving under ambiguity, and customer instincts — often in the same exercise. Understanding the structure enables targeted preparation.</p>
+
+<h3>Typical Interview Process</h3>
+
+<table>
+  <tr>
+    <th>Stage</th>
+    <th>Format</th>
+    <th>What Is Tested</th>
+    <th>Preparation Focus</th>
+  </tr>
+  <tr>
+    <td><strong>Recruiter Screen</strong></td>
+    <td>30-min phone call</td>
+    <td>Motivation, experience overview, travel/schedule flexibility</td>
+    <td>Clear narrative of why FDE (not SWE, not SA); 2-3 strong customer-facing examples ready</td>
+  </tr>
+  <tr>
+    <td><strong>Technical Screen</strong></td>
+    <td>45–60 min coding / data exercise</td>
+    <td>SQL, Python, data manipulation; ability to analyse a messy dataset and produce insights</td>
+    <td>Practice data analysis exercises: given a CSV with real-world messiness, produce insights in 45 minutes</td>
+  </tr>
+  <tr>
+    <td><strong>Customer Scenario Interview</strong></td>
+    <td>45-min role-play or case study</td>
+    <td>Discovery instincts, stakeholder communication, handling conflict, prioritisation</td>
+    <td>Practice discovery questions; prepare frameworks for handling scope creep, vague requirements, resistant stakeholders</td>
+  </tr>
+  <tr>
+    <td><strong>Take-Home / Live Build</strong></td>
+    <td>2–6 hour build exercise</td>
+    <td>Ability to produce a working prototype from a brief; communication of choices made</td>
+    <td>Practice scoping to the minimum viable demo; practise narrating build decisions as you go</td>
+  </tr>
+  <tr>
+    <td><strong>Presentation to Panel</strong></td>
+    <td>15-min presentation + 30 min Q&amp;A</td>
+    <td>Communication clarity, ability to field hostile or technical questions, presence under pressure</td>
+    <td>Practice delivering the same presentation in 5 minutes and 15 minutes; prepare for "why not just use X instead?"</td>
+  </tr>
+  <tr>
+    <td><strong>Executive / Values Interview</strong></td>
+    <td>30-min senior leader interview</td>
+    <td>Culture fit, ownership mindset, response to ambiguity and failure</td>
+    <td>STAR stories demonstrating initiative under ambiguity, learning from failure, customer advocacy</td>
+  </tr>
+</table>
+
+<div class="callout tip"><span class="t">Build Exercise Advice</span> When given a build exercise, always narrate your decisions in writing or verbally. The panel wants to understand how you think as much as what you build. An imperfect build with a clear explanation of trade-offs often beats a polished build with no commentary.</div>
+
+<h3>Interview Q &amp; A</h3>
+
+<div class="qa">
+  <div class="q">Tell me about a time you had to quickly build a solution to a problem you did not fully understand yet. How did you approach it?</div>
+  <div class="a">In my previous role, a client asked for "a way to see what our customers are doing." The request was deliberately vague. Rather than asking 20 clarifying questions upfront, I ran a two-hour session to walk through their current workflow and identify the top three decisions they made each week that felt slow or risky. I picked the most painful one, connected to one of their three data sources that afternoon, and had a working Streamlit prototype showing customer churn risk signals by the next morning. That prototype was deliberately incomplete — it was designed to provoke the reaction "yes, that, but also..." which is exactly what happened. We used that feedback to scope the next two weeks of work. The initial vagueness was not a blocker; it was the starting material.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you handle a situation where a senior stakeholder asks you to include a feature you know will make the system worse?</div>
+  <div class="a">I take it seriously rather than dismissing it — executive requests usually contain a legitimate concern, even if the proposed solution is not right. My approach is to first understand the "why" behind the request: what problem are they trying to solve, or what risk are they trying to mitigate? Then I either show them the trade-off directly using data ("if we add this filter, the false-positive rate goes from 5% to 23% — here is what that means for your team's workload"), or I propose an alternative that meets the underlying need without the harmful side effect. If they still insist after understanding the trade-off, I document the decision, flag the risk explicitly, and implement it — they own the product, not me. I do not overrule the customer; I make sure the decision is informed.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Describe your process for doing discovery at a new customer site. What questions do you ask first?</div>
+  <div class="a">I follow a two-track discovery: workflow and data. On the workflow side, I ask to observe someone doing the actual task end-to-end — not to be told about it, but to watch it. I pay attention to where they pause, where they switch tools, where they copy and paste, and where they say "this always breaks." Then I ask: "What would you do with an extra four hours each week?" — that often surfaces the highest-value opportunity faster than any structured question. On the data side, I ask for a list of data sources and walk through each one: who owns it, how fresh it is, how it is accessed, and whether there are any access or regulatory constraints. Within two days I should have enough to write a one-page problem statement and a data inventory. I share both back to the customer before building anything — if I have misunderstood the problem, better to find out then.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you explain a complex technical system — say, a RAG pipeline — to a non-technical executive?</div>
+  <div class="a">I use a familiar analogy first, then a live demonstration. I might say: "Imagine you have a brilliant analyst who has read every policy document, every contract, and every technical manual in your organisation. You can ask them any question and they will give you a direct, sourced answer in seconds. That is what we are building — except it runs 24 hours a day, handles 1,000 questions simultaneously, and cites the exact document it drew from for every answer." Then I immediately open the system and ask a real question relevant to their business — something the executive would actually want to know. Seeing their own question answered using their own documents, with the source document highlighted, takes 90 seconds and accomplishes what 20 slides could not.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What do you do when you discover, mid-engagement, that the data required for the core use case does not exist or is not accessible?</div>
+  <div class="a">First, I verify it completely — "does not exist" often means "does not exist in the form we expected" rather than truly absent. I check whether proxies exist: related fields, upstream systems, manual records that have not been digitised. If the data is genuinely unavailable, I have an honest conversation with the sponsor immediately rather than waiting. I come with options: (1) pivot to a nearby use case that IS data-ready now, (2) launch a parallel workstream to create or source the missing data with a named owner and realistic timeline, or (3) use synthetic data to prove the concept and de-risk the data investment decision. I do not hide the problem and I do not try to build around it silently — that creates a much larger trust issue later. The sponsor usually appreciates the early warning and respects the clear options.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you balance serving the customer's immediate requests versus advocating for the product roadmap?</div>
+  <div class="a">The customer's immediate requests are the signal; the product roadmap is one of several possible responses to that signal. My first question when a customer requests a feature is: is this a one-customer need or a pattern we will see everywhere? If it is unique to this customer's unusual workflow, I build a lightweight integration for them and do not push for product inclusion. If it is the third time I have heard this same request across different customers, I treat it as a product priority signal and make that case explicitly to the PM with context from all three engagements. I also manage customer expectations clearly: "This specific request is outside core product scope. I can build a custom solution for you in two days. If we believe this should be in the core product, here is how to make that case — but it will take quarters, not days." Clarity prevents both over-promising and under-serving.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Walk me through how you would run a two-week prototype sprint for an enterprise customer who wants to use AI for their procurement approval workflow.</div>
+  <div class="a">Day 1–2: Discovery. Shadow one procurement officer for a full morning. Map the current approval workflow: what triggers a request, what data is checked, who approves, what causes delays or errors. Identify the highest-friction step — typically manual policy lookup and vendor history checks. Audit available data: ERP transaction history, vendor master, policy documents, approval audit trail. Day 3: Design. Define the minimum viable prototype: an AI assistant that, given a procurement request, (1) checks the relevant policy, (2) surfaces the vendor's performance history, and (3) recommends approve/review/escalate with a cited rationale. Day 4–8: Build. Connect to ERP read-only API and a vector store of policy documents. Build a simple web interface. Prompt-engineer the LLM to follow the approval logic. Day 9: Internal testing with synthetic requests. Day 10: Live demo with 2–3 real procurement officers using real pending requests. Capture feedback on accuracy, trust, and missing context. Deliverable at end of sprint: working prototype, demo recording, accuracy score on 20 real requests, and a written recommendation for whether to proceed to pilot and what it would require.</div>
+</div>
+
+<div class="qa">
+  <div class="q">What is your approach when there is conflict between the IT/security team and the business unit over how to deploy a solution?</div>
+  <div class="a">I treat both sides as legitimate stakeholders with legitimate concerns — they usually are. The business unit wants speed and features; IT wants security and maintainability. These are not incompatible, but they require explicit negotiation. My approach: get both sides in the same room early (not separately, where each will tell me what they told the other team). Facilitate the conversation by naming the trade-offs explicitly: "If we deploy to the shared cloud environment, the business unit gets it in two weeks but you, IT, own the support burden. If we go through the full internal provisioning process, it takes six weeks but the support model is cleaner. Which matters more to the timeline?" I also make sure IT's concerns are addressed technically, not just politically — if they are worried about data exfiltration, I show them the network architecture and the access controls. Treating IT as a partner rather than a gatekeeper to be circumvented produces better long-term outcomes and a system that actually gets maintained.</div>
+</div>
+
+<div class="qa">
+  <div class="q">How do you stay technically sharp when most of your time is spent in customer meetings?</div>
+  <div class="a">Three practices keep me current. First, I treat every build sprint as a learning opportunity — I deliberately choose new tools or approaches when the risk is low, so the customer gets a better solution and I build new skills. Second, I maintain a deliberate "learning commute" habit: consuming technical content (papers, engineering blogs, conference talks) during travel, which is abundant in an FDE role. Third, I stay active in internal technical communities — sharing customer problems with product and engineering teams creates two-way knowledge exchange. The FDEs who go stale are those who stop building and become exclusively meeting-runners. I defend coding time on my calendar the same way I defend customer meetings.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Describe a deployment that failed or went significantly wrong. What happened and what did you learn?</div>
+  <div class="a">At one engagement, I deployed a data pipeline to a customer's staging environment without confirming that staging was a real representation of production. It worked perfectly in staging — but production had a different database schema version, different firewall rules, and a data volume 40x larger. The launch day was chaotic: the pipeline crashed within an hour, the demo to the customer's executive team had to be cancelled, and we spent three days doing emergency fixes. What I learned: never treat staging as a proxy for production without an explicit confirmation from the infrastructure team. I now do a "production environment audit" as a standard pre-launch checklist item — schema version, network rules, data volume sample, IAM permissions — before any go-live. The technical failure was bad; what made it worse was that it was entirely avoidable with one afternoon of systematic checking.</div>
+</div>
+
+<div class="qa">
+  <div class="q">Why do you want to be an FDE rather than a product software engineer?</div>
+  <div class="a">I am most energised when I can see the direct connection between what I build and a person's working life improving. In product engineering, the feedback loop runs through product managers, user research, analytics, and sprint cycles — the distance between my code and the user is long. As an FDE, I am talking to the person who will use what I built by the end of the same day, and iterating based on that conversation the next morning. I also find that the constraints of customer environments — imperfect data, security restrictions, legacy systems — are the most interesting engineering problems to solve. Clean greenfield systems are satisfying, but the real craft is making something valuable in a messy, real-world environment. The combination of building and communicating is also what suits me — I do not want to choose between being a strong engineer and having genuine customer impact.</div>
+</div>
+
+<h3>How to Prepare: A 30-Day Study Plan</h3>
+
+<details>
+<summary>Week 1 — Foundation: Sharpen Technical Breadth</summary>
+<div class="body">
+<p>Focus on the data layer — the most common weak point for candidates coming from backend or ML backgrounds. Practice: connect a Python script to a database with messy data, profile the quality, clean it, and produce three insights in under two hours. Review SQL window functions, common table expressions, and group-by aggregations. Build a minimal Streamlit or Gradio app that wraps a query with a UI. Read the fundamentals of at least one vector database (Pinecone, Weaviate, pgvector). Goal: complete a data-to-demo workflow end-to-end, alone, in four hours.</p>
+</div>
+</details>
+
+<details>
+<summary>Week 2 — Communication: Practice Explaining and Presenting</summary>
+<div class="body">
+<p>Record yourself explaining a technical concept (e.g., how RAG works) to an imaginary non-technical executive. Watch it back. Cut every sentence that a VP of Operations would not need to hear. Practice the BLUF format: write five emails about technical topics where the conclusion is in the first sentence. Structure a 10-minute demo of anything you have built using the three-scene structure: painful before, fast after, new insight enabled. Present it to a colleague and ask for direct feedback on clarity.</p>
+</div>
+</details>
+
+<details>
+<summary>Week 3 — Customer Instincts: Run Mock Discovery Sessions</summary>
+<div class="body">
+<p>Ask a friend or colleague to play the role of a business user and practice a 30-minute discovery session. Ask only open-ended questions. Resist the urge to propose solutions. Afterwards, write a one-page problem statement based solely on what you heard. Compare it with what your "customer" actually intended — the gap reveals listening blind spots. Repeat with a different domain (finance, logistics, healthcare) each time. Also prepare five STAR stories from your own experience that demonstrate: ownership under pressure, navigating ambiguity, delivering something technical to a non-technical audience, managing a stakeholder conflict, and learning from a significant failure.</p>
+</div>
+</details>
+
+<details>
+<summary>Week 4 — Full Simulation: Build Exercise + Panel Prep</summary>
+<div class="body">
+<p>Attempt a full mock build exercise: take a publicly available dataset (Kaggle, government open data), simulate receiving a vague brief ("the operations team wants to understand what is happening with X"), scope it to three user stories, build a working Streamlit demo, and present it as if to an executive panel — 10 minutes, live, with Q&amp;A. Research the specific company you are interviewing with: read their engineering blog, case studies, and press releases. Identify two or three customer problems their product addresses and prepare to relate your experience to those specific domains.</p>
+</div>
+</details>
+
+<div class="callout ok"><span class="t">Final Preparation Tip</span> The single best preparation for an FDE interview is completing a real end-to-end prototype project — even a personal or open-source one. Being able to walk through a concrete "I built X for Y organisation, here is the problem I found, here is what I built, here is what I measured" story from direct experience is worth more than any theoretical preparation. If you lack customer-facing experience, contribute to an open-source project in a domain you care about, or volunteer a data/AI project for a non-profit. Build, demo, and gather feedback — that is the FDE loop, and it works for interview preparation too.</div>
+
+
+<h2 id="levels-career-paths-and-compensation">Levels, Career Paths and Compensation</h2>
+
+<p class="lead">FDE is not a terminal role, and it is not a waiting room for "real" engineering. It is a distinct discipline with its own ladder — and it opens more doors than almost any other engineering job, because it produces people who can build, sell, and run a delivery organisation.</p>
+
+<h3>The levels</h3>
+
+<table>
+  <tr><th>Level</th><th>Scope</th><th>What changes</th></tr>
+  <tr><td><strong>Associate / FDE I</strong></td><td>One workstream inside someone else's engagement</td><td>You are given the problem. Success is finishing it and communicating clearly</td></tr>
+  <tr><td><strong>FDE II</strong></td><td>A whole engagement at a mid-size account</td><td>You own discovery, scope and delivery. You run the customer meeting alone</td></tr>
+  <tr><td><strong>Senior FDE</strong></td><td>A strategic account, or several concurrently</td><td>You shape what gets sold, not just what gets built. You are trusted in front of executives</td></tr>
+  <tr><td><strong>Staff / Lead FDE</strong></td><td>A portfolio, a region, or a capability</td><td>You productise: turning repeated custom work into reusable assets and patterns. You mentor</td></tr>
+  <tr><td><strong>Head of Deployment / Field Engineering</strong></td><td>The function</td><td>Hiring, utilisation, margin, methodology, and the relationship with product and sales leadership</td></tr>
+</table>
+
+<h3>Where FDEs go next</h3>
+
+<div class="grid c3">
+  <div class="card"><h4>Product management</h4><p>The most natural transition. You have spent years watching real users fail at real tasks and translating that into requirements — which is the job. FDEs make unusually good PMs for technical and enterprise products.</p></div>
+  <div class="card"><h4>Product engineering</h4><p>Back to core engineering, but with a rare asset: you know what customers actually do with the system. FDE-to-SWE transitions often land in platform, integrations or developer-experience teams.</p></div>
+  <div class="card"><h4>Solutions / pre-sales leadership</h4><p>Moving upstream into the commercial motion — solution architecture, technical sales leadership, partner engineering. The compensation ceiling here is high because it is attached to revenue.</p></div>
+  <div class="card"><h4>Engineering or delivery management</h4><p>Running the deployment function, a professional services organisation, or a customer engineering team. Your experience of scope, margin and stakeholder conflict transfers directly.</p></div>
+  <div class="card"><h4>Founding a company</h4><p>The most common ambitious exit. You have seen dozens of real workflows, you know which problems people pay to solve, and you have already practised selling, scoping and delivering. See the next section.</p></div>
+  <div class="card"><h4>Independent consulting</h4><p>The FDE skill set is almost exactly the independent consultant's skill set, minus the employer. Many go independent at senior level, often at significantly higher effective rates.</p></div>
+</div>
+
+<h3>Thinking about compensation</h3>
+
+<p>FDE compensation varies more than most engineering roles because it is structured differently across company types. Rather than quote numbers that go stale, understand the <em>shape</em>:</p>
+
+<table>
+  <tr><th>Component</th><th>How it behaves in FDE roles</th><th>What to probe in an offer conversation</th></tr>
+  <tr><td>Base salary</td><td>Typically benchmarked against product engineering at the same level, occasionally slightly below at consultancies, at or above at AI startups competing for the profile</td><td>Which internal engineering level does this map to? What is the band?</td></tr>
+  <tr><td>Variable / bonus</td><td>Often partly tied to delivery, utilisation, renewal or account expansion rather than purely company performance</td><td>What exactly is it measured on, what is the historical payout against target, and is it capped?</td></tr>
+  <tr><td>Equity</td><td>The largest swing factor at startups. Frequently lower than a comparable product-engineering grant, which is worth negotiating</td><td>Strike price, current preferred and common valuation, vesting, post-termination exercise window, and whether there is an early-exercise or extended-window policy</td></tr>
+  <tr><td>Travel &amp; allowances</td><td>Per diem, travel class, status retention, time-in-lieu policy. Materially affects quality of life</td><td>Expected travel percentage, who books, what the policy is for weekend travel</td></tr>
+  <tr><td>Progression</td><td>Promotion criteria are often less formalised than in product engineering</td><td>Who was promoted from this role in the last year, and on what evidence?</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">Negotiate the travel, not just the money</span> A role at 70% travel and a role at 25% travel are different jobs at the same salary. Travel load, time-zone overlap expectations, and whether you are staffed on one account or four are the variables that determine whether you last three years or nine months. Ask about them as directly as you ask about compensation, and ask a current FDE, not only the hiring manager.</div>
+
+
+<h2 id="from-fde-to-founder">From FDE to Founder</h2>
+
+<p class="lead">Forward deployment is arguably the best possible apprenticeship for starting a company. You spend your days inside other organisations' problems, watching which ones they pay to solve, learning what enterprise procurement actually requires, and practising the exact loop — discover, prototype, demo, deliver, prove value — that a founder runs for a living.</p>
+
+<h3>What the role gives you that most engineers lack</h3>
+
+<div class="grid c2">
+  <div class="card"><h4>Problem inventory</h4><p>You have personally observed dozens of expensive, repeated, badly solved workflows. Most would-be founders have to go looking for a problem; you have a notebook full of them, with named people who confirmed the pain.</p></div>
+  <div class="card"><h4>Distribution instincts</h4><p>You know who signs, who blocks, how long procurement takes, what a security review demands, and what a pilot has to prove. This is the knowledge that kills most technical founders in their first enterprise deal.</p></div>
+  <div class="card"><h4>Delivery credibility</h4><p>You can build the thing <em>and</em> stand in front of the customer. A two-person company where one person can do both is dramatically more capital-efficient than one that cannot.</p></div>
+  <div class="card"><h4>A referenceable network</h4><p>Former customers who trust you are the warmest possible first-customer pipeline — subject, crucially, to your contractual obligations and non-solicitation terms. Read them before you act on them.</p></div>
+</div>
+
+<div class="callout danger"><span class="t">Do this cleanly</span> Your employment agreement almost certainly contains confidentiality, IP-assignment, and non-solicitation provisions, and your customers' agreements contain their own. Do not use customer data, do not take artefacts, do not approach accounts while employed, and do not build on company time or equipment. Under Indian law a post-employment <em>non-compete</em> is generally unenforceable as a restraint of trade under Section 27 of the Indian Contract Act 1872, but confidentiality and non-solicitation obligations are a different matter entirely — and the reputational cost of behaving badly in a small market is permanent. Get your own legal advice on your actual documents; see <a href="india-contracts-ip.html">Contracts, IP &amp; Legal Essentials (India)</a>.</div>
+
+<h3>The two routes out</h3>
+
+<table>
+  <tr><th></th><th>Independent consulting / boutique</th><th>Product startup</th></tr>
+  <tr><td><strong>Time to first revenue</strong></td><td>Weeks — you are selling what you already do</td><td>Months to years</td></tr>
+  <tr><td><strong>Capital required</strong></td><td>Effectively none</td><td>Savings, angels, or venture funding</td></tr>
+  <tr><td><strong>Scaling</strong></td><td>Linear with people; margin improves only through rates and productisation</td><td>Non-linear if it works; zero if it does not</td></tr>
+  <tr><td><strong>Risk profile</strong></td><td>Low downside, capped upside</td><td>High variance both ways</td></tr>
+  <tr><td><strong>Natural first step</strong></td><td>One anchor client at a defensible day rate</td><td>A paid pilot with a design partner who has the problem you saw repeatedly</td></tr>
+  <tr><td><strong>Common hybrid</strong></td><td colspan="2">Consult to fund the build. Sell services to three customers with the same problem, then extract the product from the work — the most common and most survivable path for an FDE turned founder</td></tr>
+</table>
+
+<h3>The Indian founder's operational path</h3>
+
+<p>If you are building from India, the mechanics are concrete and learnable. This pack contains a full track for them; the short version of the sequence is:</p>
+
+<ol class="steps">
+  <li><b>Validate with a paying customer before you incorporate</b>You can legally invoice as an individual while you prove demand. Incorporation is a consequence of traction, not a substitute for it. See <a href="starting-business-india.html">Starting a Business in India</a>.</li>
+  <li><b>Choose the right entity for your actual plan</b>A solo consultant and a venture-track startup should not pick the same structure. The tax, compliance and fundraising consequences differ sharply, and converting later is expensive.</li>
+  <li><b>Get the money mechanics right from invoice one</b>Export of services is zero-rated under GST but only if you meet every condition and file the LUT; foreign inward remittance needs the right purpose code and documentation. See <a href="freelancing-consulting-india.html">Freelancing &amp; Consulting from India</a>.</li>
+  <li><b>Put the compliance calendar in place before you need it</b>GST returns, TDS, advance tax and ROC filings are cheap when scheduled and expensive when remembered late. See <a href="india-compliance-tax.html">Indian Business Compliance &amp; Taxation</a>.</li>
+  <li><b>Paper the relationships properly</b>Co-founder agreement with vesting, IP assignment from every contractor, and a contract template you understand clause by clause. See <a href="india-contracts-ip.html">Contracts, IP &amp; Legal Essentials</a>.</li>
+  <li><b>Build the back office before it breaks</b>Banking, bookkeeping, payroll and collections. See <a href="india-business-operations.html">Running a Business in India</a>.</li>
+  <li><b>Raise only if the business genuinely needs venture scale</b>Understand dilution, instruments, term sheets and FEMA filings before the first conversation, not during it. See <a href="india-startup-funding.html">Startup Funding &amp; Equity in India</a>.</li>
+</ol>
+
+<div class="callout ok"><span class="t">The honest summary</span> The FDE role teaches you that value comes from a working thing in a real person's hands, measured against what they did before. That is also the whole of entrepreneurship. The difference is who carries the risk — and after a few years of deploying other people's software into hostile environments on impossible timelines, carrying it yourself starts to look reasonable.</div>
+
+<hr><p style="color:var(--muted);font-size:13px;text-align:center" class="no-print"><a href="../index.html">&larr; Back to the Study Pack index</a></p>
+</main>
+<a href="#" class="totop no-print" aria-label="Back to top">&uarr;</a>
+</body></html>
