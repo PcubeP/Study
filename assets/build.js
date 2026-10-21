@@ -19,6 +19,8 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const decode = s => s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&');
 const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const attr = s => String(s || '').replace(/<[^>]+>/g,'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\s+/g,' ').trim();
+const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-family='Segoe UI,Arial,sans-serif' font-size='38' font-weight='700' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E";
 const slugify = s => s.toLowerCase().replace(/<[^>]+>/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
 function highlightCode(html) {
@@ -51,9 +53,16 @@ function shell(m, subtitle, tags, body) {
   const tagHtml = (tags || []).map(t => `<span>${t}</span>`).join('');
   const words = body.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
   const mins = Math.max(1, Math.round(words / 220));
+  const desc = attr(subtitle) || `${attr(m.title)} — a comprehensive study guide and interview-prep reference.`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${m.title} — Study Guide</title>
+<meta name="description" content="${desc}">
+<meta name="color-scheme" content="light">
+<meta property="og:type" content="article">
+<meta property="og:title" content="${attr(m.title)} — Study Guide">
+<meta property="og:description" content="${desc}">
+<link rel="icon" href="${FAVICON}">
 <style>${CSS}</style></head><body>
 <nav class="topbar no-print"><a href="../index.html">&larr; All guides</a>
 <span class="sp"></span><button onclick="window.print()">Print / Save PDF</button></nav>

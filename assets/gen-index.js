@@ -67,6 +67,12 @@ const done = TOPICS.filter(t => fs.existsSync(path.join(GUIDES, t.slug + '.html'
 
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Study Pack</title>
+<meta name="description" content="${done} in-depth study guides and interview prep — programming, AI/ML, infrastructure, system design, the Forward Deployed Engineer path, and starting a business in India.">
+<meta name="color-scheme" content="light">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Study Pack">
+<meta property="og:description" content="${done} in-depth study guides and interview prep — programming, AI/ML, infrastructure, system design, the Forward Deployed Engineer path, and starting a business in India.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='45' font-family='Segoe UI,Arial,sans-serif' font-size='38' font-weight='700' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
 <style>${CSS}
 .home .card .d{color:var(--muted);font-size:13px;margin:6px 0 12px;min-height:34px}
 .home .lk a{font-weight:700;font-size:13px}.home .lk .sep{color:var(--line);margin:0 8px}
