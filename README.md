@@ -1,6 +1,6 @@
 # Study Pack
 
-A personal knowledge base — **58 in-depth guides** spanning AI/ML, software engineering, cloud and infrastructure, professional skills, and starting a business in India. Each guide is a self-contained, print-ready HTML file with syntax-highlighted code, inline SVG diagrams, callouts, an auto-generated table of contents, and an interview-question section.
+A personal knowledge base — **68 in-depth guides** spanning AI/ML, software engineering, cloud and infrastructure, professional skills, starting a business in India, and investing in Indian markets. Each guide is a self-contained, print-ready HTML file with syntax-highlighted code, inline SVG diagrams, callouts, an auto-generated table of contents, and an interview-question or FAQ section.
 
 **Live site:** https://pcubep.github.io/Study/
 
@@ -22,9 +22,11 @@ A personal knowledge base — **58 in-depth guides** spanning AI/ML, software en
 
 **Business (India)** — Starting a Business · Compliance & Taxation · Startup Funding & Equity · Finance, Banking & HR Ops · Freelancing & Consulting · Contracts, IP & Legal
 
+**Investing & Markets (India)** — Investing Foundations · How the Indian Stock Market Works · Analysing a Stock · Mutual Funds, SIPs & Index Investing · Futures & Options · Trading Strategy, Risk & Psychology · Portfolio Construction · Taxation & Regulation for Investors · Market Data & Research Sources · Market Snapshot & First Year
+
 ## Reading
 
-Open the live site, or `index.html` locally. The landing page has a search filter and four curated **learning tracks** (Forward Deployed Engineer, AI/ML Engineer, Founder/Business India, Interview Sprint) if you want a sequenced path rather than a browse.
+Open the live site, or `index.html` locally. The landing page has a search filter and five curated **learning tracks** (Forward Deployed Engineer, AI/ML Engineer, Founder/Business India, Investing & Markets India, Interview Sprint) if you want a sequenced path rather than a browse.
 
 Every guide is available as **HTML** (interactive, collapsible sections) and **PDF** (A4, print-optimised).
 
@@ -75,3 +77,5 @@ That means you only have to commit `_content/` changes — the generated HTML is
 ## Disclaimer
 
 The India business, tax and legal guides are educational material, not professional advice. Rates, thresholds and filing deadlines change with every Union Budget — verify against the official portal before acting, and engage a qualified CA, CS or lawyer for your own facts.
+
+The **Investing & Markets** guides are financial education, **not investment advice**. Nothing in them is a recommendation to buy or sell any security, fund or asset class. Investments in securities markets are subject to market risk; you can lose money, including your entire capital. Past performance does not predict future returns. The market snapshot in *Market Snapshot & Your First Year Investing* is dated **21 October 2026** and will be stale — that guide includes a 30-minute routine for rebuilding it yourself. Consult a SEBI-registered Investment Adviser and a qualified chartered accountant before acting on anything in this section.

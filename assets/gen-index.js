@@ -18,7 +18,8 @@ for (const t of TOPICS) {
 const icon = { 'Programming Languages':'{ }', 'AI/ML Frameworks':'◈', 'Generative AI & LLMs':'✦',
   'Data Science':'▦', 'Web & App Development':'❐', 'Cloud & Platforms':'☁', 'Tools & Software':'⚙',
   'Career & Role':'◎', 'AI/ML Deep Dive':'∆', 'Professional Skills':'◉', 'Interview Prep':'★',
-  'Infrastructure & DevOps':'⬢', 'Business & Entrepreneurship (India)':'₹' };
+  'Infrastructure & DevOps':'⬢', 'Business & Entrepreneurship (India)':'₹',
+  'Investing & Markets (India)':'▲' };
 
 // Curated learning tracks — ordered reading paths through the pack.
 const TRACKS = [
@@ -32,6 +33,10 @@ const TRACKS = [
   { name: 'Founder / Business (India)', note: 'Idea to incorporated, compliant, funded and operating.',
     slugs: ['starting-business-india','india-contracts-ip','india-compliance-tax','india-business-operations',
             'freelancing-consulting-india','india-startup-funding'] },
+  { name: 'Investing & Markets (India)', note: 'Zero to a funded, taxed, risk-managed portfolio — read in this order.',
+    slugs: ['investing-foundations','indian-stock-market','mutual-funds-sips','stock-analysis',
+            'portfolio-construction','investing-tax-india','market-research-sources',
+            'derivatives-options','trading-strategy-risk','getting-started-investing'] },
   { name: 'Interview Sprint', note: 'Four weeks of focused preparation for technical + customer-facing loops.',
     slugs: ['dsa','system-design','python','rest-apis','docker-kubernetes','forward-deployed-engineer',
             'consulting-skills','communication-speaking'] }

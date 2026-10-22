@@ -1,0 +1,3005 @@
+<h2>Read this first: the base rates for retail trading</h2>
+<p class="lead">This guide takes trading seriously as a discipline. That means starting with the outcome data rather than the techniques, because any honest treatment of trading has to begin by establishing how unlikely success is and what distinguishes the small minority who achieve it.</p>
+
+<div class="callout danger"><span class="t">This is financial education, not financial advice</span>Nothing here is a recommendation to buy, sell or trade any security, instrument or strategy. Active trading is high-risk and the evidence is that most individuals who attempt it lose money. Every rate, tax treatment, charge and regulation below is illustrative and dated <b>as at late 2026</b> &mdash; Indian market rules and tax provisions have changed repeatedly. Verify current details at <b>nseindia.com</b>, <b>sebi.gov.in</b> and <b>incometax.gov.in</b>. For personal advice, consult a SEBI-registered Investment Adviser (RIA). No strategy in this guide is presented as a way to make money.</div>
+
+<h3>What the Indian evidence shows</h3>
+<table>
+<tr><th>Source</th><th>Finding (as reported &mdash; verify the current version)</th></tr>
+<tr><td>SEBI study on individual traders in the equity F&amp;O segment, published September 2024, covering FY 2021&ndash;22 to FY 2023&ndash;24</td><td>Roughly <b>93% of individual F&amp;O traders made losses</b>. Aggregate individual net losses across the three years were reported in the region of <b>&#8377;1.8 lakh crore</b> (&#8377;1,80,000 crore). Transaction costs were a material component of the loss.</td></tr>
+<tr><td>SEBI follow-up study published in 2025, covering FY 2024&ndash;25</td><td>Roughly <b>91% of individual traders in index options</b> lost money, despite the regulatory curbs introduced from late 2024.</td></tr>
+<tr><td>SEBI study on intraday equity (cash segment) trading</td><td>A large majority of individual intraday traders in the cash segment also made losses, with the loss rate increasing with the number of trades.</td></tr>
+<tr><td>International academic literature on day trading</td><td>Studies of day traders in several markets have consistently found that a small minority achieve persistent profitability, that past profitability has limited predictive power, and that trading intensity correlates negatively with returns.</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Treat the numbers as directional, not immutable</span>SEBI revises these studies, the definitions and the periods. Read the current primary source at <b>sebi.gov.in</b>. What is stable across every version: a large majority of individuals lose, losses are concentrated in small and high-frequency accounts, and transaction costs account for a meaningful share of the shortfall.</div>
+
+<div class="facts">
+<div class="f"><b>~93%</b><span>INDIVIDUAL F&amp;O TRADERS LOSING, FY22&ndash;FY24</span></div>
+<div class="f"><b>~91%</b><span>INDEX OPTION TRADERS LOSING, FY25</span></div>
+<div class="f"><b>&#8377;1.8 lakh cr</b><span>AGGREGATE INDIVIDUAL NET LOSS, FY22&ndash;FY24</span></div>
+<div class="f"><b>0</b><span>PROFITABLE SYSTEMS SOLD IN THIS GUIDE</span></div>
+</div>
+
+<h3>Why this guide exists anyway</h3>
+<p>Given that evidence, there are two defensible reasons to read a serious guide on trading.</p>
+
+<div class="grid c2">
+<div class="card"><h4>You are going to try regardless</h4><p>Many people will trade whatever the evidence says. If you are one of them, the difference between doing it with a written specification, measured expectancy, controlled position sizing and a journal, versus doing it on intuition and Telegram tips, is the difference between a survivable education and a destroyed balance sheet. This guide is the former.</p></div>
+<div class="card"><h4>The discipline transfers</h4><p>Expectancy, risk of ruin, overfitting, out-of-sample validation, cost modelling and base rates are not trading concepts &mdash; they are decision-making concepts. An engineer who internalises them makes better decisions about system design, estimation, hiring and product bets. The maths here is worth knowing even if you never place a trade.</p></div>
+</div>
+
+<div class="callout note"><span class="t">What this guide will not do</span>It will not give you a strategy, a setup, an indicator combination or a "system". Those are worthless when handed over, because any edge that can be written down and distributed to a million people stops being an edge. what it gives you is the <i>process</i> by which an edge would be specified, tested, sized, executed and reviewed &mdash; and the honest standards against which to judge whether you have one.</div>
+
+<div class="pipeline"><span class="step">Base rates</span><span class="arrow">&rarr;</span><span class="step">Edge</span><span class="arrow">&rarr;</span><span class="step">Specification</span><span class="arrow">&rarr;</span><span class="step">Expectancy</span><span class="arrow">&rarr;</span><span class="step">Backtest</span><span class="arrow">&rarr;</span><span class="step">Sizing</span><span class="arrow">&rarr;</span><span class="step">Execution</span><span class="arrow">&rarr;</span><span class="step">Review</span></div>
+
+<h2>Trading versus investing: different games, different maths</h2>
+<p class="lead">These two words are used interchangeably in casual conversation and they describe activities with almost nothing in common. Confusing them is the first and most expensive error, because the strategies, the risk management, the tax treatment and the base rates are all different.</p>
+
+<h3>The structural comparison</h3>
+<table>
+<tr><th>Dimension</th><th>Investing</th><th>Trading</th></tr>
+<tr><td>Source of return</td><td>Business earnings, reinvestment, economic growth &mdash; value created outside the market</td><td>Price movement, captured from another participant &mdash; value transferred within the market</td></tr>
+<tr><td>Game type</td><td>Positive sum &mdash; all long-term holders can gain simultaneously</td><td>Approximately zero sum before costs; negative sum after</td></tr>
+<tr><td>Holding period</td><td>Years to decades</td><td>Seconds to months</td></tr>
+<tr><td>Decisions per year</td><td>A handful, often zero</td><td>Dozens to thousands</td></tr>
+<tr><td>Cost drag</td><td>Low &mdash; perhaps 0.2&ndash;1.0% a year in an index fund</td><td>High &mdash; can exceed 30&ndash;40% a year at retail sizes and frequencies</td></tr>
+<tr><td>Where skill is required</td><td>Mostly in behaviour: saving consistently, not panicking, not timing</td><td>In analysis, execution, risk control <i>and</i> behaviour, continuously</td></tr>
+<tr><td>Time commitment</td><td>Hours per year</td><td>Hours per day</td></tr>
+<tr><td>Scalability</td><td>Excellent &mdash; works identically at &#8377;10,000 and &#8377;10 crore</td><td>Poor &mdash; capacity constraints, impact cost, and fixed costs punish small accounts</td></tr>
+<tr><td>Base rate of success</td><td>High for a diversified long-horizon index investor who stays invested</td><td>Low &mdash; the SEBI data above</td></tr>
+<tr><td>Tax treatment (India)</td><td>Capital gains; long-term rates after the holding period</td><td>Generally business income (speculative for intraday equity; non-speculative for F&amp;O), taxed at slab rates</td></tr>
+<tr><td>What failure looks like</td><td>Underperformance over a decade</td><td>Capital destruction over months</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">A clarifying test</span>Ask: "if the market closed for five years and reopened, would my position still make sense?" If yes, you are investing &mdash; you own a claim on earnings. If the question is absurd because your position depends entirely on price action next week, you are trading. Many people believe they are investing while behaving entirely as traders, which is how a "long-term holding" gets sold after a 12% drawdown.</div>
+
+<h3>The arithmetic difference, made concrete</h3>
+<pre><code class="language-text">TWO PEOPLE, Rs 5,00,000, TEN YEARS
+==================================
+PERSON A - SYSTEMATIC INVESTOR
+  Puts Rs 5,00,000 into a broad low-cost index fund.
+  Adds Rs 20,000 per month.
+  Assumed gross return 11% p.a. (illustrative - NOT a forecast;
+  past performance does not predict future returns).
+  Expense ratio 0.20%. Net 10.8%.
+  Trades: 120 purchases over 10 years. Costs: negligible.
+  Time spent: about 2 hours a year.
+
+  Approximate terminal value:
+    Lump sum: 5,00,000 x (1.108)^10        = Rs 13,93,000
+    SIP: 20,000/month for 120 months
+         at 0.9% monthly  (approx)          = Rs 43,70,000
+                                            --------------
+    TOTAL (approx)                          = Rs 57,63,000
+  Total contributed: 5,00,000 + 24,00,000   = Rs 29,00,000
+
+PERSON B - ACTIVE TRADER
+  Same Rs 5,00,000 and the same Rs 20,000 per month added.
+  Trades 15 round trips per month.
+  Average cost per round trip Rs 180 (brokerage, STT,
+  exchange charges, GST, stamp duty, spread).
+  Annual cost = 15 x 12 x 180 = Rs 32,400
+
+  For Person B to MATCH Person A, B must generate 10.8% net
+  PLUS Rs 32,400 a year of costs on a growing base.
+
+  Year 1: capital about Rs 7,40,000 (5L + 12 x 20k)
+          cost drag 32,400 / 7,40,000 = 4.4%
+          required gross return = 15.2%
+  Year 5: capital about Rs 20,00,000
+          cost drag = 1.6%
+          required gross return = 12.4%
+  Year 10: capital about Rs 45,00,000
+          cost drag = 0.7%
+          required gross return = 11.5%
+
+  SO: Person B must beat the index by 0.7-4.4 percentage points
+  a year, every year, for a decade, net of tax, while spending
+  hundreds of hours a year doing it, in a game where ~90% of
+  participants lose.
+
+  AND the tax treatment is worse: trading gains are business
+  income at slab rates (up to 30% plus surcharge and cess),
+  while long-term capital gains on equity have a lower rate
+  and an annual exemption.
+  Verify current rates at incometax.gov.in - as at FY 2026-27.
+
+THE OPPORTUNITY COST IS NOT JUST THE MONEY
+  Person B spent roughly 1,500-3,000 hours over the decade.
+  At a software engineer's marginal value of time, those hours
+  invested in skills, side income or career progression would
+  very plausibly have been worth more than any trading profit.</code></pre>
+
+<h3>The honest hybrid</h3>
+<div class="callout ok"><span class="t">If you want to trade, ring-fence it</span>The defensible structure is a core long-term portfolio that is automated, boring and untouchable, plus a small, separately accounted trading allocation that you can lose entirely without consequence. Separate broker accounts if possible. Never pledge the core to fund the satellite. Never move money from the core to the satellite after a loss. Review the satellite's performance against the core annually and be prepared to shut it down.</div>
+
+<h2>Where an edge can come from &mdash; and where it cannot</h2>
+<p class="lead">An edge is a repeatable reason why your expected value is positive. There are a limited number of places an edge can come from, and for a retail participant most of them are structurally inaccessible. Knowing which is which saves years.</p>
+
+<h3>The six sources of edge</h3>
+<table>
+<tr><th>Source</th><th>What it means</th><th>Who has it</th><th>Realistic for retail in India?</th></tr>
+<tr><td><b>Information</b></td><td>Knowing something material before the market prices it</td><td>Insiders (illegally), company management, large institutional research operations with channel checks and expert networks</td><td><span class="badge">No</span> &mdash; and acting on genuine non-public price-sensitive information is insider trading, prohibited under SEBI regulations with serious penalties</td></tr>
+<tr><td><b>Analysis</b></td><td>Interpreting public information better than the consensus</td><td>Skilled fundamental analysts, specialists in neglected small caps, people with genuine domain expertise</td><td><span class="badge o">Marginally</span> &mdash; possible in under-covered segments, over long horizons, with real work. Not possible in liquid large caps on a weekly timeframe.</td></tr>
+<tr><td><b>Speed</b></td><td>Reacting to information or order flow faster than others</td><td>HFT firms with co-located servers, microwave links and custom hardware</td><td><span class="badge">No</span> &mdash; the relevant timescale is microseconds. You are not in this race and never will be.</td></tr>
+<tr><td><b>Structure</b></td><td>Capturing returns available because of market plumbing: market making, arbitrage, index rebalancing, borrow/lend spreads</td><td>Proprietary desks, market makers, large arbitrage books</td><td><span class="badge">Largely no</span> &mdash; requires capital, infrastructure, negotiated costs and exchange memberships</td></tr>
+<tr><td><b>Behaviour</b></td><td>Being systematically more disciplined than the average participant: not panicking, not chasing, following a plan</td><td>Anyone willing to do the work</td><td><span class="badge g">Yes</span> &mdash; this is the one genuinely accessible source, and it is also the hardest to maintain</td></tr>
+<tr><td><b>Risk management</b></td><td>Surviving long enough for a small edge to compound; sizing so no single outcome is fatal</td><td>Anyone willing to do the work</td><td><span class="badge g">Yes</span> &mdash; and it is not optional. It is the only thing standing between a small edge and ruin.</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The uncomfortable implication</span>Four of the six sources of edge are closed to you. The two that remain &mdash; behaviour and risk management &mdash; are <i>defensive</i>. They stop you losing faster than necessary; they do not by themselves generate positive expectancy. A retail participant's realistic best case is a small analytical edge in a neglected corner, protected by excellent risk management and disciplined behaviour. Anyone offering you an edge in information, speed or structure is selling something.</div>
+
+<h3>Things frequently mistaken for an edge</h3>
+<table>
+<tr><th>Claimed edge</th><th>Why it is not one</th></tr>
+<tr><td>"I understand technical analysis"</td><td>So does everyone with a charting app. Patterns visible to millions are priced in. The academic evidence on the profitability of common technical rules after costs is weak and regime-dependent. Some order-flow and volatility signals have content; "head and shoulders" does not.</td></tr>
+<tr><td>"I read the news faster"</td><td>Algorithms parse news feeds in milliseconds. By the time you have read a headline on an app, the price has moved.</td></tr>
+<tr><td>"I use a combination of five indicators"</td><td>All common indicators are deterministic functions of past price and volume. Combining them adds parameters, not information, and dramatically increases overfitting risk.</td></tr>
+<tr><td>"I have a 90% accurate system"</td><td>Accuracy without loss magnitude is meaningless. Selling far out-of-the-money options gives a 90%+ win rate with negative expectancy. Ask for the maximum loss and the drawdown, not the win rate.</td></tr>
+<tr><td>"I follow a guru with a great track record"</td><td>Unaudited track records, survivorship bias in who you hear about, and the fact that the guru's income comes from subscriptions rather than trading. See the scams section.</td></tr>
+<tr><td>"I know the sector because I work in it"</td><td>Genuine domain knowledge is a real starting point for <i>analysis</i>, but only if applied over long horizons to under-covered companies. It is also the fastest route to inadvertently trading on material non-public information. Be extremely careful.</td></tr>
+<tr><td>"I am good at maths / I am an engineer"</td><td>Helpful for building and testing systems; irrelevant to whether an edge exists. Many quantitatively excellent people have lost money because the edge was never there.</td></tr>
+<tr><td>"It worked for the last three months"</td><td>Three months is noise. With a 55% win rate, a run of 20 wins in 30 trades has a probability of several percent &mdash; common enough that someone, somewhere, is always showing you one.</td></tr>
+</table>
+
+<h3>The edge question, asked properly</h3>
+<pre><code class="language-text">THE FOUR QUESTIONS THAT TEST A CLAIMED EDGE
+===========================================
+1. WHO IS ON THE OTHER SIDE, AND WHY ARE THEY WRONG?
+   Every trade has a counterparty. If you are buying, someone
+   is selling. What do you know or do that they do not?
+   Acceptable answers:
+     "A forced seller (index rebalance, redemption, margin
+      call) is transacting for non-informational reasons."
+     "I am providing liquidity when it is scarce and being
+      paid the spread for it."
+     "I have analysed a neglected company more thoroughly
+      than the two analysts who cover it."
+   Unacceptable answers:
+     "The chart looks bullish."
+     "The indicator crossed over."
+     "It has been going up."
+
+2. WHY HAS THIS NOT BEEN ARBITRAGED AWAY?
+   If an effect is real, persistent and easy to find, capital
+   floods in and it disappears. Acceptable reasons for
+   persistence:
+     - Capacity constraints (the opportunity is too small for
+       institutional money to bother with)
+     - Structural barriers (regulation, mandates, taxation)
+     - Behavioural causes that are deeply human and stable
+     - It is compensation for a real risk you are bearing
+   If you cannot name one, the effect is probably not real.
+
+3. WHAT IS THE SAMPLE SIZE, AND WHAT IS THE OUT-OF-SAMPLE
+   PERFORMANCE?
+   Fewer than 100 trades is anecdote. In-sample performance
+   is a measure of your curve-fitting ability, not of edge.
+
+4. WHAT IS THE EXPECTANCY AFTER COSTS, AND WHAT IS THE
+   MAXIMUM DRAWDOWN?
+   If you cannot state both numbers, you have not tested it.
+
+If your claimed edge fails any of these four, you do not have
+an edge. You have a hypothesis, which is a fine thing to have
+and a terrible thing to bet money on.</code></pre>
+
+<h2>Trading styles and timeframes</h2>
+<p class="lead">"Trading" covers activities as different from each other as sprinting is from marathon running. Each has distinct capital requirements, time demands, cost sensitivity and difficulty. Choosing a style that is incompatible with your actual life is the most common structural mistake.</p>
+
+<h3>The styles, costed out</h3>
+<table>
+<tr><th>Style</th><th>Hold period</th><th>Trades/month</th><th>Realistic minimum capital</th><th>Time per day</th><th>Cost sensitivity</th><th>Difficulty</th></tr>
+<tr><td><b>Scalping</b></td><td>Seconds to minutes</td><td>200&ndash;1,000+</td><td>&#8377;10 lakh+ (costs dominate below this)</td><td>Full session, uninterrupted</td><td><b>Extreme</b></td><td><span class="badge">Effectively impossible for retail</span></td></tr>
+<tr><td><b>Intraday</b></td><td>Minutes to hours; flat by close</td><td>20&ndash;100</td><td>&#8377;5 lakh+</td><td>4&ndash;6 hours</td><td>Very high</td><td><span class="badge">Very hard</span></td></tr>
+<tr><td><b>BTST / STBT</b></td><td>Overnight only</td><td>10&ndash;30</td><td>&#8377;3 lakh+</td><td>1&ndash;2 hours</td><td>High</td><td><span class="badge">Very hard &mdash; gap risk with no stop protection</span></td></tr>
+<tr><td><b>Swing</b></td><td>2&ndash;15 days</td><td>5&ndash;20</td><td>&#8377;2 lakh+</td><td>30&ndash;60 min</td><td>Moderate</td><td><span class="badge o">Hard</span></td></tr>
+<tr><td><b>Positional</b></td><td>Weeks to months</td><td>2&ndash;8</td><td>&#8377;2 lakh+</td><td>30 min, a few times a week</td><td>Low</td><td><span class="badge o">Hard, but the most compatible with a job</span></td></tr>
+<tr><td><b>Pairs / statistical arbitrage</b></td><td>Days to weeks</td><td>Varies</td><td>&#8377;10 lakh+ (two legs, margin)</td><td>Depends on automation</td><td>High (two legs)</td><td><span class="badge">Requires quantitative infrastructure</span></td></tr>
+</table>
+
+<h3>The strategy archetypes</h3>
+<div class="grid c2">
+<div class="card"><h4>Momentum / trend following</h4><p>Buy what is rising, sell what is falling. Premise: price trends persist over certain horizons. Characteristics: low win rate (30&ndash;45%), large average winner, many small losers, long flat periods, severe drawdowns when trends reverse. Requires the discipline to take many small losses and let a few winners run &mdash; psychologically the hardest profile.</p></div>
+<div class="card"><h4>Mean reversion</h4><p>Buy what has fallen too far, sell what has risen too far. Premise: prices overshoot and revert. Characteristics: high win rate (60&ndash;75%), small average winner, occasional very large loser when "too far" keeps going. Psychologically comfortable and structurally dangerous &mdash; it is the same payoff shape as selling options.</p></div>
+<div class="card"><h4>Breakout</h4><p>Enter when price exits a defined range. Premise: consolidation precedes directional expansion. Characteristics: many false breakouts, cost-heavy, highly sensitive to the definition of the range and to slippage at the moment of the break, when liquidity is thinnest.</p></div>
+<div class="card"><h4>Pairs / relative value</h4><p>Long one instrument, short a related one; profit from the spread converging. Premise: the relationship is stable. Characteristics: market-neutral-ish, two sets of costs, requires borrow or derivatives for the short leg, and fails catastrophically when the relationship breaks for a fundamental reason.</p></div>
+<div class="card"><h4>Event driven</h4><p>Position around results, corporate actions, index inclusions, policy decisions. Premise: predictable flows or predictable reactions. Characteristics: binary outcomes, high implied volatility, you are competing with specialists, and the event is already priced.</p></div>
+<div class="card"><h4>Volatility</h4><p>Trade implied versus realised volatility rather than direction. Premise: options are systematically mispriced in one direction. Characteristics: requires option fluency and Greeks management; for retail it almost always degenerates into naked option selling, which is covered as a hazard in the derivatives guide.</p></div>
+</div>
+
+<div class="callout note"><span class="t">Win rate and payoff ratio are not independent</span>Across almost all strategy archetypes, the two trade off against each other. Momentum gives you a low win rate and a high payoff ratio. Mean reversion gives you a high win rate and a low payoff ratio. There is no archetype offering both, because if there were, it would be arbitraged. When someone advertises "75% accuracy with 1:3 risk-reward", they are describing a combination that would be extraordinarily profitable and is therefore almost certainly a curve-fitted backtest or a fabrication.</div>
+
+<h3>Choosing a style: the honest matching exercise</h3>
+<pre><code class="language-text">STYLE SELECTION WORKSHEET
+=========================
+Answer these before choosing anything.
+
+1. HOW MANY UNINTERRUPTED HOURS CAN YOU GIVE TO THE MARKET
+   DURING SESSION HOURS, EVERY DAY, SUSTAINABLY?
+     0 hours          -> positional only, or do not trade
+     under 1 hour     -> positional
+     1-2 hours        -> swing or positional
+     4+ hours, and
+     your employer is
+     fine with it     -> intraday is arithmetically possible
+     (If you are employed full-time as a software engineer,
+      the honest answer is 0-1. Act accordingly.)
+
+2. WHAT IS YOUR RISK CAPITAL - money whose total loss changes
+   nothing material in your life?
+     under Rs 2 lakh  -> do not trade; costs will dominate
+     Rs 2-5 lakh      -> positional/swing, small size
+     Rs 5 lakh+       -> more styles become arithmetically
+                         viable (not more likely to succeed)
+
+3. CAN YOU TOLERATE A 30% DRAWDOWN WITHOUT CHANGING YOUR
+   BEHAVIOUR?
+     No  -> trend following and momentum are out. Your
+            drawdowns will be deeper than you expect.
+     Yes -> prove it. Most people say yes and discover
+            otherwise at -12%.
+
+4. DO YOU PREFER BEING RIGHT OFTEN, OR MAKING MORE WHEN RIGHT?
+     Right often      -> mean reversion. BEWARE: this is the
+                         profile that hides a fat left tail.
+     More when right  -> momentum. You will be wrong 60% of
+                         the time and must be fine with that.
+
+5. CAN YOU WRITE CODE AND MANAGE DATA?
+     Yes -> systematic testing is available to you, which is
+            a genuine advantage over discretionary traders.
+     No  -> you will be relying on discretion, which cannot
+            be backtested, which means you cannot know whether
+            you have an edge. This is a serious limitation.
+
+THE MOST COMMON MISMATCH
+  A full-time employed engineer choosing intraday or expiry-day
+  trading. It fails on question 1, every time, and the failure
+  is expensive because the style with the least compatible time
+  profile is also the one with the highest cost sensitivity.</code></pre>
+
+<h2>Market structure for traders</h2>
+<p class="lead">Before any strategy, you need to understand the mechanics of how your order becomes a trade and what it costs you in ways that never appear on a contract note. Market structure is the terrain; strategy is the route.</p>
+
+<h3>Liquidity and the bid&ndash;ask spread</h3>
+<pre><code class="language-text">READING AN ORDER BOOK
+=====================
+A hypothetical liquid large-cap share:
+
+   BIDS (buyers)              ASKS (sellers)
+   Qty      Price             Price    Qty
+   -----    -------           -------  -----
+   4,200    1,799.80          1,800.00  3,800
+   6,500    1,799.70          1,800.10  5,100
+   9,100    1,799.60          1,800.20  7,400
+  12,000    1,799.50          1,800.30 10,900
+  15,500    1,799.40          1,800.40 14,200
+
+  BEST BID  = 1,799.80   BEST ASK = 1,800.00
+  SPREAD    = 0.20       = 0.011% of price
+  MID       = 1,799.90
+
+WHAT A MARKET ORDER COSTS YOU
+  Buy 3,000 shares at market -> filled at 1,800.00 (enough
+  depth at the best ask). Cost vs mid = 0.10 x 3,000 = Rs 300.
+
+  Buy 20,000 shares at market -> you consume multiple levels:
+      3,800 @ 1,800.00 = 68,40,000
+      5,100 @ 1,800.10 = 91,80,510
+      7,400 @ 1,800.20 = 1,33,21,480
+      3,700 @ 1,800.30 = 66,61,110
+      ------------------------------
+     20,000 shares, avg price 1,800.15
+  Cost vs mid = 0.25 x 20,000 = Rs 5,000
+  This extra 0.15 is IMPACT COST - you moved the price
+  against yourself by trading.
+
+NOW THE SAME EXERCISE ON A THIN STOCK
+   BIDS                      ASKS
+   Qty     Price             Price   Qty
+   -----   ------            ------  -----
+     200   412.05            413.90    150
+     450   411.60            414.70    380
+     800   410.20            416.00    600
+
+  SPREAD = 1.85 = 0.45% of price
+  Buy 1,000 shares at market:
+      150 @ 413.90, 380 @ 414.70, 470 @ 416.00
+      avg = 415.26 vs mid of 412.98
+  IMPACT = 0.55% on entry. Another 0.55%+ on exit.
+  ROUND-TRIP STRUCTURAL COST: over 1.1%, before brokerage.
+
+  A strategy with a 0.8% average gross edge is DEAD in this
+  stock and ALIVE in the liquid one. Same strategy. The
+  instrument decides.</code></pre>
+
+<table>
+<tr><th>Liquidity measure</th><th>What it tells you</th><th>Rule of thumb</th></tr>
+<tr><td>Bid&ndash;ask spread (%)</td><td>Immediate round-trip friction</td><td>Your average expected gross profit should be at least 5&ndash;10x the spread</td></tr>
+<tr><td>Depth at best bid/ask</td><td>How much you can trade without moving the price</td><td>Your order should be a small fraction of displayed depth</td></tr>
+<tr><td>Average daily traded value</td><td>Overall capacity</td><td>Your position should be well under 1% of ADTV; smaller for intraday</td></tr>
+<tr><td>Impact cost (published by exchanges)</td><td>Estimated cost of executing a standard order size</td><td>NSE publishes impact cost for index constituents; check it before assuming liquidity</td></tr>
+<tr><td>Spread stability through the day</td><td>Whether liquidity disappears when you need it</td><td>Spreads widen at the open, at the close, and during news. Those are exactly the times you want to trade.</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">Thin stocks punish you twice</span>First on entry and exit through the spread and impact. Second, and worse, when you need to exit urgently &mdash; a stock that trades &#8377;2 crore a day in normal conditions may have no bid at all on a bad day. Circuit limits can freeze it entirely. Every backtest that includes illiquid names and assumes you got the closing price is lying to you, and the lie is largest precisely in the trades that matter most.</div>
+
+<h3>Circuit limits and gap risk in Indian equities</h3>
+<table>
+<tr><th>Mechanism</th><th>What it does</th><th>Consequence for a trader</th></tr>
+<tr><td>Stock-level price bands</td><td>Individual securities have daily movement limits (commonly 2%, 5%, 10% or 20%, depending on the security; securities in the F&amp;O segment have different treatment, with dynamic price bands)</td><td>If a stock hits the upper or lower circuit, you may be <b>unable to exit at any price</b>. A lower-circuit stock can be locked for consecutive sessions.</td></tr>
+<tr><td>Index-level market-wide circuit breakers</td><td>Trading halts across the market at defined index moves (commonly cited trigger levels are 10%, 15% and 20%), with halt durations depending on the level and the time of day</td><td>Trading stops entirely. Your stop losses do not execute. Your margin calls do not wait.</td></tr>
+<tr><td>Dynamic price bands / operating ranges</td><td>Intraday bands that flex, used in F&amp;O-eligible securities and derivatives to curb erroneous orders</td><td>Orders outside the band are rejected; the band may be relaxed by the exchange</td></tr>
+<tr><td>Overnight gaps</td><td>Price discontinuity between one close and the next open, caused by news outside market hours</td><td><b>No stop loss protects against a gap.</b> This is the single most under-appreciated risk for positional and BTST traders.</td></tr>
+</table>
+
+<pre><code class="language-text">THE GAP MATHS - WHY A STOP LOSS IS NOT A GUARANTEE
+==================================================
+You are long 1,000 shares at Rs 1,800 = Rs 18,00,000
+Stop loss placed at Rs 1,710 (-5%)
+Planned maximum loss = Rs 90,000
+
+SCENARIO A - ORDERLY DECLINE
+  Price drifts down intraday, your stop triggers at 1,710,
+  you are filled at 1,709.50.
+  Actual loss = Rs 90,500. The plan worked.
+
+SCENARIO B - OVERNIGHT NEWS, GAP DOWN
+  Previous close 1,790. Overnight: a regulatory action is
+  announced. Stock opens at 1,520 (-15%).
+  Your stop at 1,710 becomes a MARKET ORDER at the open.
+  Filled at roughly 1,518.
+  Actual loss = (1,800 - 1,518) x 1,000 = Rs 2,82,000
+
+  THREE TIMES your planned maximum loss. The stop did exactly
+  what it was designed to do and was irrelevant.
+
+SCENARIO C - GAP DOWN TO LOWER CIRCUIT
+  Stock opens at the 20% lower circuit, 1,432, locked.
+  No buyers. Your stop cannot execute.
+  Day 2: opens at lower circuit again, 1,146.
+  Day 3: opens at lower circuit again, 917.
+  You finally exit at 920.
+  Actual loss = (1,800 - 920) x 1,000 = Rs 8,80,000
+  Nearly TEN TIMES your planned maximum loss.
+
+  This is not hypothetical. Indian mid- and small-cap stocks
+  have experienced multi-day lower-circuit sequences following
+  governance events, regulatory actions and fraud disclosures.
+
+THE IMPLICATIONS FOR POSITION SIZING
+  Your "maximum loss" from a stop is a planning figure, not a
+  guarantee. Size positions so that a 3x-worse-than-planned
+  outcome is survivable, not fatal.
+
+  If your stop implies a 2% account loss, ask: "can I survive
+  a 6% loss on this position?" If no, the position is too big.
+
+  This is why single-stock concentration is so much more
+  dangerous than index exposure: an index cannot be locked at
+  the lower circuit for three days because of one company's
+  fraud, but a stock can.
+
+Circuit mechanisms and band levels illustrative. As at late
+2026 - verify current rules at nseindia.com and sebi.gov.in.</code></pre>
+
+<h3>Order types and what they actually do</h3>
+<table>
+<tr><th>Order type</th><th>Behaviour</th><th>When to use</th><th>Hazard</th></tr>
+<tr><td>Market</td><td>Executes immediately at the best available price(s)</td><td>Only in deeply liquid instruments when immediacy matters more than price</td><td>In a thin book you can be filled far from the last price. Never use in options.</td></tr>
+<tr><td>Limit</td><td>Executes only at your price or better</td><td>Default for almost everything</td><td>May not execute at all &mdash; which is sometimes valuable information</td></tr>
+<tr><td>Stop loss (SL-M)</td><td>Becomes a market order when the trigger is hit</td><td>When you must exit</td><td>Fills at whatever is available; useless against a gap</td></tr>
+<tr><td>Stop loss limit (SL-L)</td><td>Becomes a limit order when the trigger is hit</td><td>When you want price control on the exit</td><td>May not fill at all in a fast move, leaving you in a losing position with no protection</td></tr>
+<tr><td>Cover / bracket orders</td><td>Broker-level constructs bundling entry, stop and target</td><td>Intraday convenience</td><td>Availability has changed following regulatory revisions; verify with your broker. Do not rely on a broker product as your risk framework.</td></tr>
+<tr><td>AMO (after-market order)</td><td>Queued for the next session's open</td><td>Placing orders outside hours</td><td>Executes into the opening auction, often the worst price of the day</td></tr>
+<tr><td>GTT (good till triggered)</td><td>Broker-held conditional order valid for a long period</td><td>Longer-horizon alerts and exits</td><td>Broker-side, not exchange-side; depends on the broker's systems being up</td></tr>
+</table>
+
+<div class="callout tip"><span class="t">The opening and closing minutes</span>Spreads are widest, volatility highest and information lowest in the first and last few minutes of the session. A large proportion of retail intraday damage happens in those windows. If you must trade, waiting 15&ndash;30 minutes after the open costs you nothing and removes a category of avoidable loss.</div>
+
+<h2>Building a strategy: writing it as a specification</h2>
+<p class="lead">A strategy that is not written down is not a strategy &mdash; it is a mood. As a software engineer you already know the discipline: a system you cannot specify is a system you cannot test, and a system you cannot test is a system you cannot trust. Trading is the same, with money attached.</p>
+
+<h3>The seven components</h3>
+<ol class="steps">
+<li><b>Hypothesis</b>A falsifiable statement about market behaviour, with a reason why it should be true and why it has not been arbitraged away. Written first, before any chart is opened.</li>
+<li><b>Universe</b>Exactly which instruments are eligible, defined by objective, checkable criteria &mdash; liquidity, price, market cap, segment membership. No discretion.</li>
+<li><b>Timeframe</b>The bar interval for signals, the expected holding period, and the review cadence.</li>
+<li><b>Entry rule</b>The precise, computable condition that triggers a trade. If two people applying it to the same data would get different answers, it is not a rule.</li>
+<li><b>Exit rule</b>The condition for taking profit. Separate from the stop.</li>
+<li><b>Stop rule</b>The condition for accepting the trade is wrong. Defined in advance, in price terms, before entry.</li>
+<li><b>Filter and sizing rules</b>Conditions under which you do not trade at all (regime filters), and how position size is determined from account equity and the stop distance.</li>
+</ol>
+
+<div class="callout note"><span class="t">The two-person test</span>Hand your written specification to a competent stranger with the same data. If they cannot reproduce your trade list exactly, your specification has discretion hidden in it, and that discretion is where your backtest results came from. Discretionary trading is legitimate, but it cannot be backtested, which means you can never know whether you have an edge &mdash; only whether you have had good luck.</div>
+
+<h3>A full worked strategy specification</h3>
+<pre><code class="language-text">STRATEGY SPECIFICATION
+======================
+NAME        : Index Pullback Continuation (ILLUSTRATIVE ONLY)
+VERSION     : 0.3
+AUTHOR      : (you)
+DATE        : (today)
+STATUS      : UNTESTED HYPOTHESIS - NOT FOR LIVE CAPITAL
+
+------------------------------------------------------------
+1. HYPOTHESIS
+------------------------------------------------------------
+STATEMENT:
+  In an established medium-term uptrend, short-term pullbacks
+  to a defined support reference are followed, more often than
+  chance, by a resumption of the trend over the following
+  5-10 sessions.
+
+WHY MIGHT THIS BE TRUE?
+  Possible behavioural mechanism: participants who missed the
+  initial move use pullbacks as entry points, creating a
+  concentration of resting demand at reference levels.
+  Possible structural mechanism: systematic trend-following
+  allocators rebalance into weakness within a trend.
+
+WHY MIGHT IT NOT BE ARBITRAGED AWAY?
+  Honest answer: IT PROBABLY HAS BEEN. This is one of the most
+  widely known patterns in existence. Any surviving edge is
+  likely small, regime-dependent and smaller than transaction
+  costs for most participants.
+  THIS IS A RED FLAG AND IT IS WRITTEN DOWN DELIBERATELY.
+
+FALSIFICATION CRITERION:
+  If, over 200+ out-of-sample trades, expectancy after modelled
+  costs is not greater than +0.10R, the hypothesis is rejected
+  and the strategy is abandoned. No tweaking.
+
+------------------------------------------------------------
+2. UNIVERSE
+------------------------------------------------------------
+  - Instrument: a broad equity index, traded via index futures
+    or via a liquid index ETF
+  - Rationale for index over single stocks: no single-company
+    fraud risk, no multi-day lower-circuit risk, tightest
+    spreads, published impact cost
+  - EXCLUDED: all single stocks (gap and circuit risk), all
+    instruments with average daily traded value below a
+    stated threshold
+
+------------------------------------------------------------
+3. TIMEFRAME
+------------------------------------------------------------
+  Signal bar        : daily close
+  Decision time     : after the close; orders placed for the
+                      next session
+  Expected hold     : 5-10 sessions
+  Maximum hold      : 15 sessions (time stop)
+  Review cadence    : weekly log review; monthly metrics;
+                      quarterly go/no-go
+
+------------------------------------------------------------
+4. ENTRY RULE  (all conditions must be true at the close)
+------------------------------------------------------------
+  E1. Close is above the 200-period simple moving average
+      (regime: medium-term uptrend)
+  E2. The 50-period SMA is above the 200-period SMA
+  E3. Today's close is below the 20-period SMA
+      (short-term pullback has occurred)
+  E4. Today's close is above the 50-period SMA
+      (the pullback has not broken the medium-term structure)
+  E5. Today's close is greater than yesterday's close
+      (first sign of resumption - avoids catching a knife)
+  E6. India VIX is below 22 (regime filter - do not trade
+      this pattern in a high-volatility regime)
+
+  ORDER: buy at the next session's open.
+  NO DISCRETION. If all six are true, the trade is taken.
+  If any is false, no trade. There is no "but it looks good".
+
+------------------------------------------------------------
+5. EXIT RULE (profit)
+------------------------------------------------------------
+  X1. Close above the 20-period SMA by more than 0.5 x ATR(14)
+      -> exit at next open
+  OR
+  X2. Price reaches entry + 2.5 x ATR(14 at entry)
+      -> exit on touch
+  OR
+  X3. 15 sessions elapsed -> exit at next open (time stop)
+
+------------------------------------------------------------
+6. STOP RULE
+------------------------------------------------------------
+  S1. Initial stop = entry - 1.5 x ATR(14 at entry)
+  S2. Stop is never widened. Ever. Under any circumstances.
+  S3. After price reaches entry + 1.5 x ATR, the stop moves
+      to breakeven (entry price)
+  S4. Hard stop: if the index closes below its 200-SMA, exit
+      all positions at the next open regardless of P&amp;L
+      (the regime that justified the trade has ended)
+
+------------------------------------------------------------
+7. FILTERS AND SIZING
+------------------------------------------------------------
+  F1. No new entries in the 3 sessions before a scheduled
+      monetary policy decision or the Union Budget
+  F2. Maximum 2 concurrent positions
+  F3. Maximum portfolio heat 4% (sum of all open risk)
+  F4. No trading for 3 sessions after 3 consecutive losses
+      (circuit breaker - see the psychology section)
+
+  SIZING:
+    Risk per trade        = 1.0% of account equity
+    Stop distance         = 1.5 x ATR(14) in points
+    Position size (units) = (equity x 0.01) / stop distance
+    Rounded DOWN to the nearest tradeable unit.
+    If one unit exceeds the risk budget, NO TRADE.
+
+------------------------------------------------------------
+8. COST MODEL (must be applied in every backtest)
+------------------------------------------------------------
+  Brokerage           : Rs 20 per order + 18% GST
+  STT                 : as applicable to the instrument
+  Exchange charges    : as published
+  SEBI turnover fee   : as published
+  Stamp duty          : as applicable, buy side
+  SLIPPAGE ASSUMPTION : 0.05% of notional per side, on top of
+                        all of the above, on every fill,
+                        including stop-loss fills
+  GAP ASSUMPTION      : stop fills are modelled at the WORSE
+                        of (stop price) and (next open)
+
+------------------------------------------------------------
+9. METRICS TO RECORD
+------------------------------------------------------------
+  Trades, win rate, average win (R), average loss (R),
+  expectancy (R), profit factor, maximum drawdown (%),
+  maximum drawdown duration (days), longest losing streak,
+  exposure (% of time in market), return on risk capital,
+  total costs as a % of gross P&amp;L
+
+------------------------------------------------------------
+10. KILL CRITERIA
+------------------------------------------------------------
+  K1. Out-of-sample expectancy below +0.10R over 200 trades
+  K2. Live drawdown exceeds 1.5x the worst backtested drawdown
+  K3. Live expectancy below zero over 100 live trades
+  K4. Any rule has been changed more than twice since the
+      last out-of-sample test (overfitting indicator)
+
+  If a kill criterion triggers, the strategy stops. Permanently
+  or until a full re-test on new data. NOT "with a small tweak".
+
+THIS IS AN ILLUSTRATIVE SPECIFICATION FORMAT, NOT A
+RECOMMENDED STRATEGY. The hypothesis is almost certainly not
+profitable after costs. It is written out in full so you can
+see what a complete specification looks like.</code></pre>
+
+<div class="callout warn"><span class="t">Notice what section 1 does</span>The hypothesis section openly states that the pattern is widely known and probably arbitraged away, and commits to a falsification criterion before any testing. That intellectual honesty at the start is what separates research from rationalisation. The overwhelming temptation in strategy development is to write the hypothesis <i>after</i> seeing the backtest, which converts a scientific process into a storytelling one.</div>
+
+<h3>Specification anti-patterns</h3>
+<table>
+<tr><th>Anti-pattern</th><th>What it looks like</th><th>Why it fails</th></tr>
+<tr><td>Hidden discretion</td><td>"Enter on a breakout <i>if the setup looks clean</i>"</td><td>Untestable. Your backtest measures your hindsight, not the rule.</td></tr>
+<tr><td>Undefined exit</td><td>"Hold until the trend ends"</td><td>Exits determine most of your return distribution. An undefined exit is an undefined strategy.</td></tr>
+<tr><td>Stop as an afterthought</td><td>"I'll cut it if it goes too far"</td><td>"Too far" is defined by your emotional state at the moment of pain, which is the worst possible input.</td></tr>
+<tr><td>No universe definition</td><td>"Any stock showing good momentum"</td><td>Survivorship bias and selection bias are guaranteed. You will test on the stocks you remember.</td></tr>
+<tr><td>Parameter stacking</td><td>Eight indicators each with two tunable parameters</td><td>16 degrees of freedom on a few hundred trades. You are fitting noise with near-certainty.</td></tr>
+<tr><td>No cost model</td><td>Backtest on closing prices with zero friction</td><td>Covered in detail in the backtesting section. This single omission invalidates most retail backtests.</td></tr>
+<tr><td>No kill criteria</td><td>"I'll keep refining it"</td><td>Without a pre-committed stopping rule, you will refine until it looks good, which is the definition of overfitting.</td></tr>
+</table>
+
+<h2>Expectancy maths</h2>
+<p class="lead">Expectancy is the single number that determines whether a strategy makes money. Everything else &mdash; win rate, accuracy, profit factor, Sharpe ratio &mdash; is either derived from it or a distraction from it. If you learn one piece of arithmetic from this guide, learn this one.</p>
+
+<h3>R-multiples: the unit that makes everything comparable</h3>
+<pre><code class="language-text">THE R-MULTIPLE
+==============
+R = the amount of money you risked on a trade, defined as
+    the distance from entry to stop, times the position size.
+
+Every outcome is then expressed as a multiple of R:
+  Lost at the stop        = -1.0R
+  Exited at half the stop = -0.5R
+  Made twice the risk     = +2.0R
+  Gapped through the stop = -2.3R   (this happens)
+
+WHY THIS IS THE RIGHT UNIT
+  1. It normalises across position sizes and instruments.
+     A Rs 4,000 loss on a small position and a Rs 40,000 loss
+     on a large one are both -1.0R if both were sized to risk
+     1% of equity.
+  2. It separates the STRATEGY'S quality from the SIZING
+     decision. A strategy with +0.3R expectancy is good
+     whether you risk 0.5% or 2% per trade; the sizing
+     decision only changes how fast you compound and how
+     likely you are to be ruined.
+  3. It makes expectancy directly computable.
+
+WORKED EXAMPLE
+  Account                Rs 5,00,000
+  Risk per trade         1% = Rs 5,000  -> 1R = Rs 5,000
+  Entry                  25,000 (index units)
+  Stop                   24,800  -> stop distance 200 points
+  Position size          5,000 / 200 = 25 units
+
+  Exit at 25,340 -> profit = 340 x 25 = Rs 8,500
+  In R terms: 8,500 / 5,000 = +1.70R
+
+  Exit at stop -> loss = 200 x 25 = Rs 5,000 = -1.00R
+
+  Gap down, filled at 24,610 -> loss = 390 x 25 = Rs 9,750
+  In R terms: -1.95R   &lt;- RECORD THIS HONESTLY. Hiding gap
+  losses by calling them -1R is how people convince themselves
+  their risk control works.</code></pre>
+
+<h3>The expectancy formula</h3>
+<pre><code class="language-text">EXPECTANCY
+==========
+  E (in R) = (W x A_win) - (L x A_loss)
+
+  W      = win rate (as a decimal)
+  L      = loss rate = 1 - W
+  A_win  = average winning trade, in R
+  A_loss = average losing trade, in R (positive number)
+
+EQUIVALENTLY, using the PAYOFF RATIO P = A_win / A_loss
+  and assuming A_loss = 1.0R:
+
+  E = (W x P) - (1 - W)
+
+PROFITABILITY CONDITION:  E &gt; 0  after costs.
+
+WORKED - THREE STRATEGIES WITH IDENTICAL "QUALITY" CLAIMS
+---------------------------------------------------------
+STRATEGY A - "high accuracy mean reversion"
+  W = 0.75,  A_win = 0.5R,  A_loss = 1.6R
+  E = (0.75 x 0.5) - (0.25 x 1.6)
+    = 0.375 - 0.400
+    = -0.025R   LOSES MONEY despite a 75% win rate
+
+STRATEGY B - "trend following"
+  W = 0.35,  A_win = 3.2R,  A_loss = 1.0R
+  E = (0.35 x 3.2) - (0.65 x 1.0)
+    = 1.120 - 0.650
+    = +0.470R   MAKES MONEY despite being wrong 65% of the time
+
+STRATEGY C - "balanced swing"
+  W = 0.52,  A_win = 1.4R,  A_loss = 1.0R
+  E = (0.52 x 1.4) - (0.48 x 1.0)
+    = 0.728 - 0.480
+    = +0.248R
+
+TRANSLATE INTO RUPEES
+  With 1R = Rs 5,000 and 100 trades a year:
+    A: 100 x -0.025 x 5,000 = -Rs   12,500
+    B: 100 x +0.470 x 5,000 = +Rs 2,35,000
+    C: 100 x +0.248 x 5,000 = +Rs 1,24,000
+
+  Then SUBTRACT COSTS. At Rs 180 per round trip:
+    100 trades x Rs 180 = Rs 18,000
+    A: -Rs 30,500   B: +Rs 2,17,000   C: +Rs 1,06,000
+
+THE LESSON THAT CANNOT BE OVERSTATED
+  WIN RATE ALONE TELLS YOU NOTHING.
+  Strategy A wins three times as often as B and loses money.
+  Anyone who quotes accuracy without payoff ratio is either
+  confused or selling you something.</code></pre>
+
+<h3>The win rate / payoff ratio frontier</h3>
+<pre><code class="language-text">BREAK-EVEN WIN RATE FOR A GIVEN PAYOFF RATIO
+============================================
+Setting E = 0 and solving:
+     (W x P) - (1 - W) = 0
+     W x P + W = 1
+     W = 1 / (1 + P)
+
+Payoff ratio P   Break-even win rate   Comment
+--------------   -------------------   --------------------
+     0.25             80.0%            Selling tails. The
+                                       structure of a short
+                                       option book.
+     0.50             66.7%            Classic mean reversion
+     0.75             57.1%
+     1.00             50.0%            A coin flip
+     1.50             40.0%
+     2.00             33.3%
+     2.50             28.6%
+     3.00             25.0%            Classic trend following
+     4.00             20.0%
+     5.00             16.7%            Long-tail momentum
+
+NOW ADD COSTS. Suppose costs equal 0.15R per round trip
+(a realistic retail figure when 1R is small).
+
+  E = (W x P) - (1 - W) - 0.15 = 0
+  W = 1.15 / (1 + P)
+
+Payoff ratio P   BE win rate      BE win rate     Extra win
+                 (no costs)       (0.15R costs)   rate needed
+--------------   -------------    -------------   -----------
+     0.25            80.0%            92.0%         +12.0 pp
+     0.50            66.7%            76.7%         +10.0 pp
+     1.00            50.0%            57.5%          +7.5 pp
+     2.00            33.3%            38.3%          +5.0 pp
+     3.00            25.0%            28.8%          +3.8 pp
+     5.00            16.7%            19.2%          +2.5 pp
+
+READ THE LEFT-HAND SIDE OF THAT TABLE.
+A strategy with a 0.25 payoff ratio needs a 92% win rate
+after costs. That is the arithmetic reason why "sell premium
+for small consistent gains" fails at retail cost levels. The
+costs eat a larger fraction of a small average win.
+
+READ THE RIGHT-HAND SIDE.
+High-payoff strategies are far more ROBUST to costs. If your
+average winner is 5R, a 0.15R cost is 3% of the winner. If
+your average winner is 0.25R, the same cost is 60% of it.
+
+PRACTICAL CONSEQUENCE FOR A SMALL ACCOUNT
+  Prefer strategies with a high payoff ratio and a low trade
+  frequency. The cost structure of retail trading in India
+  makes high-frequency, small-edge strategies arithmetically
+  unavailable to you, regardless of how good the signal is.</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="300" fill="#ffffff"/>
+<text x="60" y="30" font-size="13" fill="#1e3a8a">BREAK-EVEN WIN RATE vs PAYOFF RATIO</text>
+<line x1="90" y1="250" x2="730" y2="250" stroke="#6b7688" stroke-width="1"/>
+<line x1="90" y1="48" x2="90" y2="250" stroke="#6b7688" stroke-width="1"/>
+<text x="350" y="282" font-size="11" fill="#6b7688">Payoff ratio (avg win / avg loss)</text>
+<text x="18" y="140" font-size="11" fill="#6b7688">Required</text>
+<text x="18" y="156" font-size="11" fill="#6b7688">win rate</text>
+<text x="96" y="266" font-size="10" fill="#6b7688">0.25</text>
+<text x="250" y="266" font-size="10" fill="#6b7688">1.0</text>
+<text x="420" y="266" font-size="10" fill="#6b7688">2.0</text>
+<text x="590" y="266" font-size="10" fill="#6b7688">3.5</text>
+<text x="700" y="266" font-size="10" fill="#6b7688">5.0</text>
+<text x="62" y="66" font-size="10" fill="#6b7688">100%</text>
+<text x="66" y="150" font-size="10" fill="#6b7688">50%</text>
+<text x="70" y="234" font-size="10" fill="#6b7688">0%</text>
+<polyline points="100,82 160,104 220,126 280,150 340,170 400,186 460,198 520,208 580,216 640,222 710,228" fill="none" stroke="#1e3a8a" stroke-width="2.5"/>
+<text x="300" y="166" font-size="10" fill="#1e3a8a">no costs</text>
+<polyline points="100,62 160,86 220,110 280,136 340,158 400,176 460,190 520,200 580,210 640,216 710,222" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text x="150" y="78" font-size="10" fill="#2563eb">with 0.15R costs</text>
+<rect x="430" y="60" width="290" height="58" fill="#eff4ff" stroke="#2563eb" stroke-width="1"/>
+<text x="440" y="78" font-size="10" fill="#1e3a8a">Costs matter most where the payoff ratio</text>
+<text x="440" y="94" font-size="10" fill="#1e3a8a">is low. Small-win strategies are the most</text>
+<text x="440" y="110" font-size="10" fill="#1e3a8a">fragile to the Indian retail cost stack.</text>
+</svg><div class="cap">The break-even frontier. Strategies to the left (small wins, high accuracy) require near-impossible win rates once realistic costs are included.</div></div>
+
+<h3>Profit factor, Sharpe and the metrics worth tracking</h3>
+<table>
+<tr><th>Metric</th><th>Formula</th><th>What it tells you</th><th>Caveat</th></tr>
+<tr><td>Expectancy (R)</td><td>(W &times; A<sub>win</sub>) &minus; (L &times; A<sub>loss</sub>)</td><td>Expected profit per trade, in risk units</td><td>Needs 100+ trades to be meaningful</td></tr>
+<tr><td>Expectancy (&#8377;)</td><td>Expectancy(R) &times; 1R value</td><td>Expected rupees per trade</td><td>Only valid if 1R is consistent</td></tr>
+<tr><td>Profit factor</td><td>Gross profit / gross loss</td><td>&gt;1 means profitable; 1.5&ndash;2.0 is good; &gt;3 on a small sample is a red flag</td><td>Extremely sensitive to one large winner</td></tr>
+<tr><td>Win rate</td><td>Wins / total trades</td><td>Almost nothing on its own</td><td>The single most over-quoted and least informative metric</td></tr>
+<tr><td>Maximum drawdown</td><td>Largest peak-to-trough equity decline</td><td>What you must survive emotionally and financially</td><td>Your future worst drawdown will likely exceed your backtested one</td></tr>
+<tr><td>Drawdown duration</td><td>Time from peak to recovery of that peak</td><td>Often more psychologically destructive than depth</td><td>Routinely ignored; should not be</td></tr>
+<tr><td>Sharpe-type ratio</td><td>(Return &minus; risk-free) / volatility of returns</td><td>Return per unit of volatility</td><td>Penalises upside volatility; assumes normality; easily gamed by strategies with hidden tail risk</td></tr>
+<tr><td>Exposure</td><td>% of time with capital at risk</td><td>Two strategies with the same return but different exposure are not equivalent</td><td>Low exposure with good returns is genuinely valuable</td></tr>
+<tr><td>Cost ratio</td><td>Total costs / gross profit</td><td>How much of your edge the market takes</td><td>If this exceeds 40&ndash;50%, reduce frequency, not position size</td></tr>
+</table>
+
+<div class="diagram"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="300" fill="#ffffff"/>
+<text x="50" y="28" font-size="13" fill="#1e3a8a">TWO R-MULTIPLE DISTRIBUTIONS WITH THE SAME EXPECTANCY</text>
+<text x="50" y="48" font-size="11" fill="#6b7688">Left: trend following (35% win rate). Right: mean reversion (75% win rate).</text>
+<line x1="60" y1="230" x2="360" y2="230" stroke="#6b7688" stroke-width="1"/>
+<line x1="60" y1="66" x2="60" y2="230" stroke="#6b7688" stroke-width="1"/>
+<rect x="70" y="96" width="30" height="134" fill="#1e3a8a"/>
+<rect x="104" y="196" width="30" height="34" fill="#1e3a8a"/>
+<rect x="138" y="204" width="30" height="26" fill="#2563eb"/>
+<rect x="172" y="196" width="30" height="34" fill="#2563eb"/>
+<rect x="206" y="188" width="30" height="42" fill="#2563eb"/>
+<rect x="240" y="198" width="30" height="32" fill="#2563eb"/>
+<rect x="274" y="208" width="30" height="22" fill="#2563eb"/>
+<rect x="308" y="214" width="30" height="16" fill="#2563eb"/>
+<text x="68" y="246" font-size="9" fill="#6b7688">-1R</text>
+<text x="170" y="246" font-size="9" fill="#6b7688">+2R</text>
+<text x="300" y="246" font-size="9" fill="#6b7688">+6R</text>
+<text x="66" y="268" font-size="10" fill="#1e3a8a">Many small losses, a few very large wins.</text>
+<text x="66" y="284" font-size="10" fill="#1e3a8a">Expectancy +0.25R. Psychologically brutal.</text>
+<line x1="420" y1="230" x2="720" y2="230" stroke="#6b7688" stroke-width="1"/>
+<line x1="420" y1="66" x2="420" y2="230" stroke="#6b7688" stroke-width="1"/>
+<rect x="430" y="176" width="30" height="54" fill="#1e3a8a"/>
+<rect x="464" y="196" width="30" height="34" fill="#1e3a8a"/>
+<rect x="498" y="214" width="30" height="16" fill="#1e3a8a"/>
+<rect x="532" y="96" width="30" height="134" fill="#2563eb"/>
+<rect x="566" y="150" width="30" height="80" fill="#2563eb"/>
+<rect x="600" y="204" width="30" height="26" fill="#2563eb"/>
+<rect x="634" y="222" width="30" height="8" fill="#2563eb"/>
+<text x="424" y="246" font-size="9" fill="#6b7688">-4R</text>
+<text x="530" y="246" font-size="9" fill="#6b7688">+0.5R</text>
+<text x="626" y="246" font-size="9" fill="#6b7688">+1.5R</text>
+<text x="424" y="268" font-size="10" fill="#1e3a8a">Many small wins, rare very large losses.</text>
+<text x="424" y="284" font-size="10" fill="#1e3a8a">Expectancy +0.25R. Psychologically comfortable,</text>
+<text x="424" y="298" font-size="10" fill="#1e3a8a">structurally dangerous.</text>
+</svg><div class="cap">Identical expectancy, opposite shapes. The left profile tests your patience; the right profile hides a fat left tail and tests your survival. Win rate alone cannot distinguish them.</div></div>
+
+<div class="callout warn"><span class="t">How many trades before expectancy means anything?</span>With a true expectancy of +0.25R and a typical trade-to-trade standard deviation of around 1.5R, the standard error of your measured expectancy after <i>n</i> trades is roughly 1.5/&radic;n. After 30 trades that is &plusmn;0.27R &mdash; wider than the effect you are trying to measure. After 100 trades it is &plusmn;0.15R. After 400 it is &plusmn;0.075R. <b>Fewer than 100 trades tells you essentially nothing.</b> Most retail traders form a strong conviction after 15.</div>
+
+<h2>Backtesting properly</h2>
+<p class="lead">A backtest is a simulation of a strategy against historical data. Done well, it is the only way to estimate expectancy before risking money. Done the way most retail traders do it, it is an elaborate machine for generating false confidence. The difference is entirely in the discipline, not in the tooling.</p>
+
+<h3>The data problems that come first</h3>
+<table>
+<tr><th>Problem</th><th>What it does to your results</th><th>Mitigation</th></tr>
+<tr><td><b>Survivorship bias</b></td><td>If your universe is "current index constituents", you have excluded every company that was delisted, merged away or collapsed. Results are inflated, often dramatically.</td><td>Use point-in-time constituent lists. If you cannot obtain them, restrict to index-level instruments where the problem does not arise.</td></tr>
+<tr><td><b>Corporate actions</b></td><td>Splits, bonuses, rights issues and demergers create apparent price crashes that your strategy will "trade".</td><td>Use properly adjusted series. Verify by checking known split dates.</td></tr>
+<tr><td><b>Dividend adjustment</b></td><td>Price-only series understate total return; adjusted series alter historical levels.</td><td>Be explicit about which you are using and be consistent.</td></tr>
+<tr><td><b>Bad ticks and stale prices</b></td><td>A single erroneous print can create a phantom profitable trade, especially in stop-based strategies.</td><td>Filter outliers; cross-check against a second source; inspect your largest winners individually.</td></tr>
+<tr><td><b>Contract rollover (futures)</b></td><td>Naively concatenating contract months creates artificial gaps at each roll.</td><td>Use a continuous series with a documented roll and adjustment method; test sensitivity to the method.</td></tr>
+<tr><td><b>Missing sessions</b></td><td>Indian market holidays, muhurat sessions and special sessions break naive date arithmetic.</td><td>Use an exchange trading calendar, not a generic business-day calendar.</td></tr>
+<tr><td><b>Index methodology changes</b></td><td>Index composition rules and reconstitutions change over time.</td><td>Understand what the historical series actually represents before drawing conclusions from it.</td></tr>
+</table>
+
+<h3>Look-ahead bias: the error you will make</h3>
+<pre><code class="language-text">LOOK-AHEAD BIAS - FOUR WAYS IT CREEPS IN
+========================================
+1. USING THE CLOSE TO DECIDE AND THE CLOSE TO TRADE
+   "If today's close is above the 20-SMA, buy at today's
+   close." You did not know today's close until it happened.
+   FIX: decide on close, execute at the NEXT open, and model
+   the gap.
+
+2. USING THE DAY'S HIGH OR LOW IN A SIGNAL
+   "Buy if price touches the lower band and closes green."
+   Within a single bar you cannot know the order of events.
+   Did it touch the band before or after the close formed?
+   FIX: use intraday data, or restrict signals to values
+   known at bar close.
+
+3. USING RESTATED OR LATE-ARRIVING DATA
+   Fundamental data is published weeks after the period it
+   describes, and is sometimes restated. Using a financial
+   ratio "as at 31 March" on 1 April is look-ahead.
+   FIX: lag fundamental data by the actual publication delay.
+
+4. SURVIVORSHIP IN RULE DESIGN
+   You chose the 20-period SMA because you have been watching
+   this market for five years and 20 "works". That knowledge
+   came from the data you are now testing on. This is the
+   subtlest and most pervasive form, and it is unfixable by
+   code. The only defence is genuinely held-out data.
+
+THE DIAGNOSTIC THAT CATCHES MOST CASES
+  If your backtest equity curve is remarkably smooth, or your
+  win rate is above 70% with a payoff ratio above 1.5, or your
+  maximum drawdown is under 8%, assume look-ahead bias until
+  you have proved otherwise. Real strategies are ugly.</code></pre>
+
+<h3>A worked backtest skeleton, with the common mistakes annotated</h3>
+<pre><code class="language-python">"""
+Minimal event-driven backtest skeleton (illustrative).
+Deliberately simple so the LOGIC is visible rather than hidden
+in a framework. The annotations marked MISTAKE show what most
+retail backtests get wrong.
+
+NOT a trading recommendation. Educational scaffolding only.
+"""
+
+import pandas as pd
+import numpy as np
+
+
+# ----------------------------------------------------------
+# 1. COST MODEL  -- build this FIRST, before any strategy
+# ----------------------------------------------------------
+# MISTAKE #1: writing the strategy first and "adding costs
+# later". Costs change which strategies are even viable, so
+# they belong in the design loop from the beginning.
+
+COST_CONFIG = {
+    "brokerage_per_order": 20.0,       # flat, discount broker
+    "gst_rate": 0.18,                  # on brokerage + fees
+    "exchange_charge_rate": 0.0000325, # of turnover (verify)
+    "sebi_fee_rate": 0.000001,         # of turnover (verify)
+    "stamp_duty_rate": 0.00003,        # buy side only (verify)
+    "stt_sell_rate": 0.001,            # verify by instrument
+    "slippage_rate": 0.0005,           # 0.05% per side
+}
+# Every rate above is ILLUSTRATIVE and dated late 2026.
+# Verify at nseindia.com / incometax.gov.in before use.
+
+
+def round_trip_cost(entry_price, exit_price, qty, cfg):
+    """Rupee cost of one complete round trip."""
+    buy_turnover = entry_price * qty
+    sell_turnover = exit_price * qty
+    turnover = buy_turnover + sell_turnover
+
+    brokerage = cfg["brokerage_per_order"] * 2
+    exch = turnover * cfg["exchange_charge_rate"]
+    sebi = turnover * cfg["sebi_fee_rate"]
+    gst = (brokerage + exch + sebi) * cfg["gst_rate"]
+    stamp = buy_turnover * cfg["stamp_duty_rate"]
+    stt = sell_turnover * cfg["stt_sell_rate"]
+    slip = turnover * cfg["slippage_rate"]
+
+    return brokerage + exch + sebi + gst + stamp + stt + slip
+
+
+# ----------------------------------------------------------
+# 2. INDICATORS -- computed only from data available at the
+#    time of the decision
+# ----------------------------------------------------------
+
+def add_indicators(df):
+    out = df.copy()
+    out["sma20"] = out["close"].rolling(20).mean()
+    out["sma50"] = out["close"].rolling(50).mean()
+    out["sma200"] = out["close"].rolling(200).mean()
+
+    prev_close = out["close"].shift(1)
+    tr = pd.concat([
+        out["high"] - out["low"],
+        (out["high"] - prev_close).abs(),
+        (out["low"] - prev_close).abs(),
+    ], axis=1).max(axis=1)
+    out["atr14"] = tr.rolling(14).mean()
+    return out
+
+
+# ----------------------------------------------------------
+# 3. SIGNAL -- evaluated on bar i, ACTED ON at bar i+1 open
+# ----------------------------------------------------------
+
+def entry_signal(row):
+    # MISTAKE #2: comparing row["close"] and then filling at
+    # row["close"]. You cannot trade at a price you only knew
+    # after it was set. Signals here are evaluated on bar i;
+    # the engine below fills at bar i+1's OPEN.
+    if np.isnan(row["sma200"]) or np.isnan(row["atr14"]):
+        return False
+    return (
+        row["close"] &gt; row["sma200"]
+        and row["sma50"] &gt; row["sma200"]
+        and row["close"] &lt; row["sma20"]
+        and row["close"] &gt; row["sma50"]
+    )
+
+
+# ----------------------------------------------------------
+# 4. ENGINE
+# ----------------------------------------------------------
+
+def backtest(df, equity_start=500000.0, risk_frac=0.01,
+             atr_stop_mult=1.5, atr_target_mult=2.5,
+             max_bars=15, cfg=COST_CONFIG):
+
+    df = add_indicators(df).reset_index(drop=True)
+    equity = equity_start
+    trades = []
+    position = None
+
+    for i in range(len(df) - 1):
+        bar = df.iloc[i]
+        nxt = df.iloc[i + 1]
+
+        # ---- manage an open position -------------------
+        if position is not None:
+            position["bars_held"] += 1
+
+            # MISTAKE #3: assuming the stop always fills at the
+            # stop price. If the bar OPENS below the stop, you
+            # fill at the OPEN, which is worse. Model that.
+            stop_hit = nxt["low"] &lt;= position["stop"]
+            gap_through = nxt["open"] &lt;= position["stop"]
+
+            if stop_hit:
+                fill = nxt["open"] if gap_through else position["stop"]
+                reason = "gap_stop" if gap_through else "stop"
+            elif nxt["high"] &gt;= position["target"]:
+                # MISTAKE #4: if BOTH the stop and the target are
+                # inside the same bar, a daily-bar backtest cannot
+                # know which came first. Resolving it in your
+                # favour inflates results. Always resolve it
+                # AGAINST yourself (stop first), as done here by
+                # checking the stop before the target.
+                fill = position["target"]
+                reason = "target"
+            elif position["bars_held"] &gt;= max_bars:
+                fill = nxt["open"]
+                reason = "time_stop"
+            else:
+                fill = None
+                reason = None
+
+            if fill is not None:
+                gross = (fill - position["entry"]) * position["qty"]
+                cost = round_trip_cost(position["entry"], fill,
+                                       position["qty"], cfg)
+                net = gross - cost
+                equity += net
+                r_multiple = net / position["risk_rupees"]
+                trades.append({
+                    "entry_date": position["entry_date"],
+                    "exit_date": nxt["date"],
+                    "entry": position["entry"],
+                    "exit": fill,
+                    "qty": position["qty"],
+                    "gross": gross,
+                    "cost": cost,
+                    "net": net,
+                    "r": r_multiple,
+                    "reason": reason,
+                    "equity": equity,
+                })
+                position = None
+
+        # ---- consider a new entry ----------------------
+        if position is None and entry_signal(bar):
+            atr = bar["atr14"]
+            entry_px = nxt["open"] * (1 + cfg["slippage_rate"])
+            stop_px = entry_px - atr_stop_mult * atr
+            stop_dist = entry_px - stop_px
+            if stop_dist &lt;= 0:
+                continue
+
+            risk_rupees = equity * risk_frac
+            qty = int(risk_rupees / stop_dist)
+            # MISTAKE #5: allowing fractional or zero quantity.
+            # If one unit exceeds the risk budget, take NO trade.
+            if qty &lt; 1:
+                continue
+
+            position = {
+                "entry_date": nxt["date"],
+                "entry": entry_px,
+                "stop": stop_px,
+                "target": entry_px + atr_target_mult * atr,
+                "qty": qty,
+                "risk_rupees": qty * stop_dist,
+                "bars_held": 0,
+            }
+
+    return pd.DataFrame(trades), equity
+
+
+# ----------------------------------------------------------
+# 5. METRICS
+# ----------------------------------------------------------
+
+def metrics(trades, equity_start):
+    if trades.empty:
+        return {"trades": 0}
+
+    wins = trades[trades["net"] &gt; 0]
+    losses = trades[trades["net"] &lt;= 0]
+
+    win_rate = len(wins) / len(trades)
+    avg_win_r = wins["r"].mean() if len(wins) else 0.0
+    avg_loss_r = abs(losses["r"].mean()) if len(losses) else 0.0
+    expectancy_r = (win_rate * avg_win_r) - ((1 - win_rate) * avg_loss_r)
+
+    curve = pd.concat([
+        pd.Series([equity_start]), trades["equity"]
+    ], ignore_index=True)
+    peak = curve.cummax()
+    dd = (curve - peak) / peak
+    max_dd = dd.min()
+
+    gross_profit = wins["net"].sum() if len(wins) else 0.0
+    gross_loss = abs(losses["net"].sum()) if len(losses) else 0.0
+
+    return {
+        "trades": len(trades),
+        "win_rate": round(win_rate, 3),
+        "avg_win_R": round(avg_win_r, 3),
+        "avg_loss_R": round(avg_loss_r, 3),
+        "expectancy_R": round(expectancy_r, 3),
+        "profit_factor": round(gross_profit / gross_loss, 3)
+                         if gross_loss else float("inf"),
+        "max_drawdown_pct": round(max_dd * 100, 2),
+        "total_costs": round(trades["cost"].sum(), 2),
+        "cost_as_pct_of_gross": round(
+            100 * trades["cost"].sum() / max(trades["gross"].sum(), 1e-9), 2),
+        "final_equity": round(trades["equity"].iloc[-1], 2),
+    }
+
+
+# ----------------------------------------------------------
+# 6. THE SPLIT THAT MAKES THE RESULT MEAN ANYTHING
+# ----------------------------------------------------------
+# MISTAKE #6 (the biggest one): tuning parameters on the whole
+# dataset and reporting that as "the result". Split the data,
+# develop on the in-sample portion ONLY, and touch the
+# out-of-sample portion once.
+
+def split_in_out_sample(df, in_sample_frac=0.6):
+    cut = int(len(df) * in_sample_frac)
+    return df.iloc[:cut].copy(), df.iloc[cut:].copy()
+</code></pre>
+
+<div class="callout danger"><span class="t">Six mistakes, one consequence</span>Each annotated mistake above inflates results independently. Combined, they routinely turn a losing strategy into a backtest showing a smooth 40% annual return. The order of magnitude is not an exaggeration &mdash; resolving same-bar stop/target ambiguity in your favour alone can swing a mean-reversion strategy from negative to strongly positive expectancy.</div>
+
+<h3>In-sample, out-of-sample and walk-forward</h3>
+<pre><code class="language-text">THE THREE LEVELS OF VALIDATION
+==============================
+LEVEL 1 - SIMPLE SPLIT
+  |-------- IN SAMPLE (60%) --------|-- OUT OF SAMPLE (40%) --|
+  Develop, tune and iterate here      Touch exactly ONCE
+
+  Rule: you get ONE look at the out-of-sample data. If you
+  look, adjust and look again, it is now in-sample and you
+  have no held-out data left.
+
+LEVEL 2 - WALK-FORWARD
+  Train on window 1, test on the period immediately after.
+  Roll forward. Repeat.
+
+  |--train 1--|-test 1-|
+       |--train 2--|-test 2-|
+            |--train 3--|-test 3-|
+                 |--train 4--|-test 4-|
+
+  The concatenated test periods form an out-of-sample equity
+  curve built from parameters that were only ever fitted on
+  PRIOR data. This is much closer to how live trading works.
+
+  Typical configuration: 3-year train, 1-year test, roll
+  annually. Record whether the OPTIMAL parameters are stable
+  across windows. If the best lookback is 14 in one window
+  and 63 in the next, the parameter is fitting noise.
+
+LEVEL 3 - PARAMETER SENSITIVITY SURFACE
+  Do not report the best parameter set. Report the SURFACE.
+
+  Lookback:      10     15     20     25     30     35
+  Expectancy:  -0.02  +0.08  +0.31  +0.11  +0.04  -0.06
+
+  A sharp spike at 20 surrounded by weak results is a sign
+  of overfitting - you found the one setting that happened
+  to work on this sample.
+
+  Lookback:      10     15     20     25     30     35
+  Expectancy:  +0.18  +0.22  +0.24  +0.23  +0.20  +0.16
+
+  A broad plateau is what a real effect looks like. The
+  precise parameter barely matters, which means you are
+  capturing something structural rather than a coincidence.
+
+ALWAYS PREFER A BROAD PLATEAU AT +0.20R OVER A SHARP PEAK
+AT +0.50R. The plateau will survive contact with live data;
+the peak will not.</code></pre>
+
+<h3>Degrees of freedom and the overfitting budget</h3>
+<pre><code class="language-text">COUNTING YOUR DEGREES OF FREEDOM
+================================
+Every tunable choice is a degree of freedom (DOF):
+  - each indicator parameter (lookback, multiplier, threshold)
+  - each rule included or excluded
+  - the universe definition
+  - the timeframe
+  - the stop and target multiples
+  - the regime filter thresholds
+
+EXAMPLE COUNT for the specification earlier in this guide:
+  SMA lookbacks (20, 50, 200)                     3 DOF
+  ATR period (14)                                 1 DOF
+  Stop multiple (1.5)                             1 DOF
+  Target multiple (2.5)                           1 DOF
+  Time stop (15 bars)                             1 DOF
+  VIX filter threshold (22)                       1 DOF
+  Breakeven-move trigger (1.5 ATR)                1 DOF
+  Rule set selection (6 entry conditions, each
+    could have been included or not)              6 DOF
+                                                 --------
+  TOTAL                                          15 DOF
+
+RULE OF THUMB
+  You need a LOT of independent observations per degree of
+  freedom. A commonly used heuristic is 30-50 trades per DOF
+  as a bare minimum for the result to mean anything.
+
+  15 DOF x 40 = 600 trades needed.
+
+  If your backtest produced 85 trades, you have roughly 5.7
+  trades per degree of freedom. You have not tested a
+  strategy; you have drawn a curve through 85 points using
+  15 parameters, which any undergraduate would recognise as
+  guaranteed overfitting.
+
+HOW TO REDUCE DOF
+  - Fix parameters at conventional values and do not tune them
+  - Remove rules rather than adding them; every rule you can
+    delete without hurting results is a rule that was fitting
+    noise
+  - Test the SAME parameters across multiple instruments and
+    multiple markets; if the edge is real it should appear,
+    weakly, in several places
+  - Prefer rules with an economic rationale over rules
+    discovered by search</code></pre>
+
+<h2>Why most backtests lie</h2>
+<p class="lead">Even a technically correct backtest can produce a result that will not repeat. The reasons are statistical rather than procedural, and they are the main source of the gap between simulated and live performance.</p>
+
+<h3>Multiple testing and p-hacking</h3>
+<pre><code class="language-text">THE MULTIPLE TESTING PROBLEM, QUANTIFIED
+========================================
+Suppose you test 1,000 strategy variants on the same data.
+Suppose NONE of them has any real edge.
+
+If you use a 5% significance threshold, you expect
+  1,000 x 0.05 = 50 variants
+to appear "significantly profitable" purely by chance.
+
+You will find them. You will be delighted. You will pick the
+best one and trade it. It will fail.
+
+HOW MANY TESTS DO YOU ACTUALLY RUN?
+  People dramatically undercount. Every one of these is a test:
+    - trying a different lookback                (x8)
+    - trying a different stop multiple           (x6)
+    - trying a different target multiple         (x6)
+    - adding or removing a filter                (x4)
+    - a different instrument                     (x5)
+    - a different timeframe                      (x3)
+
+  8 x 6 x 6 x 4 x 5 x 3 = 17,280 effective tests.
+
+  Even if you only "looked at" 40 of these explicitly, your
+  SEARCH SPACE was 17,280, and your brain pruned the rest.
+  The multiple-testing correction applies to the search space,
+  not to the number you wrote down.
+
+THE DEFLATED EXPECTATION
+  A practical correction: whatever your best backtested
+  expectancy is, assume the live figure will be substantially
+  lower. Some practitioners use a 50% haircut as a starting
+  assumption. A strategy showing +0.40R in a tuned backtest
+  should be planned around +0.20R or less live - and if it
+  is not viable at +0.20R, do not trade it.
+
+THE HONEST PROTOCOL
+  1. Decide the hypothesis and parameters BEFORE testing.
+  2. Write down how many variants you intend to test.
+  3. Test them. Record ALL results, not just the best.
+  4. If the best result is not dramatically better than the
+     distribution of all results, you found noise.
+  5. Validate the single chosen variant out of sample, once.</code></pre>
+
+<h3>Regime dependence</h3>
+<table>
+<tr><th>Regime</th><th>Strategies that tend to work</th><th>Strategies that tend to fail</th></tr>
+<tr><td>Sustained low-volatility uptrend</td><td>Trend following, buy-the-dip, covered calls, short volatility</td><td>Mean reversion on the short side, long volatility</td></tr>
+<tr><td>Range-bound, choppy</td><td>Mean reversion, range trading, premium selling</td><td>Trend following and breakout &mdash; death by a thousand false signals</td></tr>
+<tr><td>High-volatility decline</td><td>Long volatility, trend following on the short side, cash</td><td>Mean reversion ("buy the dip" into a bear market), all short-volatility structures</td></tr>
+<tr><td>Transition / regime change</td><td>Almost nothing; this is where most strategies take their worst drawdowns</td><td>Everything that was working immediately before</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The regime trap</span>A strategy developed and tested over 2020&ndash;2024 was developed in a particular Indian market regime. Its backtest tells you how it would have performed <i>in that regime</i>. If you cannot show the strategy working across multiple distinct regimes &mdash; including at least one sustained bear market and one extended sideways period &mdash; you do not know whether you have a strategy or a description of the recent past. Ten years of data covering several regimes is a reasonable minimum; it is also more data than most retail traders ever test on.</div>
+
+<h3>Capacity constraints</h3>
+<pre><code class="language-text">CAPACITY - WHEN YOUR OWN SIZE DESTROYS THE EDGE
+===============================================
+A backtest assumes you get the modelled price. In reality,
+your order participates in the market and moves it.
+
+WORKED
+  Strategy trades a mid-cap stock
+  Average daily traded value (ADTV) Rs 12 crore
+  Your intended position              Rs 5,00,000
+  Participation = 5,00,000 / 12,00,00,000 = 0.42% of ADTV
+  -> Impact cost modest. Fine.
+
+  Now you have grown the account and trade Rs 50,00,000
+  Participation = 4.2% of ADTV
+  -> You are now a meaningful part of the day's volume.
+     Your buying pushes the price up as you enter and your
+     selling pushes it down as you exit.
+     Realistic additional cost: 0.3-1.0% per side.
+
+  A strategy with a 0.8% gross edge per trade is destroyed.
+
+THE SCALING CURVE
+  Position size     Participation   Est. impact   Net edge
+  (Rs)              (% of ADTV)     (per side)    (0.8% gross)
+  ----------------  --------------  ------------  -----------
+     1,00,000           0.08%          0.02%         +0.76%
+     5,00,000           0.42%          0.06%         +0.68%
+    20,00,000           1.67%          0.22%         +0.36%
+    50,00,000           4.17%          0.65%         -0.50%
+  1,00,00,000           8.33%          1.40%         -2.00%
+
+WHY THIS MATTERS EVEN IF YOU ARE SMALL
+  1. It tells you where a strategy's ceiling is. If the
+     strategy stops working at Rs 20 lakh, it is a hobby,
+     not a business.
+  2. It explains why genuine inefficiencies persist in small
+     and illiquid corners - institutional money CANNOT
+     exploit them, which is one of the few structural
+     advantages a small retail account actually has.
+  3. It means you should test your strategy with a realistic
+     impact model, not a flat slippage assumption.
+
+Impact figures illustrative. NSE publishes impact cost data
+for index constituents - use the real numbers where available.</code></pre>
+
+<h3>Pressure-testing a result before risking money</h3>
+<ul class="checklist">
+<li><b>Remove the best 5% of trades.</b> If the strategy becomes unprofitable, it depends on a handful of outliers you cannot rely on repeating.</li>
+<li><b>Double the cost assumption.</b> If it dies, your edge was within the error bars of your cost model.</li>
+<li><b>Shift every entry and exit by one bar.</b> A real edge degrades gracefully; a fitted one collapses.</li>
+<li><b>Perturb each parameter by &plusmn;20%.</b> Look for a plateau, not a peak.</li>
+<li><b>Test on a different but related instrument.</b> A real effect should show up weakly elsewhere.</li>
+<li><b>Test on a different period.</b> Split by regime, not just by date.</li>
+<li><b>Randomise the trade order and recompute drawdown.</b> Your actual drawdown sequence was one draw from a distribution. Monte Carlo reshuffling shows you the range of drawdowns you could plausibly experience &mdash; it is usually much worse than the historical one.</li>
+<li><b>Check the trade distribution.</b> Are profits spread across many trades, or concentrated in three days in March 2020?</li>
+<li><b>Inspect your ten largest winners individually.</b> Data errors and look-ahead bias hide there.</li>
+<li><b>Ask a sceptical friend to find the flaw.</b> Pay them if necessary. It is cheaper than the alternative.</li>
+</ul>
+
+<pre><code class="language-python">"""
+Monte Carlo reshuffle of a trade sequence.
+
+Your historical maximum drawdown is ONE sample from the
+distribution of drawdowns your strategy can produce. Reshuffling
+the SAME trades in a different order shows the range.
+Illustrative code; not a recommendation.
+"""
+
+import numpy as np
+
+
+def monte_carlo_drawdowns(r_multiples, risk_frac=0.01,
+                          n_sims=10000, seed=42):
+    """r_multiples: array of per-trade results in R units."""
+    rng = np.random.default_rng(seed)
+    r = np.asarray(r_multiples, dtype=float)
+    results = []
+
+    for _ in range(n_sims):
+        shuffled = rng.permutation(r)
+        equity = 1.0
+        curve = [equity]
+        for x in shuffled:
+            # fixed-fractional compounding: each trade risks
+            # risk_frac of CURRENT equity
+            equity *= (1.0 + risk_frac * x)
+            curve.append(equity)
+        curve = np.array(curve)
+        peak = np.maximum.accumulate(curve)
+        dd = (curve - peak) / peak
+        results.append({
+            "final": curve[-1],
+            "max_dd": dd.min(),
+        })
+
+    finals = np.array([x["final"] for x in results])
+    dds = np.array([x["max_dd"] for x in results])
+
+    return {
+        "median_final_multiple": float(np.median(finals)),
+        "p05_final_multiple": float(np.percentile(finals, 5)),
+        "p95_final_multiple": float(np.percentile(finals, 95)),
+        "median_max_dd_pct": float(np.median(dds) * 100),
+        "p95_worst_dd_pct": float(np.percentile(dds, 5) * 100),
+        "prob_ruin_50pct": float((dds &lt;= -0.50).mean()),
+    }
+
+
+# Typical interpretation:
+#   If your historical max drawdown was -18% but the Monte
+#   Carlo 5th percentile is -41%, then -41% is the number you
+#   must be psychologically and financially prepared for.
+#   The historical -18% was luck in the ORDERING of trades.
+</code></pre>
+
+<div class="callout tip"><span class="t">The Monte Carlo result is the number that matters</span>Most traders plan around their backtested drawdown. That figure is one draw from a distribution and is almost always optimistic. Plan around the 5th-percentile reshuffled drawdown instead. If you cannot survive that number &mdash; financially and emotionally &mdash; the strategy is too aggressively sized, regardless of what the equity curve looks like.</div>
+
+<h2>Position sizing and the risk of ruin</h2>
+<p class="lead">Position sizing is where most traders actually fail. A positive-expectancy strategy sized badly will destroy an account; a modest strategy sized well will survive long enough for the edge to compound. Sizing is not a detail of execution &mdash; it is the dominant determinant of whether you are still trading in two years.</p>
+
+<h3>The four sizing methods</h3>
+<table>
+<tr><th>Method</th><th>Rule</th><th>Strengths</th><th>Weaknesses</th></tr>
+<tr><td><b>Fixed quantity</b></td><td>Always trade the same number of units/lots</td><td>Simple; no computation</td><td>Risk varies wildly with volatility and stop distance. A &#8377;200 stop and a &#8377;2,000 stop risk ten times as much on the same size. Effectively random risk control.</td></tr>
+<tr><td><b>Fixed rupee</b></td><td>Always deploy the same rupee amount</td><td>Simple; caps notional exposure</td><td>Same problem &mdash; risk depends on stop distance, which you have not controlled.</td></tr>
+<tr><td><b>Fixed fractional (percent risk)</b></td><td>Risk a fixed % of equity per trade; derive size from the stop distance</td><td>The standard. Risk is constant across trades. Position size scales down automatically in volatile conditions. Compounds naturally.</td><td>Requires a defined stop on every trade. Does not account for correlation between open positions.</td></tr>
+<tr><td><b>Volatility-based (ATR)</b></td><td>Set the stop at a multiple of ATR, then apply fixed fractional</td><td>Adapts to each instrument's own volatility; makes positions comparable across instruments</td><td>ATR is backward-looking; it understates risk just before volatility expands.</td></tr>
+</table>
+
+<h3>Fixed fractional sizing, worked</h3>
+<pre><code class="language-text">THE FORMULA
+===========
+  Position size (units) = (Equity x Risk%) / Stop distance
+
+  Always round DOWN. If the result is less than one tradeable
+  unit, DO NOT TAKE THE TRADE.
+
+WORKED ACROSS FOUR DIFFERENT TRADES
+Account equity: Rs 5,00,000.  Risk per trade: 1% = Rs 5,000.
+
+Trade  Entry    Stop     Stop dist   Units      Notional      Risk
+-----  -------  -------  ----------  ---------  ------------  -------
+  1    1,800     1,746      54.00       92      1,65,600      4,968
+  2      420       398      22.00      227         95,340      4,994
+  3    3,250     3,112     138.00       36      1,17,000      4,968
+  4      155       149.5      5.50      909      1,40,895      4,999
+
+NOTICE
+  - Rupee risk is nearly identical (Rs 4,968 - 4,999) on all
+    four, which is the entire point.
+  - NOTIONAL exposure varies from Rs 95,340 to Rs 1,65,600.
+    That is fine. Notional is not risk; the stop distance is.
+  - The low-priced, tight-stop trade (#4) gets the largest
+    unit count. That is correct, not dangerous - PROVIDED the
+    stop is genuinely respected and the instrument does not gap.
+
+NOW ADD VOLATILITY-BASED STOPS (ATR)
+------------------------------------
+Instead of arbitrary stops, set stop = entry - 2 x ATR(14).
+
+Trade  Entry    ATR14   Stop dist   Units   Rupee risk
+-----  -------  ------  ----------  ------  ----------
+  1    1,800     31.00     62.00       80       4,960
+  2      420      9.40     18.80      265       4,982
+  3    3,250     74.00    148.00       33       4,884
+  4      155      4.10      8.20      609       4,994
+
+  Now your stop distance is proportional to how much each
+  instrument actually moves. A volatile instrument gets a
+  wider stop and a correspondingly smaller position. Two
+  trades in two very different instruments now represent the
+  same amount of risk AND the same probability of being
+  stopped out by noise.
+
+  THIS IS THE CORRECT DEFAULT FOR MOST RETAIL STRATEGIES.</code></pre>
+
+<h3>Portfolio heat</h3>
+<pre><code class="language-text">PORTFOLIO HEAT - THE RISK YOU FORGET TO COUNT
+=============================================
+HEAT = the sum of the risk on all currently open positions,
+       as a % of equity.
+
+  5 open positions at 1% risk each = 5% heat.
+
+WHY THIS MATTERS
+  If all five positions are long equity in a correlated
+  market, they are not five independent bets. They are one
+  bet with five tickers. A market-wide 4% down day can hit
+  all five stops simultaneously.
+
+  Your "1% risk per trade" becomes a 5% day.
+  Three such days in a month = -15%.
+
+CORRELATION-ADJUSTED HEAT
+  Crude but useful adjustment:
+
+  Effective heat = Nominal heat x sqrt(1 + (n-1) x rho)/sqrt(n)
+                   ... for n equally-sized positions with
+                   average pairwise correlation rho
+
+  n=5, rho=0.0  (independent):
+    5% x sqrt(1)/sqrt(5) ... effective ~2.2%  (diversified)
+  n=5, rho=0.7  (typical for Indian large caps in a selloff):
+    effective heat approaches the full 5%
+
+  In a crisis, correlations go to 1. Plan for rho = 1.
+
+PRACTICAL HEAT LIMITS
+  Conservative          : 3% maximum heat
+  Moderate              : 5% maximum heat
+  Aggressive            : 8% maximum heat
+  Reckless              : no limit at all (most retail)
+
+  With a 5% heat cap and 1% per trade, you may hold at most
+  5 positions. Wanting a sixth means closing one first.
+  This constraint alone prevents a large category of blow-ups.
+
+SECTOR AND FACTOR HEAT
+  Also cap exposure by sector. Five positions in five
+  different banks is one position in "banks".</code></pre>
+
+<h3>Risk of ruin</h3>
+<pre><code class="language-text">RISK OF RUIN - THE TABLE EVERY TRADER SHOULD SEE ONCE
+=====================================================
+"Ruin" here means a drawdown large enough that recovery is
+impractical. We will use -50% as the ruin threshold, because
+recovering from -50% requires +100%.
+
+SIMULATION SETUP
+  Strategy expectancy +0.20R, win rate 45%,
+  average win 2.0R, average loss 1.0R.
+  Fixed fractional sizing. 500 trades.
+  10,000 Monte Carlo paths.
+
+Risk per   Prob. of     Median      Median      5th pctile
+trade      -50% DD      max DD      final       final
+--------   ----------   ---------   ---------   -----------
+  0.5%        0.2%       -8.4%      1.65x        1.18x
+  1.0%        1.9%      -15.8%      2.69x        1.33x
+  2.0%       14.1%      -29.1%      7.02x        1.42x
+  3.0%       33.8%      -40.3%     17.1x         1.11x
+  5.0%       68.2%      -59.7%     78.5x         0.31x
+ 10.0%       95.6%      -86.1%    410x           0.004x
+
+READ THE 5% ROW VERY CAREFULLY
+  Median outcome: 78.5x your starting capital. Spectacular.
+  5th percentile outcome: you have 31% of what you started
+  with - a 69% loss.
+  Probability of a 50%+ drawdown along the way: 68%.
+
+  A STRATEGY WITH A GENUINE POSITIVE EDGE RUINS TWO THIRDS OF
+  THE PEOPLE WHO TRADE IT AT 5% RISK PER TRADE.
+
+  The median looks wonderful because the distribution is
+  wildly skewed. The median is not your expected experience;
+  the whole distribution is. And most people quit at -40%,
+  so they never reach the median.
+
+THE 2% vs 5% COMPARISON, SPELLED OUT
+  At 2% risk: 14% chance of a 50% drawdown
+  At 5% risk: 68% chance of a 50% drawdown
+  The risk per trade went up 2.5x.
+  The probability of ruin went up nearly 5x.
+
+  Risk of ruin is HIGHLY NON-LINEAR in position size. This
+  is the single most important fact in this entire guide.
+
+AND WITH A NEGATIVE EDGE
+  Expectancy -0.05R (a slightly losing strategy, which is
+  what most retail strategies are after costs):
+  Risk per    Prob of
+  trade       -50% DD over 500 trades
+  --------    ------------------------
+    1.0%           78%
+    2.0%           94%
+    5.0%          100%
+
+  With a negative edge, ruin is not a risk. It is a schedule.
+  Position sizing only determines how long it takes.
+
+Figures from illustrative simulation. The SHAPE is robust.</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="300" fill="#ffffff"/>
+<text x="60" y="30" font-size="13" fill="#1e3a8a">PROBABILITY OF A 50% DRAWDOWN vs RISK PER TRADE</text>
+<text x="60" y="48" font-size="11" fill="#6b7688">(positive-expectancy strategy, +0.20R, 500 trades)</text>
+<line x1="100" y1="252" x2="720" y2="252" stroke="#6b7688" stroke-width="1"/>
+<line x1="100" y1="66" x2="100" y2="252" stroke="#6b7688" stroke-width="1"/>
+<text x="360" y="284" font-size="11" fill="#6b7688">Risk per trade (% of equity)</text>
+<text x="40" y="150" font-size="11" fill="#6b7688">P(ruin)</text>
+<text x="74" y="72" font-size="10" fill="#6b7688">100%</text>
+<text x="78" y="162" font-size="10" fill="#6b7688">50%</text>
+<text x="82" y="252" font-size="10" fill="#6b7688">0%</text>
+<rect x="120" y="251" width="42" height="1" fill="#2563eb"/>
+<text x="124" y="268" font-size="10" fill="#6b7688">0.5</text>
+<text x="120" y="245" font-size="10" fill="#1e3a8a">0.2%</text>
+<rect x="212" y="249" width="42" height="3" fill="#2563eb"/>
+<text x="220" y="268" font-size="10" fill="#6b7688">1.0</text>
+<text x="212" y="243" font-size="10" fill="#1e3a8a">1.9%</text>
+<rect x="304" y="226" width="42" height="26" fill="#2563eb"/>
+<text x="312" y="268" font-size="10" fill="#6b7688">2.0</text>
+<text x="300" y="220" font-size="10" fill="#1e3a8a">14.1%</text>
+<rect x="396" y="190" width="42" height="62" fill="#2563eb"/>
+<text x="404" y="268" font-size="10" fill="#6b7688">3.0</text>
+<text x="392" y="184" font-size="10" fill="#1e3a8a">33.8%</text>
+<rect x="488" y="126" width="42" height="126" fill="#1e3a8a"/>
+<text x="496" y="268" font-size="10" fill="#6b7688">5.0</text>
+<text x="484" y="120" font-size="10" fill="#1e3a8a">68.2%</text>
+<rect x="580" y="75" width="42" height="177" fill="#1e3a8a"/>
+<text x="588" y="268" font-size="10" fill="#6b7688">10.0</text>
+<text x="572" y="69" font-size="10" fill="#1e3a8a">95.6%</text>
+<rect x="636" y="92" width="88" height="56" fill="#eff4ff" stroke="#2563eb" stroke-width="1"/>
+<text x="644" y="110" font-size="10" fill="#1e3a8a">Ruin risk is</text>
+<text x="644" y="126" font-size="10" fill="#1e3a8a">non-linear in</text>
+<text x="644" y="142" font-size="10" fill="#1e3a8a">position size.</text>
+</svg><div class="cap">The same strategy, the same edge, six different sizing choices. Going from 2% to 5% risk per trade raises the probability of a 50% drawdown from 14% to 68%.</div></div>
+
+<h3>Kelly and why you should use a fraction of it</h3>
+<pre><code class="language-text">THE KELLY CRITERION
+===================
+Kelly gives the position size that maximises the LONG-RUN
+GEOMETRIC GROWTH RATE of capital.
+
+For a bet with win probability W, payoff ratio P (win/loss):
+
+  f* = W - (1 - W) / P
+
+WORKED
+  W = 0.45, P = 2.0
+  f* = 0.45 - 0.55/2.0 = 0.45 - 0.275 = 0.175
+
+  Kelly says risk 17.5% of capital per trade.
+
+WHY YOU MUST NOT DO THAT
+  1. KELLY ASSUMES YOU KNOW W AND P EXACTLY. You do not. You
+     have estimates from a finite sample, contaminated by
+     overfitting. If your true W is 0.40 rather than 0.45,
+     the true Kelly is 0.10 - and betting 0.175 is OVER-BETTING,
+     which produces NEGATIVE long-run growth. Kelly is brutally
+     asymmetric: under-betting costs you a little growth,
+     over-betting destroys you.
+  2. KELLY TOLERATES ENORMOUS DRAWDOWNS. At full Kelly the
+     expected maximum drawdown approaches 50-60%+. No human
+     trades through that calmly.
+  3. KELLY ASSUMES THE EDGE IS STABLE. Market edges decay.
+  4. KELLY ASSUMES INDEPENDENT BETS. Your positions are
+     correlated.
+
+FRACTIONAL KELLY
+  Common practice is to use a small fraction of full Kelly:
+
+  Fraction   Position size   Growth vs full Kelly   Max DD
+  --------   -------------   --------------------   -------
+  Full       17.5%           100%                   ~55%
+  1/2 Kelly   8.8%            75%                   ~33%
+  1/4 Kelly   4.4%            44%                   ~19%
+  1/8 Kelly   2.2%            23%                   ~10%
+  1/16 Kelly  1.1%            12%                    ~5%
+
+  Note the shape: half Kelly gives you 75% of the growth for
+  60% of the drawdown. Quarter Kelly gives you 44% of the
+  growth for a third of the drawdown.
+
+  IN PRACTICE, 1/8 TO 1/4 KELLY IS WHERE SERIOUS PRACTITIONERS
+  OPERATE, which lands at roughly 1-4% risk per trade - the
+  same place that simple fixed-fractional reasoning arrives at.
+
+  Kelly is therefore most useful not as a sizing rule but as
+  a CEILING: if your sizing exceeds half Kelly, you are
+  over-betting even under the most favourable assumptions
+  about your own edge.</code></pre>
+
+<pre><code class="language-python">"""
+Position sizing helpers. Illustrative; not a recommendation.
+"""
+
+import math
+
+
+def fixed_fractional_size(equity, risk_frac, entry, stop,
+                          lot_size=1):
+    """Units to trade, rounded DOWN to whole lots.
+    Returns 0 if one lot would exceed the risk budget."""
+    stop_distance = abs(entry - stop)
+    if stop_distance &lt;= 0:
+        raise ValueError("stop must differ from entry")
+
+    risk_rupees = equity * risk_frac
+    raw_units = risk_rupees / stop_distance
+    lots = math.floor(raw_units / lot_size)
+    units = lots * lot_size
+
+    # If a single lot already risks more than the budget,
+    # the correct answer is NO TRADE - not "round up".
+    if units == 0:
+        return 0, 0.0
+    return units, units * stop_distance
+
+
+def atr_stop_size(equity, risk_frac, entry, atr, atr_mult=2.0,
+                  lot_size=1):
+    stop = entry - atr_mult * atr
+    return fixed_fractional_size(equity, risk_frac, entry,
+                                 stop, lot_size)
+
+
+def kelly_fraction(win_rate, payoff_ratio):
+    """Full Kelly. Use a FRACTION of this, never the whole."""
+    if payoff_ratio &lt;= 0:
+        return 0.0
+    f = win_rate - (1.0 - win_rate) / payoff_ratio
+    return max(f, 0.0)
+
+
+def sizing_sanity_check(equity, risk_frac, open_positions_risk,
+                        max_heat=0.05):
+    """Reject a new trade that would breach portfolio heat."""
+    proposed_heat = (open_positions_risk + equity * risk_frac) / equity
+    return {
+        "proposed_heat_pct": round(proposed_heat * 100, 2),
+        "max_heat_pct": round(max_heat * 100, 2),
+        "allowed": proposed_heat &lt;= max_heat,
+    }
+
+
+# Example
+if __name__ == "__main__":
+    units, risk = atr_stop_size(
+        equity=500000, risk_frac=0.01,
+        entry=1800.0, atr=31.0, atr_mult=2.0)
+    print(units, round(risk, 2))
+    # Kelly ceiling check
+    k = kelly_fraction(win_rate=0.45, payoff_ratio=2.0)
+    print("full kelly:", round(k, 4),
+          "| quarter kelly:", round(k / 4, 4))
+</code></pre>
+
+<div class="callout danger"><span class="t">The sizing rules that are non-negotiable</span>Risk no more than 1&ndash;2% of trading capital per trade. Cap total portfolio heat at 5%. Never increase size to recover a loss. Never size by "how confident I feel". Never let one position exceed 20% of the account's notional regardless of stop distance. If you break these, nothing else in this guide can save you.</div>
+
+<h2>Stop losses done properly</h2>
+<p class="lead">A stop loss is a pre-commitment device. Its purpose is to make the decision to exit while you are rational, so that your irrational self cannot override it. Most of what goes wrong with stops is not about placement &mdash; it is about honouring them.</p>
+
+<h3>Logical versus arbitrary stops</h3>
+<table>
+<tr><th>Stop type</th><th>Definition</th><th>Assessment</th></tr>
+<tr><td><b>Percentage stop</b></td><td>Fixed % below entry, e.g. 5%</td><td>Arbitrary. 5% is noise in a volatile small cap and a major move in a stable large cap. Use only as a crude cap.</td></tr>
+<tr><td><b>Rupee stop</b></td><td>"I will not lose more than &#8377;10,000"</td><td>Arbitrary and backwards &mdash; it places the stop based on your wallet rather than on the market's structure. It does belong in sizing, not in placement.</td></tr>
+<tr><td><b>Volatility (ATR) stop</b></td><td>Entry &minus; k &times; ATR</td><td><b>The sensible default.</b> Adapts to each instrument. A 2&times;ATR stop has roughly comparable "noise-out" probability across instruments.</td></tr>
+<tr><td><b>Structural stop</b></td><td>Below a swing low, a consolidation base, a prior breakout level</td><td>Good when the level is objectively definable. Risk: everyone sees the same level, so it attracts stop-hunting order flow.</td></tr>
+<tr><td><b>Thesis stop</b></td><td>Exit when the reason for the trade is no longer true</td><td>Intellectually the purest. Requires the thesis to have been written down precisely enough to be falsified, which is rare.</td></tr>
+<tr><td><b>Time stop</b></td><td>Exit after N bars regardless of P&amp;L</td><td>Underused and valuable. If the move has not happened in the expected window, the hypothesis is not playing out. Frees capital and caps exposure.</td></tr>
+<tr><td><b>Trailing stop</b></td><td>Stop follows price up by a fixed amount or ATR multiple</td><td>Good for trend strategies; converts open profit into realised profit. Trails too tightly and you exit on noise; too loosely and you give back most of the gain.</td></tr>
+<tr><td><b>Mental stop</b></td><td>"I will exit if it hits X" &mdash; not entered in the system</td><td><b>Usually not a stop at all.</b> See below.</td></tr>
+</table>
+
+<div class="callout danger"><span class="t">Why a mental stop is usually not a stop</span>A stop exists to remove the decision from your stressed self. A mental stop hands the decision right back at the exact moment you are least capable of making it &mdash; when the position is losing, your pulse is up, and every narrative in your head is arguing for one more minute. Experienced discretionary traders with a long track record can run mental stops. Beginners who use mental stops are, with high reliability, running no stop at all. Place the order.</div>
+
+<h3>Where not to place a stop</h3>
+<ul class="checklist">
+<li><b>At a round number.</b> 1,800.00, 25,000, 500 &mdash; clusters of stops sit there and price is drawn through them.</li>
+<li><b>Exactly at the obvious swing low.</b> Everyone's stop is there. Place it a volatility-scaled distance beyond, or accept being stopped on noise.</li>
+<li><b>Inside the instrument's normal daily range.</b> If ATR is 30 points and your stop is 12 points away, you are not managing risk; you are paying for a coin flip with costs attached.</li>
+<li><b>At a distance determined by your position size.</b> This is backwards. Decide the stop from the market, then derive the size from the stop.</li>
+<li><b>Nowhere, because "it is a quality company".</b> Quality is a reason to invest, not a reason to carry an unbounded loss on a leveraged trade.</li>
+</ul>
+
+<pre><code class="language-text">STOP PLACEMENT WORKED EXAMPLE
+=============================
+Instrument: a hypothetical large-cap share
+Entry  Rs 1,800
+ATR(14) Rs 31.00
+Recent swing low Rs 1,742
+Account Rs 5,00,000, risk 1% = Rs 5,000
+
+CANDIDATE STOPS
+A. 3% stop          -> 1,746.00   distance 54.00
+B. 2 x ATR stop     -> 1,738.00   distance 62.00
+C. Swing low        -> 1,742.00   distance 58.00
+D. Swing low
+   minus 0.5 ATR    -> 1,726.50   distance 73.50
+E. Rs 10,000 cap    -> depends on size; circular
+
+RESULTING POSITION SIZES (risk Rs 5,000)
+A. 5,000 / 54.00   =  92 units, notional Rs 1,65,600
+B. 5,000 / 62.00   =  80 units, notional Rs 1,44,000
+C. 5,000 / 58.00   =  86 units, notional Rs 1,54,800
+D. 5,000 / 73.50   =  68 units, notional Rs 1,22,400
+
+WHICH IS BEST?
+  D is the most defensible: it respects the market structure
+  (the swing low) AND adds a volatility buffer so that normal
+  noise does not take you out at the obvious level where
+  every other stop sits.
+
+  Its cost is a smaller position. That is the correct
+  trade-off and the one most people get wrong - they tighten
+  the stop to justify a bigger position, which maximises the
+  chance of being stopped out on noise while also maximising
+  the damage when the stop fails in a gap.
+
+  WIDER STOP + SMALLER SIZE beats TIGHTER STOP + BIGGER SIZE
+  for almost every retail strategy.
+
+NOW THE REALITY CHECK
+  What if the share gaps to 1,600 on news?
+  Stop at D (1,726.50) does not protect you.
+  Fill around 1,598. Loss = (1,800-1,598) x 68 = Rs 13,736
+  That is 2.75R, not 1R.
+  Plan for it: see the gap maths in the market structure
+  section. Your sizing must survive a 3R adverse outcome.</code></pre>
+
+<h3>Trailing stops: the give-back problem</h3>
+<pre><code class="language-text">TRAILING STOP COMPARISON ON THE SAME TRADE SEQUENCE
+===================================================
+Entry at 1,800. The trade runs to 2,100 and then reverses
+to 1,850 before you would otherwise have exited.
+ATR at entry: 31.00
+
+METHOD                        EXIT    PROFIT/UNIT   % CAPTURED
+---------------------------   -----   -----------   ----------
+No trail, fixed target 2.5R   1,955       155          52%
+                              (hit on the way up)
+Trail at 1 x ATR (31)         2,062       262          87%
+Trail at 2 x ATR (62)         2,024       224          75%
+Trail at 3 x ATR (93)         1,990       190          63%
+Trail at 10% below high       1,890        90          30%
+Chandelier (3 ATR from high)  1,990       190          63%
+No trail, exit on reversal
+  signal                      1,862        62          21%
+
+THE TRADE-OFF
+  A TIGHT trail captures more of THIS move but would have
+  exited many earlier trades prematurely on normal pullbacks.
+  A LOOSE trail gives back more at the top but stays in
+  genuine trends.
+
+  You cannot evaluate a trail on one trade. You must test it
+  across the full trade distribution, where the question
+  becomes: does the extra profit captured on the big winners
+  exceed the profit lost by being shaken out of medium
+  winners?
+
+  For trend strategies the answer is usually YES for a 2.5-3.5
+  ATR trail and NO for anything tighter than 1.5 ATR.
+  For mean-reversion strategies, trailing stops are usually
+  harmful - the strategy's premise is a bounded move, so a
+  fixed target is more appropriate.
+
+TEST YOUR TRAIL. Do not adopt one because it sounds prudent.</code></pre>
+
+<div class="callout tip"><span class="t">The move to breakeven</span>Moving the stop to the entry price once a trade is up 1&ndash;1.5R feels like free risk reduction. It is not free: it increases the probability of a scratch exit on a normal pullback, which truncates winners. Test it. For many trend strategies it reduces expectancy. For strategies with a high proportion of trades that reverse through entry, it helps. The answer is empirical, not obvious.</div>
+
+<h2>Drawdowns: the thing that actually ends trading careers</h2>
+<p class="lead">Almost nobody quits trading because of a single bad trade. They quit during a drawdown &mdash; a long, grinding period where nothing works, the equity curve bleeds, and every day's decision is made under the weight of accumulated loss. Understanding drawdown maths and preparing for it in advance is the difference between a bad quarter and the end.</p>
+
+<h3>Recovery arithmetic</h3>
+<pre><code class="language-text">THE ASYMMETRY OF LOSS
+=====================
+  Required gain to recover = 1/(1 - loss) - 1
+
+Drawdown   Gain needed    Interpretation
+to recover
+---------  ------------   ----------------------------------
+   -5%         +5.3%      Trivial
+  -10%        +11.1%      Routine
+  -20%        +25.0%      A bad year
+  -25%        +33.3%      Serious
+  -30%        +42.9%      You are questioning everything
+  -40%        +66.7%      Most people quit here
+  -50%       +100.0%      You must DOUBLE to get back
+  -60%       +150.0%
+  -70%       +233.3%
+  -80%       +400.0%      Practically unrecoverable
+  -90%       +900.0%      Over
+
+THE COMPOUNDING INSIGHT
+  Capital destroyed is also TIME destroyed. If your strategy
+  genuinely produces 15% a year:
+    recovering -20% takes about 1.6 years
+    recovering -40% takes about 3.7 years
+    recovering -50% takes about 5.0 years
+    recovering -70% takes about 8.6 years
+
+  And during the recovery you earn nothing - you are merely
+  returning to where you already were. A -50% drawdown on a
+  15%-a-year strategy costs you five years of compounding.
+
+  This is why risk control is not conservatism. It is the
+  mathematically optimal behaviour for anyone who intends
+  to still be trading in five years.</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="300" fill="#ffffff"/>
+<text x="60" y="28" font-size="13" fill="#1e3a8a">AN HONEST EQUITY CURVE</text>
+<line x1="70" y1="230" x2="730" y2="230" stroke="#6b7688" stroke-width="1"/>
+<line x1="70" y1="44" x2="70" y2="230" stroke="#6b7688" stroke-width="1"/>
+<text x="360" y="258" font-size="11" fill="#6b7688">Time (months)</text>
+<text x="16" y="130" font-size="11" fill="#6b7688">Equity</text>
+<polyline points="80,210 110,196 140,186 170,200 200,178 230,164 260,172 290,150 320,142 350,160 380,178 410,194 440,206 470,198 500,186 530,172 560,150 590,132 620,140 650,118 680,104 715,92" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<line x1="320" y1="142" x2="320" y2="206" stroke="#6b7688" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="440" y1="142" x2="440" y2="206" stroke="#6b7688" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="320" y1="142" x2="560" y2="142" stroke="#6b7688" stroke-width="1" stroke-dasharray="3 3"/>
+<rect x="320" y="142" width="240" height="64" fill="#eff4ff" stroke="#0891b2" stroke-width="1"/>
+<text x="330" y="162" font-size="10" fill="#1e3a8a">DRAWDOWN: 8 months of decline,</text>
+<text x="330" y="178" font-size="10" fill="#1e3a8a">then 4 months just to get back to</text>
+<text x="330" y="194" font-size="10" fill="#1e3a8a">the old peak. 12 months of no progress.</text>
+<circle cx="320" cy="142" r="4" fill="#1e3a8a"/>
+<text x="286" y="134" font-size="10" fill="#1e3a8a">peak</text>
+<circle cx="440" cy="206" r="4" fill="#1e3a8a"/>
+<text x="420" y="224" font-size="10" fill="#1e3a8a">trough</text>
+<circle cx="560" cy="142" r="4" fill="#1e3a8a"/>
+<text x="542" y="134" font-size="10" fill="#1e3a8a">recovery</text>
+<text x="80" y="284" font-size="11" fill="#6b7688">Real equity curves are not smooth. If yours is, check your backtest for look-ahead bias.</text>
+</svg><div class="cap">A plausible equity curve for a strategy with a genuine edge. Note that the <i>duration</i> of the flat period &mdash; a year with no progress &mdash; is usually harder to endure than the depth of the decline.</div></div>
+
+<h3>Expected drawdown for a given strategy</h3>
+<pre><code class="language-text">ESTIMATING THE DRAWDOWN YOU SHOULD EXPECT
+=========================================
+A useful approximation for the expected maximum drawdown,
+in R units, over N trades:
+
+  Expected max losing streak (consecutive losses)
+      approximately  = ln(N) / -ln(L)
+
+  where L = loss rate = 1 - win rate
+
+WORKED, three strategies, N = 500 trades
+----------------------------------------
+Strategy      Win rate   L      ln(500)   -ln(L)   Expected
+                                                   max streak
+-----------   --------   ----   -------   ------   ----------
+Trend          35%       0.65    6.215    0.4308      14.4
+Balanced       50%       0.50    6.215    0.6931       9.0
+Mean rev.      70%       0.30    6.215    1.2040       5.2
+
+TRANSLATE INTO MONEY (1% risk per trade)
+  Trend following: a 14-trade losing streak at -1R each
+  = roughly -13% to -14% from that streak ALONE, before
+  counting the partial losses and scratch trades around it.
+
+  And a 14-loss streak at 100 trades a year means you will
+  spend about seven weeks losing on every single trade.
+
+  CAN YOU DO THAT WITHOUT CHANGING YOUR BEHAVIOUR?
+  Most people cannot. That is why trend following, despite
+  having the best expectancy profile on paper, is abandoned
+  by most retail traders who attempt it.
+
+A MORE COMPLETE DRAWDOWN ESTIMATE
+  Max drawdown is driven by streaks AND by the size of
+  losses AND by the ordering. Use the Monte Carlo reshuffle
+  from the backtesting section rather than this formula for
+  anything you will act on. The formula is for intuition.
+
+THE PLANNING NUMBER
+  Take your backtested max drawdown.
+  Take the Monte Carlo 5th percentile.
+  Take the larger. Multiply by 1.5.
+  THAT is the number to plan your capital and your
+  psychology around.</code></pre>
+
+<h3>Is the edge gone, or is this normal variance?</h3>
+<table>
+<tr><th>Signal</th><th>Suggests normal variance</th><th>Suggests the edge is gone</th></tr>
+<tr><td>Drawdown depth</td><td>Within 1.5&times; the backtested/Monte Carlo maximum</td><td>Beyond 1.5&times; the worst expected drawdown</td></tr>
+<tr><td>Drawdown duration</td><td>Within the historical range of flat periods</td><td>Materially longer than any historical flat period</td></tr>
+<tr><td>Trade statistics</td><td>Win rate and payoff ratio within their historical confidence bands</td><td>Win rate has shifted outside its band and stayed there for 50+ trades</td></tr>
+<tr><td>Execution quality</td><td>Slippage and fills in line with the model</td><td>Slippage consistently worse than modelled &mdash; liquidity has changed</td></tr>
+<tr><td>Rule adherence</td><td>You have followed every rule</td><td>You have been deviating &mdash; in which case the strategy is not what is failing</td></tr>
+<tr><td>Market structure</td><td>Nothing fundamental has changed</td><td>A regulatory change, a product change, a structural shift in the instrument</td></tr>
+<tr><td>Crowding</td><td>No evidence others are doing this</td><td>The approach has become widely publicised and popular</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">The hardest judgement in trading</span>Distinguishing "my edge has decayed" from "I am in a normal bad patch" cannot be done reliably in real time with retail sample sizes. This is why the decision must be <i>pre-committed</i>: you write the kill criteria into the specification before you trade, so that the decision is made by the plan rather than by your state of mind during the drawdown.</div>
+
+<h3>A drawdown response protocol</h3>
+<ol class="steps">
+<li><b>At &minus;5%: nothing changes</b>This is normal. Do not adjust anything. Do not "tighten up". Continue executing the plan exactly.</li>
+<li><b>At &minus;10%: audit execution, not strategy</b>Review the last 20 trades in your journal. Did you follow every rule? Count the deviations. If there are deviations, the problem is you, not the strategy &mdash; fix adherence and continue.</li>
+<li><b>At &minus;15%: halve position size</b>Risk per trade goes from 1% to 0.5%. This is not a loss of nerve; it reduces the chance of a bad patch becoming unrecoverable, and it buys you more trades per unit of capital to re-establish whether the edge is intact.</li>
+<li><b>At &minus;20%: stop and do a full review</b>Two weeks away from the market. Re-run the strategy's statistics on the live trades. Compare against the backtest confidence bands. Check the kill criteria. Write a conclusion before returning.</li>
+<li><b>At &minus;25%: stop trading live</b>Back to paper trading until you can demonstrate 30 trades at the specified expectancy. This is the pre-committed line you wrote down when you were calm.</li>
+<li><b>At any point: if you have deviated from the plan twice in a week, stop immediately</b>Deviation under pressure is the leading indicator of the large loss. Pause regardless of the P&amp;L.</li>
+</ol>
+
+<div class="callout danger"><span class="t">What you must never do in a drawdown</span>Increase position size to recover faster. Widen stops to avoid taking losses. Abandon the strategy for a new one you found last week. Add a correlated position to "average down" the overall book. Move money from savings into the trading account. Trade a new instrument you have not tested. Each of these converts a recoverable drawdown into a terminal one, and each feels entirely reasonable at the time.</div>
+
+<h2>Costs and taxes as a performance drag</h2>
+<p class="lead">Costs are deterministic. Your edge is probabilistic. That asymmetry means costs compound against you with certainty while your edge only works on average, which is why cost control is the highest-confidence improvement available to any trader.</p>
+
+<div class="callout warn"><span class="t">Every rate below is illustrative and dated</span>Brokerage models, STT rates, exchange charges, stamp duty and tax provisions have all changed in recent years, and the Income-tax Act 2025 restructured and renumbered provisions with effect from 1 April 2026. Figures here are plausible for <b>late 2026 / FY 2026&ndash;27</b> and exist to teach the <i>structure</i> of the drag. Verify current rates at <b>nseindia.com</b>, <b>incometax.gov.in</b> and in your broker's published tariff.</div>
+
+<h3>The cost stack for Indian equity trading</h3>
+<table>
+<tr><th>Charge</th><th>Delivery equity</th><th>Intraday equity</th><th>Futures</th><th>Options</th></tr>
+<tr><td>Brokerage</td><td>Often zero or flat</td><td>Flat per order, or a % capped at a flat amount</td><td>Flat per order</td><td>Flat per order</td></tr>
+<tr><td>STT</td><td>Both sides, on turnover</td><td>Sell side, on turnover</td><td>Sell side, on turnover</td><td>Sell side on <b>premium</b>; on <b>settlement value</b> if exercised</td></tr>
+<tr><td>Exchange transaction charge</td><td>On turnover</td><td>On turnover</td><td>On turnover</td><td>On <b>premium</b> turnover</td></tr>
+<tr><td>SEBI turnover fee</td><td>Per crore of turnover</td><td>Same</td><td>Same</td><td>Same</td></tr>
+<tr><td>Stamp duty</td><td>Buy side</td><td>Buy side</td><td>Buy side</td><td>Buy side</td></tr>
+<tr><td>GST</td><td>18% on brokerage + exchange + SEBI fees</td><td>Same</td><td>Same</td><td>Same</td></tr>
+<tr><td>DP charges</td><td>Per scrip per day on sell (delivery)</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>Spread &amp; impact</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes &mdash; largest item in illiquid strikes</td></tr>
+</table>
+
+<h3>The worked example: a genuine 0.4% edge destroyed by frequency</h3>
+<pre><code class="language-text">A STRATEGY WITH A REAL EDGE, RUN AT FOUR FREQUENCIES
+====================================================
+Assume a genuine gross edge of 0.40% of position notional
+per round trip. This is a GOOD strategy - most are not
+this good.
+
+Position notional per trade: Rs 2,00,000
+Gross profit per trade: 2,00,000 x 0.004 = Rs 800
+
+COST PER ROUND TRIP (intraday equity, illustrative rates)
+  Turnover (buy + sell)              Rs 4,00,000
+  Brokerage: 0.03% capped at Rs 20
+             per order x 2                Rs  40.00
+  STT: 0.025% of sell turnover
+       2,00,000 x 0.00025                 Rs  50.00
+  Exchange charge: 0.00325% of turnover
+       4,00,000 x 0.0000325               Rs  13.00
+  SEBI fee: Rs 10 per crore
+       4,00,000 x 0.000001                Rs   0.40
+  Stamp duty: 0.003% buy side
+       2,00,000 x 0.00003                 Rs   6.00
+  GST 18% on (40 + 13 + 0.40)             Rs   9.61
+  SLIPPAGE 0.03% per side
+       4,00,000 x 0.0003                  Rs 120.00
+                                          ----------
+  TOTAL COST PER ROUND TRIP               Rs 239.01
+
+NET PER TRADE = 800.00 - 239.01 = Rs 560.99
+COST AS % OF GROSS PROFIT = 29.9%
+
+Nearly a third of a genuinely good edge goes to friction.
+
+NOW VARY THE EDGE AND THE FREQUENCY
+-----------------------------------
+Gross edge   Gross/trade   Cost/trade   Net/trade   Net edge
+---------    -----------   ----------   ---------   --------
+  0.40%         800.00       239.01       560.99     0.280%
+  0.25%         500.00       239.01       260.99     0.130%
+  0.15%         300.00       239.01        60.99     0.030%
+  0.12%         240.00       239.01         0.99     0.000%  &lt;-BE
+  0.10%         200.00       239.01       -39.01    -0.020%
+  0.05%         100.00       239.01      -139.01    -0.070%
+
+THE BREAK-EVEN EDGE IS 0.12% PER ROUND TRIP.
+Any strategy with a gross edge below that loses money with
+certainty, no matter how clever it is.
+
+NOW ANNUALISE IT ON A Rs 5,00,000 ACCOUNT
+-----------------------------------------
+Trades/   Gross P&amp;L     Costs        Net P&amp;L      Return on
+year      (@0.40%)                                Rs 5,00,000
+-------   -----------   ----------   ----------   -----------
+   25        20,000        5,975       14,025        +2.8%
+   50        40,000       11,951       28,049        +5.6%
+  100        80,000       23,901       56,099       +11.2%
+  250     2,00,000       59,753     1,40,248       +28.0%
+  500     4,00,000     1,19,505     2,80,495       +56.1%
+ 1000     8,00,000     2,39,010     5,60,990      +112.2%
+
+"SO HIGH FREQUENCY IS BETTER?" - NO, AND HERE IS WHY
+  The table above assumes the 0.40% edge is AVAILABLE 1,000
+  times a year at Rs 2 lakh notional. It is not. Edges have
+  CAPACITY. The more often you trade, the lower-quality the
+  average opportunity, because you are forced to take the
+  marginal signal as well as the good one.
+
+  REALISTIC: edge DECAYS with frequency.
+  Trades/   Realistic    Gross/     Cost/     Net/      Annual
+  year      gross edge   trade      trade     trade     net
+  -------   ----------   --------   -------   -------   --------
+     25       0.80%      1,600.00    239.01   1,360.99   34,025
+     50       0.55%      1,100.00    239.01     860.99   43,050
+    100       0.40%        800.00    239.01     560.99   56,099
+    250       0.22%        440.00    239.01     200.99   50,248
+    500       0.14%        280.00    239.01      40.99   20,495
+   1000       0.09%        180.00    239.01     -59.01  -59,010
+
+  THE OPTIMUM IS IN THE MIDDLE, AND IT IS MUCH LOWER
+  FREQUENCY THAN MOST RETAIL TRADERS OPERATE AT.
+
+  Beyond roughly 100-250 trades a year on a Rs 5 lakh account,
+  additional trading destroys value. The marginal trade is
+  worse than the average trade AND costs the same.
+
+All rates illustrative. As at late 2026 - verify at
+nseindia.com and incometax.gov.in.</code></pre>
+
+<div class="diagram"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="300" fill="#ffffff"/>
+<text x="60" y="28" font-size="13" fill="#1e3a8a">ANNUAL NET P&amp;L vs TRADE FREQUENCY (edge decays as frequency rises)</text>
+<line x1="90" y1="190" x2="730" y2="190" stroke="#6b7688" stroke-width="1"/>
+<line x1="90" y1="48" x2="90" y2="258" stroke="#6b7688" stroke-width="1"/>
+<text x="330" y="286" font-size="11" fill="#6b7688">Trades per year</text>
+<text x="18" y="110" font-size="11" fill="#6b7688">Net P&amp;L</text>
+<text x="26" y="126" font-size="11" fill="#6b7688">(Rs)</text>
+<text x="62" y="194" font-size="10" fill="#6b7688">0</text>
+<text x="96" y="206" font-size="10" fill="#6b7688">25</text>
+<text x="196" y="206" font-size="10" fill="#6b7688">50</text>
+<text x="306" y="206" font-size="10" fill="#6b7688">100</text>
+<text x="436" y="206" font-size="10" fill="#6b7688">250</text>
+<text x="566" y="206" font-size="10" fill="#6b7688">500</text>
+<text x="676" y="206" font-size="10" fill="#6b7688">1000</text>
+<polyline points="110,122 210,104 320,86 450,98 580,164 700,236" fill="none" stroke="#2563eb" stroke-width="3"/>
+<circle cx="320" cy="86" r="5" fill="#1e3a8a"/>
+<text x="268" y="76" font-size="11" fill="#1e3a8a">optimum</text>
+<line x1="612" y1="190" x2="700" y2="190" stroke="#0891b2" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="596" y="256" font-size="11" fill="#1e3a8a">below zero: costs exceed the edge</text>
+<rect x="430" y="46" width="290" height="56" fill="#eff4ff" stroke="#2563eb" stroke-width="1"/>
+<text x="440" y="64" font-size="10" fill="#1e3a8a">The marginal trade is always worse than the</text>
+<text x="440" y="80" font-size="10" fill="#1e3a8a">average trade, and costs the same. Frequency</text>
+<text x="440" y="96" font-size="10" fill="#1e3a8a">is a cost multiplier, not a profit multiplier.</text>
+</svg><div class="cap">Net profit against trade frequency on a &#8377;5 lakh account, assuming the available edge per trade decays as you take more marginal signals. The optimum is far lower than most retail traders operate at.</div></div>
+
+<div class="callout tip"><span class="t">The highest-return activity available to a retail trader</span>Not finding a better signal. Reducing trade frequency and improving fill quality. Both are under your direct control, both are deterministic, and both work immediately. Most people spend their effort on the signal, which is the part they have least ability to improve.</div>
+
+<h3>Taxation of trading income in India</h3>
+<div class="callout warn"><span class="t">This is a summary of structure, not tax advice</span>Indian trading taxation is genuinely complex and has changed. The Income-tax Act 2025 took effect from 1 April 2026 with renumbered provisions and the "tax year" concept. Capital gains rates and holding periods for equity were revised in 2024. <b>As at FY 2026&ndash;27, verify everything at incometax.gov.in</b> and engage a chartered accountant. Do not plan around this table.</div>
+
+<table>
+<tr><th>Activity</th><th>Head of income (typical treatment)</th><th>Rate</th><th>Loss set-off and carry-forward</th></tr>
+<tr><td>Equity delivery, held long-term</td><td>Long-term capital gains</td><td>Concessional LTCG rate, with an annual exemption threshold</td><td>LTCL against LTCG only; carry forward for a limited number of years</td></tr>
+<tr><td>Equity delivery, held short-term</td><td>Short-term capital gains</td><td>Concessional STCG rate for STT-paid equity</td><td>STCL against STCG or LTCG; carry forward subject to conditions</td></tr>
+<tr><td><b>Intraday equity</b></td><td><b>Speculative business income</b></td><td>Slab rate</td><td>Speculative losses can be set off only against speculative income; carry forward for a limited period</td></tr>
+<tr><td><b>F&amp;O (exchange-traded derivatives)</b></td><td><b>Non-speculative business income</b></td><td>Slab rate</td><td>Can be set off against most other heads (not salary); carry forward subject to filing the return on time</td></tr>
+<tr><td>Delivery trading done as a business</td><td>Business income, if the facts support it</td><td>Slab rate</td><td>As non-speculative business</td></tr>
+</table>
+
+<pre><code class="language-text">WHAT BUSINESS-INCOME TREATMENT ACTUALLY MEANS
+=============================================
+1. YOU CAN DEDUCT EXPENSES
+   Brokerage, STT (as a business expense where allowed),
+   exchange charges, GST on services, internet, a proportion
+   of electricity, depreciation on a computer, data
+   subscriptions, advisory fees, demat charges, and interest
+   on money genuinely borrowed for the business.
+   Keep invoices. Keep a separate bank account.
+
+2. YOUR GAINS ARE TAXED AT SLAB RATES
+   For a software engineer already in a high slab, trading
+   profits may be taxed at the top marginal rate plus
+   surcharge and cess. Compare that to the concessional
+   LTCG treatment on long-held equity. The tax wedge alone
+   is a meaningful argument for investing over trading.
+
+3. TURNOVER AND AUDIT
+   "Turnover" for F&amp;O has a SPECIFIC definition that is not
+   the notional value of your trades. Broadly, the sum of
+   absolute profits and losses (and, in some interpretations,
+   premium received on options written) rather than contract
+   value. Above specified turnover thresholds - and in
+   certain loss-reporting situations - a TAX AUDIT may be
+   required, which has its own cost and deadline.
+   This catches people who traded a small account actively
+   and discover they have an audit obligation.
+
+4. ADVANCE TAX
+   Business income attracts advance tax in instalments
+   through the year. Interest is charged for shortfalls.
+
+5. LOSSES ARE ONLY CARRIED FORWARD IF YOU FILE ON TIME
+   A loss-making year still requires a timely return in
+   order to preserve the carry-forward. Many traders skip
+   filing in a loss year and permanently forfeit the set-off.
+
+6. YOU WILL NEED THE RIGHT ITR FORM
+   Business income generally means a different ITR form from
+   the simple salaried one, with a profit-and-loss statement
+   and balance sheet schedule.
+
+A WORKED SKETCH (ILLUSTRATIVE ONLY)
+-----------------------------------
+Salary income                      Rs 24,00,000
+F&amp;O gross profit                   Rs  3,00,000
+Less deductible expenses
+  Brokerage and charges            Rs    85,000
+  Data and software                Rs    18,000
+  Internet (business share)        Rs     9,000
+  Laptop depreciation              Rs    15,000
+  Professional fees (CA)           Rs    25,000
+                                   -------------
+Net F&amp;O business income            Rs  1,48,000
+
+Total taxable income               Rs 25,48,000
+  taxed per the applicable regime and slab;
+  the F&amp;O component is taxed at the MARGINAL rate.
+
+If instead the F&amp;O result had been a LOSS of Rs 1,52,000,
+that non-speculative loss could generally be set off against
+other income (not salary) in the same year, with the balance
+carried forward - PROVIDED the return is filed within the
+due date.
+
+Entirely illustrative. As at FY 2026-27 - verify at
+incometax.gov.in and consult a chartered accountant.</code></pre>
+
+<div class="callout note"><span class="t">The after-tax comparison nobody runs</span>A trading strategy returning 18% gross, taxed at a 31.2% marginal rate, nets about 12.4%. A low-cost index fund held long term, returning 11% gross with concessional capital-gains treatment and no annual tax event on unrealised gains, can net a comparable or better figure with a fraction of the effort and risk. Run this comparison honestly before deciding that trading is worth your time.</div>
+
+<h2>The trading journal</h2>
+<p class="lead">The journal is the single highest-value habit available to a trader, and the one most consistently skipped. Without it you have no data about your own behaviour, which means you cannot distinguish a strategy problem from an execution problem, and you cannot improve anything that is not measured.</p>
+
+<h3>What to record, and when</h3>
+<div class="grid c2">
+<div class="card"><h4>Pre-trade (before the order)</h4><p>Hypothesis, setup tag, entry trigger, planned stop, planned target, position size calculation, R value in rupees, portfolio heat after this trade, conviction level, your emotional state, and anything about the market context. Written <i>before</i> you can be influenced by the outcome.</p></div>
+<div class="card"><h4>Post-trade (after the exit)</h4><p>Actual fills, actual costs, R-multiple, exit reason, whether every rule was followed, what you would do differently, and &mdash; critically &mdash; a separate assessment of <b>decision quality</b> versus <b>outcome</b>. A good decision can lose money. A bad decision can make money.</p></div>
+</div>
+
+<div class="callout tip"><span class="t">Separate decision quality from outcome</span>Grade every trade twice: once on whether you followed your process (A&ndash;F), once on the financial result. Over time, the correlation between these two grades is the most informative statistic you will ever compute about yourself. If your F-graded decisions are profitable, you are being rewarded for bad behaviour, which is the most dangerous situation in trading.</div>
+
+<h3>A full journal template</h3>
+<pre><code class="language-text">TRADE JOURNAL - PRE-TRADE ENTRY
+================================
+TRADE ID      : 2026-0147
+DATE/TIME     : 2026-10-21  09:42
+INSTRUMENT    : [index futures / ETF / stock - specify]
+DIRECTION     : LONG
+STRATEGY      : Index Pullback Continuation v0.3
+SETUP TAG     : PULLBACK-TO-20SMA-IN-UPTREND
+
+--- THE HYPOTHESIS (write this BEFORE entering) ---
+Why this trade, in one sentence:
+  "Medium-term uptrend intact (close above 200SMA, 50SMA above
+   200SMA); price pulled back below the 20SMA for 3 sessions
+   and closed up yesterday; VIX at 13.8, below the 22 filter."
+
+What would make me wrong:
+  "A close below the 50SMA, or a close below the 200SMA
+   (regime exit)."
+
+--- RULE CHECKLIST (all must be YES) ---
+  E1 close &gt; 200SMA ............ YES
+  E2 50SMA &gt; 200SMA ............ YES
+  E3 close &lt; 20SMA ............. YES
+  E4 close &gt; 50SMA ............. YES
+  E5 close &gt; prior close ....... YES
+  E6 VIX &lt; 22 .................. YES  (13.8)
+  F1 no event in next 3 days ... YES
+  F2 open positions &lt; 2 ........ YES  (1 open)
+  F3 heat after this trade ..... 2.0%  (limit 4%) OK
+
+--- NUMBERS ---
+  Account equity        Rs 5,00,000
+  Risk per trade        1.0%  = Rs 5,000  (1R)
+  Planned entry         25,040 (next open)
+  ATR(14)               186 points
+  Stop (1.5 x ATR)      24,761  -> distance 279 points
+  Target (2.5 x ATR)    25,505
+  Time stop             15 sessions
+  Position size         5,000 / 279 = 17.9 -> 17 units
+  Actual rupee risk     17 x 279 = Rs 4,743  (0.95R)
+  Notional              17 x 25,040 = Rs 4,25,680
+  Planned R:R           2.5 / 1.5 = 1.67
+
+--- STATE ---
+  Sleep last night      7.5 hrs
+  Emotional state       Calm / neutral
+  Last 3 trades         W, L, L
+  Am I trading to
+    recover a loss?     NO   (if YES -> DO NOT TRADE)
+  Conviction (1-5)      3    (it is a rule trade; conviction
+                              is irrelevant and recorded only
+                              to check whether it correlates
+                              with outcomes - it usually does
+                              not, which is the point)
+
+
+TRADE JOURNAL - POST-TRADE ENTRY
+================================
+TRADE ID      : 2026-0147
+EXIT DATE     : 2026-11-04   (10 sessions held)
+
+--- EXECUTION ---
+  Planned entry         25,040
+  Actual entry          25,058      slippage  -18 pts
+  Planned stop          24,761
+  Actual exit           25,505       reason: TARGET
+  Exit slippage                      -4 pts (filled 25,501)
+
+--- RESULT ---
+  Gross P&amp;L             (25,501 - 25,058) x 17 = Rs  7,531
+  Costs (all-in)                                 Rs    412
+  Net P&amp;L                                        Rs  7,119
+  R-multiple            7,119 / 4,743           =    +1.50R
+  Cost as % of gross                                  5.5%
+
+--- RULE ADHERENCE ---
+  Entered per rule?             YES
+  Stop placed immediately?      YES
+  Stop ever widened?            NO
+  Size per formula?             YES
+  Exited per rule?              YES
+  Any deviation?                NONE
+  PROCESS GRADE                 A
+
+--- REVIEW ---
+  What went right:
+    "Followed the specification exactly. Did not interfere
+     during a 4-session period where the trade was underwater
+     by 0.6R."
+  What went wrong:
+    "Entry slippage of 18 points was larger than the 0.05%
+     modelled (12.5 points). Three of the last five trades
+     have had worse-than-modelled entry slippage. ACTION:
+     re-measure slippage over the next 20 trades and update
+     the cost model if the pattern holds."
+  What I would do differently:
+    "Nothing on this trade. The process worked."
+
+  OUTCOME GRADE                 Profitable
+  PROCESS GRADE                 A
+  (Record BOTH. They are different things.)
+
+--- TAGS FOR LATER ANALYSIS ---
+  #pullback #uptrend #vix-low #target-hit #no-deviation
+</code></pre>
+
+<h3>A machine-readable journal schema</h3>
+<pre><code class="language-json">{
+  "trade_id": "2026-0147",
+  "strategy": "index-pullback-continuation",
+  "strategy_version": "0.3",
+  "setup_tag": "PULLBACK-TO-20SMA-IN-UPTREND",
+  "instrument": "INDEX-FUT",
+  "direction": "long",
+  "pre_trade": {
+    "timestamp": "2026-10-21T09:42:00+05:30",
+    "hypothesis": "uptrend intact, pullback below 20SMA, first up close",
+    "invalidation": "close below 50SMA or below 200SMA",
+    "rules_passed": ["E1","E2","E3","E4","E5","E6","F1","F2","F3"],
+    "equity": 500000,
+    "risk_frac": 0.01,
+    "r_value_rupees": 5000,
+    "planned_entry": 25040,
+    "atr14": 186,
+    "planned_stop": 24761,
+    "planned_target": 25505,
+    "time_stop_bars": 15,
+    "position_units": 17,
+    "actual_risk_rupees": 4743,
+    "portfolio_heat_after": 0.02,
+    "emotional_state": "neutral",
+    "recovering_a_loss": false,
+    "conviction_1_5": 3
+  },
+  "post_trade": {
+    "exit_timestamp": "2026-11-04T09:16:00+05:30",
+    "bars_held": 10,
+    "actual_entry": 25058,
+    "actual_exit": 25501,
+    "exit_reason": "target",
+    "gross_pnl": 7531,
+    "costs": 412,
+    "net_pnl": 7119,
+    "r_multiple": 1.5,
+    "entry_slippage_points": 18,
+    "exit_slippage_points": 4,
+    "rule_adherence": {
+      "entered_per_rule": true,
+      "stop_placed_immediately": true,
+      "stop_widened": false,
+      "size_per_formula": true,
+      "exited_per_rule": true,
+      "deviations": []
+    },
+    "process_grade": "A",
+    "lessons": [
+      "entry slippage exceeding model for 3 of last 5 trades",
+      "action: re-measure over next 20 trades"
+    ],
+    "tags": ["pullback","uptrend","vix-low","target-hit","no-deviation"]
+  }
+}
+</code></pre>
+
+<h3>What to compute from the journal</h3>
+<table>
+<tr><th>Analysis</th><th>Question it answers</th><th>Typical finding</th></tr>
+<tr><td>Expectancy by setup tag</td><td>Which of my setups actually works?</td><td>Usually one or two tags carry all the profit and the rest are noise or negative. Cut the rest.</td></tr>
+<tr><td>Expectancy by process grade</td><td>Does following my rules actually pay?</td><td>If A-graded trades have higher expectancy than C-graded, your edge is real and your discipline is the constraint.</td></tr>
+<tr><td>Expectancy by day of week / time of day</td><td>Is there a time I should not trade?</td><td>Beware multiple testing here &mdash; with 5 days and 6 hour-buckets you have 30 comparisons and will find a "pattern" by chance.</td></tr>
+<tr><td>Expectancy by emotional state</td><td>Does my state predict outcomes?</td><td>Frequently yes. Trades entered while "frustrated" or "excited" tend to be worse. This is a rule you can act on.</td></tr>
+<tr><td>Expectancy after a loss / after a win</td><td>Am I revenge trading or over-confident?</td><td>If trades immediately after a loss have materially worse expectancy, institute a cooling-off rule.</td></tr>
+<tr><td>Slippage versus model</td><td>Is my cost assumption still valid?</td><td>Drifts over time as liquidity changes. Must be re-measured, not assumed.</td></tr>
+<tr><td>Deviation count per week</td><td>Is my discipline degrading?</td><td>The leading indicator of the big loss. Track it like a production error rate.</td></tr>
+<tr><td>Distribution of R-multiples</td><td>Is the profit broad or concentrated?</td><td>If removing the top three trades turns the year negative, you do not have an edge yet.</td></tr>
+</table>
+
+<h3>Review cadence</h3>
+<ol class="steps">
+<li><b>Daily (10 minutes, after the close)</b>Complete post-trade entries for anything closed. Note any deviation. Do not analyse &mdash; just record. Analysis after a losing day is contaminated.</li>
+<li><b>Weekly (45 minutes, weekend)</b>Re-read every pre-trade entry from the week and ask whether the hypothesis was honest. Count deviations. Compute week's R total and running expectancy. Note anything to investigate.</li>
+<li><b>Monthly (2 hours)</b>Full metrics: expectancy, win rate, payoff ratio, profit factor, drawdown, cost ratio, expectancy by tag and by process grade. Compare against the backtest confidence bands.</li>
+<li><b>Quarterly (half a day)</b>Go/no-go decision on each strategy against the kill criteria. Re-measure the cost model. Review whether market regime has changed. Decide what to stop doing.</li>
+<li><b>Annually</b>Compare total net after-tax return against simply having bought a broad index fund with the same capital. Be honest about the hours spent. This is the only comparison that matters.</li>
+</ol>
+
+<h2>Trading psychology, concretely</h2>
+<p class="lead">Most writing on trading psychology is vague encouragement. This section treats psychological failures as <i>observable behaviours with measurable costs and specific countermeasures</i>, because that is the only version of the topic that is actionable.</p>
+
+<div class="callout note"><span class="t">The central reframe</span>"Fear" and "greed" are not causes. They are symptoms of a position that is too large. A 0.5%-risk position does not produce fear. A 6%-risk position produces fear in everyone, including professionals. When you notice an emotional problem, the first hypothesis should always be a sizing problem, not a character problem.</div>
+
+<h3>The named failure modes</h3>
+<table>
+<tr><th>Failure mode</th><th>Observable behaviour</th><th>Typical cost</th><th>Countermeasure</th></tr>
+<tr><td><b>Revenge trading</b></td><td>A trade entered within minutes of a loss, outside the specification, at above-normal size</td><td>2&ndash;3&times; normal risk on a trade with no edge; often the largest single loss of the month</td><td>Hard rule: no new trade for 60 minutes after a loss. After three consecutive losses, stop for the day.</td></tr>
+<tr><td><b>Overconfidence after a win streak</b></td><td>Size creeping up; rule checks skipped; "I have a feel for this market"</td><td>Guarantees your largest position coincides with your eventual worst outcome</td><td>Size is a formula, not a judgement. Review the formula after every win streak of 4+.</td></tr>
+<tr><td><b>Loss aversion</b></td><td>Holding losers past the stop; "it will come back"; moving the stop</td><td>Converts &minus;1R into &minus;3R or worse; the single most expensive habit</td><td>Place the stop as a live order at entry. Never cancel it. If you cannot do this, you cannot trade.</td></tr>
+<tr><td><b>Disposition effect</b></td><td>Cutting winners at +0.4R while holding losers to &minus;2R</td><td>Destroys the payoff ratio, which destroys expectancy regardless of win rate</td><td>Pre-set the target. Journal every early exit and compute what it cost over 50 trades.</td></tr>
+<tr><td><b>FOMO entry</b></td><td>Chasing a move already in progress, at a worse price, without a setup</td><td>Entry far from the logical stop, so either the stop is too wide or the size is too big</td><td>If the entry trigger has passed, the trade is gone. Missing trades is free; bad entries are not.</td></tr>
+<tr><td><b>Analysis paralysis</b></td><td>Endless research; never placing the trade the system called for</td><td>You get the drawdowns (from the trades you did take) without the winners (from the ones you skipped)</td><td>Reduce to a binary checklist. If all boxes tick, the trade is taken. Discretion to skip is discretion to fail.</td></tr>
+<tr><td><b>Boredom trading</b></td><td>Trades on quiet days with no signal, "just to be in the market"</td><td>Pure cost with zero edge; 10 a month is roughly &#8377;24,000 a year at retail sizes</td><td>Maintain a "no trade today" log entry. Count no-trade days as successful days.</td></tr>
+<tr><td><b>Tilt</b></td><td>Rapid-fire trading, abandoning the plan entirely, size escalation</td><td>Account-ending. This is where most blow-ups actually occur.</td><td>The circuit-breaker rule below. Non-negotiable, pre-committed, automated if possible.</td></tr>
+<tr><td><b>Confirmation seeking</b></td><td>Searching for opinions that agree with an open position</td><td>Delays the exit and reinforces the thesis past its invalidation</td><td>Write the invalidation condition in the pre-trade entry. Check it against price, not against opinion.</td></tr>
+<tr><td><b>Attribution error</b></td><td>"I won because I'm good; I lost because the market is rigged"</td><td>Prevents all learning; you cannot improve what you do not own</td><td>The process grade. Grade the decision separately from the outcome, every time.</td></tr>
+</table>
+
+<h3>The effect of leverage on judgement</h3>
+<pre><code class="language-text">WHY LEVERAGE DEGRADES DECISION-MAKING
+=====================================
+Consider the same adverse 2% market move at three leverage
+levels on a Rs 5,00,000 account.
+
+Leverage   Notional      2% move    As % of    Felt as
+                         against    account
+---------  ------------  ---------  ---------  --------------
+  1x       Rs 5,00,000   -10,000      -2.0%    "a normal day"
+  3x       Rs 15,00,000  -30,000      -6.0%    "that hurt"
+  5x       Rs 25,00,000  -50,000     -10.0%    "I need to act"
+ 10x       Rs 50,00,000 -1,00,000    -20.0%    panic
+
+AT 1x you can think. At 10x you cannot, because:
+  - The amygdala response to a 20% loss is not optional
+  - You now face a margin call, which imposes a deadline
+  - Every subsequent decision is made under time pressure
+    and financial threat
+  - The "correct" decision (hold, per the plan) and the
+    "survival" decision (close everything) conflict
+
+LEVERAGE DOES NOT JUST MULTIPLY P&amp;L.
+IT MULTIPLIES THE EMOTIONAL AMPLITUDE OF EVERY TICK, AND
+EMOTIONAL AMPLITUDE IS INVERSELY RELATED TO DECISION QUALITY.
+
+THE PRACTICAL TEST
+  Find the position size at which you can walk away from the
+  screen for two hours without anxiety. That is your maximum
+  size. It is almost certainly smaller than what you are
+  currently trading.
+
+  If you cannot sleep with the position on, the position is
+  too big. This is not a metaphor - it is a usable, reliable,
+  calibrated instrument that you already own.</code></pre>
+
+<h3>The circuit-breaker rule</h3>
+<pre><code class="language-text">PRE-COMMITTED CIRCUIT BREAKERS
+==============================
+Write these down. Put them where you can see them. Automate
+them if your broker allows it.
+
+TRADE-LEVEL
+  - Stop order placed at the same moment as the entry order.
+    Not after. Not "in a minute". The same moment.
+  - Stop is never widened. There is no exception clause.
+
+DAILY
+  - Maximum 3 losing trades, then stop for the day.
+  - Maximum daily loss 3% of equity, then stop for the day.
+  - Maximum 5 trades per day regardless of outcome.
+  - 60-minute cooling-off after any loss before a new entry.
+
+WEEKLY
+  - Maximum weekly loss 6% of equity, then stop for the week.
+  - If 2+ rule deviations occurred this week, stop for the
+    following week and review.
+
+MONTHLY
+  - Maximum monthly loss 10%, then stop for the month and
+    conduct a full review before resuming.
+
+ACCOUNT-LEVEL
+  - At -15% from peak: halve position size.
+  - At -20% from peak: stop and conduct a full review.
+  - At -25% from peak: return to paper trading until 30
+    trades at the specified expectancy are demonstrated.
+
+PERSONAL-STATE
+  Do not trade when:
+  - You slept under 6 hours
+  - You are ill, angry, grieving, or under acute stress
+  - You have had alcohol in the last 12 hours
+  - You are in a financial emergency and "need" a win
+  - You have a major deadline at work today
+  - You just had an argument
+
+THE ONLY RULE ABOUT THESE RULES
+  They must be written BEFORE you need them, because the
+  moment you need them is the moment you will be least
+  capable of writing them. A rule invented during a drawdown
+  is a rationalisation, not a rule.</code></pre>
+
+<div class="callout danger"><span class="t">If you break a circuit breaker once, you will break it again</span>Treat the first violation as a serious incident. Log it. Analyse it like a production outage: what was the trigger, what was the state, what control failed, what control would have prevented it. Traders who normalise rule violations do not gradually deteriorate &mdash; they continue apparently fine until one violation coincides with a large adverse move, and then the account is gone.</div>
+
+<h2>Routine and process</h2>
+<p class="lead">Discretion fails under pressure; routine does not. The purpose of a routine is to move as many decisions as possible out of the live session, where your judgement is worst, into prepared time, where it is best.</p>
+
+<h3>The pre-market routine</h3>
+<ol class="steps">
+<li><b>Personal state check (2 min)</b>Sleep, health, stress, deadlines, emotional state. If any flag is raised, today is a no-trade day. Log it as such.</li>
+<li><b>Account state (3 min)</b>Current equity, open positions, current portfolio heat, distance from the drawdown circuit breakers, available margin, any pending corporate actions or expiries.</li>
+<li><b>Calendar check (3 min)</b>Scheduled events today and in the next three sessions &mdash; policy decisions, major data releases, results for anything you hold, expiry dates, and any no-trade windows your specification defines.</li>
+<li><b>Scan for signals (10&ndash;15 min)</b>Run the specification over the universe. Produce a list. Do not look at anything outside the list.</li>
+<li><b>Pre-compute every trade (10 min)</b>For each candidate: entry, stop, target, size, rupee risk, resulting heat. Write the pre-trade journal entry now, before the session opens, while you are calm.</li>
+<li><b>Write the no-trade conditions (1 min)</b>"I will not trade if X." Having it written removes the mid-session argument.</li>
+<li><b>Close the news</b>Social media, television, forums. You have your list. Nothing you read now will improve it; it can only cause deviation.</li>
+</ol>
+
+<h3>In-session rules</h3>
+<ul class="checklist">
+<li>Execute only trades from the pre-market list. No additions. Ever.</li>
+<li>Place the stop order at the same moment as the entry order.</li>
+<li>No position size changes to an open trade unless the specification defines scaling.</li>
+<li>No chart-watching between signals. Set alerts and close the terminal.</li>
+<li>No P&amp;L watching. Watching P&amp;L causes exits; watching the plan causes execution.</li>
+<li>If you feel the urge to deviate, write down the proposed deviation and the reason before acting. Most urges do not survive being written down.</li>
+<li>Honour the daily circuit breakers immediately, without negotiation.</li>
+<li>Avoid the first and last 15 minutes unless the strategy explicitly requires them.</li>
+</ul>
+
+<h3>Post-market, weekly and monthly</h3>
+<table>
+<tr><th>Cadence</th><th>Duration</th><th>Content</th><th>The thing people skip</th></tr>
+<tr><td>Post-market</td><td>10 min</td><td>Complete post-trade entries, log deviations, note the day's R total, log a no-trade day if applicable</td><td>Logging no-trade days &mdash; which are the days you avoided a loss</td></tr>
+<tr><td>Weekly</td><td>45 min</td><td>Re-read pre-trade hypotheses, count deviations, compute weekly R, review open positions against their invalidation conditions</td><td>Re-reading your own pre-trade reasoning with fresh eyes</td></tr>
+<tr><td>Monthly</td><td>2 hrs</td><td>Full metrics, expectancy by tag and by process grade, cost ratio, slippage versus model, drawdown status</td><td>Comparing live statistics against the backtest confidence bands</td></tr>
+<tr><td>Quarterly</td><td>Half day</td><td>Kill-criteria check on every strategy, cost model refresh, regime assessment, decide what to stop</td><td>Actually stopping something</td></tr>
+<tr><td>Annual</td><td>Half day</td><td>After-tax return versus a passive benchmark with the same capital; hours spent; effective hourly rate</td><td>The effective hourly rate, which is usually sobering</td></tr>
+</table>
+
+<h3>When not to trade at all</h3>
+<div class="grid c3">
+<div class="card"><h4>No signal</h4><p>The specification produced no candidates. This is the most common correct outcome. A trader who trades every day has a specification with no filter, which is to say no strategy.</p></div>
+<div class="card"><h4>Regime filter off</h4><p>Volatility outside the tested range, or the trend filter inactive. The strategy was never tested in this regime; running it here is live experimentation with real money.</p></div>
+<div class="card"><h4>Event windows</h4><p>Policy decisions, budgets, results for a position you hold. Unless your strategy is specifically an event strategy, these are periods of unmodelled risk.</p></div>
+<div class="card"><h4>Personal state</h4><p>Under-slept, ill, stressed, angry, recently argued, drinking last night, major work deadline. The cost of not trading is zero; the cost of trading badly is not.</p></div>
+<div class="card"><h4>Circuit breaker active</h4><p>Daily, weekly or monthly loss limit hit. The rule exists precisely for the moment when you want to override it.</p></div>
+<div class="card"><h4>Needing money</h4><p>If you need this month's trading to cover an expense, your decisions are already compromised. Trading capital must be genuinely discretionary.</p></div>
+</div>
+
+<h2>Algorithmic and quantitative trading for retail in India</h2>
+<p class="lead">As a software engineer you have a genuine advantage here &mdash; you can build, test and automate. That advantage is real but narrower than it feels, and the regulatory framework for retail algorithmic trading in India has been tightened.</p>
+
+<div class="callout warn"><span class="t">The regulatory position has changed and is still evolving</span>SEBI has issued circulars and consultation papers on algorithmic trading by retail investors, covering broker responsibilities, the registration and approval of algorithms, API access, unique identifiers for algo orders, order-per-second thresholds, and the treatment of third-party algo providers. The framework has been revised and implementation dates extended. <b>As at late 2026, verify the current position at sebi.gov.in</b> and with your broker before automating anything.</div>
+
+<h3>What the framework broadly requires</h3>
+<table>
+<tr><th>Area</th><th>Direction of the rules (verify current detail)</th></tr>
+<tr><td>Broker responsibility</td><td>Brokers are responsible for the algos routed through their systems, including those built by clients via APIs.</td></tr>
+<tr><td>Algo registration / tagging</td><td>Algorithmic orders are expected to be identifiable, with unique identifiers so that exchanges can trace orders to a specific algo.</td></tr>
+<tr><td>Order rate thresholds</td><td>Above a specified order-per-second rate, additional requirements (including exchange approval of the algo) apply. Below it, lighter treatment for self-developed algos by individual investors.</td></tr>
+<tr><td>Third-party algo providers</td><td>Brought within the framework through broker empanelment; the marketing of algos with performance claims is restricted.</td></tr>
+<tr><td>Self-developed algos</td><td>Individual investors developing their own algos have a defined path, subject to broker processes and the order-rate thresholds.</td></tr>
+<tr><td>Prohibited claims</td><td>Advertising assured or indicative returns from an algorithm is not permitted.</td></tr>
+</table>
+
+<div class="callout danger"><span class="t">Be very wary of "algo trading" products sold to retail</span>A large industry sells "proven algos" with claimed returns to retail investors in India. SEBI has acted against assured-return claims in this space. If a product promises a return, shows an unaudited equity curve, or asks for a profit share without a clear regulatory status, treat it as a scam until proven otherwise. A genuine algorithmic edge is not sold for &#8377;5,000 a month to strangers.</div>
+
+<h3>What an individual can and cannot compete on</h3>
+<table>
+<tr><th>Dimension</th><th>Professional firm</th><th>You</th><th>Verdict</th></tr>
+<tr><td>Latency</td><td>Co-located servers, kernel bypass, FPGA, microsecond round trips</td><td>Home broadband, broker API, hundreds of milliseconds</td><td><span class="badge">Not competitive &mdash; do not build anything latency-sensitive</span></td></tr>
+<tr><td>Data</td><td>Full tick depth, historical order book, alternative data, vendor feeds</td><td>End-of-day or delayed intraday, limited history, often inconsistent</td><td><span class="badge">Significant disadvantage</span></td></tr>
+<tr><td>Costs</td><td>Negotiated, exchange membership, no brokerage spread</td><td>Retail tariff plus GST plus STT</td><td><span class="badge">Significant disadvantage</span></td></tr>
+<tr><td>Capital</td><td>Large, diversified across strategies</td><td>Small, concentrated</td><td><span class="badge o">Disadvantage, with one upside &mdash; see below</span></td></tr>
+<tr><td>Capacity constraints</td><td>Cannot trade small, illiquid opportunities profitably</td><td><b>Can</b> &mdash; small size is the one structural advantage you have</td><td><span class="badge g">Advantage</span></td></tr>
+<tr><td>Mandate constraints</td><td>Must stay invested; benchmark-relative; quarterly reporting pressure</td><td>Can hold cash indefinitely; no reporting; no career risk</td><td><span class="badge g">Advantage</span></td></tr>
+<tr><td>Patience</td><td>Limited by investor and employer expectations</td><td>Unlimited, if you have the temperament</td><td><span class="badge g">Advantage</span></td></tr>
+<tr><td>Research quality</td><td>PhD teams, peer review, risk oversight</td><td>You, alone, with confirmation bias</td><td><span class="badge">Disadvantage &mdash; mitigate with rigour</span></td></tr>
+</table>
+
+<div class="callout tip"><span class="t">The only quadrant where a retail quant has a real chance</span>Low-frequency, capacity-constrained, patience-requiring strategies in corners too small for institutional capital. Nothing latency-sensitive. Nothing requiring exotic data. Nothing that needs to be traded a thousand times a day. If your algorithmic idea requires speed, better data or lower costs than you have, it is not an idea &mdash; it is a description of someone else's business.</div>
+
+<h3>Infrastructure a retail quant actually needs</h3>
+<pre><code class="language-text">A MINIMAL RETAIL QUANT STACK
+============================
+DATA
+  - Historical daily OHLCV with corporate-action adjustment
+  - An exchange trading calendar (NOT a generic business-day
+    calendar - Indian market holidays and special sessions
+    will break naive date logic)
+  - Point-in-time index constituents if you trade stocks
+  - A second data source for cross-validation
+  STORE IT LOCALLY. Vendor APIs change, go down, and
+  silently revise history.
+
+RESEARCH
+  - Python, pandas, numpy
+  - A backtest engine you WROTE YOURSELF at least once, so
+    you understand where the lies hide. Then use a library.
+  - Version control for the strategy code AND the parameters
+  - A results database: every experiment, every parameter
+    set, every outcome - including the failures. Without
+    this you cannot assess your own multiple-testing burden.
+
+EXECUTION
+  - Broker API with documented rate limits
+  - An order management layer with: idempotent order
+    placement, reconciliation against broker state on
+    restart, a kill switch, and hard limits that the
+    strategy code cannot override
+  - Logging of every decision, every order, every fill,
+    with timestamps
+
+MONITORING
+  - Position and P&amp;L reconciliation against the broker,
+    at least daily
+  - Alerting on: disconnection, rejected orders, position
+    mismatch, drawdown thresholds, order-rate anomalies
+  - A DEAD MAN'S SWITCH: if the system cannot confirm its
+    own health, it flattens positions and stops
+
+THE ENGINEERING RULES THAT MATTER MOST
+  1. The kill switch must be OUTSIDE the strategy code and
+     must work even if the strategy is in a bad state.
+  2. Risk limits are enforced at the order layer, not in
+     the strategy. The strategy cannot be trusted.
+  3. Reconcile against broker state on every restart.
+     NEVER assume your in-memory position is correct.
+  4. Fail closed. On any uncertainty, place no orders.
+  5. Paper trade the FULL stack for months before live
+     capital. Most failures are infrastructure failures,
+     not strategy failures.
+  6. Log everything. You will need it for the post-mortem
+     and possibly for a dispute with the broker.</code></pre>
+
+<pre><code class="language-python">"""
+Risk gate enforced OUTSIDE strategy code.
+Illustrative skeleton. Not production code, not a recommendation.
+"""
+
+from dataclasses import dataclass, field
+from datetime import date
+
+
+@dataclass
+class RiskLimits:
+    max_risk_per_trade_frac: float = 0.01
+    max_portfolio_heat_frac: float = 0.05
+    max_positions: int = 5
+    max_daily_loss_frac: float = 0.03
+    max_orders_per_day: int = 20
+    max_notional_frac: float = 0.60
+
+
+@dataclass
+class RiskState:
+    equity: float
+    open_risk_rupees: float = 0.0
+    open_positions: int = 0
+    realised_pnl_today: float = 0.0
+    orders_today: int = 0
+    open_notional: float = 0.0
+    halted: bool = False
+    halt_reasons: list = field(default_factory=list)
+
+
+class RiskGate:
+    """Every order passes through here. The strategy cannot
+    bypass it. If any check fails, the order is rejected and
+    the reason is logged."""
+
+    def __init__(self, limits: RiskLimits):
+        self.limits = limits
+
+    def check(self, state: RiskState, order_risk_rupees: float,
+              order_notional: float):
+        reasons = []
+        L = self.limits
+
+        if state.halted:
+            reasons.append("system halted: " + ",".join(state.halt_reasons))
+
+        if order_risk_rupees &gt; state.equity * L.max_risk_per_trade_frac:
+            reasons.append("per-trade risk exceeds limit")
+
+        new_heat = (state.open_risk_rupees + order_risk_rupees) / state.equity
+        if new_heat &gt; L.max_portfolio_heat_frac:
+            reasons.append(f"portfolio heat {new_heat:.3f} exceeds limit")
+
+        if state.open_positions &gt;= L.max_positions:
+            reasons.append("max concurrent positions reached")
+
+        daily_loss_frac = -state.realised_pnl_today / state.equity
+        if daily_loss_frac &gt;= L.max_daily_loss_frac:
+            reasons.append("daily loss circuit breaker tripped")
+
+        if state.orders_today &gt;= L.max_orders_per_day:
+            reasons.append("daily order count limit reached")
+
+        new_notional = (state.open_notional + order_notional) / state.equity
+        if new_notional &gt; L.max_notional_frac:
+            reasons.append("gross notional exposure limit")
+
+        return {"allowed": len(reasons) == 0, "reasons": reasons}
+
+
+def reconcile(local_positions, broker_positions):
+    """NEVER trust in-memory state after a restart.
+    Any mismatch halts the system - it does not 'fix itself'."""
+    mismatches = []
+    keys = set(local_positions) | set(broker_positions)
+    for k in keys:
+        a = local_positions.get(k, 0)
+        b = broker_positions.get(k, 0)
+        if a != b:
+            mismatches.append({"symbol": k, "local": a, "broker": b})
+    return {"ok": not mismatches, "mismatches": mismatches}
+</code></pre>
+
+<h3>Dabba trading &mdash; do not</h3>
+<div class="callout danger"><span class="t">Dabba (bucket) trading is illegal</span>Dabba trading is off-exchange betting on the prices of listed securities, operated by unregistered intermediaries. Orders never reach the exchange. It is marketed on lower costs, no STT, higher leverage and no KYC. The reality: you have no exchange protection, no clearing corporation guarantee, no investor grievance mechanism, no legal recourse when the operator refuses to pay, and you are participating in an illegal activity that has attracted enforcement action and tax proceedings. If someone offers you trading with no STT and 50x leverage, you are being offered a crime with a high probability of being defrauded.</div>
+
+<h2>Scams, tip services and the "profitable system" industry</h2>
+<p class="lead">A large, profitable industry exists around selling trading signals, courses and "algos" to retail participants. Understanding its business model tells you everything about whether its products work.</p>
+
+<h3>The arithmetic of selling signals</h3>
+<pre><code class="language-text">WHY SELLING TIPS IS MORE PROFITABLE THAN TRADING THEM
+=====================================================
+A tip service with 2,000 subscribers at Rs 3,000 per month:
+  Monthly revenue = 2,000 x 3,000 = Rs 60,00,000
+  Annual revenue  = Rs 7,20,00,000  (seven crore twenty lakh)
+
+  Costs: a Telegram channel, some staff, marketing. Low.
+  Capital at risk: ZERO.
+  Downside: zero, beyond reputational and regulatory risk.
+
+To earn Rs 7.2 crore a year by TRADING at a (very good) 25%
+annual return, you would need Rs 28.8 crore of capital,
+and you would risk it every day.
+
+THE INCENTIVE IS UNAMBIGUOUS. If you genuinely had a method
+producing reliable returns, the rational action is to raise
+capital and trade it, not to sell it for Rs 3,000 a month to
+strangers who will dilute its capacity.
+
+THE "FREE CALLS" FUNNEL
+-----------------------
+Stage 1: free Telegram channel, thousands of members
+Stage 2: post many "calls" daily
+Stage 3: post screenshots of the winners only
+Stage 4: convert the impressed to a paid "VIP" group
+Stage 5: in the VIP group, repeat with bigger claims
+Stage 6: upsell a "mentorship" at Rs 50,000-2,00,000
+
+THE SPLIT-SIGNAL TRICK
+----------------------
+Take 8,000 free subscribers. Split into two groups of 4,000.
+  Group A: "Index will go UP this week"
+  Group B: "Index will go DOWN this week"
+
+One group is right. Keep them; discard the others.
+  Split the 4,000 winners again: 2,000 / 2,000
+  One group is right again. Keep them.
+  Repeat: 1,000 -> 500 -> 250
+
+After five rounds, 250 people have seen you be RIGHT FIVE
+TIMES IN A ROW. From their perspective you are clairvoyant.
+Convert them to a paid group at Rs 10,000 a month.
+Revenue: Rs 25,00,000 a month from a trick requiring zero
+market knowledge.
+
+This is not theoretical. Variants of it are run constantly.
+
+THE SCREENSHOT PROBLEM
+----------------------
+A P&amp;L screenshot proves nothing:
+  - It is trivially edited; browser developer tools take
+    about four seconds
+  - A genuine Rs 4 lakh profit screenshot is fully compatible
+    with a Rs 12 lakh year-to-date loss
+  - It shows one position, not an account
+  - It shows a day, not an equity curve
+  - A demo/paper account looks identical to a real one
+
+THE ONLY EVIDENCE THAT WOULD MEAN ANYTHING
+  A complete, continuous, independently verified equity curve
+  covering several years and multiple market regimes, with
+  drawdowns, net of all costs and taxes, with the capital base
+  disclosed. Essentially nobody in retail social media provides
+  this, and the reason is not modesty.</code></pre>
+
+<h3>How to verify a SEBI registration</h3>
+<ol class="steps">
+<li><b>Ask for the registration number</b>A SEBI-registered Research Analyst (RA) or Investment Adviser (RIA) has a registration number in a defined format and is required to disclose it. Refusal to provide it is a complete answer.</li>
+<li><b>Check it on sebi.gov.in</b>SEBI publishes searchable lists of registered intermediaries. Verify the number, the name, the entity type and that the registration is current &mdash; not lapsed, suspended or cancelled.</li>
+<li><b>Check the category matches the service</b>A Research Analyst may publish research. An Investment Adviser may give personalised advice for a fee. Neither may guarantee returns. Someone registered as one and acting as the other is operating outside their registration.</li>
+<li><b>Check for enforcement orders</b>SEBI publishes orders and settlement records. Search the name and the entity.</li>
+<li><b>Check the fee structure</b>SEBI prescribes constraints on how registered advisers charge, including fee caps and the prohibition on handling client funds. An adviser asking for a profit share, access to your trading account, or direct transfers to a personal account is a serious warning sign.</li>
+<li><b>Never give trading-account access</b>No legitimate adviser needs your broker credentials. Handing them over means you have no recourse and possibly no insurance.</li>
+</ol>
+
+<table>
+<tr><th>Red flag</th><th>Why it is disqualifying</th></tr>
+<tr><td>Guaranteed or assured returns</td><td>Prohibited and impossible. Markets do not provide guarantees; anyone claiming one is lying.</td></tr>
+<tr><td>"90% accuracy" or similar</td><td>Accuracy without payoff ratio is meaningless, and the number is unverifiable. Also a classic marketing claim rather than a statistic.</td></tr>
+<tr><td>Urgency and scarcity</td><td>"Only 10 seats left", "offer closes tonight". Pressure tactics exist to prevent due diligence.</td></tr>
+<tr><td>Profit sharing</td><td>Creates an incentive for maximum risk &mdash; the provider gets the upside and you keep all the downside.</td></tr>
+<tr><td>Asking for account access or funds</td><td>Registered advisers may not handle client funds in this way. This is how money disappears.</td></tr>
+<tr><td>No registration number, or an unverifiable one</td><td>Giving investment advice for consideration without registration contravenes SEBI regulations.</td></tr>
+<tr><td>Testimonials and lifestyle marketing</td><td>Cars, watches, hotel lobbies. The income is from you, not from the market.</td></tr>
+<tr><td>"No STT, higher leverage, no KYC"</td><td>Dabba trading. Illegal, with total counterparty risk.</td></tr>
+<tr><td>Pressure to recruit others</td><td>A referral or multi-level structure means the revenue model is recruitment, not performance.</td></tr>
+<tr><td>Deleting losing calls</td><td>If the channel's history is edited, the track record is fiction.</td></tr>
+</table>
+
+<div class="callout warn"><span class="t">A note on finfluencers</span>SEBI has moved to restrict associations between registered intermediaries and unregistered persons who make performance claims, and has acted against unregistered advisory activity. The practical rule for you is simple: if someone is telling you what to buy and is not a registered RA or RIA with a verifiable number, they are not permitted to do so for consideration, and you have no recourse when it goes wrong. Verify the current position at sebi.gov.in.</div>
+
+<h2>The honest conclusion</h2>
+<p class="lead">Everything above assumed you were going to trade. This section asks whether you should, and tries to answer it without flattery.</p>
+
+<h3>Who should not trade</h3>
+<ul class="checklist">
+<li>Anyone without an emergency fund, insurance, and a funded long-term investment plan already running.</li>
+<li>Anyone trading with borrowed money, or with money that has a purpose.</li>
+<li>Anyone who cannot give the market consistent, sustainable time during session hours for the style they have chosen.</li>
+<li>Anyone who cannot write down a falsifiable hypothesis with an economic rationale.</li>
+<li>Anyone who has not tested a specification over 100+ trades with realistic cost modelling.</li>
+<li>Anyone who needs trading income to meet expenses.</li>
+<li>Anyone who has increased size to recover a loss, more than once.</li>
+<li>Anyone whose trading affects their sleep, their work, or their relationships.</li>
+<li>Anyone following tips, signals or paid "calls".</li>
+<li>Anyone who cannot state their expectancy, their maximum drawdown and their cost ratio from their own records.</li>
+</ul>
+
+<h3>Who might reasonably trade</h3>
+<ul class="checklist">
+<li>Someone with a secure income, a fully funded long-term portfolio, and genuinely discretionary risk capital.</li>
+<li>Someone who treats it as a serious, measured, loss-making-until-proven-otherwise activity rather than an income source.</li>
+<li>Someone with the engineering discipline to specify, test, instrument and review &mdash; and the honesty to kill a strategy that fails its criteria.</li>
+<li>Someone operating in a low-frequency, capacity-constrained niche where small size is an advantage rather than a handicap.</li>
+<li>Someone who finds the research genuinely interesting independent of the money, because for a long time there will be no money.</li>
+<li>Someone who has written down, in advance, the drawdown at which they will stop &mdash; and who will honour it.</li>
+</ul>
+
+<h3>The opportunity cost, computed</h3>
+<pre><code class="language-text">WHAT ELSE COULD THOSE HOURS HAVE DONE?
+======================================
+Assume 10 hours a week on trading: research, execution,
+journaling, review. That is 500 hours a year.
+
+ALTERNATIVE A - CAREER
+  500 hours toward a specialism, a certification, open-source
+  contribution, or a visible body of work.
+  A plausible effect on a software engineer's compensation
+  over 3 years: a 20-40% increase in total compensation.
+  On a Rs 30 lakh package, a 25% increase is Rs 7.5 lakh
+  PER YEAR, COMPOUNDING, RECURRING, with no capital at risk
+  and no drawdowns.
+
+ALTERNATIVE B - SIDE INCOME
+  500 hours of freelance or consulting work at a modest
+  Rs 2,500 per hour = Rs 12,50,000 a year, with a
+  100% win rate and zero risk of ruin.
+
+ALTERNATIVE C - TRADING
+  500 hours, Rs 5,00,000 of capital, and roughly a 10%
+  probability of a positive outcome based on the SEBI data.
+  Expected value: negative.
+  Best realistic case for a disciplined participant with a
+  genuine small edge: perhaps Rs 50,000-1,00,000 a year,
+  taxed at the marginal rate, i.e. Rs 70-140 per hour
+  before accounting for the risk taken.
+
+THE COMPARISON IS NOT CLOSE, AND IT IS THE COMPARISON ALMOST
+NOBODY RUNS.
+
+For an Indian software engineer specifically, the highest
+expected-value financial activity is almost always:
+  1. Increase income (career, skills, specialisation)
+  2. Increase savings rate
+  3. Invest the surplus systematically in low-cost index funds
+  4. Do not touch it
+
+Trading is, at best, a fourth priority and an expensive hobby.
+It becomes defensible only when the first three are complete
+and the capital involved is genuinely surplus.</code></pre>
+
+<div class="callout ok"><span class="t">The most useful thing this guide can tell you</span>The skills in it &mdash; thinking in expectancy, sizing for survival, testing honestly, separating decision quality from outcome, pre-committing to rules, journaling and reviewing &mdash; are enormously valuable. They are also transferable to every important decision you will make, in engineering and in life. You can acquire all of them from a small paper-trading programme and a journal, at zero financial risk. Acquiring them is the win. Trading with real money is optional, and for most people it is the part that should be skipped.</div>
+
+<h2>Frequently Asked Questions</h2>
+
+<div class="qa"><div class="q">What percentage of retail traders in India actually make money?</div><div class="a">SEBI's study published in September 2024, covering FY 2021&ndash;22 to FY 2023&ndash;24, found roughly 93% of individual F&amp;O traders made losses, with aggregate individual net losses in the region of &#8377;1.8 lakh crore. A 2025 follow-up covering FY 2024&ndash;25 found roughly 91% of individual index-option traders losing. Studies of cash-segment intraday trading show a similar majority losing, with the loss rate rising with trade frequency. Verify the current figures at sebi.gov.in &mdash; the methodology and periods change, but the direction has been consistent across every version.</div></div>
+
+<div class="qa"><div class="q">Can I realistically trade while working full time as a software engineer?</div><div class="a">Intraday and scalping: no. Not "difficult" &mdash; structurally incompatible, because those styles require continuous attention during exactly the hours you are being paid to do something else, and they are also the most cost-sensitive styles. Swing and positional trading on a daily timeframe are compatible: signals are evaluated after the close, orders are placed before the open, and the time demand is 30&ndash;60 minutes a day plus a weekly review. If your plan requires watching charts during work hours, the plan is already broken and you will do both things badly.</div></div>
+
+<div class="qa"><div class="q">How much capital do I need to start?</div><div class="a">Enough that fixed costs do not dominate and that a single position can be sized at 1&ndash;2% risk. Below roughly &#8377;2 lakh, flat per-order brokerage and minimum lot sizes make responsible position sizing arithmetically impossible &mdash; one position becomes 15&ndash;30% of the account. More importantly, the capital must be genuinely discretionary: money whose total loss changes nothing material in your life. For most people that number is smaller than their enthusiasm, and the honest answer is to paper trade until the capital exists.</div></div>
+
+<div class="qa"><div class="q">Is technical analysis useful or is it astrology?</div><div class="a">Neither extreme is right. Some concepts have genuine content &mdash; volatility measures like ATR for stop placement and sizing, liquidity and volume for execution quality, and simple trend filters as regime indicators. Much of the rest &mdash; named chart patterns, Fibonacci levels, elaborate indicator combinations &mdash; has weak and regime-dependent evidence, is visible to millions of participants simultaneously, and is extremely prone to overfitting when tested. The practical position: use a minimal number of simple, economically motivated indicators, test them honestly out of sample, and be suspicious of anything that requires you to interpret a chart subjectively, because subjectivity cannot be backtested.</div></div>
+
+<div class="qa"><div class="q">What is a realistic return for a good retail trader?</div><div class="a">The question is badly posed, because the expected value for an untested retail trader is negative. If you have demonstrated a positive expectancy out of sample over 200+ trades, and you size at 1% risk with a +0.20R expectancy and 120 trades a year, the arithmetic gives roughly 24% a year gross before tax &mdash; with drawdowns likely to reach 20&ndash;30% along the way, and with a wide distribution around that figure. After the marginal tax rate on business income, that becomes roughly 16&ndash;17% net. Compare that honestly to a passive index portfolio requiring two hours a year. The comparison is closer than most traders want it to be, and that is for the <i>successful</i> case.</div></div>
+
+<div class="qa"><div class="q">How do I know if my strategy actually has an edge?</div><div class="a">You cannot know with certainty; you can only accumulate evidence. The minimum bar: a written specification with no hidden discretion, 200+ trades including a genuinely held-out out-of-sample period, realistic cost and slippage modelling, parameter sensitivity showing a broad plateau rather than a sharp peak, performance across at least two distinct market regimes, and a Monte Carlo reshuffle showing a drawdown you could survive. Even then, deflate your measured expectancy substantially to account for the multiple testing you did not count. Fewer than 100 trades tells you essentially nothing, which is why most retail conviction is formed on noise.</div></div>
+
+<div class="qa"><div class="q">What is the most common reason retail traders lose?</div><div class="a">In order of magnitude: (1) no edge to begin with, compounded by the near-zero-sum structure of derivatives; (2) transaction costs, which scale linearly with frequency and routinely exceed 30&ndash;40% of a small account per year; (3) position sizing that is far too large, making normal variance fatal; (4) failure to honour stops, converting &minus;1R losses into &minus;3R losses; and (5) behavioural escalation &mdash; revenge trading, averaging down, and size increases after wins. Note that only the first is about market knowledge. Four of the five are about process and discipline, which are fully within your control.</div></div>
+
+<div class="qa"><div class="q">Should I use a stop loss on every trade?</div><div class="a">You need a defined exit on every trade &mdash; that is non-negotiable. Whether it is a resting stop order depends on the instrument and the strategy. For liquid instruments and intraday or swing strategies, place the order. For positional strategies in volatile instruments, a stop placed inside the normal noise range will take you out repeatedly at a cost; a wider stop with a smaller position is usually better. Understand that no stop protects against an overnight gap or a lower-circuit lock, so your position sizing must survive an outcome roughly three times worse than the stop implies. A "mental stop" is, for most beginners, not a stop at all.</div></div>
+
+<div class="qa"><div class="q">How much should I risk per trade?</div><div class="a">One to two percent of trading capital, with a hard cap on total portfolio heat of around 5%. The Monte Carlo evidence is stark: with a genuinely positive-expectancy strategy, risking 2% per trade gives roughly a 14% chance of a 50% drawdown over 500 trades, while risking 5% gives roughly a 68% chance. Risk of ruin is sharply non-linear in position size. Professional practitioners typically operate at an eighth to a quarter of full Kelly, which lands in the same 1&ndash;4% range. If your sizing exceeds half Kelly on your own (probably optimistic) estimates, you are over-betting.</div></div>
+
+<div class="qa"><div class="q">What drawdown should I expect?</div><div class="a">Larger and longer than your backtest suggests. Take your backtested maximum drawdown, compute the Monte Carlo reshuffled 5th-percentile drawdown, take the larger, and multiply by 1.5 &mdash; that is your planning number. For a trend-following strategy with a 35% win rate, expect losing streaks of 14 or more trades over a few hundred trades, which means weeks of consecutive losses. The <i>duration</i> of a flat period is usually harder to endure than the depth of the decline. Plan for a full year with no progress and decide now whether you could tolerate that.</div></div>
+
+<div class="qa"><div class="q">How are trading profits taxed in India?</div><div class="a">Broadly: intraday equity is treated as <b>speculative business income</b>; exchange-traded F&amp;O is <b>non-speculative business income</b>; delivery-based equity is capital gains unless the facts indicate a business. Business income is taxed at slab rates, which for a well-paid engineer means the top marginal rate &mdash; materially worse than the concessional capital-gains treatment on long-held equity. Business treatment does allow expense deduction (brokerage, data, equipment depreciation, professional fees). Turnover for F&amp;O has a specific definition and a tax audit may be required above certain thresholds. Losses are only carried forward if the return is filed on time. <b>As at FY 2026&ndash;27, verify at incometax.gov.in</b> &mdash; note the Income-tax Act 2025 took effect from 1 April 2026 &mdash; and engage a chartered accountant.</div></div>
+
+<div class="qa"><div class="q">Is algorithmic trading allowed for retail investors in India?</div><div class="a">Yes, within a framework. SEBI has issued rules covering broker responsibility for algos routed through their systems, unique identification of algo orders, order-per-second thresholds above which exchange approval is required, the treatment of third-party algo providers via broker empanelment, and a defined path for self-developed algos by individual investors. Advertising assured or indicative returns from an algorithm is not permitted. The framework has been revised and implementation extended more than once &mdash; <b>verify the current position at sebi.gov.in</b> and with your broker before automating anything. Separately: be extremely sceptical of "proven algo" products sold to retail with performance claims.</div></div>
+
+<div class="qa"><div class="q">How do I verify whether an advisor or tip service is legitimate?</div><div class="a">Ask for their SEBI Research Analyst or Investment Adviser registration number and verify it directly in SEBI's published lists at sebi.gov.in &mdash; check the name, the category, and that the registration is current. Check for enforcement orders against them. Confirm the fee structure complies with SEBI's constraints: no guaranteed returns, no profit sharing, no handling of your funds, no access to your trading account. If they refuse to supply a number, show only edited screenshots, use urgency tactics, or offer "no STT, high leverage" arrangements (which is dabba trading, and illegal), stop immediately. The economics are also informative: someone with a genuine edge raises capital and trades it rather than selling signals for &#8377;3,000 a month.</div></div>
+
+<div class="qa"><div class="q">Should I quit my job to trade full time?</div><div class="a">No. The base rates alone make this indefensible, but there is a second reason that is specific and practical: trading with capital you need to live on destroys the decision-making that trading requires. Every position becomes a rent payment. You will take trades you should skip, hold losers you should cut, and size up to meet a monthly target that the market has no obligation to supply. People who successfully trade full time have typically done so for years part time first, with a demonstrated and audited edge, and with living expenses covered from capital or another source for a long runway. If you are asking the question, the answer is no.</div></div>
+
+<div class="qa"><div class="q">What should I do instead, if I conclude trading is not for me?</div><div class="a">Direct your effort to the three things with far better expected value: increase your income (skills, specialisation, visible work &mdash; a 25% compensation increase on a &#8377;30 lakh package is &#8377;7.5 lakh a year, recurring, with no capital at risk); increase your savings rate; and invest the surplus systematically in low-cost diversified index funds with an asset allocation suited to your horizon. Automate it and leave it alone. Then keep the analytical skills from this guide &mdash; expectancy thinking, base rates, honest testing, separating decision quality from outcome &mdash; and apply them to engineering and career decisions, where the odds are overwhelmingly in your favour.</div></div>
+
+<h2>Trading-readiness checklist and a 90-day paper-trading programme</h2>
+<p class="lead">Two closing tools. The first is an honest gate. The second is a structured programme that costs nothing and will tell you, within a quarter, whether you should proceed.</p>
+
+<h3>Readiness checklist</h3>
+
+<h4>Gate 1 &mdash; financial preconditions (every item must be true)</h4>
+<ul class="checklist">
+<li>Emergency fund of 6&ndash;12 months of expenses, fully funded and untouched.</li>
+<li>Health insurance in place; term life cover if anyone depends on you.</li>
+<li>No high-interest debt &mdash; no credit card balances, no personal loans.</li>
+<li>A long-term investment plan running on automatic, funded monthly.</li>
+<li>Trading capital is genuinely surplus; its total loss changes nothing material.</li>
+<li>No borrowed money in the trading account; no long-term portfolio pledged as margin.</li>
+<li>A separate account for trading, with its own accounting.</li>
+</ul>
+
+<h4>Gate 2 &mdash; knowledge preconditions</h4>
+<ul class="checklist">
+<li>I can compute expectancy in R, and I know why win rate alone is meaningless.</li>
+<li>I can compute position size from equity, risk percentage and stop distance.</li>
+<li>I know my round-trip cost as a percentage of capital at risk, for the instruments I trade.</li>
+<li>I understand gap risk and circuit limits and have sized for a 3R adverse outcome.</li>
+<li>I understand the difference between in-sample and out-of-sample, and why 85 trades with 15 parameters proves nothing.</li>
+<li>I know the tax treatment of what I intend to trade and the record-keeping it requires.</li>
+<li>I can explain, in one sentence, who is on the other side of my trade and why they are wrong.</li>
+</ul>
+
+<h4>Gate 3 &mdash; process preconditions</h4>
+<ul class="checklist">
+<li>A written strategy specification with hypothesis, universe, timeframe, entry, exit, stop, filters, sizing, cost model and kill criteria.</li>
+<li>A backtest over 200+ trades with realistic costs, with a held-out out-of-sample period touched once.</li>
+<li>Parameter sensitivity shows a plateau, not a peak.</li>
+<li>A Monte Carlo drawdown estimate I could financially and emotionally survive.</li>
+<li>A journal template ready, with pre-trade and post-trade sections and a process grade.</li>
+<li>Written circuit breakers: per-trade, daily, weekly, monthly and account-level.</li>
+<li>A pre-committed drawdown level at which I stop entirely.</li>
+<li>A pre-committed date at which I compare results against a passive benchmark and decide whether to continue.</li>
+</ul>
+
+<div class="callout danger"><span class="t">Any unchecked box in Gate 1 is disqualifying</span>Gates 2 and 3 can be completed with study and work. Gate 1 cannot be worked around. If the emergency fund is not there, or the debt is not cleared, or the capital is not genuinely surplus, no amount of skill will make the activity appropriate.</div>
+
+<h3>The 90-day paper-trading programme</h3>
+<p>Zero financial risk. The objective is not to "practise making money" &mdash; it is to find out whether you have an edge and whether you can execute a process, before either question costs you anything.</p>
+
+<table>
+<tr><th>Week</th><th>Objective</th><th>Deliverable</th><th>Pass criterion</th></tr>
+<tr><td><b>1</b></td><td>Write the strategy specification</td><td>A complete spec: hypothesis with economic rationale, universe, timeframe, entry, exit, stop, filters, sizing, cost model, metrics, kill criteria</td><td>A competent stranger could reproduce your trade list from it</td></tr>
+<tr><td><b>2</b></td><td>Build the cost model</td><td>A spreadsheet or function computing full round-trip cost for your instruments, with current published rates and a measured slippage assumption</td><td>You can state cost as a % of capital at risk for every trade size you will use</td></tr>
+<tr><td><b>3&ndash;4</b></td><td>Backtest in-sample</td><td>Trade list, equity curve, full metrics, parameter sensitivity surface</td><td>Expectancy &gt; +0.20R after costs on at least 100 in-sample trades, with a parameter plateau</td></tr>
+<tr><td><b>5</b></td><td>Out-of-sample test</td><td>Results on the held-out period, touched exactly once, with no parameter changes</td><td>Expectancy &gt; +0.10R after costs. If not, stop: the hypothesis is rejected</td></tr>
+<tr><td><b>6</b></td><td>Monte Carlo and stress tests</td><td>Reshuffled drawdown distribution; results with doubled costs, with the top 5% of trades removed, and with entries shifted by one bar</td><td>Survives all four. 5th-percentile drawdown is one you could live through</td></tr>
+<tr><td><b>7</b></td><td>Set up the journal and circuit breakers</td><td>Journal template in use; circuit breakers written and visible; a daily routine documented</td><td>You have run one full day of the routine end to end</td></tr>
+<tr><td><b>8&ndash;10</b></td><td>Paper trade, phase 1</td><td>Every signal taken, logged pre-trade and post-trade, with honest fills (assume the worse side of the spread)</td><td>Zero rule deviations. Not "few". Zero. Expectancy is secondary this phase.</td></tr>
+<tr><td><b>11</b></td><td>First formal review</td><td>Expectancy, win rate, payoff ratio, cost ratio, deviation count, expectancy by process grade</td><td>Live-simulated statistics within the backtest confidence bands</td></tr>
+<tr><td><b>12&ndash;13</b></td><td>Paper trade, phase 2</td><td>Continue, with a deliberate stress test: take a scheduled break, trade after a losing streak, trade on a day you feel off</td><td>Rules honoured under stress; no-trade days correctly logged</td></tr>
+<tr><td><b>14&ndash;15</b></td><td>Deviation analysis</td><td>Every deviation documented as an incident: trigger, state, control that failed, control that would prevent it</td><td>Fewer than 2 deviations across the whole programme, with written controls for each</td></tr>
+<tr><td><b>16&ndash;17</b></td><td>Paper trade, phase 3</td><td>Continue to 60+ simulated trades total</td><td>Expectancy still positive after costs; drawdown within expectations</td></tr>
+<tr><td><b>18</b></td><td>Go / no-go decision</td><td>A written decision document with all metrics, against pre-committed criteria</td><td>See the decision rule below</td></tr>
+</table>
+
+<pre><code class="language-text">THE 90-DAY GO / NO-GO DECISION RULE
+===================================
+Write this down in week 1, before you have any results.
+
+GO (proceed to live trading at MINIMUM size) requires ALL of:
+  [ ] Out-of-sample backtest expectancy  &gt; +0.10R after costs
+  [ ] Paper-trading expectancy           &gt; +0.10R after costs
+  [ ] Simulated trades                   &gt;= 60
+  [ ] Rule deviations                    &lt;= 2 across 90 days
+  [ ] Monte Carlo 5th-pctile drawdown    survivable
+  [ ] Cost ratio (costs / gross profit)  &lt; 40%
+  [ ] Gate 1 financial preconditions     all true
+  [ ] Written circuit breakers           in place and tested
+  [ ] A written stop-trading drawdown    committed
+
+IF ALL NINE ARE TRUE
+  Go live at HALF your intended risk per trade (0.5%, not 1%)
+  for the first 50 live trades. Live results are systematically
+  worse than paper results - slippage is real, fills are worse,
+  and emotion is present for the first time.
+  Re-review after 50 live trades before increasing size.
+
+IF ANY ARE FALSE
+  Do not go live. Choose one:
+   (a) Fix the specific failure and extend the programme by
+       30 days - ONCE. Not repeatedly; repeated extension is
+       overfitting your own process.
+   (b) Reject the hypothesis and either develop a new one or
+       conclude that trading is not for you.
+
+  Option (b) after 90 days of honest work is a SUCCESS, not a
+  failure. You will have learned the most valuable lesson
+  available in this domain at a cost of zero rupees, which is
+  precisely the opposite of how most people learn it.
+
+THE HONEST PRIOR
+  Most specifications fail at week 5 (out-of-sample) or at
+  week 14 (deviation count). Both failures are informative.
+  The out-of-sample failure tells you the edge was never
+  there. The deviation failure tells you that even with an
+  edge, you would not have executed it.
+  Each costs nothing to discover now, and a great deal to
+  discover with money on the table.</code></pre>
+
+<div class="callout warn"><span class="t">One last honest note about paper trading</span>Paper results overstate live results, consistently and materially. There is no slippage you did not choose, no partial fill, no rejected order, no margin call, no broker outage, and above all no fear. Model costs aggressively, assume you get the worse side of every spread, and treat a marginally positive paper expectancy as equivalent to a negative live one. If your paper expectancy is +0.12R, plan as though it is zero.</div>
+
+<div class="callout danger"><span class="t">Closing note</span>This guide has given you the maths, the process and the standards of serious trading. It has deliberately not given you a strategy, because any edge that can be written down and distributed stops being an edge. The evidence from SEBI's own participant data is that the overwhelming majority of Indian individuals who trade actively lose money, and that the losses are very large in aggregate. Nothing in this guide changes that base rate; it only changes whether you find out cheaply or expensively. If you work through the 90-day programme honestly and conclude that you do not have an edge, you have achieved the best realistically available outcome. Every figure, rate, charge, tax treatment and regulation above is illustrative and dated to late 2026 / FY 2026&ndash;27; verify current details at <b>nseindia.com</b>, <b>sebi.gov.in</b> and <b>incometax.gov.in</b>, and consult a SEBI-registered Investment Adviser and a chartered accountant for personal advice.</div>
+
